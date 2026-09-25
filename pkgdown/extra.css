@@ -103,32 +103,31 @@ tr:nth-child(even) td {
    ========================================================================== */
 
 main#main, .col-md-9 {
-  min-width: 0 !important; /* Prevents overflow content from pushing sidebar */
+  min-width: 0 !important;
   padding-right: 2rem !important;
+  padding-bottom: 2.5rem !important;
 }
 
-/* Right Headings Sidebar - Sticky, Clean, Single Slider */
-aside.col-md-3 {
-  position: sticky !important;
-  top: 85px !important;
-  overflow: visible !important; /* Absolutely NO inner scrollbar track */
-  max-height: none !important;  /* No artificial height constraint */
-  padding-left: 1.5rem !important;
-  border-left: 1px solid #e2e8f0 !important;
-}
+/* Right Headings Sidebar - Sticky, Clean, Single Slider, Stops Before Footer */
+@media (min-width: 768px) {
+  aside.col-md-3 {
+    position: sticky !important;
+    top: 85px !important;
+    max-height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-left: 1.5rem !important;
+    border-left: 1px solid #e2e8f0 !important;
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE and Edge */
+  }
 
-/* Suppress any scrollbar on aside or nav#toc to guarantee only one page slider */
-aside.col-md-3, nav#toc {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-  overflow-y: visible !important;
-}
-
-aside.col-md-3::-webkit-scrollbar,
-nav#toc::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
+  aside.col-md-3::-webkit-scrollbar,
+  nav#toc::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
 }
 
 @media (max-width: 767.98px) {
@@ -144,6 +143,7 @@ nav#toc::-webkit-scrollbar {
 /* Table of Contents Styling (Clean Tidyverse Style) */
 nav#toc {
   font-size: 0.9rem !important;
+  scrollbar-width: none !important;
 }
 
 nav#toc h2 {
@@ -183,34 +183,67 @@ nav#toc a:hover, nav#toc a.active {
 }
 
 /* ==========================================================================
-   Large, Prominent Package Logo - Properly Aligned
+   Footer Isolation (Prevents Sidebar Overflow / Overlap)
    ========================================================================== */
-.page-header img.logo, .template-home img.logo, img.logo {
-  width: 170px !important;
-  min-width: 170px !important;
-  max-width: 170px !important;
+footer {
+  margin-top: 3.5rem !important;
+  padding: 2.2rem 0 !important;
+  border-top: 1px solid #e2e8f0 !important;
+  background-color: #ffffff !important;
+  position: relative !important;
+  z-index: 20 !important;
+  clear: both !important;
+}
+
+/* ==========================================================================
+   Logo Display Control: ONLY on Home Page and Reference Page
+   (Hidden from all article/vignette pages as requested)
+   ========================================================================== */
+
+/* Default: hide page logo everywhere */
+.page-header img.logo,
+.page-header .logo,
+.template-article .page-header img.logo,
+.template-article img.logo,
+.template-article .page-header .logo,
+.template-news .page-header img.logo,
+.template-news img.logo,
+.template-citation-authors .page-header img.logo,
+.template-citation-authors img.logo,
+.template-reference-topic .page-header img.logo,
+.template-reference-topic img.logo {
+  display: none !important;
+}
+
+/* Prominently show logo ONLY on Home Page and Reference Index Page */
+.template-home .page-header img.logo,
+.template-home img.logo,
+.template-reference-index .page-header img.logo,
+.template-reference-index img.logo {
+  display: block !important;
+  width: 175px !important;
+  min-width: 175px !important;
+  max-width: 175px !important;
   height: auto !important;
   float: right !important;
   margin-left: 2rem !important;
   margin-bottom: 1.5rem !important;
   filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.16)) !important;
   border-radius: 12px !important;
-  transition: transform 0.2s ease-in-out !important;
-}
-
-.page-header img.logo:hover, img.logo:hover {
-  transform: scale(1.03) !important;
 }
 
 .navbar-brand img, .navbar-brand .logo {
-  height: 44px !important;
+  height: 42px !important;
   width: auto !important;
-  margin-right: 12px !important;
+  margin-right: 10px !important;
   vertical-align: middle !important;
 }
 
 @media (max-width: 767.98px) {
-  .page-header img.logo, .template-home img.logo, img.logo {
+  .template-home .page-header img.logo,
+  .template-home img.logo,
+  .template-reference-index .page-header img.logo,
+  .template-reference-index img.logo {
     width: 120px !important;
     min-width: 120px !important;
     max-width: 120px !important;

@@ -24,43 +24,73 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 <style>
-  .page-header img.logo, .template-home img.logo, img.logo {
-    width: 170px !important;
-    min-width: 170px !important;
-    max-width: 170px !important;
+  /* Default: hide page logo everywhere */
+  .page-header img.logo,
+  .page-header .logo,
+  .template-article .page-header img.logo,
+  .template-article img.logo,
+  .template-article .page-header .logo,
+  .template-news .page-header img.logo,
+  .template-news img.logo,
+  .template-citation-authors .page-header img.logo,
+  .template-citation-authors img.logo,
+  .template-reference-topic .page-header img.logo,
+  .template-reference-topic img.logo {
+    display: none !important;
+  }
+  /* Show logo prominently ONLY on Home page and Reference index page */
+  .template-home .page-header img.logo,
+  .template-home img.logo,
+  .template-reference-index .page-header img.logo,
+  .template-reference-index img.logo {
+    display: block !important;
+    width: 175px !important;
+    min-width: 175px !important;
+    max-width: 175px !important;
     height: auto !important;
     float: right !important;
     margin-left: 2rem !important;
     margin-bottom: 1.5rem !important;
     filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.16)) !important;
+    border-radius: 12px !important;
   }
   .navbar-brand img, .navbar-brand .logo {
-    height: 44px !important;
+    height: 42px !important;
     width: auto !important;
-    margin-right: 12px !important;
+    margin-right: 10px !important;
     vertical-align: middle !important;
   }
   main#main, .col-md-9 {
     min-width: 0 !important;
     padding-right: 2rem !important;
+    padding-bottom: 2.5rem !important;
   }
+  /* Right sidebar sticky, capped before footer, no duplicate slider */
   aside.col-md-3 {
     position: sticky !important;
     top: 85px !important;
-    overflow: visible !important;
-    max-height: none !important;
+    max-height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
     padding-left: 1.5rem !important;
     border-left: 1px solid #e2e8f0 !important;
-  }
-  aside.col-md-3, nav#toc {
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
-    overflow-y: visible !important;
   }
   aside.col-md-3::-webkit-scrollbar, nav#toc::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
+  }
+  /* Footer isolation to prevent overlap */
+  footer {
+    margin-top: 3.5rem !important;
+    padding: 2.2rem 0 !important;
+    border-top: 1px solid #e2e8f0 !important;
+    background-color: #ffffff !important;
+    position: relative !important;
+    z-index: 20 !important;
+    clear: both !important;
   }
   .template-citation-authors div.section:has(> #citation),
   .template-citation-authors #citation,
