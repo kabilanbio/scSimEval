@@ -199,13 +199,8 @@ reference:
       - plot_scalability_benchmark
       - plot_metric_boxplots
       - plot_metric_heatmap
-      - plot_trajectory_comparison
-      - plot_cross_modal_coupling
-      - plot_deg_fidelity
-      - plot_deg_bubble_matrix
       - plot_metric_pca
       - plot_metric_mds
-      - plot_consolidated_summary
 
   - title: "Interactive Graphical Interface (Shiny App GUI)"
     desc: "Interactive Shiny web application providing point-and-click simulation benchmarking and dynamic exploration."

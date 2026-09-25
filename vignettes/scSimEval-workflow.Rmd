@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Getting Started with scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations"
 author: "Kabilan S, Dr. Dwijesh Chandra Mishra, Dr. Shashi Bhushan Lal, Dr. Sudhir Srivastava, Dr. Krishna Kumar Chaturvedi, Dr. Sharanbasappa"
 date: "`r Sys.Date()`"
@@ -288,9 +288,7 @@ master_eval <- evaluate_multiomics_accuracy(
   sim_multi = example_multiomics$sim_multi,
   cell_types = example_multiomics$cell_types,
   batch_info = example_multiomics$batch_info,
-  cpu_time = example_multiomics$resource_stats$cpu_time,
   memory_mb = example_multiomics$resource_stats$memory_mb,
-  system_time = example_multiomics$resource_stats$system_time,
   elapsed_time = example_multiomics$resource_stats$elapsed_time,
   verbose = FALSE
 )

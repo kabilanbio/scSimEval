@@ -25,10 +25,9 @@ evaluate_multiomics_accuracy(
   sim_multi,
   cell_types = NULL,
   batch_info = NULL,
-  cpu_time = NULL,
   memory_mb = NULL,
-  system_time = NULL,
   elapsed_time = NULL,
+  peak_memory_mb = NULL,
   feature_pairs = NULL,
   compute_bivariate = FALSE,
   threads = 1,
@@ -54,21 +53,18 @@ evaluate_multiomics_accuracy(
 
   Optional factor or vector of batch labels for cells.
 
-- cpu_time:
-
-  Optional numeric value of CPU execution time in seconds.
-
 - memory_mb:
 
-  Optional numeric value of peak memory allocation in MB.
-
-- system_time:
-
-  Optional numeric value of system CPU time in seconds.
+  Optional numeric value of peak memory allocation in MB (or
+  peak_memory_mb).
 
 - elapsed_time:
 
   Optional numeric value of wall-clock elapsed time in seconds.
+
+- peak_memory_mb:
+
+  Optional alias for `memory_mb`.
 
 - feature_pairs:
 

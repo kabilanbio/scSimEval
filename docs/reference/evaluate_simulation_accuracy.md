@@ -12,10 +12,9 @@ evaluate_simulation_accuracy(
   sim_data,
   compute_bivariate = TRUE,
   threads = 1,
-  cpu_time = NULL,
   memory_mb = NULL,
-  system_time = NULL,
   elapsed_time = NULL,
+  peak_memory_mb = NULL,
   verbose = TRUE
 )
 ```
@@ -38,21 +37,18 @@ evaluate_simulation_accuracy(
 
   Number of threads for parallel computation. Default is 1.
 
-- cpu_time:
-
-  Optional numeric value of CPU execution time in seconds.
-
 - memory_mb:
 
-  Optional numeric value of peak memory allocation in MB.
-
-- system_time:
-
-  Optional numeric value of system CPU time in seconds.
+  Optional numeric value of peak memory allocation in MB (or
+  peak_memory_mb).
 
 - elapsed_time:
 
   Optional numeric value of wall-clock elapsed time in seconds.
+
+- peak_memory_mb:
+
+  Optional alias for `memory_mb`.
 
 - verbose:
 

@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Demonstration 1: scRNA-seq Simulation Evaluation"
 output: rmarkdown::html_vignette
 vignette: >
@@ -146,7 +146,7 @@ Instead of running individual steps, execute the entire unimodal evaluation suit
 eval_res <- evaluate_simulation_accuracy(
   ref_data          = example_scrna$ref,
   sim_data          = example_scrna$sim,
-  cpu_time          = 12.5,
+  elapsed_time      = 12.5,
   memory_mb         = 340.2,
   compute_bivariate = FALSE,
   verbose           = FALSE

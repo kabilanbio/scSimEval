@@ -38,8 +38,4 @@ test_that("evaluate_deg_fidelity computes multi-framework DEG metrics correctly"
   expect_true("Log2FC_Pearson_Corr" %in% metrics)
   expect_true("Silhouette_Sim" %in% metrics)
   expect_true("Classifier_Accuracy" %in% metrics)
-  
-  # Test plotting
-  p <- plot_deg_fidelity(res)
-  expect_s3_class(p, "ggplot")
 })

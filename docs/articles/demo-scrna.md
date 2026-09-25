@@ -179,7 +179,7 @@ evaluation suite in a single coordinated command:
 eval_res <- evaluate_simulation_accuracy(
   ref_data          = example_scrna$ref,
   sim_data          = example_scrna$sim,
-  cpu_time          = 12.5,
+  elapsed_time      = 12.5,
   memory_mb         = 340.2,
   compute_bivariate = FALSE,
   verbose           = FALSE

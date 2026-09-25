@@ -10,10 +10,9 @@
 #' @param sim_data Simulated count matrix (features x cells).
 #' @param compute_bivariate Logical, whether to compute 2D bivariate tests. Default is TRUE.
 #' @param threads Number of threads for parallel computation. Default is 1.
-#' @param cpu_time Optional numeric value of CPU execution time in seconds.
-#' @param memory_mb Optional numeric value of peak memory allocation in MB.
-#' @param system_time Optional numeric value of system CPU time in seconds.
+#' @param memory_mb Optional numeric value of peak memory allocation in MB (or peak_memory_mb).
 #' @param elapsed_time Optional numeric value of wall-clock elapsed time in seconds.
+#' @param peak_memory_mb Optional alias for \code{memory_mb}.
 #' @param verbose Logical, whether to print execution messages. Default is TRUE.
 #'
 #' @return A list containing tidy summary tables and detailed metric lists.
@@ -23,12 +22,14 @@ evaluate_simulation_accuracy <- function(
   sim_data,
   compute_bivariate = TRUE,
   threads = 1,
-  cpu_time = NULL,
   memory_mb = NULL,
-  system_time = NULL,
   elapsed_time = NULL,
+  peak_memory_mb = NULL,
   verbose = TRUE
 ) {
+  if (is.null(memory_mb) && !is.null(peak_memory_mb)) {
+    memory_mb <- peak_memory_mb
+  }
   # Step 1: Extract properties
   if (verbose) message("[1/5] Extracting cell-level properties...")
   ref_cell <- extract_cell_properties(ref_data, verbose = FALSE)
@@ -248,7 +249,7 @@ evaluate_simulation_accuracy <- function(
     ),
     ref_properties = list(cell = ref_cell, feature = ref_feat),
     sim_properties = list(cell = sim_cell, feature = sim_feat),
-    resource_usage = list(cpu_time = cpu_time, memory_mb = memory_mb, system_time = system_time, elapsed_time = elapsed_time)
+    resource_usage = list(memory_mb = memory_mb, elapsed_time = elapsed_time)
   )
 }
 
@@ -271,10 +272,9 @@ evaluate_simulation_accuracy <- function(
 #' @param sim_multi Named list of simulated matrices for Modality 1 and 2.
 #' @param cell_types Optional factor or vector of cell type labels for cells.
 #' @param batch_info Optional factor or vector of batch labels for cells.
-#' @param cpu_time Optional numeric value of CPU execution time in seconds.
-#' @param memory_mb Optional numeric value of peak memory allocation in MB.
-#' @param system_time Optional numeric value of system CPU time in seconds.
+#' @param memory_mb Optional numeric value of peak memory allocation in MB (or peak_memory_mb).
 #' @param elapsed_time Optional numeric value of wall-clock elapsed time in seconds.
+#' @param peak_memory_mb Optional alias for \code{memory_mb}.
 #' @param feature_pairs Optional 2-column data.frame of linked feature pairs.
 #' @param compute_bivariate Logical, whether to compute 2D bivariate tests. Default FALSE for speed.
 #' @param threads Number of CPU threads. Default is 1.
@@ -287,15 +287,17 @@ evaluate_multiomics_accuracy <- function(
   sim_multi,
   cell_types = NULL,
   batch_info = NULL,
-  cpu_time = NULL,
   memory_mb = NULL,
-  system_time = NULL,
   elapsed_time = NULL,
+  peak_memory_mb = NULL,
   feature_pairs = NULL,
   compute_bivariate = FALSE,
   threads = 1,
   verbose = TRUE
 ) {
+  if (is.null(memory_mb) && !is.null(peak_memory_mb)) {
+    memory_mb <- peak_memory_mb
+  }
   mod_names <- names(ref_multi)
   if (is.null(mod_names) || length(mod_names) < 2) {
     mod_names <- c("Modality_1", "Modality_2")
@@ -697,7 +699,8 @@ evaluate_multiomics_accuracy <- function(
       coaccessibility = peak_coacc,
       coexpression = coexpr_fid,
       profile = acc_prof
-    )
+    ),
+    resource_usage = list(memory_mb = memory_mb, elapsed_time = elapsed_time)
   )
 }
 
@@ -774,9 +777,7 @@ evaluate_multiple_datasets <- function(
             sim = sim_mat,
             cell_types = item$cell_types,
             batch_info = item$batch_info,
-            cpu_time = item$cpu_time,
             memory_mb = item$memory_mb,
-            system_time = item$system_time,
             elapsed_time = item$elapsed_time,
             feature_pairs = item$feature_pairs
           )
@@ -827,9 +828,7 @@ evaluate_multiple_datasets <- function(
             sim = sim_list,
             cell_types = ct,
             batch_info = bi,
-            cpu_time = sub_items[[rna_idx]]$cpu_time,
             memory_mb = sub_items[[rna_idx]]$memory_mb,
-            system_time = sub_items[[rna_idx]]$system_time,
             elapsed_time = sub_items[[rna_idx]]$elapsed_time,
             feature_pairs = sub_items[[rna_idx]]$feature_pairs
           )
@@ -874,9 +873,7 @@ evaluate_multiple_datasets <- function(
           sim = sim_mat,
           cell_types = item$cell_types,
           batch_info = item$batch_info,
-          cpu_time = item$cpu_time,
           memory_mb = item$memory_mb,
-          system_time = item$system_time,
           elapsed_time = item$elapsed_time,
           feature_pairs = item$feature_pairs
         )
@@ -921,9 +918,7 @@ evaluate_multiple_datasets <- function(
         sim_multi = exp$sim,
         cell_types = exp$cell_types,
         batch_info = exp$batch_info,
-        cpu_time = exp$cpu_time,
         memory_mb = exp$memory_mb,
-        system_time = exp$system_time,
         elapsed_time = exp$elapsed_time,
         feature_pairs = exp$feature_pairs,
         compute_bivariate = compute_bivariate,
@@ -966,6 +961,8 @@ evaluate_multiple_datasets <- function(
         sim_data = exp$sim,
         compute_bivariate = compute_bivariate,
         threads = threads,
+        memory_mb = exp$memory_mb,
+        elapsed_time = exp$elapsed_time,
         verbose = verbose
       )
 

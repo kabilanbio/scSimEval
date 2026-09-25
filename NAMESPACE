@@ -113,8 +113,6 @@ export(evaluate_multiomics_accuracy)
 export(plot_distribution_qc)
 export(plot_metric_boxplots)
 export(plot_scalability_benchmark)
-export(plot_trajectory_comparison)
-export(plot_cross_modal_coupling)
 export(plot_metric_heatmap)
 export(plot_metric_mds)
 export(plot_metric_pca)
@@ -128,12 +126,9 @@ importFrom(stats, median, sd, var, quantile, IQR, ks.test, cor, dist, prcomp, lm
 importFrom(utils, head, tail)
 
 export(evaluate_multiple_datasets)
-export(plot_consolidated_summary)
 S3method(print, scSimEval_consolidated)
 
 export(evaluate_deg_fidelity)
-export(plot_deg_fidelity)
-export(plot_deg_bubble_matrix)
 
 export(plot_evaluation_summary)
 export(plot_benchmark_summary_bars)

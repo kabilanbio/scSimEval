@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Demonstration 3: Multiomics (scRNA-seq + scATAC-seq) Simulation Evaluation"
 output: rmarkdown::html_vignette
 vignette: >
@@ -120,10 +120,9 @@ master_eval <- evaluate_multiomics_accuracy(
   ref_multi  = example_multiomics$ref_multi,
   sim_multi  = example_multiomics$sim_multi,
   cell_types = example_multiomics$cell_types,
-  batch_info = example_multiomics$batch_info,
-  cpu_time   = example_multiomics$resource_stats$cpu_time,
-  memory_mb  = example_multiomics$resource_stats$memory_mb,
-  verbose    = FALSE
+  elapsed_time = example_multiomics$resource_stats$elapsed_time,
+  memory_mb    = example_multiomics$resource_stats$memory_mb,
+  verbose      = FALSE
 )
 
 # Inspect tidy master summary table

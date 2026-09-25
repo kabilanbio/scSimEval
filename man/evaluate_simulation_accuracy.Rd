@@ -9,10 +9,9 @@ evaluate_simulation_accuracy(
   sim_data,
   compute_bivariate = TRUE,
   threads = 1,
-  cpu_time = NULL,
   memory_mb = NULL,
-  system_time = NULL,
   elapsed_time = NULL,
+  peak_memory_mb = NULL,
   verbose = TRUE
 )
 }
@@ -25,13 +24,11 @@ evaluate_simulation_accuracy(
 
 \item{threads}{Number of threads for parallel computation. Default is 1.}
 
-\item{cpu_time}{Optional numeric value of CPU execution time in seconds.}
-
-\item{memory_mb}{Optional numeric value of peak memory allocation in MB.}
-
-\item{system_time}{Optional numeric value of system CPU time in seconds.}
+\item{memory_mb}{Optional numeric value of peak memory allocation in MB (or peak_memory_mb).}
 
 \item{elapsed_time}{Optional numeric value of wall-clock elapsed time in seconds.}
+
+\item{peak_memory_mb}{Optional alias for \code{memory_mb}.}
 
 \item{verbose}{Logical, whether to print execution messages. Default is TRUE.}
 }

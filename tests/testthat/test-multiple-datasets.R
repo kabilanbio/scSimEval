@@ -42,10 +42,6 @@ test_that("evaluate_multiple_datasets handles flat prefixed multiomics and unimo
   # Check print method
   output <- capture.output(print(res))
   expect_true(any(grepl("scSimEval Consolidated Multi-Dataset Benchmark Results", output)))
-
-  # Test consolidated visualization
-  p <- plot_consolidated_summary(res, category = "(I) Distributional Properties", metric = "KS")
-  expect_s3_class(p, "ggplot")
 })
 
 test_that("evaluate_multiple_datasets handles grouped dataset structure", {
@@ -73,8 +69,5 @@ test_that("evaluate_multiple_datasets handles grouped dataset structure", {
 
   expect_s3_class(res2, "scSimEval_consolidated")
   expect_true(all(c("Experiment_A", "Experiment_B") %in% res2$consolidated_summary_table$Dataset))
-
-  p2 <- plot_consolidated_summary(res2, category = "(I) Distributional Properties", metric = "Wasserstein")
-  expect_s3_class(p2, "ggplot")
 })
 

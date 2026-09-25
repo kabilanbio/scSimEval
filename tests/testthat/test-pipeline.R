@@ -60,9 +60,7 @@ test_that("evaluate_multiomics_accuracy executes end-to-end on example_multiomic
     sim_multi = example_multiomics$sim_multi,
     cell_types = example_multiomics$cell_types,
     batch_info = example_multiomics$batch_info,
-    cpu_time = example_multiomics$resource_stats$cpu_time,
     memory_mb = example_multiomics$resource_stats$memory_mb,
-    system_time = example_multiomics$resource_stats$system_time,
     elapsed_time = example_multiomics$resource_stats$elapsed_time,
     verbose = FALSE
   )

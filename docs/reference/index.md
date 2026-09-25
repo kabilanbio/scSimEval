@@ -34,22 +34,12 @@ cross-simulator benchmarking.
 - [`plot_metric_heatmap()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_heatmap.md)
   : Plot Multi-Simulator Comparative Metric Heatmap Across Canonical
   Categories
-- [`plot_trajectory_comparison()`](https://kabilanbio.github.io/scSimEval/reference/plot_trajectory_comparison.md)
-  : Plot Trajectory Dynamics Comparison (Pseudotime Q-Q Alignment)
-- [`plot_cross_modal_coupling()`](https://kabilanbio.github.io/scSimEval/reference/plot_cross_modal_coupling.md)
-  : Plot Cross-Modal Regulatory Coupling (RNA \<-\> ATAC)
-- [`plot_deg_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/plot_deg_fidelity.md)
-  : Plot Differentially Expressed Gene (DEG) Fidelity
-- [`plot_deg_bubble_matrix()`](https://kabilanbio.github.io/scSimEval/reference/plot_deg_bubble_matrix.md)
-  : Plot Multi-Framework Differential Expression Bubble Matrix
 - [`plot_metric_pca()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_pca.md)
   : Principal Component Analysis (PCA) Dashboard of Benchmark Metrics
   and Methods
 - [`plot_metric_mds()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_mds.md)
   : Multi-Dimensional Scaling (MDS) Ordination of Evaluation Metrics or
   Simulators
-- [`plot_consolidated_summary()`](https://kabilanbio.github.io/scSimEval/reference/plot_consolidated_summary.md)
-  : Plot Consolidated Multi-Method Benchmark Summary
 
 ## Interactive Graphical Interface (Shiny App GUI)
 

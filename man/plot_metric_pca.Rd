@@ -41,8 +41,8 @@ set to \code{NULL} or \code{62} to display all evaluated metrics.}
 A \code{ggplot} or \code{patchwork} object representing the ordination figure.
 }
 \description{
-Generates a dual-panel PCA dashboard matching single-cell simulation benchmarking
-publication standards (e.g. Crowell et al., Nature Biotechnology; Soneson et al., Genome Biology).
+Generates a dual-panel PCA dashboard for evaluating single-cell simulation benchmark metrics
+and methods.
 }
 \details{
 All metrics present in \code{benchmark_data} (e.g. all 62 canonical metrics across categories)

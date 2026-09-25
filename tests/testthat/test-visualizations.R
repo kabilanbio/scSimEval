@@ -67,26 +67,6 @@ test_that("plot_benchmark_summary returns a valid ggplot object", {
   expect_s3_class(p, "ggplot")
 })
 
-test_that("plot_trajectory_comparison returns a valid ggplot object", {
-  data("example_scrna", package = "scSimEval", envir = environment())
-  
-  p <- plot_trajectory_comparison(example_scrna$ref, example_scrna$sim)
-  expect_s3_class(p, "ggplot")
-})
-
-test_that("plot_cross_modal_coupling returns a valid ggplot object", {
-  data("example_multiomics", package = "scSimEval", envir = environment())
-  
-  p <- plot_cross_modal_coupling(
-    ref_rna = example_multiomics$ref_multi$rna,
-    ref_atac = example_multiomics$ref_multi$atac,
-    sim_rna = example_multiomics$sim_multi$rna,
-    sim_atac = example_multiomics$sim_multi$atac,
-    n_features = 10
-  )
-  expect_s3_class(p, "ggplot")
-})
-
 test_that("plot_metric_heatmap returns a valid ggplot object", {
   data("example_multiomics", package = "scSimEval", envir = environment())
   

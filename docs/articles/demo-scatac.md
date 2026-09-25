@@ -156,7 +156,7 @@ command:
 master_atac <- evaluate_simulation_accuracy(
   ref_data          = example_scatac$ref,
   sim_data          = example_scatac$sim,
-  cpu_time          = 18.2,
+  elapsed_time      = 18.2,
   memory_mb         = 512.4,
   compute_bivariate = FALSE,
   verbose           = FALSE

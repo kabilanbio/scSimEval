@@ -1309,146 +1309,8 @@ plot_benchmark_summary <- function(
 }
 
 
-# ============================================================================
-# 4. plot_trajectory_comparison()
-# ============================================================================
-
-#' Plot Trajectory Dynamics Comparison (Pseudotime Q-Q Alignment)
-#'
-#' Compares continuous differentiation pseudotime distributions between reference and
-#' simulated scRNA-seq data via quantile-quantile (Q-Q) alignment and overlaid KDE curves.
-#' Pseudotime is auto-inferred from count matrices if not provided as precomputed vectors.
-#'
-#' @param ref_data Reference count matrix (genes x cells) or precomputed pseudotime vector.
-#' @param sim_data Simulated count matrix (genes x cells) or precomputed pseudotime vector.
-#' @param palette Character vector of 2 colors. Default \code{c("#2E86AB", "#E74C3C")}.
-#' @param n_quantile_pts Integer. Quantile points for Q-Q plot. Default \code{200}.
-#'
-#' @return A \code{ggplot} object (or patchwork object if patchwork is available).
-#' @export
-#' @examples
-#' data(example_scrna)
-#' p <- plot_trajectory_comparison(example_scrna$ref, example_scrna$sim)
-#' if (requireNamespace("ggplot2", quietly = TRUE)) print(p)
-plot_trajectory_comparison <- function(
-  ref_data,
-  sim_data,
-  palette        = c("#2E86AB", "#E74C3C"),
-  n_quantile_pts = 200
-) {
-  pt_ref <- if (is.matrix(ref_data) || is.data.frame(ref_data))
-    infer_scrna_pseudotime(ref_data) else as.numeric(ref_data)
-  pt_sim <- if (is.matrix(sim_data) || is.data.frame(sim_data))
-    infer_scrna_pseudotime(sim_data) else as.numeric(sim_data)
-
-  n_pts  <- min(length(pt_ref), length(pt_sim), n_quantile_pts)
-  probs  <- seq(0, 1, length.out = n_pts)
-  q_ref  <- as.numeric(stats::quantile(pt_ref, probs = probs, na.rm = TRUE))
-  q_sim  <- as.numeric(stats::quantile(pt_sim, probs = probs, na.rm = TRUE))
-  qq_df  <- data.frame(Ref_Quantile = q_ref, Sim_Quantile = q_sim)
-
-  cor_val  <- stats::cor(q_ref, q_sim, method = "spearman")
-  ks_d     <- stats::ks.test(pt_ref, pt_sim)$statistic
-  annot_lbl <- sprintf("Spearman rho = %.3f\nKS D = %.3f", cor_val, ks_d)
-
-  p <- ggplot2::ggplot(qq_df, ggplot2::aes(x = .data$Ref_Quantile,
-                                            y = .data$Sim_Quantile)) +
-    ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed",
-                          color = "#85929E", linewidth = 0.8) +
-    ggplot2::geom_point(color = palette[1], size = 2.0, alpha = 0.75, shape = 16) +
-    ggplot2::stat_smooth(method = "lm", se = FALSE,
-                          color = palette[2], linewidth = 1.1) +
-    ggplot2::annotate("label", x = -Inf, y = Inf, label = annot_lbl,
-                       hjust = -0.08, vjust = 1.3, size = 3.2, fontface = "italic",
-                       color = "#2C3E50", label.padding = ggplot2::unit(0.3, "lines"), fill = "white", alpha = 0.88) +
-    ggplot2::labs(
-      title    = "Pseudotime Q-Q Alignment",
-      subtitle = "Reference vs. Simulation quantile alignment along inferred differentiation trajectory",
-      x        = "Reference Pseudotime Quantile",
-      y        = "Simulation Pseudotime Quantile",
-      caption  = "Pseudotime inferred via PCA-based diffusion ordering. Dashed line = identity (perfect alignment)."
-    ) +
-    .pub_theme(base_size = 11)
-  p
-}
 
 
-# ============================================================================
-# 5. plot_cross_modal_coupling()
-# ============================================================================
-
-#' Plot Cross-Modal Regulatory Coupling (RNA <-> ATAC)
-#'
-#' For multiomics benchmarking: compares Spearman cross-modality correlations between
-#' linked gene expression (scRNA-seq) and chromatin accessibility (scATAC-seq) pairs.
-#'
-#' @param ref_rna  Reference scRNA-seq matrix (genes x cells).
-#' @param ref_atac Reference scATAC-seq matrix (peaks x cells).
-#' @param sim_rna  Simulated scRNA-seq matrix (genes x cells).
-#' @param sim_atac Simulated scATAC-seq matrix (peaks x cells).
-#' @param n_features Integer. Number of linked gene-peak pairs to evaluate. Default \code{20}.
-#' @param palette Character vector of 2 colors. Default \code{c("#2E86AB", "#E74C3C")}.
-#'
-#' @return A \code{ggplot} object of cross-modal correlation bars.
-#' @export
-#' @examples
-#' data(example_multiomics)
-#' p <- plot_cross_modal_coupling(
-#'   example_multiomics$ref_multi$rna, example_multiomics$ref_multi$atac,
-#'   example_multiomics$sim_multi$rna, example_multiomics$sim_multi$atac
-#' )
-#' if (requireNamespace("ggplot2", quietly = TRUE)) print(p)
-plot_cross_modal_coupling <- function(
-  ref_rna,
-  ref_atac,
-  sim_rna,
-  sim_atac,
-  n_features = 20,
-  palette    = c("#2E86AB", "#E74C3C")
-) {
-  n_f <- min(nrow(ref_rna), nrow(ref_atac), nrow(sim_rna), nrow(sim_atac), n_features)
-  ref_cors <- vapply(seq_len(n_f), function(i)
-    stats::cor(as.numeric(ref_rna[i, ]), as.numeric(ref_atac[i, ]),
-               method = "spearman"), numeric(1))
-  sim_cors <- vapply(seq_len(n_f), function(i)
-    stats::cor(as.numeric(sim_rna[i, ]), as.numeric(sim_atac[i, ]),
-               method = "spearman"), numeric(1))
-
-  pair_ids <- sprintf("Pair %02d", seq_len(n_f))
-  df <- data.frame(
-    Feature_Pair = factor(rep(pair_ids, 2), levels = pair_ids),
-    Correlation  = c(ref_cors, sim_cors),
-    Dataset      = rep(c("Reference", "Simulation"), each = n_f),
-    stringsAsFactors = FALSE
-  )
-  df$Dataset <- factor(df$Dataset, levels = c("Reference", "Simulation"))
-
-  mean_ref  <- mean(ref_cors, na.rm = TRUE)
-  mean_sim  <- mean(sim_cors, na.rm = TRUE)
-  annot_sub <- sprintf(
-    "Reference mean rho = %.3f  |  Simulation mean rho = %.3f  |  Delta rho = %+.3f",
-    mean_ref, mean_sim, mean_sim - mean_ref
-  )
-
-  ggplot2::ggplot(df, ggplot2::aes(x = .data$Feature_Pair, y = .data$Correlation,
-                                    fill = .data$Dataset)) +
-    ggplot2::geom_col(position = ggplot2::position_dodge(width = 0.8),
-                       width = 0.72, alpha = 0.88, color = "#2C3E50", linewidth = 0.2) +
-    ggplot2::geom_hline(yintercept = 0, linetype = "dashed",
-                         color = "#85929E", linewidth = 0.5) +
-    ggplot2::scale_fill_manual(values = palette, name = NULL) +
-    ggplot2::scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, 0.25)) +
-    ggplot2::labs(
-      title    = "Cross-Modal Regulatory Coupling Fidelity (RNA <-> ATAC)",
-      subtitle = annot_sub,
-      x        = "Linked Gene-Peak Feature Pair",
-      y        = "Cross-Modal Spearman Correlation (rho)",
-      caption  = "Each pair: one linked scRNA-seq gene and its cognate scATAC-seq chromatin peak."
-    ) +
-    .pub_theme(base_size = 11) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
-                   legend.position = "bottom")
-}
 
 
 # ============================================================================
@@ -1629,8 +1491,7 @@ plot_metric_heatmap <- function(
 #' Multi-Dimensional Scaling (MDS) Ordination of Evaluation Metrics or Simulators
 #'
 #' Projects evaluation metric profiles or simulator performances into a 2D MDS space
-#' following single-cell benchmarking literature standards (e.g. Crowell et al., Nature Biotechnology;
-#' Soneson et al., Genome Biology).
+#' for benchmarking single-cell simulation methods.
 #'
 #' When \code{ordination_by = "summaries"}, each point represents an evaluated property/metric,
 #' colored by its biological level: \code{"gene"} (red), \code{"cell"} (blue), or \code{"global"} (green).
@@ -1980,8 +1841,8 @@ plot_metric_mds <- function(
 
 #' Principal Component Analysis (PCA) Dashboard of Benchmark Metrics and Methods
 #'
-#' Generates a dual-panel PCA dashboard matching single-cell simulation benchmarking
-#' publication standards (e.g. Crowell et al., Nature Biotechnology; Soneson et al., Genome Biology).
+#' Generates a dual-panel PCA dashboard for evaluating single-cell simulation benchmark metrics
+#' and methods.
 #'
 #' All metrics present in \code{benchmark_data} (e.g. all 62 canonical metrics across categories)
 #' are mathematically considered in the PCA decomposition. Panel \code{"both"} displays:
@@ -2262,107 +2123,16 @@ plot_metric_pca <- function(
 }
 
 # ============================================================================
-
-#' Plot Consolidated Multi-Method Benchmark Summary
-#'
-#' Generates a 600 DPI comparative grouped bar chart across multiple
-#' simulation methods evaluated with \code{\link{evaluate_multiple_datasets}()}.
-#'
-#' @param consolidated_res Output from \code{evaluate_multiple_datasets()} or a
-#'   consolidated summary \code{data.frame}.
-#' @param category Character string specifying evaluation category to filter by.
-#'   Default \code{"(I) Distributional Properties"}.
-#' @param metric Character. Metric to plot. Default \code{"KS"}.
-#' @param properties Character vector of specific properties to include. Default \code{NULL} (all).
-#' @param facet_by_category Logical. Facet by evaluation category. Default \code{FALSE}.
-#'
-#' @return A \code{ggplot} object comparing evaluated methods.
-#' @export
-#' @examples
-#' data(example_scrna)
-#' datasets <- list(
-#'   "Method 1-scRNA-seq" = list(ref = example_scrna$ref, sim = example_scrna$sim),
-#'   "Method 2-scRNA-seq" = list(ref = example_scrna$ref, sim = example_scrna$sim)
-#' )
-#' consolidated <- evaluate_multiple_datasets(datasets, compute_bivariate = FALSE, verbose = FALSE)
-#' p <- plot_consolidated_summary(consolidated, metric = "KS")
-#' print(p)
-plot_consolidated_summary <- function(
-  consolidated_res,
-  category          = "(I) Distributional Properties",
-  metric            = "KS",
-  properties        = NULL,
-  facet_by_category = FALSE
-) {
-  df <- if (inherits(consolidated_res, "scSimEval_consolidated") ||
-            (is.list(consolidated_res) && "consolidated_summary_table" %in% names(consolidated_res))) {
-    consolidated_res$consolidated_summary_table
-  } else if (is.data.frame(consolidated_res)) {
-    consolidated_res
-  } else stop("`consolidated_res` must be output of `evaluate_multiple_datasets()` or a data.frame.")
-
-  if ("Category" %in% colnames(df))
-    df$Category <- ifelse(df$Category %in% names(.LEGACY_CATEGORY_MAP),
-                          .LEGACY_CATEGORY_MAP[df$Category], df$Category)
-
-  if (!is.null(category)) {
-    category <- ifelse(category %in% names(.LEGACY_CATEGORY_MAP),
-                       .LEGACY_CATEGORY_MAP[category], category)
-    df <- df[df$Category %in% category, , drop = FALSE]
-  }
-  if (!is.null(metric))     df <- df[df$Metric   %in% metric,   , drop = FALSE]
-  if (!is.null(properties)) df <- df[df$Property %in% properties,, drop = FALSE]
-  if (nrow(df) == 0) stop("No data remaining after filters.")
-
-  df$Property_Clean <- gsub("_", " ", df$Property)
-  n_methods <- length(unique(df$Data_Name))
-
-  method_colors <- if (n_methods <= 8) {
-    cols <- RColorBrewer::brewer.pal(max(3, n_methods), "Set2")[seq_len(n_methods)]
-    stats::setNames(cols, unique(df$Data_Name))
-  } else {
-    stats::setNames(grDevices::hcl.colors(n_methods, palette = "Dark 3"),
-                    unique(df$Data_Name))
-  }
-
-  p <- ggplot2::ggplot(df,
-                       ggplot2::aes(x = stats::reorder(.data$Property_Clean, .data$Value),
-                                    y = .data$Value, fill = .data$Data_Name)) +
-    ggplot2::geom_col(position = ggplot2::position_dodge(preserve = "single", width = 0.82),
-                       width = 0.74, color = "#2C3E50", linewidth = 0.2, alpha = 0.88) +
-    ggplot2::scale_fill_manual(values = method_colors, name = "Method / Modality") +
-    ggplot2::coord_flip() +
-    ggplot2::labs(
-      title    = paste0("Consolidated Multi-Method Benchmark  --  ", metric, " Distance"),
-      subtitle = if (!is.null(category))
-        paste0("Evaluation Category: ", paste(category, collapse = " | "))
-      else "Multi-dataset, multi-modality comparison",
-      x        = "Evaluated Biological Property",
-      y        = paste0("Discrepancy (", metric, ")  --  lower = better fidelity"),
-      caption  = "Methods sharing the same property bar group are directly comparable."
-    ) +
-    .pub_theme(base_size = 11) +
-    ggplot2::theme(axis.text.y = ggplot2::element_text(face = "bold", size = 9),
-                   legend.position = "bottom", legend.key.size = ggplot2::unit(0.5, "cm"))
-
-  if (facet_by_category && "Category" %in% colnames(df) && length(unique(df$Category)) > 1)
-    p <- p + ggplot2::facet_grid(Category ~ ., scales = "free_y", space = "free_y")
-  p
-}
-
-
-# ============================================================================
-# 8. plot_benchmark_bubble_matrix()  -- FLAGSHIP FIGURE
+# 8. plot_benchmark_bubble_matrix()
 # ============================================================================
 
 #' Plot Multi-Dimensional Benchmarking Bubble Matrix
 #'
-#' Produces the flagship 600 DPI multi-dimensional benchmarking bubble
-#' matrix following Nature/Cell benchmarking study conventions. Methods appear as rows;
-#' evaluation metrics appear as columns grouped under the eight canonical evaluation
-#' categories (I-VIII) displayed as colored header strips at the top.
+#' Produces a multi-dimensional benchmarking bubble matrix comparing simulation methods.
+#' Methods appear as rows; evaluation metrics appear as columns grouped under the eight
+#' canonical evaluation categories (I-VIII) displayed as colored header strips at the top.
 #'
-#' \if{html}{\figure{benchmark_bubble_matrix.png}{options: width="100\%" alt="Flagship Benchmarking Bubble Matrix"}}
+#' \if{html}{\figure{benchmark_bubble_matrix.png}{options: width="100\%" alt="Benchmarking Bubble Matrix"}}
 #'
 #' \strong{Bubble encoding:}
 #' \itemize{
@@ -2385,7 +2155,7 @@ plot_consolidated_summary <- function(
 #'           and \code{Score} (or \code{Value}).
 #'   }
 #' @param method_classes Optional named list mapping method names to row group labels.
-#'   E.g. \code{list("Unimodal" = c("Method A", "Method B"), "Multiomics" = "Method C")}.
+#'   E.g. \code{list("scRNA-seq" = c("Splatter", "SymSim"), "Multiomics" = c("scDesign3", "dyngen"))}.
 #' @param category_colors Optional named character vector to override the canonical palette.
 #' @param metrics_order Optional character vector for explicit metric ordering (left to right).
 #' @param methods_order Optional character vector for explicit method ordering (top to bottom).
@@ -2402,25 +2172,23 @@ plot_consolidated_summary <- function(
 #' @return A \code{ggplot} object rendering the multi-dimensional bubble matrix.
 #' @export
 #' @examples
-#' # Synthetic demo covering multiple categories
-#' set.seed(42)
-#' demo_df <- data.frame(
-#'   Method   = rep(c("Method A", "Method B", "Method C"), each = 6),
-#'   Category = rep(c("(I) Distributional Properties",
-#'                    "(I) Distributional Properties",
-#'                    "(III) Cellular Structure & Concordance",
-#'                    "(III) Cellular Structure & Concordance",
-#'                    "(VI) Trajectory & Lineage Dynamics",
-#'                    "(VIII) Computational Scalability"), 3),
-#'   Metric   = rep(c("KS Distance", "Wasserstein Dist.", "ARI", "NMI",
-#'                    "Pseudotime Corr. (rho)", "CPU Time (s)"), 3),
-#'   Score    = runif(18, 0.3, 1.0)
-#' )
-#' p <- plot_benchmark_bubble_matrix(demo_df,
-#'        title = "scSimEval Benchmark Comparison",
-#'        method_classes = list("RNA Methods" = c("Method A", "Method B"),
-#'                              "Multiomics"  = "Method C"))
-#' if (requireNamespace("ggplot2", quietly = TRUE)) print(p)
+#' \dontrun{
+#' # Load benchmark summary across simulators
+#' demo_file <- system.file("shiny/scSimEvalApp/data/demo_benchmark_data.rds", package = "scSimEval")
+#' if (file.exists(demo_file)) {
+#'   demo <- readRDS(demo_file)
+#'   p <- plot_benchmark_bubble_matrix(
+#'     data = demo$benchmark_summary_table,
+#'     title = "Single-Cell Multiomics Simulation Benchmark",
+#'     method_classes = list(
+#'       "scRNA-seq"  = c("Splatter", "SymSim"),
+#'       "scATAC-seq" = c("simATAC", "SCRIP"),
+#'       "Multiomics" = c("scDesign3", "dyngen")
+#'     )
+#'   )
+#'   print(p)
+#' }
+#' }
 plot_benchmark_bubble_matrix <- function(
   data,
   method_classes    = NULL,
@@ -2794,304 +2562,14 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
 
 
 
-#' Plot Differentially Expressed Gene (DEG) Fidelity
-#'
-#' Produces a two-panel 600 DPI visualization evaluating differential expression
-#' fidelity between empirical reference and simulated datasets:
-#' \itemize{
-#'   \item \strong{Panel A (Effect Size Concordance):} Scatter plot comparing reference vs
-#'         simulated log2 fold-changes across all features, annotated with Pearson correlation ($r$)
-#'         and colored by DEG discovery status (Shared DEG, Reference Only, Simulation Only, Not DE).
-#'   \item \strong{Panel B (Multi-Framework Metric Benchmark):} Horizontal bar chart displaying
-#'         fidelity metrics spanning Simpipe, SimBench, and Shaky Foundations.
-#' }
-#'
-#' @param deg_res Result object returned by \code{\link{evaluate_deg_fidelity}}.
-#' @param base_size Base font size for ggplot2 elements (default 11).
-#' @return A ggplot object.
-#' @export
-plot_deg_fidelity <- function(deg_res, base_size = 11) {
-  if (!is.list(deg_res) || is.null(deg_res$logfc_ref) || is.null(deg_res$logfc_sim)) {
-    stop("Input must be a valid result object from evaluate_deg_fidelity().")
-  }
-  
-  # Prepare scatter data
-  common_genes <- intersect(names(deg_res$logfc_ref), names(deg_res$logfc_sim))
-  if (length(common_genes) == 0) {
-    common_genes <- seq_along(deg_res$logfc_ref)
-  }
-  
-  status <- rep("Not DE", length(common_genes))
-  names(status) <- common_genes
-  
-  is_ref_deg <- common_genes %in% deg_res$deg_genes_ref
-  is_sim_deg <- common_genes %in% deg_res$deg_genes_sim
-  
-  status[is_ref_deg & !is_sim_deg] <- "Reference Only"
-  status[!is_ref_deg & is_sim_deg] <- "Simulation Only"
-  status[is_ref_deg & is_sim_deg]  <- "Shared DEG"
-  
-  scatter_df <- data.frame(
-    Gene = common_genes,
-    LogFC_Ref = as.numeric(deg_res$logfc_ref[common_genes]),
-    LogFC_Sim = as.numeric(deg_res$logfc_sim[common_genes]),
-    Status = factor(status, levels = c("Shared DEG", "Reference Only", "Simulation Only", "Not DE"))
-  )
-  
-  r_val <- round(stats::cor(scatter_df$LogFC_Ref, scatter_df$LogFC_Sim, method = "pearson"), 3)
-  
-  color_map <- c(
-    "Shared DEG"       = "#16A085",
-    "Reference Only"   = "#2980B9",
-    "Simulation Only"  = "#E67E22",
-    "Not DE"           = "#BDC3C7"
-  )
-  
-  p1 <- ggplot2::ggplot(scatter_df, ggplot2::aes(x = .data$LogFC_Ref, y = .data$LogFC_Sim, color = .data$Status)) +
-    ggplot2::geom_point(alpha = 0.65, size = 1.8) +
-    ggplot2::geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "#7F8C8D", linewidth = 0.8) +
-    ggplot2::scale_color_manual(values = color_map) +
-    ggplot2::annotate("text", x = -Inf, y = Inf, hjust = -0.1, vjust = 1.5,
-                      label = paste0("Pearson r = ", r_val, "\nContrast: ", deg_res$contrast),
-                      fontface = "bold", size = 3.8, color = "#2C3E50") +
-    ggplot2::theme_bw(base_size = base_size) +
-    ggplot2::labs(
-      title = "A. Effect Size Concordance (Log2 Fold Change)",
-      x = "Reference Log2 Fold-Change",
-      y = "Simulated Log2 Fold-Change",
-      color = "Discovery Status"
-    ) +
-    ggplot2::theme(
-      legend.position = "bottom",
-      plot.title = ggplot2::element_text(face = "bold", size = base_size * 1.05)
-    )
-  
-  # Prepare barplot data
-  tbl <- deg_res$deg_summary_table
-  metrics_to_plot <- c(
-    "SimBench_DE_Fidelity_Score",
-    "Log2FC_Pearson_Corr",
-    "Top_DEG_Jaccard_Overlap",
-    "Classifier_Accuracy",
-    "Classifier_Macro_F1",
-    "Distribution_Score"
-  )
-  sub_tbl <- tbl[tbl$Metric %in% metrics_to_plot, , drop = FALSE]
-  
-  if (nrow(sub_tbl) > 0) {
-    sub_tbl$Value <- pmax(0, pmin(1, as.numeric(sub_tbl$Value)))
-    sub_tbl$Metric_Label <- c(
-      "SimBench_DE_Fidelity_Score" = "SimBench DE Fidelity (1 - SMAPE)",
-      "Log2FC_Pearson_Corr"        = "Log2FC Pearson Correlation",
-      "Top_DEG_Jaccard_Overlap"   = "Top DEG Jaccard Overlap",
-      "Classifier_Accuracy"        = "ML Group Classification Accuracy",
-      "Classifier_Macro_F1"        = "ML Macro F1 Score",
-      "Distribution_Score"         = "Simpipe p-val Uniformity Score"
-    )[sub_tbl$Metric]
-    
-    p2 <- ggplot2::ggplot(sub_tbl, ggplot2::aes(x = stats::reorder(.data$Metric_Label, .data$Value), y = .data$Value, fill = .data$Framework)) +
-      ggplot2::geom_bar(stat = "identity", width = 0.65) +
-      ggplot2::coord_flip(ylim = c(0, 1.05)) +
-      ggplot2::scale_fill_brewer(palette = "Set2") +
-      ggplot2::geom_text(ggplot2::aes(label = sprintf("%.2f", .data$Value)), hjust = -0.2, size = 3.5, fontface = "bold") +
-      ggplot2::theme_bw(base_size = base_size) +
-      ggplot2::labs(
-        title = "B. Multi-Framework DEG Fidelity Scores",
-        x = NULL,
-        y = "Fidelity Score [0 - 1]",
-        fill = "Benchmarking Framework"
-      ) +
-      ggplot2::theme(
-        legend.position = "bottom",
-        plot.title = ggplot2::element_text(face = "bold", size = base_size * 1.05)
-      )
-    
-    # Combine plots vertically or horizontally
-    if (requireNamespace("cowplot", quietly = TRUE)) {
-      return(cowplot::plot_grid(p1, p2, ncol = 2, rel_widths = c(1, 1.2)))
-    }
-  }
-  
-  return(p1)
-}
-
-
-
-# ============================================================================
-# plot_deg_bubble_matrix()
-# ============================================================================
-
-#' Plot Multi-Framework Differential Expression Bubble Matrix
-#'
-#' Renders a 600 DPI bubble matrix focused specifically on comparing
-#' multiple single-cell simulation methods across the 15 differential expression
-#' and biological signal metrics from Simpipe, SimBench, and Shaky Foundations.
-#'
-#' @param data A list of result objects from \code{\link{evaluate_deg_fidelity}}
-#'   (e.g., \code{list("scDesign3" = res1, "Splatter" = res2)}) or a consolidated
-#'   \code{data.frame} containing columns \code{Method}, \code{Framework}, \code{Metric}, and \code{Value}.
-#' @param methods_order Optional character vector specifying custom method order.
-#' @param metrics_order Optional character vector specifying custom metric order.
-#' @param bubble_size_range Range of bubble radii (default \code{c(2, 8.5)}).
-#' @param base_size Base font size (default 10).
-#' @param title Plot title.
-#' @param subtitle Plot subtitle.
-#'
-#' @return A ggplot object.
-#' @export
-#' @examples
-#' \dontrun{
-#' # Assuming deg_res1 and deg_res2 are results from evaluate_deg_fidelity()
-#' p_bubble <- plot_deg_bubble_matrix(
-#'   data = list("scDesign3" = deg_res1, "Splatter" = deg_res2)
-#' )
-#' print(p_bubble)
-#' }
-plot_deg_bubble_matrix <- function(
-  data,
-  methods_order     = NULL,
-  metrics_order     = NULL,
-  bubble_size_range = c(2, 8.5),
-  base_size         = 10,
-  title             = "Multi-Framework Differential Expression & Biological Signal Fidelity",
-  subtitle          = "Benchmarking simulation methods across Simpipe, SimBench, and Shaky Foundations"
-) {
-  # 1. Ingest data
-  df <- if (is.data.frame(data)) {
-    data
-  } else if (is.list(data)) {
-    rows <- list()
-    for (nm in names(data)) {
-      sub_obj <- data[[nm]]
-      if (is.list(sub_obj) && "deg_summary_table" %in% names(sub_obj)) {
-        sub_tbl <- sub_obj$deg_summary_table
-        sub_tbl$Method <- nm
-        rows[[length(rows) + 1]] <- sub_tbl
-      }
-    }
-    do.call(rbind, rows)
-  } else {
-    stop("Input must be a data.frame or a named list of evaluate_deg_fidelity() objects.")
-  }
-  
-  req_cols <- c("Method", "Framework", "Metric", "Value")
-  if (!all(req_cols %in% colnames(df))) {
-    stop(paste("Data must contain columns:", paste(req_cols, collapse = ", ")))
-  }
-  
-  df$Value <- as.numeric(df$Value)
-  
-  deg_metric_labels <- c(
-    "DEG_Ratio"                  = "DEG Ratio",
-    "PValue_Uniformity_Chisq"    = "p-val Unif. Chisq",
-    "Distribution_Score"         = "Simpipe Unif. Score",
-    "Classifier_Accuracy"        = "ML Accuracy",
-    "Classifier_Macro_F1"        = "ML Macro F1",
-    "Classifier_Macro_Recall"    = "ML Macro Recall",
-    "SimBench_SMAPE"             = "SimBench SMAPE",
-    "SimBench_DE_Fidelity_Score" = "SimBench DE Fidelity",
-    "Log2FC_Pearson_Corr"        = "Log2FC Pearson Corr",
-    "Log2FC_Spearman_Corr"       = "Log2FC Spearman Corr",
-    "Top_DEG_Jaccard_Overlap"    = "Top DEG Jaccard",
-    "Silhouette_Sim"             = "Group Silhouette",
-    "Silhouette_Discrepancy"     = "Silh. Discrepancy",
-    "PVE_Group_Sim"              = "Group PVE",
-    "PVE_Discrepancy"            = "PVE Discrepancy"
-  )
-  
-  df$Display_Metric <- deg_metric_labels[df$Metric]
-  df$Display_Metric[is.na(df$Display_Metric)] <- df$Metric[is.na(df$Display_Metric)]
-  
-  hib_metrics <- c(
-    "Distribution_Score", "Classifier_Accuracy", "Classifier_Macro_F1",
-    "Classifier_Macro_Recall", "SimBench_DE_Fidelity_Score",
-    "Log2FC_Pearson_Corr", "Log2FC_Spearman_Corr", "Top_DEG_Jaccard_Overlap",
-    "Silhouette_Sim", "PVE_Group_Sim"
-  )
-  
-  df$Score_Norm <- NA_real_
-  for (met in unique(df$Metric)) {
-    idx <- which(df$Metric == met)
-    vals <- df$Value[idx]
-    non_na <- vals[!is.na(vals)]
-    if (length(non_na) == 0) next
-    
-    if (met == "DEG_Ratio") {
-      disc <- abs(1 - vals)
-      min_d <- min(disc, na.rm = TRUE)
-      max_d <- max(disc, na.rm = TRUE)
-      rng <- max_d - min_d
-      normed <- if (rng < 1e-6) rep(1.0, length(vals)) else 1 - (disc - min_d) / rng
-    } else {
-      min_v <- min(non_na)
-      max_v <- max(non_na)
-      rng <- max_v - min_v
-      if (rng < 1e-10) {
-        normed <- rep(1.0, length(vals))
-      } else if (met %in% hib_metrics) {
-        normed <- (vals - min_v) / rng
-      } else {
-        normed <- 1 - (vals - min_v) / rng
-      }
-    }
-    df$Score_Norm[idx] <- pmax(0.05, pmin(1.0, normed))
-  }
-  
-  if (!is.null(methods_order)) {
-    df$Method <- factor(df$Method, levels = rev(methods_order))
-  } else {
-    df$Method <- factor(df$Method, levels = rev(unique(df$Method)))
-  }
-  
-  fw_colors <- c(
-    "Simpipe (Duo et al., 2024)"               = "#2E86AB",
-    "SimBench (Cao et al., 2021)"              = "#CA6F1E",
-    "Shaky Foundations (Crowell et al., 2023)" = "#16A085"
-  )
-  
-  ggplot2::ggplot(df, ggplot2::aes(x = .data$Display_Metric, y = .data$Method)) +
-    ggplot2::geom_point(ggplot2::aes(size = .data$Score_Norm, fill = .data$Framework),
-                        shape = 21, color = "#2C3E50", alpha = 0.88, stroke = 0.8) +
-    ggplot2::scale_size_continuous(
-      range = bubble_size_range,
-      limits = c(0.05, 1.0),
-      breaks = c(0.2, 0.4, 0.6, 0.8, 1.0),
-      labels = c("20%", "40%", "60%", "80%", "100%"),
-      name = "Fidelity Score (Higher = Better)"
-    ) +
-    ggplot2::scale_fill_manual(values = fw_colors, guide = "none") +
-    ggplot2::facet_grid(. ~ .data$Framework, scales = "free_x", space = "free_x") +
-    ggplot2::theme_bw(base_size = base_size) +
-    ggplot2::labs(
-      title = title,
-      subtitle = subtitle,
-      x = NULL,
-      y = NULL
-    ) +
-    ggplot2::theme(
-      axis.text.x      = ggplot2::element_text(angle = 45, hjust = 1, face = "bold", size = base_size * 0.85, color = "#2C3E50"),
-      axis.text.y      = ggplot2::element_text(face = "bold", size = base_size * 0.95, color = "#1A252F"),
-      strip.background = ggplot2::element_rect(fill = "#F4F6F7", color = "#BDC3C7", linewidth = 0.6),
-      strip.text       = ggplot2::element_text(face = "bold", size = base_size * 0.9, color = "#2C3E50"),
-      panel.grid.major = ggplot2::element_line(color = "#EAECF0", linewidth = 0.4),
-      panel.grid.minor = ggplot2::element_blank(),
-      legend.position  = "bottom",
-      plot.title       = ggplot2::element_text(face = "bold", size = base_size * 1.25, color = "#1A252F"),
-      plot.subtitle    = ggplot2::element_text(size = base_size * 0.92, color = "#566573")
-    )
-}
-
-
-
 # -------------------------------------------------------------------------
-# Evaluation Summary Horizontal Bar Matrix (Nature Methods / Cell Style)
+# Evaluation Summary Horizontal Bar Matrix
 # -------------------------------------------------------------------------
 
 #' Plot Single-Cell Simulator Evaluation Summary
 #'
 #' Produces a 600 DPI horizontal bar matrix ranking single-cell simulators
-#' across the 8 canonical evaluation categories and overall composite performance,
-#' styled in accordance with premier benchmark literature (e.g., Nature Methods / Cell).
+#' across the 8 canonical evaluation categories and overall composite performance.
 #'
 #' \if{html}{\figure{evaluation_summary_bars.png}{options: width="100\%" alt="Single-Cell Simulator Evaluation Summary"}}
 #'

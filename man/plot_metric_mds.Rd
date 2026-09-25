@@ -56,8 +56,7 @@ A \code{ggplot} or \code{patchwork} object.
 }
 \description{
 Projects evaluation metric profiles or simulator performances into a 2D MDS space
-following single-cell benchmarking literature standards (e.g. Crowell et al., Nature Biotechnology;
-Soneson et al., Genome Biology).
+for benchmarking single-cell simulation methods.
 }
 \details{
 When \code{ordination_by = "summaries"}, each point represents an evaluated property/metric,

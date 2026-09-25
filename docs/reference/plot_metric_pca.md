@@ -1,8 +1,7 @@
 # Principal Component Analysis (PCA) Dashboard of Benchmark Metrics and Methods
 
-Generates a dual-panel PCA dashboard matching single-cell simulation
-benchmarking publication standards (e.g. Crowell et al., Nature
-Biotechnology; Soneson et al., Genome Biology).
+Generates a dual-panel PCA dashboard for evaluating single-cell
+simulation benchmark metrics and methods.
 
 ## Usage
 

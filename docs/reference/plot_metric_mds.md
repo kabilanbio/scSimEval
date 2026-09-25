@@ -1,8 +1,7 @@
 # Multi-Dimensional Scaling (MDS) Ordination of Evaluation Metrics or Simulators
 
 Projects evaluation metric profiles or simulator performances into a 2D
-MDS space following single-cell benchmarking literature standards (e.g.
-Crowell et al., Nature Biotechnology; Soneson et al., Genome Biology).
+MDS space for benchmarking single-cell simulation methods.
 
 ## Usage
 

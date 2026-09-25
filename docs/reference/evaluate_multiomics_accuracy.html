@@ -204,10 +204,9 @@ using strictly the user's provided inputs:</p><ul><li><p><code>ref_multi</code>:
 <span>  <span class="va">sim_multi</span>,</span>
 <span>  cell_types <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  batch_info <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  cpu_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  memory_mb <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  system_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  elapsed_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  peak_memory_mb <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  feature_pairs <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  compute_bivariate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  threads <span class="op">=</span> <span class="fl">1</span>,</span>
@@ -235,20 +234,16 @@ using strictly the user's provided inputs:</p><ul><li><p><code>ref_multi</code>:
 <dd><p>Optional factor or vector of batch labels for cells.</p></dd>
 
 
-<dt id="arg-cpu-time">cpu_time<a class="anchor" aria-label="anchor" href="#arg-cpu-time"></a></dt>
-<dd><p>Optional numeric value of CPU execution time in seconds.</p></dd>
-
-
 <dt id="arg-memory-mb">memory_mb<a class="anchor" aria-label="anchor" href="#arg-memory-mb"></a></dt>
-<dd><p>Optional numeric value of peak memory allocation in MB.</p></dd>
-
-
-<dt id="arg-system-time">system_time<a class="anchor" aria-label="anchor" href="#arg-system-time"></a></dt>
-<dd><p>Optional numeric value of system CPU time in seconds.</p></dd>
+<dd><p>Optional numeric value of peak memory allocation in MB (or peak_memory_mb).</p></dd>
 
 
 <dt id="arg-elapsed-time">elapsed_time<a class="anchor" aria-label="anchor" href="#arg-elapsed-time"></a></dt>
 <dd><p>Optional numeric value of wall-clock elapsed time in seconds.</p></dd>
+
+
+<dt id="arg-peak-memory-mb">peak_memory_mb<a class="anchor" aria-label="anchor" href="#arg-peak-memory-mb"></a></dt>
+<dd><p>Optional alias for <code>memory_mb</code>.</p></dd>
 
 
 <dt id="arg-feature-pairs">feature_pairs<a class="anchor" aria-label="anchor" href="#arg-feature-pairs"></a></dt>

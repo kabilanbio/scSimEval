@@ -2,8 +2,7 @@
 
 Produces a 600 DPI horizontal bar matrix ranking single-cell simulators
 across the 8 canonical evaluation categories and overall composite
-performance, styled in accordance with premier benchmark literature
-(e.g., Nature Methods / Cell).
+performance.
 
 ## Usage
 

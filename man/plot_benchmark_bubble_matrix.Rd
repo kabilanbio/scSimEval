@@ -51,7 +51,7 @@ plot_bubble_matrix(
 }}
 
 \item{method_classes}{Optional named list mapping method names to row group labels.
-E.g. \code{list("Unimodal" = c("Method A", "Method B"), "Multiomics" = "Method C")}.}
+E.g. \code{list("scRNA-seq" = c("Splatter", "SymSim"), "Multiomics" = c("scDesign3", "dyngen"))}.}
 
 \item{category_colors}{Optional named character vector to override the canonical palette.}
 
@@ -81,13 +81,12 @@ E.g. \code{list("Unimodal" = c("Method A", "Method B"), "Multiomics" = "Method C
 A \code{ggplot} object rendering the multi-dimensional bubble matrix.
 }
 \description{
-Produces the flagship 600 DPI multi-dimensional benchmarking bubble
-matrix following Nature/Cell benchmarking study conventions. Methods appear as rows;
-evaluation metrics appear as columns grouped under the eight canonical evaluation
-categories (I-VIII) displayed as colored header strips at the top.
+Produces a multi-dimensional benchmarking bubble matrix comparing simulation methods.
+Methods appear as rows; evaluation metrics appear as columns grouped under the eight
+canonical evaluation categories (I-VIII) displayed as colored header strips at the top.
 }
 \details{
-\if{html}{\figure{benchmark_bubble_matrix.png}{options: width="100\%" alt="Flagship Benchmarking Bubble Matrix"}}
+\if{html}{\figure{benchmark_bubble_matrix.png}{options: width="100\%" alt="Benchmarking Bubble Matrix"}}
 
 \strong{Bubble encoding:}
 \itemize{
@@ -103,23 +102,21 @@ so that 1 always means best performance, while concordance/correlation metrics a
 directly (higher = better).
 }
 \examples{
-# Synthetic demo covering multiple categories
-set.seed(42)
-demo_df <- data.frame(
-  Method   = rep(c("Method A", "Method B", "Method C"), each = 6),
-  Category = rep(c("(I) Distributional Properties",
-                   "(I) Distributional Properties",
-                   "(III) Cellular Structure & Concordance",
-                   "(III) Cellular Structure & Concordance",
-                   "(VI) Trajectory & Lineage Dynamics",
-                   "(VIII) Computational Scalability"), 3),
-  Metric   = rep(c("KS Distance", "Wasserstein Dist.", "ARI", "NMI",
-                   "Pseudotime Corr. (rho)", "CPU Time (s)"), 3),
-  Score    = runif(18, 0.3, 1.0)
-)
-p <- plot_benchmark_bubble_matrix(demo_df,
-       title = "scSimEval Benchmark Comparison",
-       method_classes = list("RNA Methods" = c("Method A", "Method B"),
-                             "Multiomics"  = "Method C"))
-if (requireNamespace("ggplot2", quietly = TRUE)) print(p)
+\dontrun{
+# Load benchmark summary across simulators
+demo_file <- system.file("shiny/scSimEvalApp/data/demo_benchmark_data.rds", package = "scSimEval")
+if (file.exists(demo_file)) {
+  demo <- readRDS(demo_file)
+  p <- plot_benchmark_bubble_matrix(
+    data = demo$benchmark_summary_table,
+    title = "Single-Cell Multiomics Simulation Benchmark",
+    method_classes = list(
+      "scRNA-seq"  = c("Splatter", "SymSim"),
+      "scATAC-seq" = c("simATAC", "SCRIP"),
+      "Multiomics" = c("scDesign3", "dyngen")
+    )
+  )
+  print(p)
+}
+}
 }
