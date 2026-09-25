@@ -6,6 +6,24 @@ categories (I-VIII) displayed as colored header strips at the top."><meta proper
 matrix following Nature/Cell benchmarking study conventions. Methods appear as rows;
 evaluation metrics appear as columns grouped under the eight canonical evaluation
 categories (I-VIII) displayed as colored header strips at the top."><meta property="og:image" content="https://kabilanbio.github.io/scSimEval/logo.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><style>
+  /* Ensure strictly ONE horizontal line under headers across the entire documentation */
+  .page-header {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 1.2rem !important;
+  }
+  .page-header + hr,
+  .page-header hr,
+  h1 + hr,
+  .page-header ~ hr {
+    display: none !important;
+  }
+  h1 {
+    border-bottom: 1.5px solid #e2e8f0 !important;
+    padding-bottom: 0.35em !important;
+    margin-top: 1.2em !important;
+    margin-bottom: 0.6em !important;
+  }
   /* Default: hide page logo everywhere */
   .page-header img.logo,
   .page-header .logo,
@@ -274,7 +292,8 @@ E.g. <code>list("Unimodal" = c("Method A", "Method B"), "Multiomics" = "Method C
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p><strong>Bubble encoding:</strong></p><ul><li><p><strong>Size</strong>: Normalized fidelity score [0, 1] – larger = better performance.</p></li>
+    <p><img src="figures/benchmark_bubble_matrix.png" width="100%" alt="Flagship Benchmarking Bubble Matrix"></p>
+<p><strong>Bubble encoding:</strong></p><ul><li><p><strong>Size</strong>: Normalized fidelity score [0, 1] – larger = better performance.</p></li>
 <li><p><strong>Fill color</strong>: Evaluation category (one of the eight canonical groups).</p></li>
 <li><p><strong>Circle (shape 21)</strong>: Regular performance (score &lt; 0.96).</p></li>
 <li><p><strong>Square (shape 22)</strong>: Top performer (score &gt;= 0.96).</p></li>

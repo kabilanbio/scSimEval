@@ -1,9 +1,3 @@
-#' @title Computational Performance & Scalability Metrics
-#' @description Measures execution runtime, memory allocation, and scalability
-#'   scaling factors across varying cell and feature counts. Integrated from HelenaLC.
-#' @name metrics_scalability
-NULL
-
 #' Benchmark Execution Runtime and Memory Usage
 #'
 #' Times an expression and measures change in memory allocation.

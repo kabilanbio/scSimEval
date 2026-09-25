@@ -1,9 +1,3 @@
-#' @title Core Utilities and Alignment Functions
-#' @description Helper utilities for empirical distribution alignment, Tukey outlier
-#'   filtering, Hungarian assignment, and robust numerical transformations.
-#' @name utils
-NULL
-
 #' Align Two Empirical Distributions
 #'
 #' Sorts both distributions and aligns their lengths using either quantile interpolation
@@ -16,7 +10,8 @@ NULL
 #' @param n_points Number of points to evaluate when method = "quantile". Default is max(length(ref), length(sim)).
 #'
 #' @return A list with aligned numeric vectors: \code{list(ref = ..., sim = ...)}.
-#' @export
+#' @keywords internal
+#' @noRd
 align_distributions <- function(ref, sim, method = c("quantile", "resample"), n_points = NULL) {
   method <- match.arg(method)
   ref <- sort(stats::na.omit(as.numeric(ref)))
@@ -81,7 +76,8 @@ calc_outlier_proportion <- function(x) {
 #' @param truth Vector of ground truth cell-type labels.
 #'
 #' @return A list with matched cluster pairs, precision, recall, and macro F1 score.
-#' @export
+#' @keywords internal
+#' @noRd
 hungarian_match <- function(pred, truth) {
   valid <- !is.na(pred) & !is.na(truth)
   pred <- as.character(pred[valid])

@@ -1,14 +1,3 @@
-#' @title Trajectory & Differentiation Lineage Dynamics
-#' @description Trajectory comparison metrics including geodesic pseudotime correlation,
-#'   pseudotime distribution distance, and lineage tree branch height discrepancy.
-#'   Supports automated trajectory and lineage tree inference directly from scRNA-seq counts.
-#' @name metrics_trajectory
-#' @export infer_scrna_pseudotime
-#' @export infer_scrna_lineage_tree
-#' @export calc_pseudotime_correlation
-#' @export calc_tree_height_discrepancy
-#' @export evaluate_trajectory_metrics
-NULL
 
 #' Automatically Infer Pseudotime Trajectory from scRNA-seq Counts
 #'

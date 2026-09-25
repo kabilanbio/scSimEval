@@ -1,11 +1,3 @@
-#' @title Scientific Visualization Suite for Single-Cell Multiomics Simulation Benchmarking
-#' @description High-resolution (600 DPI) ggplot2 visualization functions designed to inspect,
-#'   benchmark, and compare simulated single-cell and multiomics datasets against empirical
-#'   references. All functions conform to the \pkg{scSimEval} eight-category evaluation
-#'   framework (Categories I-VIII).
-#' @name visualizations
-NULL
-
 # ============================================================================
 # GLOBAL VARIABLE DECLARATIONS (for R CMD check NOTE suppression)
 # ============================================================================
@@ -440,6 +432,8 @@ utils::globalVariables(c(
 #' human-crafted scientific layout featuring solid visible contour lines, semi-transparent
 #' color-filled density curves, and simple understated titles.
 #'
+#' \if{html}{\figure{comparative_distribution_qc.png}{options: width="100\%" alt="Comparative Single-Cell Distribution QC"}}
+#'
 #' @param ref_data Numeric count matrix for empirical reference (features x cells).
 #' @param sim_data Numeric count matrix for simulated data (features x cells), or a named list
 #'   of simulated count matrices representing multiple simulators (e.g. \code{list("scDesign3" = m1, "Splatter" = m2)}).
@@ -831,6 +825,8 @@ MNO#
 #' superior, resolving metric polarity differences across distance and correlation measures)
 #' or original unnormalized raw values with optional direction separation or per-metric faceting.
 #'
+#' \if{html}{\figure{metric_boxplots.png}{options: width="100\%" alt="Multi-Metric Distribution Boxplots"}}
+#'
 #' @param benchmark_data A data frame (such as \code{demo$benchmark_summary_table} or output from
 #'   \code{\link{evaluate_simulation_accuracy}()}) or a named list of benchmark result tables.
 #' @param categories Optional character vector of categories to include. Default \code{NULL} (all 8 categories).
@@ -975,6 +971,8 @@ plot_metric_boxplots <- function(
 #' Evaluates computational resource efficiency across single-cell simulators using raw
 #' benchmarking measurements (elapsed real wall-clock time in seconds and peak resident
 #' memory consumption in MiB).
+#'
+#' \if{html}{\figure{scalability_benchmark.png}{options: width="100\%" alt="Computational Scalability and Resource Footprint"}}
 #'
 #' @param benchmark_data Benchmark summary table or named list containing Category VIII metrics.
 #' @param type Character. Visualization type: \code{"composite"} (multi-panel dashboard),
@@ -1230,7 +1228,8 @@ plot_scalability_benchmark <- function(
 #' @param palette Optional named color vector. If \code{NULL}, uses canonical palette.
 #'
 #' @return A \code{ggplot} object of sorted discrepancy scores.
-#' @export
+#' @keywords internal
+#' @noRd
 #' @examples
 #' data(example_multiomics)
 #' res <- evaluate_multiomics_accuracy(
@@ -1463,6 +1462,8 @@ plot_cross_modal_coupling <- function(
 #' evaluation categories. Displays the exact original raw evaluation score in text inside every cell,
 #' with cell fill colors scaled by relative fidelity (direction-aware, ensuring balanced visual contrast
 #' across all 62 measures without scale distortion from high-magnitude metrics like RAM or runtime).
+#'
+#' \if{html}{\figure{metric_heatmap.png}{options: width="100\%" alt="Cross-Metric Z-Scored Heatmap"}}
 #'
 #' @param benchmark_data A tidy benchmark summary table or a named list of benchmark tables.
 #' @param category Optional character vector to filter by canonical evaluation category. Default \code{NULL} (all 8 categories).
@@ -2361,6 +2362,8 @@ plot_consolidated_summary <- function(
 #' evaluation metrics appear as columns grouped under the eight canonical evaluation
 #' categories (I-VIII) displayed as colored header strips at the top.
 #'
+#' \if{html}{\figure{benchmark_bubble_matrix.png}{options: width="100\%" alt="Flagship Benchmarking Bubble Matrix"}}
+#'
 #' \strong{Bubble encoding:}
 #' \itemize{
 #'   \item \strong{Size}: Normalized fidelity score [0, 1] -- larger = better performance.
@@ -2707,8 +2710,8 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
 # INTERNAL HELPERS
 # ============================================================================
 
-#' Ingest bubble matrix input into a tidy data.frame
-#' @keywords internal
+# Ingest bubble matrix input into a tidy data.frame
+# @keywords internal
 .ingest_bubble_data <- function(data) {
   # scSimEval_consolidated object
   if (inherits(data, "scSimEval_consolidated") ||
@@ -2758,8 +2761,8 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
 }
 
 
-#' Normalize bubble scores (direction-aware, per-metric across methods)
-#' @keywords internal
+# Normalize bubble scores (direction-aware, per-metric across methods)
+# @keywords internal
 .normalize_bubble_scores <- function(df) {
   df$Score_Norm <- NA_real_
   for (met in unique(df$Metric)) {
@@ -3089,6 +3092,8 @@ plot_deg_bubble_matrix <- function(
 #' Produces a 600 DPI horizontal bar matrix ranking single-cell simulators
 #' across the 8 canonical evaluation categories and overall composite performance,
 #' styled in accordance with premier benchmark literature (e.g., Nature Methods / Cell).
+#'
+#' \if{html}{\figure{evaluation_summary_bars.png}{options: width="100\%" alt="Single-Cell Simulator Evaluation Summary"}}
 #'
 #' @param data A benchmark summary data frame, a list containing \code{benchmark_summary_table},
 #'   or the output of \code{\link{run_benchmark_suite}}.

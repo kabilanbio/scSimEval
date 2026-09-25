@@ -74,3 +74,7 @@ plot_metric_boxplots(
 ## Value
 
 A `ggplot` object.
+
+## Details
+
+![Multi-Metric Distribution Boxplots](figures/metric_boxplots.png)

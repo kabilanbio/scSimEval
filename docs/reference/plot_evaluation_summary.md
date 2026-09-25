@@ -98,6 +98,11 @@ plot_summary_bars(
 
 A `ggplot` object representing the multi-panel evaluation summary.
 
+## Details
+
+![Single-Cell Simulator Evaluation
+Summary](figures/evaluation_summary_bars.png)
+
 ## Examples
 
 ``` r

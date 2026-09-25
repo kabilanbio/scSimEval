@@ -1,18 +1,10 @@
-#' @title Master Evaluation Pipeline for Single-Cell and Multiomics Simulation Benchmarking
-#' @description Unified benchmarking orchestrator uniting the 62 canonical evaluation measures across 8 categories
-#'   operating strictly on real/simulated single-cell multiomics matrices, cell-type labels,
-#'   batch annotations, computational resource usage, and trajectory features inferred from scRNA-seq.
-#' @name evaluate_benchmark
-#' @export evaluate_simulation_accuracy
-#' @export evaluate_multiomics_accuracy
-#' @export evaluate_multiple_datasets
-#' @export print.scSimEval_consolidated
-NULL
 
 #' Evaluate Comprehensive Simulation Accuracy (Unimodal Omics Layer)
 #'
 #' Computes distribution distances, cellular and feature-level properties,
 #' zero-inflation curves, and manifold distances between reference and simulated datasets.
+#'
+#' \if{html}{\figure{workflow_diagram.png}{options: width="100\%" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 #'
 #' @param ref_data Reference count matrix (features x cells).
 #' @param sim_data Simulated count matrix (features x cells).
@@ -272,6 +264,8 @@ evaluate_simulation_accuracy <- function(
 #'   \item Computational resource usage: \code{cpu_time}, \code{memory_mb}, \code{system_time}.
 #'   \item Trajectory features inferred directly from scRNA-seq counts.
 #' }
+#'
+#' \if{html}{\figure{workflow_diagram.png}{options: width="100\%" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 #'
 #' @param ref_multi Named list of reference matrices for Modality 1 and 2.
 #' @param sim_multi Named list of simulated matrices for Modality 1 and 2.

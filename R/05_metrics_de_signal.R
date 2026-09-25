@@ -1,22 +1,3 @@
-#' @title Differential Features and Biological Signal Evaluation
-#' @description Implements the 5 biological signal evaluation patterns from SimBench
-#'   (DE, DV, DD, DP, BD), predictive cell identity classification modeling,
-#'   pseudoreplication delta-variance preservation (Libra), cell cycle phase fidelity,
-#'   and cell-type mixture deconvolution accuracy.
-#' @name metrics_de_signal
-#' @export calc_signal_de
-#' @export calc_signal_dv
-#' @export calc_signal_dd
-#' @export calc_signal_dp
-#' @export calc_signal_bd
-#' @export evaluate_simbench_signals
-#' @export evaluate_predictive_de_model
-#' @export to_pseudobulk
-#' @export calc_delta_variance
-#' @export calc_cell_cycle_phase_fidelity
-#' @export calc_deconvolution_accuracy
-#' @export evaluate_deg_fidelity
-NULL
 
 # -----------------------------------------------------------------------------
 # SimBench 5 Biological Signal Types: DE, DV, DD, DP, BD
@@ -289,7 +270,8 @@ evaluate_predictive_de_model <- function(
 #' @param min_cells Minimum number of cells required per cell type to retain. Default is 3.
 #'
 #' @return Named list of pseudobulk count matrices (features x sample_replicates), one per cell type.
-#' @export
+#' @keywords internal
+#' @noRd
 to_pseudobulk <- function(
   counts,
   cell_types,

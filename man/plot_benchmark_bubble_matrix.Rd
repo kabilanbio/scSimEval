@@ -87,6 +87,8 @@ evaluation metrics appear as columns grouped under the eight canonical evaluatio
 categories (I-VIII) displayed as colored header strips at the top.
 }
 \details{
+\if{html}{\figure{benchmark_bubble_matrix.png}{options: width="100\%" alt="Flagship Benchmarking Bubble Matrix"}}
+
 \strong{Bubble encoding:}
 \itemize{
   \item \strong{Size}: Normalized fidelity score [0, 1] -- larger = better performance.

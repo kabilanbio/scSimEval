@@ -8,6 +8,24 @@ from raw or normalized count matrices without requiring ground-truth cell-type l
 (Fang et al., Genome Biology 2022; benchmarked in scDesign3, Song et al., Nat Biotechnol 2024).
 CDI calculates the penalized log-likelihood (CDI-AIC and CDI-BIC) of count data
 under a cluster-specific Poisson or Negative Binomial GLM with cell size factors."><meta property="og:image" content="https://kabilanbio.github.io/scSimEval/logo.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><style>
+  /* Ensure strictly ONE horizontal line under headers across the entire documentation */
+  .page-header {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 1.2rem !important;
+  }
+  .page-header + hr,
+  .page-header hr,
+  h1 + hr,
+  .page-header ~ hr {
+    display: none !important;
+  }
+  h1 {
+    border-bottom: 1.5px solid #e2e8f0 !important;
+    padding-bottom: 0.35em !important;
+    margin-top: 1.2em !important;
+    margin-bottom: 0.6em !important;
+  }
   /* Default: hide page logo everywhere */
   .page-header img.logo,
   .page-header .logo,

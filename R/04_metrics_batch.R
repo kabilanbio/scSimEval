@@ -1,10 +1,3 @@
-#' @title Batch Effect & Integration Evaluation Metrics
-#' @description Comprehensive suite of batch mixing, cell-specific mixing,
-#'   and local structure preservation metrics integrated from simpipe,
-#'   HelenaLC/simulation-comparison, and CellMixS (Lütge et al., Life Sci Alliance 2021).
-#' @name metrics_batch
-NULL
-
 #' Cell-Specific Mixing Score (CMS)
 #'
 #' Tests the hypothesis that group-specific distance distributions of k-nearest

@@ -85,6 +85,11 @@ plot_distribution_qc(
 A `ggplot` or `patchwork` composite object containing the comparative
 panels.
 
+## Details
+
+![Comparative Single-Cell Distribution
+QC](figures/comparative_distribution_qc.png)
+
 ## Examples
 
 ``` r

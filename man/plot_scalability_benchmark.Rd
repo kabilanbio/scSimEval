@@ -45,4 +45,6 @@ Plot Multi-Dimensional Computational Scalability Benchmark
 Evaluates computational resource efficiency across single-cell simulators using raw
 benchmarking measurements (elapsed real wall-clock time in seconds and peak resident
 memory consumption in MiB).
+
+\if{html}{\figure{scalability_benchmark.png}{options: width="100\%" alt="Computational Scalability and Resource Footprint"}}
 }

@@ -1,9 +1,3 @@
-#' @title Cell Clustering and Population Separation Metrics
-#' @description Comprehensive suite of unsupervised clustering quality metrics
-#'   and supervised ground-truth concordance measures integrated from simpipe and HelenaLC.
-#' @name metrics_clustering
-NULL
-
 #' Calculate Average Silhouette Width (ASW)
 #' @param dist_mat Distance matrix among cells or numeric matrix (features x cells).
 #' @param cluster_labels Vector of cluster or cell-type labels.

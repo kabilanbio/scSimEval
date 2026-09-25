@@ -63,3 +63,6 @@ A `ggplot` or `patchwork` object.
 Evaluates computational resource efficiency across single-cell
 simulators using raw benchmarking measurements (elapsed real wall-clock
 time in seconds and peak resident memory consumption in MiB).
+
+![Computational Scalability and Resource
+Footprint](figures/scalability_benchmark.png)

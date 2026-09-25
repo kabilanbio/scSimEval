@@ -4,6 +4,24 @@ benchmarking measurements (elapsed real wall-clock time, total CPU time, peak re
 Plot Multi-Dimensional Computational Scalability Benchmark"><meta property="og:description" content="Evaluates computational resource efficiency across single-cell simulators using raw
 benchmarking measurements (elapsed real wall-clock time, total CPU time, peak resident
 Plot Multi-Dimensional Computational Scalability Benchmark"><meta property="og:image" content="https://kabilanbio.github.io/scSimEval/logo.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><style>
+  /* Ensure strictly ONE horizontal line under headers across the entire documentation */
+  .page-header {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 1.2rem !important;
+  }
+  .page-header + hr,
+  .page-header hr,
+  h1 + hr,
+  .page-header ~ hr {
+    display: none !important;
+  }
+  h1 {
+    border-bottom: 1.5px solid #e2e8f0 !important;
+    padding-bottom: 0.35em !important;
+    margin-top: 1.2em !important;
+    margin-bottom: 0.6em !important;
+  }
   /* Default: hide page logo everywhere */
   .page-header img.logo,
   .page-header .logo,
@@ -217,6 +235,7 @@ simulation throughput (<code>cells / second</code>). Default <code>1000</code>.<
     <p>Evaluates computational resource efficiency across single-cell simulators using raw
 benchmarking measurements (elapsed real wall-clock time in seconds and peak resident
 memory consumption in MiB).</p>
+<p><img src="figures/scalability_benchmark.png" width="100%" alt="Computational Scalability and Resource Footprint"></p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

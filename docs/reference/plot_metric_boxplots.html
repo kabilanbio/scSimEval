@@ -8,6 +8,24 @@ of evaluation metric scores across simulated single-cell and multiomics datasets
 Supports standardized direction-aligned fidelity scores (where higher is universally
 superior, resolving metric polarity differences across distance and correlation measures)
 or original unnormalized raw values with optional direction separation or per-metric faceting."><meta property="og:image" content="https://kabilanbio.github.io/scSimEval/logo.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"><style>
+  /* Ensure strictly ONE horizontal line under headers across the entire documentation */
+  .page-header {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 1.2rem !important;
+  }
+  .page-header + hr,
+  .page-header hr,
+  h1 + hr,
+  .page-header ~ hr {
+    display: none !important;
+  }
+  h1 {
+    border-bottom: 1.5px solid #e2e8f0 !important;
+    padding-bottom: 0.35em !important;
+    margin-top: 1.2em !important;
+    margin-bottom: 0.6em !important;
+  }
   /* Default: hide page logo everywhere */
   .page-header img.logo,
   .page-header .logo,
@@ -230,6 +248,10 @@ or <code>"metric"</code> (independent panels for each individual metric).</p></d
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>ggplot</code> object.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p><img src="figures/metric_boxplots.png" width="100%" alt="Multi-Metric Distribution Boxplots"></p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

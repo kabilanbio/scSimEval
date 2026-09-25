@@ -51,3 +51,6 @@ Supports standardized direction-aligned fidelity scores (where higher is univers
 superior, resolving metric polarity differences across distance and correlation measures)
 or original unnormalized raw values with optional direction separation or per-metric faceting.
 }
+\details{
+\if{html}{\figure{metric_boxplots.png}{options: width="100\%" alt="Multi-Metric Distribution Boxplots"}}
+}

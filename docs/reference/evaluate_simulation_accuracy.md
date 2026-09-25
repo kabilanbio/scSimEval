@@ -61,3 +61,8 @@ evaluate_simulation_accuracy(
 ## Value
 
 A list containing tidy summary tables and detailed metric lists.
+
+## Details
+
+![scSimEval Unified Benchmarking Workflow
+Diagram](figures/workflow_diagram.png)

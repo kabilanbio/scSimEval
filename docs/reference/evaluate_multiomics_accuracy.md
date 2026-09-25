@@ -91,3 +91,8 @@ evaluate_multiomics_accuracy(
 
 A list containing detailed results and a unified tidy master summary
 table.
+
+## Details
+
+![scSimEval Unified Benchmarking Workflow
+Diagram](figures/workflow_diagram.png)

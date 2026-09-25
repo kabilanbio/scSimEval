@@ -42,3 +42,6 @@ A list containing tidy summary tables and detailed metric lists.
 Computes distribution distances, cellular and feature-level properties,
 zero-inflation curves, and manifold distances between reference and simulated datasets.
 }
+\details{
+\if{html}{\figure{workflow_diagram.png}{options: width="100\%" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
+}

@@ -128,6 +128,9 @@ A `ggplot` object rendering the multi-dimensional bubble matrix.
 
 ## Details
 
+![Flagship Benchmarking Bubble
+Matrix](figures/benchmark_bubble_matrix.png)
+
 **Bubble encoding:**
 
 - **Size**: Normalized fidelity score \[0, 1\] – larger = better

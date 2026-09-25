@@ -50,3 +50,6 @@ evaluation categories. Displays the exact original raw evaluation score in text 
 with cell fill colors scaled by relative fidelity (direction-aware, ensuring balanced visual contrast
 across all 62 measures without scale distortion from high-magnitude metrics like RAM or runtime).
 }
+\details{
+\if{html}{\figure{metric_heatmap.png}{options: width="100\%" alt="Cross-Metric Z-Scored Heatmap"}}
+}

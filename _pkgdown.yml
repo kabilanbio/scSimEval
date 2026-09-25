@@ -8,6 +8,24 @@ template:
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
       <style>
+        /* Ensure strictly ONE horizontal line under headers across the entire documentation */
+        .page-header {
+          border-bottom: none !important;
+          padding-bottom: 0 !important;
+          margin-bottom: 1.2rem !important;
+        }
+        .page-header + hr,
+        .page-header hr,
+        h1 + hr,
+        .page-header ~ hr {
+          display: none !important;
+        }
+        h1 {
+          border-bottom: 1.5px solid #e2e8f0 !important;
+          padding-bottom: 0.35em !important;
+          margin-top: 1.2em !important;
+          margin-bottom: 0.6em !important;
+        }
         /* Default: hide page logo everywhere */
         .page-header img.logo,
         .page-header .logo,
@@ -163,3 +181,170 @@ navbar:
     - icon: fa-github fa-lg
       href: https://github.com/kabilanbio/scSimEval
       aria-label: GitHub repository
+
+reference:
+  - title: "Master Benchmarking Workflows"
+    desc: "Unified end-to-end evaluation pipelines executing the 62 canonical metrics across unimodal and multiomics simulations."
+    contents:
+      - evaluate_simulation_accuracy
+      - evaluate_multiomics_accuracy
+      - evaluate_multiple_datasets
+
+  - title: "High-Resolution Visualization Suite (600 DPI)"
+    desc: "Publication-grade visualization functions designed for multi-metric and cross-simulator benchmarking."
+    contents:
+      - plot_benchmark_bubble_matrix
+      - plot_evaluation_summary
+      - plot_distribution_qc
+      - plot_scalability_benchmark
+      - plot_metric_boxplots
+      - plot_metric_heatmap
+      - plot_trajectory_comparison
+      - plot_cross_modal_coupling
+      - plot_deg_fidelity
+      - plot_deg_bubble_matrix
+      - plot_metric_pca
+      - plot_metric_mds
+      - plot_consolidated_summary
+
+  - title: "Interactive Graphical Interface (Shiny App GUI)"
+    desc: "Interactive Shiny web application providing point-and-click simulation benchmarking and dynamic exploration."
+    contents:
+      - launch_scSimEval_app
+
+  - title: "Category-Specific Evaluation Suites"
+    desc: "Targeted evaluation functions executing specialized metric pipelines."
+    contents:
+      - evaluate_batch_metrics
+      - evaluate_clustering_metrics
+      - evaluate_trajectory_metrics
+      - evaluate_cross_batch_prediction
+      - evaluate_cross_modal_prediction
+      - evaluate_deg_fidelity
+      - evaluate_predictive_de_model
+      - evaluate_simbench_signals
+      - evaluate_epigenomic_annotation
+      - evaluate_zero_probability_curve
+      - evaluate_accessibility_sparsity_curve
+      - benchmark_resource_usage
+
+  - title: "Data Extraction & Empirical Properties"
+    desc: "Extraction of feature-level and cell-level empirical properties."
+    contents:
+      - extract_cell_properties
+      - extract_feature_properties
+
+  - title: "Example Multiomics Datasets"
+    desc: "Pre-packaged synthetic and empirical single-cell multiomics benchmark datasets."
+    contents:
+      - example_scrna
+      - example_scatac
+      - example_multiomics
+
+  - title: "Category 1: Global & Marginal Distributions"
+    desc: "Evaluation functions assessing univariate and bivariate distribution divergence."
+    contents:
+      - calc_ks
+      - calc_wasserstein_1d
+      - calc_mad
+      - calc_mae
+      - calc_rmse
+      - calc_overlap
+      - calc_bhattacharyya
+      - calc_ecdf_diffarea
+      - calc_runs_test
+      - calc_nn_mismatch
+      - calc_between_dataset_silhouette
+      - calc_fasano_franceschini
+      - calc_peacock_2d
+      - calc_kde_test
+      - calc_emd_2d
+      - calc_mmd
+      - calc_frechet_singlecell_distance
+      - calc_model_aic_bic
+      - calc_marginal_aic_bic
+      - calc_likelihood_ratio_test
+      - calc_outlier_proportion
+      - calc_all_univariate_metrics
+      - calc_all_bivariate_metrics
+
+  - title: "Category 2: Cellular & Feature-Level Properties"
+    desc: "Assessment of zero-inflation dynamics, library size distributions, and kinetic noise decomposition."
+    contents:
+      - calc_zero_probability_curve
+      - calc_excess_zero_weights
+      - calc_kinetic_noise_decomposition
+      - calc_accessibility_sparsity_curve
+
+  - title: "Category 3: Cell Identity & Clustering Concordance"
+    desc: "Concordance of unsupervised cluster definitions, cluster separation, and latent manifold recovery."
+    contents:
+      - calc_ari
+      - calc_nmi
+      - calc_ami
+      - calc_clustering_accuracy
+      - calc_fmi
+      - calc_silhouette
+      - calc_dunn
+      - calc_connectivity
+      - calc_davies_bouldin
+      - calc_calinski_harabasz
+      - calc_homogeneity
+      - calc_completeness
+      - calc_v_measure
+      - calc_homogeneity_completeness_v_measure
+      - calc_neighborhood_purity
+      - calc_cdi
+      - calc_generative_precision_recall
+
+  - title: "Category 4: Batch Effect & Confounder Dynamics"
+    desc: "Quantification of technical variation, batch mixing, and local density factor conservation."
+    contents:
+      - calc_cms
+      - calc_isi
+      - calc_seurat_mixing_metric
+      - calc_ldf
+      - calc_ldf_diff
+      - calc_local_structure_metric
+
+  - title: "Category 5: Differential Expression & Signal Preservation"
+    desc: "Recovery of biological contrast, differential gene detection accuracy, and cell-cycle phase fidelity."
+    contents:
+      - calc_signal_de
+      - calc_signal_dv
+      - calc_signal_dd
+      - calc_signal_dp
+      - calc_signal_bd
+      - calc_delta_variance
+      - calc_cell_cycle_phase_fidelity
+      - calc_deconvolution_accuracy
+      - calc_variance_decomposition
+      - calc_intraclass_correlation
+      - calc_expected_mi
+
+  - title: "Category 6: Trajectory & Lineage Dynamics"
+    desc: "Inference and benchmarking of differentiation pseudotime trajectories and lineage branching topologies."
+    contents:
+      - infer_scrna_pseudotime
+      - infer_scrna_lineage_tree
+      - calc_pseudotime_correlation
+      - calc_tree_height_discrepancy
+
+  - title: "Category 7: Multiomics Cross-Modality Coupling"
+    desc: "Inter-modality regulatory coupling, peak-to-gene linkages, and joint chromatin-expression modularity."
+    contents:
+      - calc_cross_modality_correlation
+      - calc_foscttm
+      - calc_cross_modal_generation
+      - calc_modality_alignment
+      - calc_network_jaccard
+      - calc_atac_rna_coupling
+      - calc_coregulation_fidelity
+      - calc_peak_coaccessibility_fidelity
+      - calc_coexpression_module_fidelity
+      - calc_accessibility_profile_concordance
+
+  - title: "Category 8: Computational Scalability & Resource Footprint"
+    desc: "Empirical benchmarking of CPU runtime, peak RAM consumption, and execution efficiency."
+    contents:
+      - benchmark_resource_usage

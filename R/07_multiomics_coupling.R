@@ -1,21 +1,3 @@
-#' @title Single-Cell Multiomics Cross-Modality Coupling
-#' @description Evaluates inter-modality coupling, cross-modal label transfer,
-#'   FOSCTTM alignment, cross-modal generation fidelity, joint embedding alignment,
-#'   peak-to-gene ATAC-RNA regulatory linkage, chromatin peak co-accessibility,
-#'   and co-regulation/co-expression modularity in multiomics simulations.
-#' @name multiomics_coupling
-#' @export calc_cross_modality_correlation
-#' @export evaluate_cross_modal_prediction
-#' @export calc_foscttm
-#' @export calc_cross_modal_generation
-#' @export calc_modality_alignment
-#' @export calc_network_jaccard
-#' @export calc_atac_rna_coupling
-#' @export calc_coregulation_fidelity
-#' @export calc_peak_coaccessibility_fidelity
-#' @export calc_coexpression_module_fidelity
-#' @export calc_accessibility_profile_concordance
-NULL
 
 #' Calculate Cross-Modality Correlation Fidelity
 #'

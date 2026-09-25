@@ -1,9 +1,3 @@
-#' @title Extraction of Single-Cell and Multiomics Summary Properties
-#' @description Comprehensive feature- and cell-level property extraction combining
-#'   simpipe, HelenaLC, and SimBench benchmarking methodologies.
-#' @name extract_properties
-NULL
-
 #' Extract Comprehensive Cell-Level Properties
 #'
 #' Computes library size, log-library size, zero fraction / detection frequency,

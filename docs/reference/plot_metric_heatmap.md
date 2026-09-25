@@ -80,3 +80,7 @@ plot_metric_heatmap(
 ## Value
 
 A `ggplot` object.
+
+## Details
+
+![Cross-Metric Z-Scored Heatmap](figures/metric_heatmap.png)
