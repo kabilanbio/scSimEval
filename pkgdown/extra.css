@@ -104,75 +104,77 @@ tr:nth-child(even) td {
 
 main#main, .col-md-9 {
   min-width: 0 !important; /* Prevents overflow content from pushing sidebar */
+  padding-right: 2rem !important;
 }
 
-@media (min-width: 768px) {
-  main#main, .col-md-9 {
-    padding-right: 2.5rem !important;
-  }
+/* Right Headings Sidebar - Sticky, Clean, Single Slider */
+aside.col-md-3 {
+  position: sticky !important;
+  top: 85px !important;
+  overflow: visible !important; /* Absolutely NO inner scrollbar track */
+  max-height: none !important;  /* No artificial height constraint */
+  padding-left: 1.5rem !important;
+  border-left: 1px solid #e2e8f0 !important;
+}
 
-  aside.col-md-3 {
-    position: sticky !important;
-    top: 80px !important;
-    max-height: calc(100vh - 100px) !important;
-    overflow-y: auto !important;
-    padding-left: 1.5rem !important;
-    border-left: 1px solid #f1f5f9 !important;
-    /* Hide duplicate sidebar scrollbar so only one page scrollbar exists */
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
-  }
+/* Suppress any scrollbar on aside or nav#toc to guarantee only one page slider */
+aside.col-md-3, nav#toc {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  overflow-y: visible !important;
+}
 
-  aside.col-md-3::-webkit-scrollbar,
-  nav#toc::-webkit-scrollbar {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-  }
+aside.col-md-3::-webkit-scrollbar,
+nav#toc::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 @media (max-width: 767.98px) {
   aside.col-md-3 {
     margin-top: 2rem !important;
     border-top: 1px solid #e2e8f0 !important;
+    border-left: none !important;
     padding-top: 1.5rem !important;
+    padding-left: 0 !important;
   }
 }
 
 /* Table of Contents Styling (Clean Tidyverse Style) */
 nav#toc {
-  font-size: 0.9em;
-  scrollbar-width: none !important;
+  font-size: 0.9rem !important;
 }
 
 nav#toc h2 {
-  font-size: 0.95em !important;
+  font-size: 0.92rem !important;
   font-weight: 700 !important;
-  color: #64748b !important;
+  color: #475569 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.06em !important;
   border-bottom: none !important;
   padding-bottom: 0 !important;
-  margin-top: 0.4em !important;
-  margin-bottom: 0.75em !important;
+  margin-top: 0.2rem !important;
+  margin-bottom: 0.8rem !important;
 }
 
 nav#toc ul {
-  padding-left: 0 !important;
+  padding-left: 0.25rem !important;
   list-style: none !important;
   margin: 0 !important;
 }
 
 nav#toc li {
-  margin-bottom: 0.4em !important;
+  margin-bottom: 0.45rem !important;
   line-height: 1.4 !important;
   text-align: left !important;
 }
 
 nav#toc a {
-  color: #64748b !important;
+  color: #475569 !important;
   text-decoration: none !important;
   transition: color 0.15s ease-in-out !important;
+  display: block !important;
 }
 
 nav#toc a:hover, nav#toc a.active {
@@ -181,31 +183,40 @@ nav#toc a:hover, nav#toc a.active {
 }
 
 /* ==========================================================================
-   Large, Prominent Package Logo
+   Large, Prominent Package Logo - Properly Aligned
    ========================================================================== */
-.template-home img.logo, .page-header img.logo, img.logo {
-  width: 175px !important;
-  max-width: 100% !important;
+.page-header img.logo, .template-home img.logo, img.logo {
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
   height: auto !important;
   float: right !important;
-  margin-left: 25px !important;
-  margin-bottom: 20px !important;
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.12)) !important;
+  margin-left: 2rem !important;
+  margin-bottom: 1.5rem !important;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.16)) !important;
+  border-radius: 12px !important;
+  transition: transform 0.2s ease-in-out !important;
+}
+
+.page-header img.logo:hover, img.logo:hover {
+  transform: scale(1.03) !important;
 }
 
 .navbar-brand img, .navbar-brand .logo {
-  height: 46px !important;
+  height: 44px !important;
   width: auto !important;
   margin-right: 12px !important;
   vertical-align: middle !important;
 }
 
-@media (max-width: 575.98px) {
-  .template-home img.logo, .page-header img.logo, img.logo {
-    width: 110px !important;
+@media (max-width: 767.98px) {
+  .page-header img.logo, .template-home img.logo, img.logo {
+    width: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
     float: none !important;
     display: block !important;
-    margin: 0 auto 15px auto !important;
+    margin: 0 auto 1.5rem auto !important;
   }
 }
 
