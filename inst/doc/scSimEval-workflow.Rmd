@@ -241,7 +241,7 @@ Many existing evaluation tools require artificial "ground truth" labels that are
 5. **Computer resources** (Runtime in seconds and peak RAM in MiB)
 6. **Developmental trajectories** (automatically inferred directly from scRNA-seq counts without requiring external tools)
 
-> **Note on Data Modalities:** `scSimEval` is developed specifically for scRNA-seq, scATAC-seq, and paired scRNA-seq + scATAC-seq multiomics. Other single-cell omics data types (such as CITE-seq surface protein or single-cell methylation) have not been tested yet.
+> **Data Modalities:** `scSimEval` is primarily optimized for scRNA-seq, scATAC-seq, and paired scRNA-seq + scATAC-seq multiomics, and the evaluation framework can be readily extended to other single-cell data types.
 
 ---
 
@@ -630,14 +630,14 @@ launch_scSimEval_app()
 
 ---
 
-## 15. Supported Single-Cell Modalities
+## 15. Extension to Other Single-Cell Data Types
 
-`scSimEval` has been primarily developed and validated for:
-* **Single-Cell RNA-seq (scRNA-seq):** Feature-by-cell raw and normalized expression count matrices.
-* **Single-Cell ATAC-seq (scATAC-seq):** Peak-by-cell binary and insertion count accessibility matrices.
-* **Paired scRNA-seq + scATAC-seq Multiomics:** Joint profiling across identical single cells.
+While `scSimEval` is primarily optimized and demonstrated for **scRNA-seq**, **scATAC-seq**, and **paired scRNA-seq + scATAC-seq multiomics**, all 62 evaluation measures operate on standard numeric count or continuous matrices. 
 
-*Note: Other single-cell omics technologies (such as CITE-seq surface protein or single-cell methylation) have not been tested yet.*
+Consequently, the package can be readily extended to benchmark simulations across other single-cell data modalities, including:
+* **CITE-seq / REAP-seq:** Passing RNA expression counts as Modality 1 and antibody-derived tag (ADT) surface protein counts as Modality 2.
+* **Single-Cell DNA Methylation:** Passing cell-level methylation levels or $\beta$-values as numeric input matrices.
+* **Spatial Omics:** Passing spatial gene expression counts alongside complementary spatial coordinates or morphological features.
 
 ---
 
