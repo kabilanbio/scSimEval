@@ -1,9 +1,8 @@
 #' @title Scientific Visualization Suite for Single-Cell Multiomics Simulation Benchmarking
-#' @description Publication-ready ggplot2 visualization functions designed to inspect,
+#' @description High-resolution (600 DPI) ggplot2 visualization functions designed to inspect,
 #'   benchmark, and compare simulated single-cell and multiomics datasets against empirical
 #'   references. All functions conform to the \pkg{scSimEval} eight-category evaluation
-#'   framework (Categories I-VIII) and produce figures suitable for direct inclusion in
-#'   peer-reviewed manuscripts.
+#'   framework (Categories I-VIII).
 #' @name visualizations
 NULL
 
@@ -826,7 +825,7 @@ MNO#
 #' Plot Comparison Boxplots Across Simulators
 #' Plot Benchmark Metric Score Distributions Across Simulators
 #'
-#' Generates publication-ready boxplots with jittered points showing the distribution
+#' Generates 600 DPI boxplots with jittered points showing the distribution
 #' of evaluation metric scores across simulated single-cell and multiomics datasets.
 #' Supports standardized direction-aligned fidelity scores (where higher is universally
 #' superior, resolving metric polarity differences across distance and correlation measures)
@@ -1459,7 +1458,7 @@ plot_cross_modal_coupling <- function(
 
 #' Plot Multi-Simulator Comparative Metric Heatmap Across Canonical Categories
 #'
-#' Produces a publication-ready comparative heatmap displaying simulators on the x-axis
+#' Produces a 600 DPI comparative heatmap displaying simulators on the x-axis
 #' and evaluated biological/computational measures on the y-axis, grouped by the 8 canonical
 #' evaluation categories. Displays the exact original raw evaluation score in text inside every cell,
 #' with cell fill colors scaled by relative fidelity (direction-aware, ensuring balanced visual contrast
@@ -2265,7 +2264,7 @@ plot_metric_pca <- function(
 
 #' Plot Consolidated Multi-Method Benchmark Summary
 #'
-#' Generates a publication-ready comparative grouped bar chart across multiple
+#' Generates a 600 DPI comparative grouped bar chart across multiple
 #' simulation methods evaluated with \code{\link{evaluate_multiple_datasets}()}.
 #'
 #' @param consolidated_res Output from \code{evaluate_multiple_datasets()} or a
@@ -2357,7 +2356,7 @@ plot_consolidated_summary <- function(
 
 #' Plot Multi-Dimensional Benchmarking Bubble Matrix
 #'
-#' Produces the flagship publication-ready multi-dimensional benchmarking bubble
+#' Produces the flagship 600 DPI multi-dimensional benchmarking bubble
 #' matrix following Nature/Cell benchmarking study conventions. Methods appear as rows;
 #' evaluation metrics appear as columns grouped under the eight canonical evaluation
 #' categories (I-VIII) displayed as colored header strips at the top.
@@ -2794,7 +2793,7 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
 
 #' Plot Differentially Expressed Gene (DEG) Fidelity
 #'
-#' Produces a two-panel publication-ready visualization evaluating differential expression
+#' Produces a two-panel 600 DPI visualization evaluating differential expression
 #' fidelity between empirical reference and simulated datasets:
 #' \itemize{
 #'   \item \strong{Panel A (Effect Size Concordance):} Scatter plot comparing reference vs
@@ -2921,7 +2920,7 @@ plot_deg_fidelity <- function(deg_res, base_size = 11) {
 
 #' Plot Multi-Framework Differential Expression Bubble Matrix
 #'
-#' Renders a publication-ready bubble matrix focused specifically on comparing
+#' Renders a 600 DPI bubble matrix focused specifically on comparing
 #' multiple single-cell simulation methods across the 15 differential expression
 #' and biological signal metrics from Simpipe, SimBench, and Shaky Foundations.
 #'
@@ -3087,7 +3086,7 @@ plot_deg_bubble_matrix <- function(
 
 #' Plot Single-Cell Simulator Evaluation Summary
 #'
-#' Produces a publication-ready horizontal bar matrix ranking single-cell simulators
+#' Produces a 600 DPI horizontal bar matrix ranking single-cell simulators
 #' across the 8 canonical evaluation categories and overall composite performance,
 #' styled in accordance with premier benchmark literature (e.g., Nature Methods / Cell).
 #'

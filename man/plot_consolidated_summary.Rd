@@ -29,7 +29,7 @@ Default \code{"(I) Distributional Properties"}.}
 A \code{ggplot} object comparing evaluated methods.
 }
 \description{
-Generates a publication-ready comparative grouped bar chart across multiple
+Generates a 600 DPI comparative grouped bar chart across multiple
 simulation methods evaluated with \code{\link{evaluate_multiple_datasets}()}.
 }
 \examples{

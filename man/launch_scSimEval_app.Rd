@@ -26,7 +26,7 @@ Launches the Shiny web application embedded in the \pkg{scSimEval} package.
   Provides an intuitive graphical interface to ingest single-cell reference and simulated datasets,
   configure ground-truth-free evaluation pipelines, interactively inspect the flagship 62-measure
   bubble matrix, adjust category weighting for custom method rankings, and export
-  publication-ready figures and tables.
+  high-resolution (600 DPI) figures and tables.
 }
 \examples{
 \dontrun{

@@ -228,18 +228,20 @@ knitr::opts_chunk$set(
 
 ## 1. Introduction
 
-Computer simulations of single-cell technologies—such as single-cell RNA sequencing (scRNA-seq), single-cell ATAC sequencing (scATAC-seq), CITE-seq, and single-cell methylation—are widely used in biological research. They help scientists test new computational tools, optimize experimental protocols, and study statistical models. However, an important question is always: *how realistic is the simulated data compared to genuine biological experiments?*
+Computer simulations of single-cell technologies—specifically single-cell RNA sequencing (**scRNA-seq**), single-cell ATAC sequencing (**scATAC-seq**), and paired **scRNA-seq + scATAC-seq multiomics**—are widely used in bioinformatics research. They help scientists test computational pipelines, optimize analysis workflows, and evaluate statistical models. A critical question is always: *how realistic is the simulated data compared to genuine biological experiments?*
 
 Many existing evaluation tools require artificial "ground truth" labels that are rarely known in real experiments, such as predefined true gene networks or synthetic marker lists.
 
 **`scSimEval`** solves this problem by providing **62 evaluation measures organized into 8 easy-to-understand categories**. It works directly with the real experimental data and simulated data you already have, without needing any artificial ground truth:
 
-1. **Real experimental reference data** (`ref_rna`, `ref_atac`, CITE-seq protein, or methylation $\beta$-values)
-2. **Simulated synthetic data** (`sim_rna`, `sim_atac`, CITE-seq protein, or methylation $\beta$-values)
+1. **Real experimental reference data** (`ref_rna`, `ref_atac`)
+2. **Simulated synthetic data** (`sim_rna`, `sim_atac`)
 3. **Cell type annotations** (`cell_types`)
 4. **Batch or donor identifiers** (`batch_info`)
 5. **Computer resources** (Runtime in seconds and peak RAM in MiB)
 6. **Developmental trajectories** (automatically inferred directly from scRNA-seq counts without requiring external tools)
+
+> **Note on Data Modalities:** `scSimEval` is developed specifically for scRNA-seq, scATAC-seq, and paired scRNA-seq + scATAC-seq multiomics. Other single-cell omics data types (such as CITE-seq surface protein or single-cell methylation) have not been tested yet.
 
 ---
 
@@ -247,7 +249,7 @@ Many existing evaluation tools require artificial "ground truth" labels that are
 
 The following workflow diagram shows the step-by-step benchmarking process in `scSimEval`:
 
-```{r workflow-diagram, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 1: End-to-end benchmarking workflow of scSimEval.** The framework takes real and simulated single-cell multiomics data, evaluates 62 metrics across 8 foundational categories, and produces standardized scores, publication-ready figures, and ranking leaderboards.'}
+```{r workflow-diagram, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 1: End-to-end benchmarking workflow of scSimEval.** The framework takes real and simulated single-cell multiomics data, evaluates 62 metrics across 8 foundational categories, and produces standardized scores, 600 DPI figures, and ranking leaderboards.'}
 knitr::include_graphics("figures/workflow_diagram.png")
 ```
 
@@ -255,7 +257,7 @@ The evaluation process follows four simple stages:
 1. **Inputs:** Real and simulated count matrices, cell type labels, batch labels, and compute logs.
 2. **Evaluation Engines:** 62 evaluation measures grouped into 8 categories (distributions, correlations, cell structure, batch mixing, marker genes, trajectories, multiomics coupling, and scalability).
 3. **Orchestration:** A single master function (`evaluate_multiomics_accuracy()` or `evaluate_simulation_accuracy()`) runs all metrics automatically.
-4. **Outputs:** A clean summary table, normalized scores, ranking leaderboards, and publication-ready plots.
+4. **Outputs:** A clean summary table, normalized scores, ranking leaderboards, and 600 DPI plots.
 
 ---
 
@@ -265,7 +267,7 @@ In single-cell benchmarking, different metrics have completely different units a
 
 To make fair and intuitive comparisons, `scSimEval` uses an automated **two-step score normalization pipeline**, followed by clear **visual mapping**:
 
-```{r score-norm-workflow, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 2: Score normalization and visual mapping workflow in scSimEval.** Box 1 shows the two-step normalization process: direction inversion for lower-is-better metrics followed by min-max scaling to a standard 0 to 1 range. Box 2 illustrates the visual mapping into publication bubble matrices, where bubble size reflects simulation quality and top performers are highlighted with bold squares.'}
+```{r score-norm-workflow, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 2: Score normalization and visual mapping workflow in scSimEval.** Box 1 shows the two-step normalization process: direction inversion for lower-is-better metrics followed by min-max scaling to a standard 0 to 1 range. Box 2 illustrates the visual mapping into bubble matrices, where bubble size reflects simulation quality and top performers are highlighted with bold squares.'}
 knitr::include_graphics("figures/score_normalization_workflow.png")
 ```
 
@@ -280,7 +282,7 @@ knitr::include_graphics("figures/score_normalization_workflow.png")
    All values are rescaled to a standard range from $0.00$ (worst performer) to $1.00$ (best performer):
    $$\text{Standardized Score} = \frac{\text{Value} - \text{Minimum}}{\text{Maximum} - \text{Minimum}}$$
 
-### 3.2 Visual Mapping to Publication Bubble Matrices
+### 3.2 Visual Mapping to Bubble Matrices
 
 * **Bubble Size:** Directly represents the standardized score ($0.00$ to $1.00$). Larger bubbles indicate higher simulation quality and closer match to real biology.
 * **Top-Performer Highlighting:** Outstanding scores ($\ge 0.96$) are shown as bold squares, while standard scores are shown as filled circles.
@@ -292,9 +294,15 @@ knitr::include_graphics("figures/score_normalization_workflow.png")
 
 ## 4. Installation and Getting Started
 
-To install and load **`scSimEval`**:
+To install and load **`scSimEval`** directly from GitHub:
 
 ```r
+# Install devtools if needed
+if (!requireNamespace("devtools", quietly = TRUE)) install.packages("devtools")
+
+# Install scSimEval from GitHub
+devtools::install_github("kabilanbio/scSimEval")
+
 # Load the package
 library(scSimEval)
 ```
@@ -342,9 +350,9 @@ knitr::kable(head(lib_summary, 8), digits = 4, caption = "Library Size Statistic
 
 ### 5.1 Comparative Distribution QC Plot (`plot_distribution_qc`)
 
-To visually inspect whether simulated counts match real biological distributions, `plot_distribution_qc()` generates a clean 14-panel layout comparing properties such as library size, mean expression, gene variance, zero proportions, and cell-cell correlations:
+To visually inspect whether simulated counts match real biological distributions, `plot_distribution_qc()` generates a clean 14-panel layout comparing properties such as library size, mean expression, gene variance, zero proportions, and cell-cell correlations at 600 DPI:
 
-```{r plot-dist-qc-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 3: 14-panel comparative distribution QC layout.** Compares real biological data (warm brick red) and simulated data (steel blue) across single-cell properties, bivariate relationships, and biological signal retention.'}
+```{r plot-dist-qc-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 3: 14-panel comparative distribution QC layout (600 DPI).** Compares real biological data (warm brick red) and simulated data (steel blue) across single-cell properties, bivariate relationships, and biological signal retention.'}
 knitr::include_graphics("figures/comparative_distribution_qc.png")
 ```
 
@@ -446,9 +454,9 @@ knitr::kable(head(deg_res$deg_summary_table, 10), digits = 4)
 
 ## 10. Evaluating Computational Resource Usage (Scalability)
 
-Simulating thousands or millions of single cells requires fast and memory-efficient software. `plot_scalability_benchmark()` generates a comprehensive 6-panel dashboard comparing runtime, memory usage, Pareto tradeoff frontiers, multithreading speedup, and cell throughput:
+Simulating thousands or millions of single cells requires fast and memory-efficient software. `plot_scalability_benchmark()` generates a comprehensive 6-panel dashboard comparing runtime, memory usage, Pareto tradeoff frontiers, multithreading speedup, and cell throughput at 600 DPI:
 
-```{r plot-scalability-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 4: Computational scalability benchmark suite.** 6-panel dashboard comparing execution runtime, peak RAM, runtime-memory tradeoff, CPU efficiency, cost footprint, and throughput across simulation methods.'}
+```{r plot-scalability-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 4: Computational scalability benchmark suite (600 DPI).** 6-panel dashboard comparing execution runtime, peak RAM, runtime-memory tradeoff, CPU efficiency, cost footprint, and throughput across simulation methods.'}
 knitr::include_graphics("figures/scalability_benchmark.png")
 ```
 
@@ -487,20 +495,20 @@ table(summary_df$Category)
 
 ---
 
-## 12. Publication-Ready Visualizations
+## 12. Visualizations Suite (600 DPI)
 
-`scSimEval` provides built-in plotting functions designed to produce publication-grade figures for high-impact scientific journals.
+`scSimEval` provides built-in plotting functions rendering high-resolution figures at 600 DPI.
 
 ### 12.1 Multi-Dimensional Benchmarking Bubble Matrix (`plot_benchmark_bubble_matrix`)
 
 The flagship visualization **`plot_benchmark_bubble_matrix()`** summarizes multi-simulator performance across the 8 evaluation categories. Bubble sizes indicate normalized simulation fidelity (larger bubbles = better performance):
 
-```{r plot-bubble-matrix-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 5: Flagship multi-dimensional benchmarking bubble matrix.** Ranks simulation methods top-to-bottom across the 8 evaluation categories. Bubble size reflects standardized fidelity score ($0.00$ to $1.00$), and top performers are highlighted with bold squares.'}
+```{r plot-bubble-matrix-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 5: Flagship multi-dimensional benchmarking bubble matrix (600 DPI).** Ranks simulation methods top-to-bottom across the 8 evaluation categories. Bubble size reflects standardized fidelity score ($0.00$ to $1.00$), and top performers are highlighted with bold squares.'}
 knitr::include_graphics("figures/benchmark_bubble_matrix.png")
 ```
 
 ```r
-# Generate publication-grade benchmark bubble matrix
+# Generate benchmark bubble matrix (600 DPI)
 plot_benchmark_bubble_matrix(
   data = sim_comparison_list,
   bubble_size_range = c(2, 7.5),
@@ -513,7 +521,7 @@ plot_benchmark_bubble_matrix(
 
 To present an executive overview of overall simulation accuracy, `plot_evaluation_summary()` ranks candidate simulators from best to worst and displays average scores across categories:
 
-```{r eval-summary-bars, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 6: Executive evaluation summary horizontal bar matrix.** Ranks simulators across the 8 categories and displays overall composite performance with exact score annotations.'}
+```{r eval-summary-bars, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 6: Executive evaluation summary horizontal bar matrix (600 DPI).** Ranks simulators across the 8 categories and displays overall composite performance with exact score annotations.'}
 knitr::include_graphics("figures/evaluation_summary_bars.png")
 ```
 
@@ -530,7 +538,7 @@ plot_evaluation_summary(
 
 To inspect variability across individual metrics and simulators, `plot_metric_boxplots()` displays boxplots with jittered data points across all 8 categories:
 
-```{r plot-boxplots-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 7: Metric score distributions across the 8 categories.** Displays standardized scores ($[0, 1]$, higher is better) with individual data points and boxplots across candidate simulators.'}
+```{r plot-boxplots-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 7: Metric score distributions across the 8 categories (600 DPI).** Displays standardized scores ($[0, 1]$, higher is better) with individual data points and boxplots across candidate simulators.'}
 knitr::include_graphics("figures/metric_boxplots.png")
 ```
 
@@ -547,7 +555,7 @@ plot_metric_boxplots(
 
 To examine exact numeric values for every metric without any loss of detail, `plot_metric_heatmap()` displays all simulators on the horizontal axis and all 62 measures on the vertical axis, printing **exact raw values inside each cell**:
 
-```{r plot-heatmap-fig, echo=FALSE, fig.align='center', out.width='88%', fig.cap='**Figure 8: Complete benchmark metric heatmap.** Displays exact unnormalized raw scores in bold text inside every cell, grouped cleanly across the 8 evaluation categories.'}
+```{r plot-heatmap-fig, echo=FALSE, fig.align='center', out.width='88%', fig.cap='**Figure 8: Complete benchmark metric heatmap (600 DPI).** Displays exact unnormalized raw scores in bold text inside every cell, grouped cleanly across the 8 evaluation categories.'}
 knitr::include_graphics("figures/metric_heatmap.png")
 ```
 
@@ -564,7 +572,7 @@ plot_metric_heatmap(
 
 To discover which simulation methods behave similarly across all metrics, `scSimEval` includes Principal Component Analysis (`plot_metric_pca`) and Multidimensional Scaling (`plot_metric_mds`):
 
-```{r plot-pca-cat1, echo=FALSE, fig.align='center', out.width='85%', fig.cap='**Figure 9: Principal Component Analysis (PCA) ordination of simulation methods.** Projects simulators based on their metric profiles, showing global affinities and key discriminating metric vectors.'}
+```{r plot-pca-cat1, echo=FALSE, fig.align='center', out.width='85%', fig.cap='**Figure 9: Principal Component Analysis (PCA) ordination of simulation methods (600 DPI).** Projects simulators based on their metric profiles, showing global affinities and key discriminating metric vectors.'}
 knitr::include_graphics("figures/individual_category_plots/pca_cat1_distribution.png")
 ```
 
@@ -613,7 +621,7 @@ knitr::kable(consolidated_results$dataset_overview, digits = 4, caption = "Conso
 
 ## 14. Interactive Web Application (Shiny Studio)
 
-For researchers who prefer an interactive graphical interface rather than writing R code, `scSimEval` includes an embedded Shiny web application. You can explore benchmark results, filter metrics, view bubble plots, and export publication-ready figures directly in your web browser:
+For researchers who prefer an interactive graphical interface rather than writing R code, `scSimEval` includes an embedded Shiny web application. You can explore benchmark results, filter metrics, view bubble plots, and export 600 DPI figures directly in your web browser:
 
 ```r
 # Launch the interactive web app in your default browser
@@ -622,34 +630,41 @@ launch_scSimEval_app()
 
 ---
 
-## 15. Extension to Other Single-Cell Technologies
+## 15. Supported Single-Cell Modalities
 
-Because all 62 evaluation measures operate on standard numeric count or continuous matrices, `scSimEval` can be applied directly to other single-cell multiomics technologies:
-* **CITE-seq / REAP-seq:** Pass RNA counts as Modality 1 and antibody-derived tag (ADT) protein counts as Modality 2.
-* **Single-Cell DNA Methylation:** Pass single-cell methylation percentages ($\beta$-values between 0 and 1) as numeric matrices.
-* **Spatial Transcriptomics:** Pass gene expression counts as Modality 1 and spatial or morphological features as Modality 2.
+`scSimEval` has been primarily developed and validated for:
+* **Single-Cell RNA-seq (scRNA-seq):** Feature-by-cell raw and normalized expression count matrices.
+* **Single-Cell ATAC-seq (scATAC-seq):** Peak-by-cell binary and insertion count accessibility matrices.
+* **Paired scRNA-seq + scATAC-seq Multiomics:** Joint profiling across identical single cells.
+
+*Note: Other single-cell omics technologies (such as CITE-seq surface protein or single-cell methylation) have not been tested yet.*
 
 ---
 
 ## 16. Summary
 
-`scSimEval` provides a unified, objective, and ground-truth-free evaluation toolkit for benchmarking single-cell and multiomics simulation methods. With 62 metrics organized into 8 clear categories, automated score normalization, and publication-ready visualizations, it enables researchers to select and validate simulation methods with confidence.
+`scSimEval` provides a unified, objective, and ground-truth-free evaluation toolkit for benchmarking single-cell and multiomics simulation methods. With 62 metrics organized into 8 clear categories, automated score normalization, and 600 DPI visualizations, it enables researchers to select and validate simulation methods with confidence.
 
 ---
 
-## 17. Authors and Citation
+## 17. Authors and Maintainers
 
 `scSimEval` is developed and maintained by:
 
-* **Kabilan S** (Ph.D Student and Maintainer, ICAR-IASRI) - `kabilan151414@gmail.com`
-* **Dr. Dwijesh Chandra Mishra** (Author & Thesis Guide, ICAR-IASRI) - `dwij.mishra@gmail.com`
-* **Dr. Shashi Bhushan Lal** (Author, ICAR-IASRI) - `sblall16@gmail.com`
-* **Dr. Sudhir Srivastava** (Author, ICAR-IASRI) - `sudhir0401bm@gmail.com`
-* **Dr. Krishna Kumar Chaturvedi** (Author, ICAR-IASRI) - `kkcchaturvedi@gmail.com`
-* **Dr. Sharanbasappa** (Contributor, ICAR-IASRI) - `smadival509@gmail.com`
+* **Kabilan S** (Ph.D Student and Maintainer, ICAR-IASRI) — `kabilan151414@gmail.com`
+* **Dr. Dwijesh Chandra Mishra** (Author & Thesis Guide, ICAR-IASRI) — `dwij.mishra@gmail.com`
+* **Dr. Shashi Bhushan Lal** (Author, ICAR-IASRI) — `sblall16@gmail.com`
+* **Dr. Sudhir Srivastava** (Author, ICAR-IASRI) — `sudhir0401bm@gmail.com`
+* **Dr. Krishna Kumar Chaturvedi** (Author, ICAR-IASRI) — `kkcchaturvedi@gmail.com`
+* **Dr. Sharanbasappa** (Contributor, ICAR-IASRI) — `smadival509@gmail.com`
 
-To cite `scSimEval` in publications:
+* **GitHub Repository:** [https://github.com/kabilanbio/scSimEval](https://github.com/kabilanbio/scSimEval)
+* **Bug Reports & Issues:** [https://github.com/kabilanbio/scSimEval/issues](https://github.com/kabilanbio/scSimEval/issues)
 
-> Kabilan S, Dwijesh Chandra Mishra, Shashi Bhushan Lal, Sudhir Srivastava, Krishna Kumar Chaturvedi, Sharanbasappa (2026). **scSimEval: Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods**. R package version 0.6.0.
+---
 
-For questions, feature requests, or bug reports, please contact the maintainer or visit the package repository.
+## 18. Session Information
+
+```{r session-info}
+sessionInfo()
+```

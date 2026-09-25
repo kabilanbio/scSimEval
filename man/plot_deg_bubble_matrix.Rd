@@ -36,7 +36,7 @@ plot_deg_bubble_matrix(
 A ggplot object.
 }
 \description{
-Renders a publication-ready bubble matrix focused specifically on comparing
+Renders a 600 DPI bubble matrix focused specifically on comparing
 multiple single-cell simulation methods across the 15 differential expression
 and biological signal metrics from Simpipe, SimBench, and Shaky Foundations.
 }

@@ -44,7 +44,7 @@ across all 62 measures while cell text displays exact raw numbers) or \code{"raw
 A \code{ggplot} object.
 }
 \description{
-Produces a publication-ready comparative heatmap displaying simulators on the x-axis
+Produces a 600 DPI comparative heatmap displaying simulators on the x-axis
 and evaluated biological/computational measures on the y-axis, grouped by the 8 canonical
 evaluation categories. Displays the exact original raw evaluation score in text inside every cell,
 with cell fill colors scaled by relative fidelity (direction-aware, ensuring balanced visual contrast

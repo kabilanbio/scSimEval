@@ -15,7 +15,7 @@ Author: Kabilan S [aut, cre],
   Dr Dwijesh Chandra Mishra [aut, ths],
   Dr Shashi Bhushan Lal [aut],
   Dr Sudhir Srivastava [aut],
-  Dr Krishna Kumar Chaturvedi [ths],
+  Dr Krishna Kumar Chaturvedi [aut],
   Dr Sharanbasappa [ctb]
 Description: A simple and unified evaluation toolkit for benchmarking single-cell
     and multiomics data simulation methods. Evaluates how realistic simulated data
@@ -29,8 +29,10 @@ Description: A simple and unified evaluation toolkit for benchmarking single-cel
     (6) Cell Lineage and Trajectories: Preservation of continuous developmental pathways (inferred directly from scRNA-seq counts),
     (7) Multiomics Relationships: Connections between different layers (such as gene expression and chromatin accessibility),
     (8) Computational Resources: Speed (runtime in seconds) and memory usage (peak RAM in MiB).
-    Includes automated score normalization, leaderboards, publication-ready bubble plots, and an interactive Shiny app.
+    Includes automated score normalization, leaderboards, 600 DPI bubble plots, and an interactive Shiny app.
 License: MIT + file LICENSE
+URL: https://github.com/kabilanbio/scSimEval
+BugReports: https://github.com/kabilanbio/scSimEval/issues
 Encoding: UTF-8
 LazyData: true
 Depends:
@@ -83,6 +85,4 @@ Suggests:
     SingleCellExperiment,
     SummarizedExperiment,
     Seurat
-URL: https://github.com/example/scSimEval
-BugReports: https://github.com/example/scSimEval/issues
 Config/roxygen2/version: 8.1.0

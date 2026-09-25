@@ -15,7 +15,7 @@ plot_deg_fidelity(deg_res, base_size = 11)
 A ggplot object.
 }
 \description{
-Produces a two-panel publication-ready visualization evaluating differential expression
+Produces a two-panel 600 DPI visualization evaluating differential expression
 fidelity between empirical reference and simulated datasets:
 \itemize{
   \item \strong{Panel A (Effect Size Concordance):} Scatter plot comparing reference vs

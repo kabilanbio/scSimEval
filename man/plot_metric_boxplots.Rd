@@ -45,7 +45,7 @@ or \code{"metric"} (independent panels for each individual metric).}
 A \code{ggplot} object.
 }
 \description{
-Generates publication-ready boxplots with jittered points showing the distribution
+Generates 600 DPI boxplots with jittered points showing the distribution
 of evaluation metric scores across simulated single-cell and multiomics datasets.
 Supports standardized direction-aligned fidelity scores (where higher is universally
 superior, resolving metric polarity differences across distance and correlation measures)

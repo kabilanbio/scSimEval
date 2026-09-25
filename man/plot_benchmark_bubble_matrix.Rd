@@ -81,7 +81,7 @@ E.g. \code{list("Unimodal" = c("Method A", "Method B"), "Multiomics" = "Method C
 A \code{ggplot} object rendering the multi-dimensional bubble matrix.
 }
 \description{
-Produces the flagship publication-ready multi-dimensional benchmarking bubble
+Produces the flagship 600 DPI multi-dimensional benchmarking bubble
 matrix following Nature/Cell benchmarking study conventions. Methods appear as rows;
 evaluation metrics appear as columns grouped under the eight canonical evaluation
 categories (I-VIII) displayed as colored header strips at the top.

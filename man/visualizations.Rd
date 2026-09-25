@@ -4,9 +4,8 @@
 \alias{visualizations}
 \title{Scientific Visualization Suite for Single-Cell Multiomics Simulation Benchmarking}
 \description{
-Publication-ready ggplot2 visualization functions designed to inspect,
+High-resolution (600 DPI) ggplot2 visualization functions designed to inspect,
   benchmark, and compare simulated single-cell and multiomics datasets against empirical
   references. All functions conform to the \pkg{scSimEval} eight-category evaluation
-  framework (Categories I-VIII) and produce figures suitable for direct inclusion in
-  peer-reviewed manuscripts.
+  framework (Categories I-VIII).
 }

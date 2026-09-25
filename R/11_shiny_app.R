@@ -3,7 +3,7 @@
 #'   Provides an intuitive graphical interface to ingest single-cell reference and simulated datasets,
 #'   configure ground-truth-free evaluation pipelines, interactively inspect the flagship 62-measure
 #'   bubble matrix, adjust category weighting for custom method rankings, and export
-#'   publication-ready figures and tables.
+#'   high-resolution (600 DPI) figures and tables.
 #'
 #' @param port Optional port number for the local web server. Default is \code{NULL} (random open port).
 #' @param host Character string specifying the IP address to listen on. Defaults to \code{"127.0.0.1"}.

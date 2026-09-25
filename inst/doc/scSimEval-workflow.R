@@ -9,11 +9,11 @@ knitr::opts_chunk$set(
 )
 
 
-## ----workflow-diagram, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 1: End-to-end benchmarking workflow of scSimEval.** The framework takes real and simulated single-cell multiomics data, evaluates 62 metrics across 8 foundational categories, and produces standardized scores, publication-ready figures, and ranking leaderboards.'----
+## ----workflow-diagram, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 1: End-to-end benchmarking workflow of scSimEval.** The framework takes real and simulated single-cell multiomics data, evaluates 62 metrics across 8 foundational categories, and produces standardized scores, 600 DPI figures, and ranking leaderboards.'----
 knitr::include_graphics("figures/workflow_diagram.png")
 
 
-## ----score-norm-workflow, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 2: Score normalization and visual mapping workflow in scSimEval.** Box 1 shows the two-step normalization process: direction inversion for lower-is-better metrics followed by min-max scaling to a standard 0 to 1 range. Box 2 illustrates the visual mapping into publication bubble matrices, where bubble size reflects simulation quality and top performers are highlighted with bold squares.'----
+## ----score-norm-workflow, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 2: Score normalization and visual mapping workflow in scSimEval.** Box 1 shows the two-step normalization process: direction inversion for lower-is-better metrics followed by min-max scaling to a standard 0 to 1 range. Box 2 illustrates the visual mapping into bubble matrices, where bubble size reflects simulation quality and top performers are highlighted with bold squares.'----
 knitr::include_graphics("figures/score_normalization_workflow.png")
 
 
@@ -47,7 +47,7 @@ lib_summary <- subset(unimodal_res$metrics_summary_table, Property == "library_s
 knitr::kable(head(lib_summary, 8), digits = 4, caption = "Library Size Statistical Distance Measures")
 
 
-## ----plot-dist-qc-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 3: 14-panel comparative distribution QC layout.** Compares real biological data (warm brick red) and simulated data (steel blue) across single-cell properties, bivariate relationships, and biological signal retention.'----
+## ----plot-dist-qc-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 3: 14-panel comparative distribution QC layout (600 DPI).** Compares real biological data (warm brick red) and simulated data (steel blue) across single-cell properties, bivariate relationships, and biological signal retention.'----
 knitr::include_graphics("figures/comparative_distribution_qc.png")
 
 
@@ -90,7 +90,7 @@ cat("Pseudotime Spearman Correlation:", round(traj_res$pseudotime_correlation, 4
 cat("Lineage Tree Branch Height RMSE:", round(as.numeric(traj_res$tree_height_rmse), 4), "\n")
 
 
-## ----plot-scalability-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 4: Computational scalability benchmark suite.** 6-panel dashboard comparing execution runtime, peak RAM, runtime-memory tradeoff, CPU efficiency, cost footprint, and throughput across simulation methods.'----
+## ----plot-scalability-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 4: Computational scalability benchmark suite (600 DPI).** 6-panel dashboard comparing execution runtime, peak RAM, runtime-memory tradeoff, CPU efficiency, cost footprint, and throughput across simulation methods.'----
 knitr::include_graphics("figures/scalability_benchmark.png")
 
 
@@ -112,23 +112,23 @@ cat("Total evaluated metric instances:", nrow(summary_df), "\n")
 table(summary_df$Category)
 
 
-## ----plot-bubble-matrix-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 5: Flagship multi-dimensional benchmarking bubble matrix.** Ranks simulation methods top-to-bottom across the 8 evaluation categories. Bubble size reflects standardized fidelity score ($0.00$ to $1.00$), and top performers are highlighted with bold squares.'----
+## ----plot-bubble-matrix-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 5: Flagship multi-dimensional benchmarking bubble matrix (600 DPI).** Ranks simulation methods top-to-bottom across the 8 evaluation categories. Bubble size reflects standardized fidelity score ($0.00$ to $1.00$), and top performers are highlighted with bold squares.'----
 knitr::include_graphics("figures/benchmark_bubble_matrix.png")
 
 
-## ----eval-summary-bars, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 6: Executive evaluation summary horizontal bar matrix.** Ranks simulators across the 8 categories and displays overall composite performance with exact score annotations.'----
+## ----eval-summary-bars, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 6: Executive evaluation summary horizontal bar matrix (600 DPI).** Ranks simulators across the 8 categories and displays overall composite performance with exact score annotations.'----
 knitr::include_graphics("figures/evaluation_summary_bars.png")
 
 
-## ----plot-boxplots-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 7: Metric score distributions across the 8 categories.** Displays standardized scores ($[0, 1]$, higher is better) with individual data points and boxplots across candidate simulators.'----
+## ----plot-boxplots-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 7: Metric score distributions across the 8 categories (600 DPI).** Displays standardized scores ($[0, 1]$, higher is better) with individual data points and boxplots across candidate simulators.'----
 knitr::include_graphics("figures/metric_boxplots.png")
 
 
-## ----plot-heatmap-fig, echo=FALSE, fig.align='center', out.width='88%', fig.cap='**Figure 8: Complete benchmark metric heatmap.** Displays exact unnormalized raw scores in bold text inside every cell, grouped cleanly across the 8 evaluation categories.'----
+## ----plot-heatmap-fig, echo=FALSE, fig.align='center', out.width='88%', fig.cap='**Figure 8: Complete benchmark metric heatmap (600 DPI).** Displays exact unnormalized raw scores in bold text inside every cell, grouped cleanly across the 8 evaluation categories.'----
 knitr::include_graphics("figures/metric_heatmap.png")
 
 
-## ----plot-pca-cat1, echo=FALSE, fig.align='center', out.width='85%', fig.cap='**Figure 9: Principal Component Analysis (PCA) ordination of simulation methods.** Projects simulators based on their metric profiles, showing global affinities and key discriminating metric vectors.'----
+## ----plot-pca-cat1, echo=FALSE, fig.align='center', out.width='85%', fig.cap='**Figure 9: Principal Component Analysis (PCA) ordination of simulation methods (600 DPI).** Projects simulators based on their metric profiles, showing global affinities and key discriminating metric vectors.'----
 knitr::include_graphics("figures/individual_category_plots/pca_cat1_distribution.png")
 
 
@@ -151,4 +151,8 @@ consolidated_results <- evaluate_multiple_datasets(
 
 # Preview consolidated results overview
 knitr::kable(consolidated_results$dataset_overview, digits = 4, caption = "Consolidated Benchmark Overview")
+
+
+## ----session-info-------------------------------------------------------------
+sessionInfo()
 
