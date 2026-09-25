@@ -1,0 +1,22 @@
+citHeader("To cite scSimEval in publications, please use:")
+
+citEntry(
+  entry    = "manual",
+  title    = "scSimEval: Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods",
+  author   = personList(
+    person("Kabilan", "S", email = "kabilan151414@gmail.com"),
+    person("Dr", "Dwijesh Chandra Mishra", email = "dwij.mishra@gmail.com"),
+    person("Dr", "Shashi Bhushan Lal", email = "sblall16@gmail.com"),
+    person("Dr", "Sudhir Srivastava", email = "sudhir0401bm@gmail.com"),
+    person("Dr", "Krishna Kumar Chaturvedi", email = "kkcchaturvedi@gmail.com"),
+    person("Dr", "Sharanbasappa", email = "smadival509@gmail.com")
+  ),
+  year     = "2026",
+  note     = "R package version 0.6.0",
+  textVersion = paste(
+    "Kabilan S, Dwijesh Chandra Mishra, Shashi Bhushan Lal, Sudhir Srivastava,",
+    "Krishna Kumar Chaturvedi, Sharanbasappa (2026).",
+    "scSimEval: Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods.",
+    "R package version 0.6.0."
+  )
+)

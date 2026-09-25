@@ -1,4 +1,11 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^LICENSE\.md$
-^README\.Rmd$
+^\.DS_Store$
+^examples$
+^scratch$
+^.*\.tar\.gz$
+^.*\.Rcheck$
+^.*\.log$
+^data-raw$
+^doc$
+^Meta$

@@ -1,4 +1,18 @@
+# R specific
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
+*.tar.gz
+*.Rcheck/
+Meta/
+
+# Scratch and temporary testing files
+scratch/
+*.tmp
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini

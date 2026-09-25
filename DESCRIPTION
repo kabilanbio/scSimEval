@@ -1,47 +1,88 @@
-Package: simpipe
+Package: scSimEval
 Type: Package
-Title: A standard pipeline of simulating single-cell RNA sequencing data
-Version: 1.0
-Authors@R: 
-    c(person("Hongrui", "Duo", role = c("aut", "cre"),
-      email = "Duohongrui@cqnu.edu.cn",
-      comment = c(ORCID = "0000-0001-8683-015X")),
-      person("Bo", "Li", role = c("aut"),
-      email = "libo@cqnu.edu.cn",
-      comment = c(ORCID = "0000-0001-9944-0003")))
-Maintainer: Hongrui Duo <duohongrui@cqnu.edu.cn>
-Description: The series steps of estimating parameters from real data, simulating
-    scRNA-seq datasets and evaluating the simulated data with real data are packaged
-    in this project. The prevalent methods of simulating scRNA-seq datasets are 
-    involved in this project and we will still add new important methods in the future.
-License: GPL (>= 3)
-Depends: R (>= 4.0)
-Imports: 
-    tidyr,
-    purrr,
-    assertthat,
-    dplyr,
-    simutils,
-    simmethods,
-    stringr,
-    SingleCellExperiment,
-    methods,
-    provenance,
+Title: Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods
+Version: 0.6.0
+Authors@R: c(
+    person("Kabilan", "S", role = c("aut", "cre"), email = "kabilan151414@gmail.com"),
+    person("Dr", "Dwijesh Chandra Mishra", role = c("aut", "ths"), email = "dwij.mishra@gmail.com"),
+    person("Dr", "Shashi Bhushan Lal", role = c("aut"), email = "sblall16@gmail.com"),
+    person("Dr", "Sudhir Srivastava", role = c("aut"), email = "sudhir0401bm@gmail.com"),
+    person("Dr", "Krishna Kumar Chaturvedi", role = c("aut"), email = "kkcchaturvedi@gmail.com"),
+    person("Dr", "Sharanbasappa", role = c("ctb"), email = "smadival509@gmail.com")
+  )
+Maintainer: Kabilan S <kabilan151414@gmail.com>
+Author: Kabilan S [aut, cre],
+  Dr Dwijesh Chandra Mishra [aut, ths],
+  Dr Shashi Bhushan Lal [aut],
+  Dr Sudhir Srivastava [aut],
+  Dr Krishna Kumar Chaturvedi [ths],
+  Dr Sharanbasappa [ctb]
+Description: A simple and unified evaluation toolkit for benchmarking single-cell
+    and multiomics data simulation methods. Evaluates how realistic simulated data
+    are compared to real biological datasets (scRNA-seq, scATAC-seq, and paired multiomics)
+    using 62 metrics organized into 8 easy-to-understand categories:
+    (1) Distribution Differences: Statistical distances between real and simulated values (such as KS, Wasserstein, MAD, and RMSE),
+    (2) Summary Properties: Gene correlations, zero counts, and dropout patterns,
+    (3) Cell Structure and Clustering: How well distinct cell types and clusters are preserved (such as Silhouette width, ARI, and NMI),
+    (4) Batch and Confounder Mixing: How well technical batch variations are captured or mixed,
+    (5) Biological Signals and Marker Genes: Preservation of differentially expressed genes (DEGs) across Simpipe, SimBench, and Shaky Foundations frameworks,
+    (6) Cell Lineage and Trajectories: Preservation of continuous developmental pathways (inferred directly from scRNA-seq counts),
+    (7) Multiomics Relationships: Connections between different layers (such as gene expression and chromatin accessibility),
+    (8) Computational Resources: Speed (runtime in seconds) and memory usage (peak RAM in MiB).
+    Includes automated score normalization, leaderboards, publication-ready bubble plots, and an interactive Shiny app.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends:
+    R (>= 3.5.0)
+VignetteBuilder: knitr
+Imports:
+    stats,
+    RColorBrewer,
+    utils,
+    Matrix,
+    class,
+    ggplot2
+Suggests:
+    testthat,
+    knitr,
+    rmarkdown,
+    shiny,
+    bslib,
+    DT,
+    plotly,
+    cowplot,
+    ggrepel,
+    patchwork,
     MLmetrics,
     overlapping,
     philentropy,
+    provenance,
     fasano.franceschini.test,
-    ks
-Remotes: 
-    duohongrui/simmethods@master,
-    duohongrui/simutils@master,
-    dynverse/dynwrap@master
-URL: https://github.com/duohongrui/simpipe
-BugReports: https://github.com/duohongrui/simpipe/issues
-Encoding: UTF-8
-LazyData: true
-biocViews:
-Author: Hongrui Duo [aut, cre] (<https://orcid.org/0000-0001-8683-015X>),
-    Bo Li [aut] (<https://orcid.org/0000-0001-9944-0003>)
-RoxygenNote: 7.2.3
-Roxygen: list(markdown = TRUE)
+    ks,
+    waddR,
+    emdist,
+    MASS,
+    Peacock.test,
+    randtests,
+    caTools,
+    edgeR,
+    clue,
+    mclust,
+    cluster,
+    clValid,
+    clusterSim,
+    fpc,
+    kBET,
+    lisi,
+    CellMixS,
+    kSamples,
+    limma,
+    RANN,
+    bluster,
+    SingleCellExperiment,
+    SummarizedExperiment,
+    Seurat
+URL: https://github.com/example/scSimEval
+BugReports: https://github.com/example/scSimEval/issues
+Config/roxygen2/version: 8.1.0
