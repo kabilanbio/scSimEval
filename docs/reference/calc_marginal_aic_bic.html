@@ -132,7 +132,63 @@ If NULL, estimated via method-of-moments.</p></dd>
 
 
 
+  <script>
+document.addEventListener("DOMContentLoaded", function() {
+  const aside = document.querySelector("aside.col-md-3");
+  const main = document.querySelector("main.col-md-9");
+  if (!aside || !main) return;
 
+  // Add toggle button to sidebar
+  const toggleWrapper = document.createElement("div");
+  toggleWrapper.className = "sidebar-toggle-wrapper";
+  toggleWrapper.innerHTML = `
+    <button id="btn-toggle-sidebar" class="btn-sidebar-toggle" title="Hide headings for full-page reading">
+      <span>◀</span> <span>Hide Headings</span>
+    </button>
+  `;
+  aside.insertBefore(toggleWrapper, aside.firstChild);
 
-  </body></html>
+  // Add floating button to restore headings
+  const floatingBtn = document.createElement("button");
+  floatingBtn.id = "btn-floating-headings";
+  floatingBtn.style.cssText = "position: fixed; bottom: 22px; left: 22px; z-index: 1060; background-color: #1e293b; color: #ffffff; border: none; border-radius: 50px; padding: 7px 15px; font-size: 13px; font-weight: 500; display: none; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(0,0,0,0.22); cursor: pointer;";
+  floatingBtn.innerHTML = `<span>☰</span> <span>Show Headings</span>`;
+  document.body.appendChild(floatingBtn);
+
+  function setFullPage(full) {
+    if (full) {
+      document.body.classList.add("full-page-mode");
+      floatingBtn.style.display = "inline-flex";
+    } else {
+      document.body.classList.remove("full-page-mode");
+      floatingBtn.style.display = "none";
+    }
+  }
+
+  document.getElementById("btn-toggle-sidebar").addEventListener("click", function() {
+    setFullPage(true);
+  });
+
+  floatingBtn.addEventListener("click", function() {
+    setFullPage(false);
+  });
+
+  // Add Full Page button in page header
+  const pageHeader = main.querySelector(".page-header");
+  if (pageHeader) {
+    const headerToggle = document.createElement("div");
+    headerToggle.className = "d-flex justify-content-end mb-2";
+    headerToggle.innerHTML = `
+      <button id="btn-header-fullpage" class="btn-sidebar-toggle" title="Toggle Full Page View">
+        <span>⛶</span> <span>Full Page View</span>
+      </button>
+    `;
+    pageHeader.appendChild(headerToggle);
+    document.getElementById("btn-header-fullpage").addEventListener("click", function() {
+      const isFull = document.body.classList.contains("full-page-mode");
+      setFullPage(!isFull);
+    });
+  }
+});
+</script></body></html>
 

@@ -93,3 +93,134 @@ td {
 tr:nth-child(even) td {
   background-color: #f8fafc !important;
 }
+
+/* ==========================================================================
+   Left-Side Navigation & Table of Contents (TOC) with Full-Page View Option
+   ========================================================================== */
+
+/* Move the sidebar / Table of Contents to the LEFT side on all screens */
+aside.col-md-3 {
+  order: -1 !important;
+}
+
+@media (min-width: 768px) {
+  .container > .row, .container-fluid > .row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+  }
+
+  aside.col-md-3 {
+    order: -1 !important;
+    position: sticky !important;
+    top: 75px !important;
+    max-height: calc(100vh - 90px) !important;
+    overflow-y: auto !important;
+    padding-right: 1.5rem !important;
+    padding-left: 0.25rem !important;
+    border-right: 1px solid #e2e8f0 !important;
+    scrollbar-width: thin;
+    transition: all 0.2s ease-in-out;
+  }
+
+  main.col-md-9 {
+    order: 1 !important;
+    padding-left: 2.2rem !important;
+    transition: all 0.2s ease-in-out;
+  }
+}
+
+/* On mobile / tablets, keep the TOC box at the top before the text */
+@media (max-width: 767.98px) {
+  aside.col-md-3 {
+    order: -1 !important;
+    margin-bottom: 1.8rem !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding-bottom: 1.2rem !important;
+  }
+}
+
+/* Table of Contents Styling */
+nav#toc {
+  font-size: 0.9em;
+}
+
+nav#toc h2 {
+  font-size: 1.15em !important;
+  font-weight: 600 !important;
+  color: #1e293b !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  padding-bottom: 0.4em !important;
+  margin-top: 0.5em !important;
+  margin-bottom: 0.8em !important;
+}
+
+nav#toc ul {
+  padding-left: 0.9rem !important;
+  list-style: none !important;
+}
+
+nav#toc li {
+  margin-bottom: 0.4em !important;
+  line-height: 1.35 !important;
+  text-align: left !important;
+}
+
+nav#toc a {
+  color: #475569 !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease !important;
+}
+
+nav#toc a:hover, nav#toc a.active {
+  color: #2563eb !important;
+  font-weight: 600 !important;
+}
+
+/* Full Page Mode Classes (toggled via JS) */
+body.full-page-mode aside.col-md-3 {
+  display: none !important;
+}
+
+body.full-page-mode main.col-md-9 {
+  width: 100% !important;
+  flex: 0 0 100% !important;
+  max-width: 100% !important;
+  padding-left: 1rem !important;
+}
+
+/* Toggle Buttons */
+.sidebar-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.btn-sidebar-toggle {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.btn-sidebar-toggle:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Ensure citation section is hidden on Authors page */
+.template-citation-authors div.section:has(> #citation),
+.template-citation-authors #citation,
+.template-citation-authors #citation ~ * {
+  display: none !important;
+}
