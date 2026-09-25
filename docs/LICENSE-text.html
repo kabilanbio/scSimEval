@@ -14,7 +14,7 @@
   .template-reference-topic img.logo {
     display: none !important;
   }
-  /* Show logo prominently ONLY on Home page and Reference index page */
+  /* Show logo prominently ONLY on Home page and Reference index page (No shading, no square border) */
   .template-home .page-header img.logo,
   .template-home img.logo,
   .template-reference-index .page-header img.logo,
@@ -27,8 +27,11 @@
     float: right !important;
     margin-left: 2rem !important;
     margin-bottom: 1.5rem !important;
-    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.16)) !important;
-    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
   }
   .navbar-brand img, .navbar-brand .logo {
     height: 42px !important;
@@ -40,6 +43,42 @@
     min-width: 0 !important;
     padding-right: 2rem !important;
     padding-bottom: 2.5rem !important;
+  }
+  /* Function names and inline code inside paragraph texts in dark blue */
+  p code,
+  p a code,
+  p a > code,
+  li code,
+  li a code,
+  li a > code {
+    color: #1e40af !important; /* Dark blue */
+    background-color: #f1f5f9 !important;
+    padding: 0.15em 0.35em !important;
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  p a:hover code,
+  li a:hover code {
+    color: #1d4ed8 !important;
+    text-decoration: underline !important;
+  }
+  /* Black box surrounding figures (only around the figure itself) */
+  .figure img,
+  figure img,
+  img.r-plt,
+  p > img:not(.logo):not([src*="shields.io"]):not([src*="badge"]) {
+    border: 1.5px solid #000000 !important;
+    border-radius: 4px !important;
+    padding: 3px !important;
+    background-color: #ffffff !important;
+    box-sizing: border-box !important;
+  }
+  /* Remove 'Source: vignettes/****.Rmd' texts everywhere */
+  .page-header small.dont-index,
+  .template-article small.dont-index,
+  small.dont-index {
+    display: none !important;
   }
   /* Right sidebar sticky, capped before footer, no duplicate slider */
   aside.col-md-3 {
@@ -98,7 +137,6 @@
     <li><a class="dropdown-item" href="articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="articles/metrics-catalog.html">Metric Catalog (62 Metrics)</a></li>
-<li class="nav-item"><a class="nav-link" href="articles/shiny-app.html">Interactive App</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/kabilanbio/scSimEval" aria-label="GitHub repository"><span class="fa fa-github fa-lg"></span></a></li>
       </ul></div>
