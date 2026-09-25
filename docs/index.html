@@ -10,9 +10,13 @@
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<meta property="og:title" content="scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations">
 <meta name="description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods without Artificial Ground Truth.">
 <meta property="og:description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods without Artificial Ground Truth.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -103,34 +107,43 @@
 </h2>
 <p align="center">
 <img src="reference/figures/workflow_diagram.png" width="100%" alt="scSimEval Workflow Architecture"></p>
-<p>The benchmarking process follows four systematic stages: 1. <strong>Empirical Inputs:</strong> Reference and simulated count matrices (<code>ref_rna</code>, <code>sim_rna</code>, <code>ref_atac</code>, <code>sim_atac</code>), cell type annotations (<code>cell_types</code>), batch labels (<code>batch_info</code>), and compute telemetry. 2. <strong>Evaluation Engines:</strong> 62 evaluation measures spanning the 8 foundational categories. 3. <strong>Unified Orchestration:</strong> A single call to <code><a href="reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code>, <code><a href="reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code>, or <code><a href="reference/evaluate_multiple_datasets.html">evaluate_multiple_datasets()</a></code>. 4. <strong>Outputs &amp; Ranking:</strong> Standardized score tables, composite ranking leaderboards, and high-resolution 600 DPI figures.</p>
+<p>The evaluation process follows four simple steps:</p>
+<div class="section level3">
+<h3 id="step-1-input-real-and-simulated-data">Step 1: Input Real and Simulated Data<a class="anchor" aria-label="anchor" href="#step-1-input-real-and-simulated-data"></a>
+</h3>
+<p>Provide your real experimental reference and simulated count matrices (<code>ref_rna</code>, <code>sim_rna</code>, <code>ref_atac</code>, <code>sim_atac</code>), along with cell type labels (<code>cell_types</code>), batch labels (<code>batch_info</code>), and computer resource records (runtime in seconds and peak RAM in MiB).</p>
+</div>
+<div class="section level3">
+<h3 id="step-2-calculate-evaluation-measures">Step 2: Calculate Evaluation Measures<a class="anchor" aria-label="anchor" href="#step-2-calculate-evaluation-measures"></a>
+</h3>
+<p><code>scSimEval</code> calculates 62 evaluation measures across 8 core categories without needing any artificial ground truth.</p>
+</div>
+<div class="section level3">
+<h3 id="step-3-run-the-complete-benchmark">Step 3: Run the Complete Benchmark<a class="anchor" aria-label="anchor" href="#step-3-run-the-complete-benchmark"></a>
+</h3>
+<p>Execute the complete evaluation in a single command using <code><a href="reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code>, <code><a href="reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code>, or <code><a href="reference/evaluate_multiple_datasets.html">evaluate_multiple_datasets()</a></code>.</p>
+</div>
+<div class="section level3">
+<h3 id="step-4-review-scores-rankings-and-figures">Step 4: Review Scores, Rankings, and Figures<a class="anchor" aria-label="anchor" href="#step-4-review-scores-rankings-and-figures"></a>
+</h3>
+<p>Review clean summary tables, standardized scores (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.00</mn><annotation encoding="application/x-tex">0.00</annotation></semantics></math> to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1.00</mn><annotation encoding="application/x-tex">1.00</annotation></semantics></math>), simulator ranking leaderboards, and high-resolution figures.</p>
 <hr>
+</div>
 </div>
 <div class="section level2">
 <h2 id="the-8-evaluation-categories">The 8 Evaluation Categories<a class="anchor" aria-label="anchor" href="#the-8-evaluation-categories"></a>
 </h2>
 <p><code>scSimEval</code> organizes 62 evaluation measures into eight foundational categories:</p>
 <ol style="list-style-type: decimal">
-<li>
-<strong>(I) Distributional Properties:</strong> 1D and 2D statistical distances (Kolmogorov-Smirnov, Wasserstein, Median Absolute Deviation, RMSE, Density Overlap, Bhattacharyya distance, ECDF area, Runs test) and manifold divergence (Maximum Mean Discrepancy, Fréchet Single-Cell Distance).</li>
-<li>
-<strong>(II) Correlations &amp; Zero-Inflation:</strong> Biological coefficient of variation (BCV), logistic dropout curves (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>0</mn></msub><mo>,</mo><msub><mi>β</mi><mn>1</mn></msub><mo>,</mo><msup><mi>R</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">x_0, \beta_1, R^2</annotation></semantics></math>), cell-cell correlation, and gene-gene co-expression matrix distances.</li>
-<li>
-<strong>(III) Cellular Structure &amp; Concordance:</strong> Intrinsic cluster separation (Average Silhouette Width, Dunn index, Davies-Bouldin, Calinski-Harabasz) and supervised concordance (Adjusted Rand Index, Normalized Mutual Information, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>-measure, Neighborhood Purity, Hungarian matching accuracy).</li>
-<li>
-<strong>(IV) Batch Effects &amp; Confounder Mixing:</strong> CellMixS mixing score (CMS), batch Shannon entropy, Principal Component Regression (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>), Seurat mixing metric, Local Inverse Simpson Index (LISI), and cross-batch cell identity transfer accuracy.</li>
-<li>
-<strong>(V) Biological Signal &amp; Downstream Fidelity:</strong> Differentially expressed gene (DEG) fidelity across Simpipe, SimBench, and Shaky Foundations (SMAPE, log2 fold-change correlations, top-DEG Jaccard overlap, machine learning cell classification accuracy and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>F</mi><mn>1</mn></msub><annotation encoding="application/x-tex">F_1</annotation></semantics></math>, group silhouette separation).</li>
-<li>
-<strong>(VI) Trajectory &amp; Lineage Dynamics:</strong> Inferred geodesic pseudotime rank correlation and differentiation lineage tree branch height discrepancy (RMSE), inferred directly from scRNA-seq counts.</li>
-<li>
-<strong>(VII) Cross-Modal Coupling &amp; Modularity:</strong> Feature-level cross-correlation, cross-modal label transfer accuracy, manifold alignment (FOSCTTM, <a href="mailto:Match@1" class="email">Match@1</a>), regulatory coupling, and peak-to-gene co-accessibility (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>V</mi></msub><annotation encoding="application/x-tex">R_V</annotation></semantics></math> coefficient).</li>
-<li>
-<strong>(VIII) Computational Scalability:</strong> Elapsed wall-clock execution time (seconds) and peak resident RAM allocation (MiB).</li>
+<li><p><strong>Category 1: Distribution Properties (14 metrics)</strong> — Compares single-cell count distributions (such as library size, average expression, gene variance, and zero fraction) and data manifolds between real and simulated data using statistical distance measures (Kolmogorov-Smirnov, Wasserstein, Median Absolute Deviation, RMSE, Density Overlap, Bhattacharyya distance, ECDF area, Runs test, Maximum Mean Discrepancy, and Fréchet distance).</p></li>
+<li><p><strong>Category 2: Correlations and Zero Patterns (8 metrics)</strong> — Checks biological variation, dropout curves, cell-to-cell correlations, and gene-gene co-expression relationships.</p></li>
+<li><p><strong>Category 3: Cell Structure and Clustering (9 metrics)</strong> — Evaluates whether simulated data preserves distinct cell types in unsupervised clustering (Silhouette width, Dunn index, Davies-Bouldin, Calinski-Harabasz) and supervised group matching (Adjusted Rand Index, Normalized Mutual Information, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>-measure, Neighborhood Purity, and Hungarian matching accuracy).</p></li>
+<li><p><strong>Category 4: Batch Effects and Technical Confounders (6 metrics)</strong> — Tests whether technical batch differences are well-mixed without erasing true biological differences (CellMixS, batch Shannon entropy, Principal Component Regression <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>, Seurat mixing metric, LISI, and cross-batch cell prediction accuracy).</p></li>
+<li><p><strong>Category 5: Marker Genes and Biological Signals (15 metrics)</strong> — Assesses differentially expressed gene (DEG) fidelity across three established benchmarking frameworks: Simpipe, SimBench, and Shaky Foundations (effect size errors, fold-change correlations, top-marker overlap, and cell classification accuracy).</p></li>
+<li><p><strong>Category 6: Trajectory and Lineage Dynamics (2 metrics)</strong> — Evaluates developmental timelines (pseudotime rank correlation) and cell lineage tree branching (branch height RMSE), inferred directly from scRNA-seq counts.</p></li>
+<li><p><strong>Category 7: Cross-Modal Coupling and Modularity (6 metrics)</strong> — Evaluates the connection between chromatin accessibility and gene expression in multiomics data, including cell-to-cell matching (FOSCTTM, <a href="mailto:Match@1" class="email">Match@1</a>), cross-modal cell type transfer, and peak-to-gene regulatory links (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>V</mi></msub><annotation encoding="application/x-tex">R_V</annotation></semantics></math> coefficient).</p></li>
+<li><p><strong>Category 8: Computer Resources and Scalability (2 metrics)</strong> — Measures total execution time in seconds and peak computer memory usage in MiB.</p></li>
 </ol>
-<blockquote>
-<p><strong>Complete Metric Documentation:</strong> Full mathematical formulations, biological interpretations, and parameter options for all 62 individual metrics will be available on our documentation portal: <a href="https://kabilanbio.github.io/scSimEval">https://kabilanbio.github.io/scSimEval</a>.</p>
-</blockquote>
 <hr>
 </div>
 <div class="section level2">

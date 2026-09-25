@@ -53,11 +53,19 @@ devtools::install_github("kabilanbio/scSimEval", build_vignettes = TRUE)
   <img src="man/figures/workflow_diagram.png" width="100%" alt="scSimEval Workflow Architecture">
 </p>
 
-The benchmarking process follows four systematic stages:
-1. **Empirical Inputs:** Reference and simulated count matrices (`ref_rna`, `sim_rna`, `ref_atac`, `sim_atac`), cell type annotations (`cell_types`), batch labels (`batch_info`), and compute telemetry.
-2. **Evaluation Engines:** 62 evaluation measures spanning the 8 foundational categories.
-3. **Unified Orchestration:** A single call to `evaluate_simulation_accuracy()`, `evaluate_multiomics_accuracy()`, or `evaluate_multiple_datasets()`.
-4. **Outputs & Ranking:** Standardized score tables, composite ranking leaderboards, and high-resolution 600 DPI figures.
+The evaluation process follows four simple steps:
+
+### Step 1: Input Real and Simulated Data
+Provide your real experimental reference and simulated count matrices (`ref_rna`, `sim_rna`, `ref_atac`, `sim_atac`), along with cell type labels (`cell_types`), batch labels (`batch_info`), and computer resource records (runtime in seconds and peak RAM in MiB).
+
+### Step 2: Calculate Evaluation Measures
+`scSimEval` calculates 62 evaluation measures across 8 core categories without needing any artificial ground truth.
+
+### Step 3: Run the Complete Benchmark
+Execute the complete evaluation in a single command using `evaluate_simulation_accuracy()`, `evaluate_multiomics_accuracy()`, or `evaluate_multiple_datasets()`.
+
+### Step 4: Review Scores, Rankings, and Figures
+Review clean summary tables, standardized scores ($0.00$ to $1.00$), simulator ranking leaderboards, and high-resolution figures.
 
 ---
 
@@ -65,16 +73,21 @@ The benchmarking process follows four systematic stages:
 
 `scSimEval` organizes 62 evaluation measures into eight foundational categories:
 
-1. **(I) Distributional Properties:** 1D and 2D statistical distances (Kolmogorov-Smirnov, Wasserstein, Median Absolute Deviation, RMSE, Density Overlap, Bhattacharyya distance, ECDF area, Runs test) and manifold divergence (Maximum Mean Discrepancy, Fréchet Single-Cell Distance).
-2. **(II) Correlations & Zero-Inflation:** Biological coefficient of variation (BCV), logistic dropout curves ($x_0, \beta_1, R^2$), cell-cell correlation, and gene-gene co-expression matrix distances.
-3. **(III) Cellular Structure & Concordance:** Intrinsic cluster separation (Average Silhouette Width, Dunn index, Davies-Bouldin, Calinski-Harabasz) and supervised concordance (Adjusted Rand Index, Normalized Mutual Information, $V$-measure, Neighborhood Purity, Hungarian matching accuracy).
-4. **(IV) Batch Effects & Confounder Mixing:** CellMixS mixing score (CMS), batch Shannon entropy, Principal Component Regression ($R^2$), Seurat mixing metric, Local Inverse Simpson Index (LISI), and cross-batch cell identity transfer accuracy.
-5. **(V) Biological Signal & Downstream Fidelity:** Differentially expressed gene (DEG) fidelity across Simpipe, SimBench, and Shaky Foundations (SMAPE, log2 fold-change correlations, top-DEG Jaccard overlap, machine learning cell classification accuracy and $F_1$, group silhouette separation).
-6. **(VI) Trajectory & Lineage Dynamics:** Inferred geodesic pseudotime rank correlation and differentiation lineage tree branch height discrepancy (RMSE), inferred directly from scRNA-seq counts.
-7. **(VII) Cross-Modal Coupling & Modularity:** Feature-level cross-correlation, cross-modal label transfer accuracy, manifold alignment (FOSCTTM, Match@1), regulatory coupling, and peak-to-gene co-accessibility ($R_V$ coefficient).
-8. **(VIII) Computational Scalability:** Elapsed wall-clock execution time (seconds) and peak resident RAM allocation (MiB).
+1. **Category 1: Distribution Properties (14 metrics)** — Compares single-cell count distributions (such as library size, average expression, gene variance, and zero fraction) and data manifolds between real and simulated data using statistical distance measures (Kolmogorov-Smirnov, Wasserstein, Median Absolute Deviation, RMSE, Density Overlap, Bhattacharyya distance, ECDF area, Runs test, Maximum Mean Discrepancy, and Fréchet distance).
 
-> **Complete Metric Documentation:** Full mathematical formulations, biological interpretations, and parameter options for all 62 individual metrics will be available on our documentation portal: [https://kabilanbio.github.io/scSimEval](https://kabilanbio.github.io/scSimEval).
+2. **Category 2: Correlations and Zero Patterns (8 metrics)** — Checks biological variation, dropout curves, cell-to-cell correlations, and gene-gene co-expression relationships.
+
+3. **Category 3: Cell Structure and Clustering (9 metrics)** — Evaluates whether simulated data preserves distinct cell types in unsupervised clustering (Silhouette width, Dunn index, Davies-Bouldin, Calinski-Harabasz) and supervised group matching (Adjusted Rand Index, Normalized Mutual Information, $V$-measure, Neighborhood Purity, and Hungarian matching accuracy).
+
+4. **Category 4: Batch Effects and Technical Confounders (6 metrics)** — Tests whether technical batch differences are well-mixed without erasing true biological differences (CellMixS, batch Shannon entropy, Principal Component Regression $R^2$, Seurat mixing metric, LISI, and cross-batch cell prediction accuracy).
+
+5. **Category 5: Marker Genes and Biological Signals (15 metrics)** — Assesses differentially expressed gene (DEG) fidelity across three established benchmarking frameworks: Simpipe, SimBench, and Shaky Foundations (effect size errors, fold-change correlations, top-marker overlap, and cell classification accuracy).
+
+6. **Category 6: Trajectory and Lineage Dynamics (2 metrics)** — Evaluates developmental timelines (pseudotime rank correlation) and cell lineage tree branching (branch height RMSE), inferred directly from scRNA-seq counts.
+
+7. **Category 7: Cross-Modal Coupling and Modularity (6 metrics)** — Evaluates the connection between chromatin accessibility and gene expression in multiomics data, including cell-to-cell matching (FOSCTTM, Match@1), cross-modal cell type transfer, and peak-to-gene regulatory links ($R_V$ coefficient).
+
+8. **Category 8: Computer Resources and Scalability (2 metrics)** — Measures total execution time in seconds and peak computer memory usage in MiB.
 
 ---
 

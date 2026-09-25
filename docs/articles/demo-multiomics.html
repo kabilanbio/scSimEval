@@ -10,7 +10,11 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Demonstration 3: Multiomics (scRNA-seq + scATAC-seq) Simulation Evaluation">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Demonstration 3: Multiomics (scRNA-seq + scATAC-seq) Simulation Evaluation">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -67,11 +71,42 @@
 
     
     
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #24292f;
+  text-align: justify;
+  text-justify: inter-word;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2em;
+  background-color: #ffffff;
+}
+
+p, li, dd {
+  line-height: 1.5;
+  text-align: justify;
+  text-justify: inter-word;
+  margin-bottom: 1em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: left;
+  line-height: 1.3;
+}
+</style>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Single-cell multiomics technologies enable simultaneous measurement
-of multiple cellular modalities, such as gene expression (scRNA-seq) and
+<p>Single-cell multiomics technologies allow simultaneous measurement of
+multiple cellular features, such as gene expression (scRNA-seq) and
 chromatin accessibility (scATAC-seq). Simulating multiomics data
 presents unique challenges because algorithms must preserve not only the
 distinct statistical properties of each individual modality, but also
@@ -86,7 +121,7 @@ Works<a class="anchor" aria-label="anchor" href="#paired-vs--unpaired-multiomics
 <strong>paired</strong> and <strong>unpaired</strong> single-cell
 multiomics data.</p>
 <p><strong>The answer is yes — <code>scSimEval</code> provides
-comprehensive evaluation for both data paradigms:</strong></p>
+comprehensive evaluation for both data types:</strong></p>
 <div class="section level4">
 <h4 id="paired-multiomics-e-g--10x-chromium-multiome-share-seq-snare-seq">1. Paired Multiomics (e.g., 10x Chromium Multiome, SHARE-seq,
 SNARE-seq)<a class="anchor" aria-label="anchor" href="#paired-multiomics-e-g--10x-chromium-multiome-share-seq-snare-seq"></a>
@@ -101,10 +136,10 @@ matrix).</li>
 <li>
 <strong>Evaluation in <code>scSimEval</code>:</strong>
 <ul>
-<li>Runs all unimodal evaluations across both modalities (Categories I
-through VI and Category VIII).</li>
+<li>Runs all unimodal evaluations across both modalities (Categories 1
+through 6 and Category 8).</li>
 <li>
-<strong>Unlocks full Category VII (Cross-Modal Coupling):</strong>
+<strong>Unlocks full Category 7 (Cross-Modal Coupling):</strong>
 <ul>
 <li>
 <strong>FOSCTTM (Fraction of Samples Closer Than The True
@@ -190,12 +225,12 @@ accessibility matrix). * <code>sim_multi</code>: Named list containing
 simulated <code>rna</code> and <code>atac</code> matrices. *
 <code>cell_types</code>: Cell type annotations across the cells. *
 <code>batch_info</code>: Batch labels across the cells. *
-<code>resource_stats</code>: Hardware telemetry logs (runtime in seconds
-and peak RAM in MiB).</p>
+<code>resource_stats</code>: Hardware logs (runtime in seconds and peak
+RAM in MiB).</p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="category-vii-cross-modality-coupling-analysis">2. Category VII: Cross-Modality Coupling Analysis<a class="anchor" aria-label="anchor" href="#category-vii-cross-modality-coupling-analysis"></a>
+<h2 id="category-7-cross-modality-coupling-analysis">2. Category 7: Cross-Modality Coupling Analysis<a class="anchor" aria-label="anchor" href="#category-7-cross-modality-coupling-analysis"></a>
 </h2>
 <p>For multiomics data, <code>scSimEval</code> provides specialized
 functions to evaluate inter-modality coupling.</p>
@@ -245,7 +280,7 @@ accurately predict cell types annotated in RNA:</p>
 <code>evaluate_multiomics_accuracy</code><a class="anchor" aria-label="anchor" href="#master-multiomics-pipeline-evaluate_multiomics_accuracy"></a>
 </h2>
 <p>The master function <code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code>
-coordinates evaluation across all 8 canonical categories:</p>
+coordinates evaluation across all 8 categories:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">master_eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy</a></span><span class="op">(</span></span>
 <span>  ref_multi  <span class="op">=</span> <span class="va">example_multiomics</span><span class="op">$</span><span class="va">ref_multi</span>,</span>
@@ -267,7 +302,7 @@ coordinates evaluation across all 8 canonical categories:</p>
 <span><span class="co">#&gt; 5 Distributional Properties library_size            OV 8.269394e-01      rna</span></span>
 <span><span class="co">#&gt; 6 Distributional Properties library_size Bhattacharyya 1.188839e-04      rna</span></span></code></pre></div>
 <p>The output contains: * <code>benchmark_summary_table</code>: Master
-tibble containing metric names, categories, raw values, and standardized
+table containing metric names, categories, raw values, and standardized
 scores. * <code>category_scores</code>: Mean normalized score for each
 of the 8 categories. * <code>composite_score</code>: Overall unified
 simulation accuracy index.</p>
@@ -324,7 +359,7 @@ high-resolution figures:</p>
 <span>  title <span class="op">=</span> <span class="st">"Benchmarking Single-Cell Multiomics Simulators"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 2. Executive Evaluation Summary Horizontal Bar Matrix</span></span>
+<span><span class="co"># 2. Evaluation Summary Horizontal Bar Matrix</span></span>
 <span><span class="fu"><a href="../reference/plot_evaluation_summary.html">plot_evaluation_summary</a></span><span class="op">(</span></span>
 <span>  data  <span class="op">=</span> <span class="va">consolidated</span>,</span>
 <span>  title <span class="op">=</span> <span class="st">"Multiomics Simulator Leaderboard"</span></span>

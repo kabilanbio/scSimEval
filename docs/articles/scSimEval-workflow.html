@@ -10,7 +10,11 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting Started with scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Getting Started with scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -332,18 +336,40 @@ and produces standardized scores, comprehensive figures, and ranking
 leaderboards.
 </p>
 </div>
-<p>The evaluation process follows four simple stages: 1.
-<strong>Inputs:</strong> Real and simulated count matrices, cell type
-labels, batch labels, and compute logs. 2. <strong>Evaluation
-Engines:</strong> 62 evaluation measures grouped into 8 categories
-(distributions, correlations, cell structure, batch mixing, marker
-genes, trajectories, multiomics coupling, and scalability). 3.
-<strong>Orchestration:</strong> A single master function
-(<code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code> or
-<code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code>) runs all metrics
-automatically. 4. <strong>Outputs:</strong> A clean summary table,
-normalized scores, ranking leaderboards, and diagnostic plots.</p>
+<p>The evaluation process follows four simple steps:</p>
+<div class="section level3">
+<h3 id="step-1-input-real-and-simulated-data">Step 1: Input Real and Simulated Data<a class="anchor" aria-label="anchor" href="#step-1-input-real-and-simulated-data"></a>
+</h3>
+<p>Provide your real experimental reference and simulated count matrices
+(<code>ref_rna</code>, <code>sim_rna</code>, <code>ref_atac</code>,
+<code>sim_atac</code>), along with cell type labels
+(<code>cell_types</code>), batch labels (<code>batch_info</code>), and
+computer resource records (runtime in seconds and peak RAM in MiB).</p>
+</div>
+<div class="section level3">
+<h3 id="step-2-calculate-evaluation-measures">Step 2: Calculate Evaluation Measures<a class="anchor" aria-label="anchor" href="#step-2-calculate-evaluation-measures"></a>
+</h3>
+<p><code>scSimEval</code> calculates 62 evaluation measures across 8
+core categories without needing any artificial ground truth.</p>
+</div>
+<div class="section level3">
+<h3 id="step-3-run-the-complete-benchmark">Step 3: Run the Complete Benchmark<a class="anchor" aria-label="anchor" href="#step-3-run-the-complete-benchmark"></a>
+</h3>
+<p>Execute the complete evaluation in a single command using
+<code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code>,
+<code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code>, or
+<code><a href="../reference/evaluate_multiple_datasets.html">evaluate_multiple_datasets()</a></code>.</p>
+</div>
+<div class="section level3">
+<h3 id="step-4-review-scores-rankings-and-figures">Step 4: Review Scores, Rankings, and Figures<a class="anchor" aria-label="anchor" href="#step-4-review-scores-rankings-and-figures"></a>
+</h3>
+<p>Review clean summary tables, standardized scores
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.00</mn><annotation encoding="application/x-tex">0.00</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1.00</mn><annotation encoding="application/x-tex">1.00</annotation></semantics></math>),
+simulator ranking leaderboards, and high-resolution figures.</p>
 <hr>
+</div>
 </div>
 <div class="section level2">
 <h2 id="score-normalization-and-visual-mapping-workflow">3. Score Normalization and Visual Mapping Workflow<a class="anchor" aria-label="anchor" href="#score-normalization-and-visual-mapping-workflow"></a>

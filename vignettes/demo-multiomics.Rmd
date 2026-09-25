@@ -7,6 +7,38 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #24292f;
+  text-align: justify;
+  text-justify: inter-word;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2em;
+  background-color: #ffffff;
+}
+
+p, li, dd {
+  line-height: 1.5;
+  text-align: justify;
+  text-justify: inter-word;
+  margin-bottom: 1em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: left;
+  line-height: 1.3;
+}
+</style>
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -18,7 +50,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Single-cell multiomics technologies enable simultaneous measurement of multiple cellular modalities, such as gene expression (scRNA-seq) and chromatin accessibility (scATAC-seq). Simulating multiomics data presents unique challenges because algorithms must preserve not only the distinct statistical properties of each individual modality, but also the biological coupling and regulatory connections between them.
+Single-cell multiomics technologies allow simultaneous measurement of multiple cellular features, such as gene expression (scRNA-seq) and chromatin accessibility (scATAC-seq). Simulating multiomics data presents unique challenges because algorithms must preserve not only the distinct statistical properties of each individual modality, but also the biological coupling and regulatory connections between them.
 
 ---
 
@@ -26,13 +58,13 @@ Single-cell multiomics technologies enable simultaneous measurement of multiple 
 
 A common question is whether `scSimEval` supports both **paired** and **unpaired** single-cell multiomics data. 
 
-**The answer is yes — `scSimEval` provides comprehensive evaluation for both data paradigms:**
+**The answer is yes — `scSimEval` provides comprehensive evaluation for both data types:**
 
 ### 1. Paired Multiomics (e.g., 10x Chromium Multiome, SHARE-seq, SNARE-seq)
 * **Definition:** Both scRNA-seq expression counts and scATAC-seq chromatin accessibility peaks are measured simultaneously from the **exact same individual cells** (each column in the RNA matrix corresponds to the same cell barcode in the ATAC matrix).
 * **Evaluation in `scSimEval`:**
-  * Runs all unimodal evaluations across both modalities (Categories I through VI and Category VIII).
-  * **Unlocks full Category VII (Cross-Modal Coupling):**
+  * Runs all unimodal evaluations across both modalities (Categories 1 through 6 and Category 8).
+  * **Unlocks full Category 7 (Cross-Modal Coupling):**
     * **FOSCTTM (Fraction of Samples Closer Than The True Match):** Evaluates whether the paired cell is its nearest neighbor in joint embedding space.
     * **Match@1 Rate:** Percentage of cells whose true multiomics profile is rank-1 in joint space.
     * **Cross-Modal Generation Fidelity:** Predicts scATAC from scRNA (or vice versa) and computes cell-wise Pearson correlation, RMSE, and cosine similarity.
@@ -70,11 +102,11 @@ The dataset contains:
 * `sim_multi`: Named list containing simulated `rna` and `atac` matrices.
 * `cell_types`: Cell type annotations across the cells.
 * `batch_info`: Batch labels across the cells.
-* `resource_stats`: Hardware telemetry logs (runtime in seconds and peak RAM in MiB).
+* `resource_stats`: Hardware logs (runtime in seconds and peak RAM in MiB).
 
 ---
 
-# 2. Category VII: Cross-Modality Coupling Analysis
+# 2. Category 7: Cross-Modality Coupling Analysis
 
 For multiomics data, `scSimEval` provides specialized functions to evaluate inter-modality coupling.
 
@@ -113,7 +145,7 @@ cat("Cross-Modal Macro F1 Score:", round(transfer_res$cross_modal_F1, 4), "\n")
 
 # 3. Master Multiomics Pipeline: `evaluate_multiomics_accuracy`
 
-The master function `evaluate_multiomics_accuracy()` coordinates evaluation across all 8 canonical categories:
+The master function `evaluate_multiomics_accuracy()` coordinates evaluation across all 8 categories:
 
 ```{r master-multi}
 master_eval <- evaluate_multiomics_accuracy(
@@ -131,7 +163,7 @@ head(master_eval$benchmark_summary_table)
 ```
 
 The output contains:
-* `benchmark_summary_table`: Master tibble containing metric names, categories, raw values, and standardized scores.
+* `benchmark_summary_table`: Master table containing metric names, categories, raw values, and standardized scores.
 * `category_scores`: Mean normalized score for each of the 8 categories.
 * `composite_score`: Overall unified simulation accuracy index.
 
@@ -174,7 +206,7 @@ plot_benchmark_bubble_matrix(
   title = "Benchmarking Single-Cell Multiomics Simulators"
 )
 
-# 2. Executive Evaluation Summary Horizontal Bar Matrix
+# 2. Evaluation Summary Horizontal Bar Matrix
 plot_evaluation_summary(
   data  = consolidated,
   title = "Multiomics Simulator Leaderboard"

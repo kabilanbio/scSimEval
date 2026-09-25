@@ -7,6 +7,38 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #24292f;
+  text-align: justify;
+  text-justify: inter-word;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2em;
+  background-color: #ffffff;
+}
+
+p, li, dd {
+  line-height: 1.5;
+  text-align: justify;
+  text-justify: inter-word;
+  margin-bottom: 1em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: left;
+  line-height: 1.3;
+}
+</style>
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -18,12 +50,12 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Single-cell assay for transposase-accessible chromatin sequencing (scATAC-seq) profiles epigenomic landscapes at single-cell resolution. Unlike scRNA-seq expression counts, scATAC-seq data have unique statistical characteristics:
-* **High Sparsity:** Over 90–98% of values in peak-by-cell matrices are zeroes due to the diploid nature of eukaryotic genomes (each locus having at most 2 copies per cell).
+Single-cell assay for transposase-accessible chromatin sequencing (scATAC-seq) measures chromatin accessibility at single-cell resolution. Unlike scRNA-seq expression counts, scATAC-seq data have unique properties:
+* **High Sparsity:** Over 90% to 98% of values in peak-by-cell matrices are zeroes because each locus has at most 2 copies per cell.
 * **Near-Binary Nature:** Values primarily represent open (accessible) vs. closed chromatin states.
-* **Peak Co-Accessibility:** Genomic loci in spatial proximity or under shared transcription factor control exhibit correlated accessibility.
+* **Peak Co-Accessibility:** Genomic loci regulated together exhibit correlated accessibility across cells.
 
-This tutorial demonstrates how to evaluate synthetic scATAC-seq data using **`scSimEval`**.
+This tutorial shows how to evaluate synthetic scATAC-seq data using **`scSimEval`**.
 
 ---
 
@@ -49,7 +81,7 @@ The matrices contain integer insertion counts across genomic peaks ($60\text{ pe
 
 # 2. Epigenomic Distribution & Summary Properties
 
-We evaluate whether simulated peak insertion frequencies and cell library sizes match empirical distributions using `evaluate_simulation_accuracy()`:
+We evaluate whether simulated peak insertion frequencies and cell library sizes match real distributions using `evaluate_simulation_accuracy()`:
 
 ```{r dist-eval}
 atac_res <- evaluate_simulation_accuracy(
@@ -67,7 +99,7 @@ head(atac_res$metrics_summary_table, 8)
 
 # 3. Epigenomic Cluster & Cell-Type Concordance
 
-In scATAC-seq, identifying cell types requires clustering cells based on chromatin accessibility profiles. We benchmark whether the simulator preserves genuine epigenomic separation using `evaluate_clustering_metrics()`:
+In scATAC-seq, identifying cell types requires clustering cells based on chromatin accessibility profiles. We test whether the simulator preserves genuine biological separation using `evaluate_clustering_metrics()`:
 
 ```{r clust-eval}
 atac_clust <- evaluate_clustering_metrics(
@@ -86,7 +118,7 @@ cat("Normalized Mutual Information (NMI):", round(atac_clust$NMI, 4), "\n")
 
 # 4. Epigenomic Batch Integration & Confounder Handling
 
-When simulating multi-sample or multi-donor epigenomic experiments, batch variations can confound biological signals. We evaluate batch mixing metrics using `evaluate_batch_metrics()`:
+When simulating multi-sample experiments, batch variations can confound biological signals. We evaluate batch mixing metrics using `evaluate_batch_metrics()`:
 
 ```{r batch-eval}
 atac_batch <- evaluate_batch_metrics(
@@ -105,7 +137,7 @@ cat("Cross-Batch Transfer Accuracy:", round(atac_batch$cross_batch_accuracy, 4),
 
 # 5. Chromatin Peak Co-Accessibility & Regulatory Coupling
 
-In real biological cells, peaks within the same topologically associating domain (TAD) or co-regulated by the same transcription factor complexes exhibit correlated accessibility:
+In real biological cells, peaks that are close to each other or regulated by the same transcription factor complexes show correlated accessibility:
 
 ```{r peak-coacc}
 # Evaluate peak co-accessibility fidelity
@@ -124,7 +156,7 @@ cat("Frobenius Matrix Distance:", round(coacc_res$frobenius_distance, 4), "\n")
 
 # 6. Master Unimodal scATAC-seq Pipeline
 
-Execute the comprehensive evaluation workflow in a single coordinated call:
+Execute the comprehensive evaluation workflow in a single coordinated command:
 
 ```{r master-eval}
 master_atac <- evaluate_simulation_accuracy(

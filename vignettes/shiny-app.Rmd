@@ -7,6 +7,38 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #24292f;
+  text-align: justify;
+  text-justify: inter-word;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2em;
+  background-color: #ffffff;
+}
+
+p, li, dd {
+  line-height: 1.5;
+  text-align: justify;
+  text-justify: inter-word;
+  margin-bottom: 1em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: left;
+  line-height: 1.3;
+}
+</style>
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -16,9 +48,9 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-For researchers who prefer an interactive graphical user interface rather than writing R command-line code, **`scSimEval`** includes a full-featured, embedded Shiny web application: **`launch_scSimEval_app()`**.
+For researchers who prefer an interactive graphical interface rather than writing R code, **`scSimEval`** includes an easy-to-use, embedded Shiny web application: **`launch_scSimEval_app()`**.
 
-The Shiny application allows you to explore benchmark results across all 62 evaluation measures, interactively adjust category weights to re-rank simulation methods, and export high-resolution (600 DPI) figures directly in your web browser.
+The Shiny application allows you to explore benchmark results across all 62 evaluation measures, adjust category weights to re-rank simulation methods, and export high-resolution (600 DPI) figures directly in your web browser.
 
 ---
 
@@ -41,15 +73,15 @@ By default, the application opens an interactive session in your browser (at `ht
 
 ### 1. Instant Demo Benchmark Mode
 * Includes pre-computed benchmark results across multiple single-cell simulators with zero waiting time.
-* Allows immediate exploration of bubble matrices, category rankings, and diagnostic plots without needing to execute computationally intensive simulations first.
+* Allows immediate exploration of bubble matrices, category rankings, and diagnostic plots without needing to execute simulations first.
 
 ### 2. Custom Benchmark Upload
 * Upload custom evaluation outputs generated from `evaluate_multiomics_accuracy()`, `evaluate_simulation_accuracy()`, or `evaluate_multiple_datasets()`.
-* Automatically validates tabular structures and parses metric categories.
+* Automatically checks table structures and organizes metric categories.
 
 ### 3. Dynamic Category Weighting & Leaderboard Re-Ranking
-* Customize the relative importance of each of the 8 canonical categories using interactive sliders.
-* Observe real-time changes to composite simulator scores and leaderboard rankings based on your specific analytical priorities (e.g. prioritizing DEG fidelity over computational scalability).
+* Customize the relative importance of each of the 8 categories using interactive sliders.
+* Observe real-time changes to composite simulator scores and leaderboard rankings based on your specific priorities (e.g. prioritizing marker genes over computer speed).
 
 ### 4. Interactive Bubble Matrix Explorer
 * Filter metrics by category or specific biological properties.
@@ -57,7 +89,7 @@ By default, the application opens an interactive session in your browser (at `ht
 * Adjust bubble scaling and highlight threshold glyphs interactively.
 
 ### 5. High-Resolution (600 DPI) Figure Export
-* Export benchmark figures directly from the interface in publication-ready formats (PNG, PDF, SVG) at **600 DPI** resolution.
+* Export benchmark figures directly from the interface in high-resolution formats (PNG, PDF, SVG) at **600 DPI**.
 * Download consolidated benchmark summary tables in CSV and Excel formats.
 
 ---

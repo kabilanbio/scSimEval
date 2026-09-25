@@ -2,8 +2,8 @@
 
 ## Introduction
 
-Single-cell multiomics technologies enable simultaneous measurement of
-multiple cellular modalities, such as gene expression (scRNA-seq) and
+Single-cell multiomics technologies allow simultaneous measurement of
+multiple cellular features, such as gene expression (scRNA-seq) and
 chromatin accessibility (scATAC-seq). Simulating multiomics data
 presents unique challenges because algorithms must preserve not only the
 distinct statistical properties of each individual modality, but also
@@ -17,7 +17,7 @@ A common question is whether `scSimEval` supports both **paired** and
 **unpaired** single-cell multiomics data.
 
 **The answer is yes — `scSimEval` provides comprehensive evaluation for
-both data paradigms:**
+both data types:**
 
 #### 1. Paired Multiomics (e.g., 10x Chromium Multiome, SHARE-seq, SNARE-seq)
 
@@ -26,9 +26,9 @@ both data paradigms:**
   **exact same individual cells** (each column in the RNA matrix
   corresponds to the same cell barcode in the ATAC matrix).
 - **Evaluation in `scSimEval`:**
-  - Runs all unimodal evaluations across both modalities (Categories I
-    through VI and Category VIII).
-  - **Unlocks full Category VII (Cross-Modal Coupling):**
+  - Runs all unimodal evaluations across both modalities (Categories 1
+    through 6 and Category 8).
+  - **Unlocks full Category 7 (Cross-Modal Coupling):**
     - **FOSCTTM (Fraction of Samples Closer Than The True Match):**
       Evaluates whether the paired cell is its nearest neighbor in joint
       embedding space.
@@ -91,12 +91,12 @@ The dataset contains: \* `ref_multi`: Named list containing `rna` (count
 matrix) and `atac` (peak accessibility matrix). \* `sim_multi`: Named
 list containing simulated `rna` and `atac` matrices. \* `cell_types`:
 Cell type annotations across the cells. \* `batch_info`: Batch labels
-across the cells. \* `resource_stats`: Hardware telemetry logs (runtime
-in seconds and peak RAM in MiB).
+across the cells. \* `resource_stats`: Hardware logs (runtime in seconds
+and peak RAM in MiB).
 
 ------------------------------------------------------------------------
 
-## 2. Category VII: Cross-Modality Coupling Analysis
+## 2. Category 7: Cross-Modality Coupling Analysis
 
 For multiomics data, `scSimEval` provides specialized functions to
 evaluate inter-modality coupling.
@@ -145,7 +145,7 @@ cat("Cross-Modal Macro F1 Score:", round(transfer_res$cross_modal_F1, 4), "\n")
 
 The master function
 [`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md)
-coordinates evaluation across all 8 canonical categories:
+coordinates evaluation across all 8 categories:
 
 ``` r
 master_eval <- evaluate_multiomics_accuracy(
@@ -169,7 +169,7 @@ head(master_eval$benchmark_summary_table)
 #> 6 Distributional Properties library_size Bhattacharyya 1.188839e-04      rna
 ```
 
-The output contains: \* `benchmark_summary_table`: Master tibble
+The output contains: \* `benchmark_summary_table`: Master table
 containing metric names, categories, raw values, and standardized
 scores. \* `category_scores`: Mean normalized score for each of the 8
 categories. \* `composite_score`: Overall unified simulation accuracy
@@ -231,7 +231,7 @@ plot_benchmark_bubble_matrix(
   title = "Benchmarking Single-Cell Multiomics Simulators"
 )
 
-# 2. Executive Evaluation Summary Horizontal Bar Matrix
+# 2. Evaluation Summary Horizontal Bar Matrix
 plot_evaluation_summary(
   data  = consolidated,
   title = "Multiomics Simulator Leaderboard"

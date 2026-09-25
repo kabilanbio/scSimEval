@@ -10,7 +10,11 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Demonstration 1: scRNA-seq Simulation Evaluation">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Demonstration 1: scRNA-seq Simulation Evaluation">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -67,22 +71,52 @@
 
     
     
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #24292f;
+  text-align: justify;
+  text-justify: inter-word;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2em;
+  background-color: #ffffff;
+}
+
+p, li, dd {
+  line-height: 1.5;
+  text-align: justify;
+  text-justify: inter-word;
+  margin-bottom: 1em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  color: #0f172a;
+  text-align: left;
+  line-height: 1.3;
+}
+</style>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>In single-cell transcriptomics (scRNA-seq), evaluating the realism of
-simulated counts is essential for benchmarking downstream bioinformatics
-algorithms (such as clustering, batch correction, and differential
-expression).</p>
-<p>This tutorial provides a complete walkthrough of evaluating synthetic
-scRNA-seq count matrices using
-<strong><code>scSimEval</code></strong>.</p>
+<p>In single-cell RNA sequencing (scRNA-seq), evaluating the quality of
+simulated count data is important before testing analysis tools such as
+clustering, batch correction, or differential expression algorithms.</p>
+<p>This tutorial shows how to evaluate synthetic scRNA-seq data
+step-by-step using <strong><code>scSimEval</code></strong> without
+needing any artificial ground truth.</p>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="loading-the-package-and-example-dataset">1. Loading the Package and Example Dataset<a class="anchor" aria-label="anchor" href="#loading-the-package-and-example-dataset"></a>
 </h2>
-<p><code>scSimEval</code> includes pre-packaged empirical and simulated
+<p><code>scSimEval</code> includes pre-packaged real and simulated
 scRNA-seq count matrices (<code>example_scrna</code>):</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kabilanbio.github.io/scSimEval">scSimEval</a></span><span class="op">)</span></span>
@@ -100,23 +134,23 @@ scRNA-seq count matrices (<code>example_scrna</code>):</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Batches represented:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/levels.html" class="external-link">levels</a></span><span class="op">(</span><span class="va">example_scrna</span><span class="op">$</span><span class="va">batch_info</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Batches represented: Batch1 Batch2</span></span></code></pre></div>
 <p>The dataset consists of: * <code>ref</code>: Feature-by-cell matrix
-of empirical scRNA-seq read counts (60 genes
+of real experimental scRNA-seq read counts (60 genes
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
 80 cells). * <code>sim</code>: Feature-by-cell matrix of simulated
-counts generated by a candidate simulator. * <code>cell_types</code>:
-Factor of biological cell type labels. * <code>batch_info</code>: Factor
-of technical batch identifiers.</p>
+counts generated by a simulation method. * <code>cell_types</code>:
+Factor of cell type labels. * <code>batch_info</code>: Factor of
+technical batch identifiers.</p>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="step-by-step-category-evaluation">2. Step-by-Step Category Evaluation<a class="anchor" aria-label="anchor" href="#step-by-step-category-evaluation"></a>
 </h2>
 <div class="section level4">
-<h4 id="distributional-fidelity-summary-properties-categories-i-ii">2.1 Distributional Fidelity &amp; Summary Properties (Categories I
-&amp; II)<a class="anchor" aria-label="anchor" href="#distributional-fidelity-summary-properties-categories-i-ii"></a>
+<h4 id="distribution-properties-summary-measures-categories-1-and-2">2.1 Distribution Properties &amp; Summary Measures (Categories 1 and
+2)<a class="anchor" aria-label="anchor" href="#distribution-properties-summary-measures-categories-1-and-2"></a>
 </h4>
 <p>We evaluate how closely the simulated gene expression distributions
-match the reference data using
+match the real reference data using
 <code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">unimodal_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy</a></span><span class="op">(</span></span>
@@ -138,10 +172,10 @@ match the reference data using
 <span><span class="co">#&gt; 6 Distributional Properties library_size Bhattacharyya 1.188839e-04</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="cell-clustering-and-concordance-category-iii">2.2 Cell Clustering and Concordance (Category III)<a class="anchor" aria-label="anchor" href="#cell-clustering-and-concordance-category-iii"></a>
+<h4 id="cell-clustering-and-concordance-category-3">2.2 Cell Clustering and Concordance (Category 3)<a class="anchor" aria-label="anchor" href="#cell-clustering-and-concordance-category-3"></a>
 </h4>
-<p>We evaluate how well the simulator preserves distinct cell types in
-unsupervised and supervised clustering using
+<p>We evaluate whether the simulated data preserves distinct cell types
+in unsupervised and supervised clustering using
 <code><a href="../reference/evaluate_clustering_metrics.html">evaluate_clustering_metrics()</a></code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">clust_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_clustering_metrics.html">evaluate_clustering_metrics</a></span><span class="op">(</span></span>
@@ -161,10 +195,11 @@ unsupervised and supervised clustering using
 <span><span class="co">#&gt; Normalized Mutual Information (NMI): 0.1414</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="batch-effects-and-confounder-mixing-category-iv">2.3 Batch Effects and Confounder Mixing (Category IV)<a class="anchor" aria-label="anchor" href="#batch-effects-and-confounder-mixing-category-iv"></a>
+<h4 id="batch-effects-and-confounder-mixing-category-4">2.3 Batch Effects and Confounder Mixing (Category 4)<a class="anchor" aria-label="anchor" href="#batch-effects-and-confounder-mixing-category-4"></a>
 </h4>
-<p>We test whether technical variation across batches is preserved or
-well-mixed using <code><a href="../reference/evaluate_batch_metrics.html">evaluate_batch_metrics()</a></code>:</p>
+<p>We test whether technical batch differences are properly mixed
+without masking biological differences using
+<code><a href="../reference/evaluate_batch_metrics.html">evaluate_batch_metrics()</a></code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">batch_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_batch_metrics.html">evaluate_batch_metrics</a></span><span class="op">(</span></span>
 <span>  data       <span class="op">=</span> <span class="va">example_scrna</span><span class="op">$</span><span class="va">sim</span>,</span>
@@ -182,10 +217,10 @@ well-mixed using <code><a href="../reference/evaluate_batch_metrics.html">evalua
 <span><span class="co">#&gt; Cross-Batch Transfer Accuracy: 0.6125</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="differential-expression-deg-fidelity-category-v">2.4 Differential Expression (DEG) Fidelity (Category V)<a class="anchor" aria-label="anchor" href="#differential-expression-deg-fidelity-category-v"></a>
+<h4 id="differential-expression-deg-fidelity-category-5">2.4 Differential Expression (DEG) Fidelity (Category 5)<a class="anchor" aria-label="anchor" href="#differential-expression-deg-fidelity-category-5"></a>
 </h4>
-<p>We assess differentially expressed gene effect sizes and marker gene
-overlap using <code><a href="../reference/evaluate_deg_fidelity.html">evaluate_deg_fidelity()</a></code>:</p>
+<p>We assess marker gene effect sizes and top marker overlap using
+<code><a href="../reference/evaluate_deg_fidelity.html">evaluate_deg_fidelity()</a></code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">deg_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_deg_fidelity.html">evaluate_deg_fidelity</a></span><span class="op">(</span></span>
 <span>  ref_data      <span class="op">=</span> <span class="va">example_scrna</span><span class="op">$</span><span class="va">ref</span>,</span>
@@ -212,7 +247,7 @@ overlap using <code><a href="../reference/evaluate_deg_fidelity.html">evaluate_d
 <span><span class="co">#&gt; 6          Higher is better (Sensitivity)</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="trajectory-and-lineage-dynamics-category-vi">2.5 Trajectory and Lineage Dynamics (Category VI)<a class="anchor" aria-label="anchor" href="#trajectory-and-lineage-dynamics-category-vi"></a>
+<h4 id="trajectory-and-lineage-dynamics-category-6">2.5 Trajectory and Lineage Dynamics (Category 6)<a class="anchor" aria-label="anchor" href="#trajectory-and-lineage-dynamics-category-6"></a>
 </h4>
 <p>We infer developmental pseudotime and lineage branching directly from
 scRNA-seq expression counts using
@@ -237,7 +272,7 @@ scRNA-seq expression counts using
 <code>evaluate_simulation_accuracy</code><a class="anchor" aria-label="anchor" href="#master-unimodal-pipeline-evaluate_simulation_accuracy"></a>
 </h2>
 <p>Instead of running individual steps, execute the entire unimodal
-evaluation suite in a single coordinated call:</p>
+evaluation suite in a single coordinated command:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">eval_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy</a></span><span class="op">(</span></span>
 <span>  ref_data          <span class="op">=</span> <span class="va">example_scrna</span><span class="op">$</span><span class="va">ref</span>,</span>

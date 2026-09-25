@@ -50,17 +50,32 @@ framework takes real and simulated single-cell multiomics data,
 evaluates 62 metrics across 8 foundational categories, and produces
 standardized scores, comprehensive figures, and ranking leaderboards.
 
-The evaluation process follows four simple stages: 1. **Inputs:** Real
-and simulated count matrices, cell type labels, batch labels, and
-compute logs. 2. **Evaluation Engines:** 62 evaluation measures grouped
-into 8 categories (distributions, correlations, cell structure, batch
-mixing, marker genes, trajectories, multiomics coupling, and
-scalability). 3. **Orchestration:** A single master function
-([`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md)
+The evaluation process follows four simple steps:
+
+### Step 1: Input Real and Simulated Data
+
+Provide your real experimental reference and simulated count matrices
+(`ref_rna`, `sim_rna`, `ref_atac`, `sim_atac`), along with cell type
+labels (`cell_types`), batch labels (`batch_info`), and computer
+resource records (runtime in seconds and peak RAM in MiB).
+
+### Step 2: Calculate Evaluation Measures
+
+`scSimEval` calculates 62 evaluation measures across 8 core categories
+without needing any artificial ground truth.
+
+### Step 3: Run the Complete Benchmark
+
+Execute the complete evaluation in a single command using
+[`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md),
+[`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md),
 or
-[`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md))
-runs all metrics automatically. 4. **Outputs:** A clean summary table,
-normalized scores, ranking leaderboards, and diagnostic plots.
+[`evaluate_multiple_datasets()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiple_datasets.md).
+
+### Step 4: Review Scores, Rankings, and Figures
+
+Review clean summary tables, standardized scores ($`0.00`$ to $`1.00`$),
+simulator ranking leaderboards, and high-resolution figures.
 
 ------------------------------------------------------------------------
 

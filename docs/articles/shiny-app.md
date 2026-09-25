@@ -2,15 +2,15 @@
 
 ## Introduction
 
-For researchers who prefer an interactive graphical user interface
-rather than writing R command-line code, **`scSimEval`** includes a
-full-featured, embedded Shiny web application:
+For researchers who prefer an interactive graphical interface rather
+than writing R code, **`scSimEval`** includes an easy-to-use, embedded
+Shiny web application:
 **[`launch_scSimEval_app()`](https://kabilanbio.github.io/scSimEval/reference/launch_scSimEval_app.md)**.
 
 The Shiny application allows you to explore benchmark results across all
-62 evaluation measures, interactively adjust category weights to re-rank
-simulation methods, and export high-resolution (600 DPI) figures
-directly in your web browser.
+62 evaluation measures, adjust category weights to re-rank simulation
+methods, and export high-resolution (600 DPI) figures directly in your
+web browser.
 
 ------------------------------------------------------------------------
 
@@ -37,8 +37,7 @@ By default, the application opens an interactive session in your browser
 - Includes pre-computed benchmark results across multiple single-cell
   simulators with zero waiting time.
 - Allows immediate exploration of bubble matrices, category rankings,
-  and diagnostic plots without needing to execute computationally
-  intensive simulations first.
+  and diagnostic plots without needing to execute simulations first.
 
 #### 2. Custom Benchmark Upload
 
@@ -47,16 +46,15 @@ By default, the application opens an interactive session in your browser
   [`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md),
   or
   [`evaluate_multiple_datasets()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiple_datasets.md).
-- Automatically validates tabular structures and parses metric
-  categories.
+- Automatically checks table structures and organizes metric categories.
 
 #### 3. Dynamic Category Weighting & Leaderboard Re-Ranking
 
-- Customize the relative importance of each of the 8 canonical
-  categories using interactive sliders.
+- Customize the relative importance of each of the 8 categories using
+  interactive sliders.
 - Observe real-time changes to composite simulator scores and
-  leaderboard rankings based on your specific analytical priorities
-  (e.g. prioritizing DEG fidelity over computational scalability).
+  leaderboard rankings based on your specific priorities
+  (e.g. prioritizing marker genes over computer speed).
 
 #### 4. Interactive Bubble Matrix Explorer
 
@@ -68,7 +66,7 @@ By default, the application opens an interactive session in your browser
 #### 5. High-Resolution (600 DPI) Figure Export
 
 - Export benchmark figures directly from the interface in
-  publication-ready formats (PNG, PDF, SVG) at **600 DPI** resolution.
+  high-resolution formats (PNG, PDF, SVG) at **600 DPI**.
 - Download consolidated benchmark summary tables in CSV and Excel
   formats.
 

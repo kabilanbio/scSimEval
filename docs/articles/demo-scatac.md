@@ -3,18 +3,17 @@
 ## Introduction
 
 Single-cell assay for transposase-accessible chromatin sequencing
-(scATAC-seq) profiles epigenomic landscapes at single-cell resolution.
+(scATAC-seq) measures chromatin accessibility at single-cell resolution.
 Unlike scRNA-seq expression counts, scATAC-seq data have unique
-statistical characteristics: \* **High Sparsity:** Over 90–98% of values
-in peak-by-cell matrices are zeroes due to the diploid nature of
-eukaryotic genomes (each locus having at most 2 copies per cell). \*
-**Near-Binary Nature:** Values primarily represent open (accessible)
-vs. closed chromatin states. \* **Peak Co-Accessibility:** Genomic loci
-in spatial proximity or under shared transcription factor control
-exhibit correlated accessibility.
+properties: \* **High Sparsity:** Over 90% to 98% of values in
+peak-by-cell matrices are zeroes because each locus has at most 2 copies
+per cell. \* **Near-Binary Nature:** Values primarily represent open
+(accessible) vs. closed chromatin states. \* **Peak Co-Accessibility:**
+Genomic loci regulated together exhibit correlated accessibility across
+cells.
 
-This tutorial demonstrates how to evaluate synthetic scATAC-seq data
-using **`scSimEval`**.
+This tutorial shows how to evaluate synthetic scATAC-seq data using
+**`scSimEval`**.
 
 ------------------------------------------------------------------------
 
@@ -47,7 +46,7 @@ The matrices contain integer insertion counts across genomic peaks
 ## 2. Epigenomic Distribution & Summary Properties
 
 We evaluate whether simulated peak insertion frequencies and cell
-library sizes match empirical distributions using
+library sizes match real distributions using
 [`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md):
 
 ``` r
@@ -76,8 +75,8 @@ head(atac_res$metrics_summary_table, 8)
 ## 3. Epigenomic Cluster & Cell-Type Concordance
 
 In scATAC-seq, identifying cell types requires clustering cells based on
-chromatin accessibility profiles. We benchmark whether the simulator
-preserves genuine epigenomic separation using
+chromatin accessibility profiles. We test whether the simulator
+preserves genuine biological separation using
 [`evaluate_clustering_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_clustering_metrics.md):
 
 ``` r
@@ -101,9 +100,8 @@ cat("Normalized Mutual Information (NMI):", round(atac_clust$NMI, 4), "\n")
 
 ## 4. Epigenomic Batch Integration & Confounder Handling
 
-When simulating multi-sample or multi-donor epigenomic experiments,
-batch variations can confound biological signals. We evaluate batch
-mixing metrics using
+When simulating multi-sample experiments, batch variations can confound
+biological signals. We evaluate batch mixing metrics using
 [`evaluate_batch_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_batch_metrics.md):
 
 ``` r
@@ -126,9 +124,9 @@ cat("Cross-Batch Transfer Accuracy:", round(atac_batch$cross_batch_accuracy, 4),
 
 ## 5. Chromatin Peak Co-Accessibility & Regulatory Coupling
 
-In real biological cells, peaks within the same topologically
-associating domain (TAD) or co-regulated by the same transcription
-factor complexes exhibit correlated accessibility:
+In real biological cells, peaks that are close to each other or
+regulated by the same transcription factor complexes show correlated
+accessibility:
 
 ``` r
 # Evaluate peak co-accessibility fidelity
@@ -152,7 +150,7 @@ cat("Frobenius Matrix Distance:", round(coacc_res$frobenius_distance, 4), "\n")
 ## 6. Master Unimodal scATAC-seq Pipeline
 
 Execute the comprehensive evaluation workflow in a single coordinated
-call:
+command:
 
 ``` r
 master_atac <- evaluate_simulation_accuracy(
