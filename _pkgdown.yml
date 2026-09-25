@@ -1,0 +1,34 @@
+url: https://kabilanbio.github.io/scSimEval
+template:
+  bootstrap: 5
+  bootswatch: flatly
+
+home:
+  title: "scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations"
+  description: "Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods without Artificial Ground Truth."
+
+navbar:
+  title: "scSimEval"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Getting Started"
+      href: articles/scSimEval-workflow.html
+    - text: "Demonstrations"
+      menu:
+        - text: "1. scRNA-seq Simulation Evaluation"
+          href: articles/demo-scrna.html
+        - text: "2. scATAC-seq Simulation Evaluation"
+          href: articles/demo-scatac.html
+        - text: "3. Multiomics (RNA + ATAC) Evaluation"
+          href: articles/demo-multiomics.html
+    - text: "Metric Catalog (62 Metrics)"
+      href: articles/metrics-catalog.html
+    - text: "Interactive App"
+      href: articles/shiny-app.html
+    - text: "Reference"
+      href: reference/index.html
+  right:
+    - icon: fa-github fa-lg
+      href: https://github.com/kabilanbio/scSimEval
+      aria-label: GitHub repository

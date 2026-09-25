@@ -1,0 +1,29 @@
+# Kinetic Noise Decomposition (SymSim & Elowitz et al.)
+
+Decomposes gene expression variance / squared coefficient of variation
+(CV^2) into intrinsic transcriptional bursting noise and extrinsic
+cell-state noise.
+
+## Usage
+
+``` r
+calc_kinetic_noise_decomposition(counts, cell_states = NULL)
+```
+
+## Arguments
+
+- counts:
+
+  Matrix of expression counts (genes x cells) or SingleCellExperiment.
+
+- cell_states:
+
+  Optional factor or vector of cell states / subpopulation clusters. If
+  provided, noise is partitioned into within-state (intrinsic) and
+  between-state (extrinsic) components. If NULL, intrinsic noise is
+  estimated via Poisson shot-noise expectation (1 / mean).
+
+## Value
+
+A list containing mean intrinsic noise, mean extrinsic noise, noise
+ratio, and gene-level vectors.

@@ -1,0 +1,147 @@
+---
+title: "Demonstration 2: scATAC-seq Simulation Evaluation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Demonstration 2: scATAC-seq Simulation Evaluation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+# Introduction
+
+Single-cell assay for transposase-accessible chromatin sequencing (scATAC-seq) profiles epigenomic landscapes at single-cell resolution. Unlike scRNA-seq expression counts, scATAC-seq data have unique statistical characteristics:
+* **High Sparsity:** Over 90–98% of values in peak-by-cell matrices are zeroes due to the diploid nature of eukaryotic genomes (each locus having at most 2 copies per cell).
+* **Near-Binary Nature:** Values primarily represent open (accessible) vs. closed chromatin states.
+* **Peak Co-Accessibility:** Genomic loci in spatial proximity or under shared transcription factor control exhibit correlated accessibility.
+
+This tutorial demonstrates how to evaluate synthetic scATAC-seq data using **`scSimEval`**.
+
+---
+
+# 1. Loading the Packaged scATAC-seq Dataset
+
+`scSimEval` includes an empirical reference and simulated scATAC-seq peak accessibility dataset (`example_scatac`):
+
+```{r setup}
+library(scSimEval)
+
+# Load packaged scATAC-seq example data
+data(example_scatac)
+
+cat("Reference scATAC-seq dimensions:", dim(example_scatac$ref), "\n")
+cat("Simulated scATAC-seq dimensions:", dim(example_scatac$sim), "\n")
+cat("Cell types:", levels(example_scatac$cell_types), "\n")
+cat("Batches:", levels(example_scatac$batch_info), "\n")
+```
+
+The matrices contain integer insertion counts across genomic peaks ($60\text{ peaks} \times 80\text{ cells}$).
+
+---
+
+# 2. Epigenomic Distribution & Summary Properties
+
+We evaluate whether simulated peak insertion frequencies and cell library sizes match empirical distributions using `evaluate_simulation_accuracy()`:
+
+```{r dist-eval}
+atac_res <- evaluate_simulation_accuracy(
+  ref_data          = example_scatac$ref,
+  sim_data          = example_scatac$sim,
+  compute_bivariate = FALSE,
+  verbose           = FALSE
+)
+
+# Inspect peak accessibility and library size statistical distances
+head(atac_res$metrics_summary_table, 8)
+```
+
+---
+
+# 3. Epigenomic Cluster & Cell-Type Concordance
+
+In scATAC-seq, identifying cell types requires clustering cells based on chromatin accessibility profiles. We benchmark whether the simulator preserves genuine epigenomic separation using `evaluate_clustering_metrics()`:
+
+```{r clust-eval}
+atac_clust <- evaluate_clustering_metrics(
+  data       = example_scatac$sim,
+  cell_types = example_scatac$cell_types,
+  ref_data   = example_scatac$ref
+)
+
+cat("Average Silhouette Width (Simulated):", round(atac_clust$silhouette, 4), "\n")
+cat("Davies-Bouldin Index:", round(atac_clust$davies_bouldin, 4), "\n")
+cat("Adjusted Rand Index (ARI):", round(atac_clust$ARI, 4), "\n")
+cat("Normalized Mutual Information (NMI):", round(atac_clust$NMI, 4), "\n")
+```
+
+---
+
+# 4. Epigenomic Batch Integration & Confounder Handling
+
+When simulating multi-sample or multi-donor epigenomic experiments, batch variations can confound biological signals. We evaluate batch mixing metrics using `evaluate_batch_metrics()`:
+
+```{r batch-eval}
+atac_batch <- evaluate_batch_metrics(
+  data       = example_scatac$sim,
+  batch_info = example_scatac$batch_info,
+  cell_types = example_scatac$cell_types,
+  verbose    = FALSE
+)
+
+cat("Batch Shannon Entropy:", round(atac_batch$shannon_entropy, 4), "\n")
+cat("Principal Component Regression (PCR R2):", round(atac_batch$pcr_r2, 4), "\n")
+cat("Cross-Batch Transfer Accuracy:", round(atac_batch$cross_batch_accuracy, 4), "\n")
+```
+
+---
+
+# 5. Chromatin Peak Co-Accessibility & Regulatory Coupling
+
+In real biological cells, peaks within the same topologically associating domain (TAD) or co-regulated by the same transcription factor complexes exhibit correlated accessibility:
+
+```{r peak-coacc}
+# Evaluate peak co-accessibility fidelity
+coacc_res <- calc_peak_coaccessibility_fidelity(
+  ref_atac = example_scatac$ref,
+  sim_atac = example_scatac$sim
+)
+
+cat("Co-Accessibility RV Coefficient:", round(coacc_res$rv_coefficient, 4), "\n")
+cat("Peak Co-Accessibility Pearson Correlation:", round(coacc_res$coaccessibility_pearson, 4), "\n")
+cat("Peak Co-Accessibility Spearman Correlation:", round(coacc_res$coaccessibility_spearman, 4), "\n")
+cat("Frobenius Matrix Distance:", round(coacc_res$frobenius_distance, 4), "\n")
+```
+
+---
+
+# 6. Master Unimodal scATAC-seq Pipeline
+
+Execute the comprehensive evaluation workflow in a single coordinated call:
+
+```{r master-eval}
+master_atac <- evaluate_simulation_accuracy(
+  ref_data          = example_scatac$ref,
+  sim_data          = example_scatac$sim,
+  cpu_time          = 18.2,
+  memory_mb         = 512.4,
+  compute_bivariate = FALSE,
+  verbose           = FALSE
+)
+
+# Inspect tidy summary table
+head(master_atac$metrics_summary_table)
+```
+
+---
+
+# 7. Conclusion
+
+`scSimEval` effectively benchmarks scATAC-seq simulations, validating peak insertion distributions, extreme sparsity, cell type clustering, batch mixing, and chromatin peak co-accessibility without requiring synthetic ground-truth annotations.
