@@ -249,7 +249,7 @@ Many existing evaluation tools require artificial "ground truth" labels that are
 
 The following workflow diagram shows the step-by-step benchmarking process in `scSimEval`:
 
-```{r workflow-diagram, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 1: End-to-end benchmarking workflow of scSimEval.** The framework takes real and simulated single-cell multiomics data, evaluates 62 metrics across 8 foundational categories, and produces standardized scores, 600 DPI figures, and ranking leaderboards.'}
+```{r workflow-diagram, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 1: End-to-end benchmarking workflow of scSimEval.** The framework takes real and simulated single-cell multiomics data, evaluates 62 metrics across 8 foundational categories, and produces standardized scores, comprehensive figures, and ranking leaderboards.'}
 knitr::include_graphics("figures/workflow_diagram.png")
 ```
 
@@ -257,7 +257,7 @@ The evaluation process follows four simple stages:
 1. **Inputs:** Real and simulated count matrices, cell type labels, batch labels, and compute logs.
 2. **Evaluation Engines:** 62 evaluation measures grouped into 8 categories (distributions, correlations, cell structure, batch mixing, marker genes, trajectories, multiomics coupling, and scalability).
 3. **Orchestration:** A single master function (`evaluate_multiomics_accuracy()` or `evaluate_simulation_accuracy()`) runs all metrics automatically.
-4. **Outputs:** A clean summary table, normalized scores, ranking leaderboards, and 600 DPI plots.
+4. **Outputs:** A clean summary table, normalized scores, ranking leaderboards, and diagnostic plots.
 
 ---
 
@@ -350,9 +350,9 @@ knitr::kable(head(lib_summary, 8), digits = 4, caption = "Library Size Statistic
 
 ### 5.1 Comparative Distribution QC Plot (`plot_distribution_qc`)
 
-To visually inspect whether simulated counts match real biological distributions, `plot_distribution_qc()` generates a clean 14-panel layout comparing properties such as library size, mean expression, gene variance, zero proportions, and cell-cell correlations at 600 DPI:
+To visually inspect whether simulated counts match real biological distributions, `plot_distribution_qc()` generates a clean 14-panel layout comparing properties such as library size, mean expression, gene variance, zero proportions, and cell-cell correlations:
 
-```{r plot-dist-qc-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 3: 14-panel comparative distribution QC layout (600 DPI).** Compares real biological data (warm brick red) and simulated data (steel blue) across single-cell properties, bivariate relationships, and biological signal retention.'}
+```{r plot-dist-qc-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 3: 14-panel comparative distribution QC layout.** Compares real biological data (warm brick red) and simulated data (steel blue) across single-cell properties, bivariate relationships, and biological signal retention.'}
 knitr::include_graphics("figures/comparative_distribution_qc.png")
 ```
 
@@ -454,9 +454,9 @@ knitr::kable(head(deg_res$deg_summary_table, 10), digits = 4)
 
 ## 10. Evaluating Computational Resource Usage (Scalability)
 
-Simulating thousands or millions of single cells requires fast and memory-efficient software. `plot_scalability_benchmark()` generates a comprehensive 6-panel dashboard comparing runtime, memory usage, Pareto tradeoff frontiers, multithreading speedup, and cell throughput at 600 DPI:
+Simulating thousands or millions of single cells requires fast and memory-efficient software. `plot_scalability_benchmark()` generates a comprehensive 6-panel dashboard comparing runtime, memory usage, Pareto tradeoff frontiers, multithreading speedup, and cell throughput:
 
-```{r plot-scalability-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 4: Computational scalability benchmark suite (600 DPI).** 6-panel dashboard comparing execution runtime, peak RAM, runtime-memory tradeoff, CPU efficiency, cost footprint, and throughput across simulation methods.'}
+```{r plot-scalability-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 4: Computational scalability benchmark suite.** 6-panel dashboard comparing execution runtime, peak RAM, runtime-memory tradeoff, CPU efficiency, cost footprint, and throughput across simulation methods.'}
 knitr::include_graphics("figures/scalability_benchmark.png")
 ```
 
@@ -495,20 +495,20 @@ table(summary_df$Category)
 
 ---
 
-## 12. Visualizations Suite (600 DPI)
+## 12. Visualization Suite
 
-`scSimEval` provides built-in plotting functions rendering high-resolution figures at 600 DPI.
+`scSimEval` provides built-in plotting functions rendering high-resolution figures (supporting 600 DPI for publication and reporting needs).
 
 ### 12.1 Multi-Dimensional Benchmarking Bubble Matrix (`plot_benchmark_bubble_matrix`)
 
 The flagship visualization **`plot_benchmark_bubble_matrix()`** summarizes multi-simulator performance across the 8 evaluation categories. Bubble sizes indicate normalized simulation fidelity (larger bubbles = better performance):
 
-```{r plot-bubble-matrix-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 5: Flagship multi-dimensional benchmarking bubble matrix (600 DPI).** Ranks simulation methods top-to-bottom across the 8 evaluation categories. Bubble size reflects standardized fidelity score ($0.00$ to $1.00$), and top performers are highlighted with bold squares.'}
+```{r plot-bubble-matrix-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 5: Flagship multi-dimensional benchmarking bubble matrix.** Ranks simulation methods top-to-bottom across the 8 evaluation categories. Bubble size reflects standardized fidelity score ($0.00$ to $1.00$), and top performers are highlighted with bold squares.'}
 knitr::include_graphics("figures/benchmark_bubble_matrix.png")
 ```
 
 ```r
-# Generate benchmark bubble matrix (600 DPI)
+# Generate benchmark bubble matrix
 plot_benchmark_bubble_matrix(
   data = sim_comparison_list,
   bubble_size_range = c(2, 7.5),
@@ -521,7 +521,7 @@ plot_benchmark_bubble_matrix(
 
 To present an executive overview of overall simulation accuracy, `plot_evaluation_summary()` ranks candidate simulators from best to worst and displays average scores across categories:
 
-```{r eval-summary-bars, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 6: Executive evaluation summary horizontal bar matrix (600 DPI).** Ranks simulators across the 8 categories and displays overall composite performance with exact score annotations.'}
+```{r eval-summary-bars, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 6: Executive evaluation summary horizontal bar matrix.** Ranks simulators across the 8 categories and displays overall composite performance with exact score annotations.'}
 knitr::include_graphics("figures/evaluation_summary_bars.png")
 ```
 
@@ -538,7 +538,7 @@ plot_evaluation_summary(
 
 To inspect variability across individual metrics and simulators, `plot_metric_boxplots()` displays boxplots with jittered data points across all 8 categories:
 
-```{r plot-boxplots-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 7: Metric score distributions across the 8 categories (600 DPI).** Displays standardized scores ($[0, 1]$, higher is better) with individual data points and boxplots across candidate simulators.'}
+```{r plot-boxplots-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 7: Metric score distributions across the 8 categories.** Displays standardized scores ($[0, 1]$, higher is better) with individual data points and boxplots across candidate simulators.'}
 knitr::include_graphics("figures/metric_boxplots.png")
 ```
 
@@ -555,7 +555,7 @@ plot_metric_boxplots(
 
 To examine exact numeric values for every metric without any loss of detail, `plot_metric_heatmap()` displays all simulators on the horizontal axis and all 62 measures on the vertical axis, printing **exact raw values inside each cell**:
 
-```{r plot-heatmap-fig, echo=FALSE, fig.align='center', out.width='88%', fig.cap='**Figure 8: Complete benchmark metric heatmap (600 DPI).** Displays exact unnormalized raw scores in bold text inside every cell, grouped cleanly across the 8 evaluation categories.'}
+```{r plot-heatmap-fig, echo=FALSE, fig.align='center', out.width='88%', fig.cap='**Figure 8: Complete benchmark metric heatmap.** Displays exact unnormalized raw scores in bold text inside every cell, grouped cleanly across the 8 evaluation categories.'}
 knitr::include_graphics("figures/metric_heatmap.png")
 ```
 
@@ -572,7 +572,7 @@ plot_metric_heatmap(
 
 To discover which simulation methods behave similarly across all metrics, `scSimEval` includes Principal Component Analysis (`plot_metric_pca`) and Multidimensional Scaling (`plot_metric_mds`):
 
-```{r plot-pca-cat1, echo=FALSE, fig.align='center', out.width='85%', fig.cap='**Figure 9: Principal Component Analysis (PCA) ordination of simulation methods (600 DPI).** Projects simulators based on their metric profiles, showing global affinities and key discriminating metric vectors.'}
+```{r plot-pca-cat1, echo=FALSE, fig.align='center', out.width='85%', fig.cap='**Figure 9: Principal Component Analysis (PCA) ordination of simulation methods.** Projects simulators based on their metric profiles, showing global affinities and key discriminating metric vectors.'}
 knitr::include_graphics("figures/individual_category_plots/pca_cat1_distribution.png")
 ```
 
@@ -621,7 +621,7 @@ knitr::kable(consolidated_results$dataset_overview, digits = 4, caption = "Conso
 
 ## 14. Interactive Web Application (Shiny Studio)
 
-For researchers who prefer an interactive graphical interface rather than writing R code, `scSimEval` includes an embedded Shiny web application. You can explore benchmark results, filter metrics, view bubble plots, and export 600 DPI figures directly in your web browser:
+For researchers who prefer an interactive graphical interface rather than writing R code, `scSimEval` includes an embedded Shiny web application. You can explore benchmark results, filter metrics, view bubble plots, and export high-resolution (600 DPI) figures directly in your web browser:
 
 ```r
 # Launch the interactive web app in your default browser
@@ -643,7 +643,7 @@ launch_scSimEval_app()
 
 ## 16. Summary
 
-`scSimEval` provides a unified, objective, and ground-truth-free evaluation toolkit for benchmarking single-cell and multiomics simulation methods. With 62 metrics organized into 8 clear categories, automated score normalization, and 600 DPI visualizations, it enables researchers to select and validate simulation methods with confidence.
+`scSimEval` provides a unified, objective, and ground-truth-free evaluation toolkit for benchmarking single-cell and multiomics simulation methods. With 62 metrics organized into 8 clear categories, automated score normalization, and intuitive visualizations, it enables researchers to select and validate simulation methods with confidence.
 
 ---
 
