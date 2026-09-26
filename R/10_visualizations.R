@@ -213,7 +213,7 @@ utils::globalVariables(c(
   "(III) Cellular Structure & Concordance"     = "(III)\nCell Structure",
   "(IV) Batch Effects & Confounder Mixing"     = "(IV)\nBatch Mixing",
   "(V) Biological Signal & Downstream Fidelity"= "(V)\nBio-Signal & DE",
-  "(VI) Trajectory & Lineage Dynamics"         = "(VI)\nTraj.",
+  "(VI) Trajectory & Lineage Dynamics"         = "(VI)\nTrajectory",
   "(VII) Cross-Modal Coupling & Modularity"    = "(VII)\nCross-Modal",
   "(VIII) Computational Scalability"           = "(VIII)\nScalability"
 )
@@ -364,13 +364,27 @@ utils::globalVariables(c(
 
 #' @keywords internal
 .LEGACY_CATEGORY_MAP <- c(
-  "Distributional Properties"      = "(I) Distributional Properties",
-  "Correlation & Dependencies"     = "(I) Distributional Properties",
-  "Cellular Structure & Mixing"    = "(III) Cellular Structure & Concordance",
-  "Biological Signal & Downstream" = "(V) Biological Signal & Downstream Fidelity",
-  "Trajectory Dynamics"            = "(VI) Trajectory & Lineage Dynamics",
-  "Cross-Modal Relationships"      = "(VII) Cross-Modal Coupling & Modularity",
-  "Computational Scalability"      = "(VIII) Computational Scalability"
+  "Distributional Properties"               = "(I) Distributional Properties",
+  "Distribution"                            = "(I) Distributional Properties",
+  "Correlation & Dependencies"              = "(II) Correlations & Zero-Inflation",
+  "Correlations & Zero-Inflation"           = "(II) Correlations & Zero-Inflation",
+  "Correlation"                             = "(II) Correlations & Zero-Inflation",
+  "Cellular Structure & Mixing"             = "(III) Cellular Structure & Concordance",
+  "Cellular Structure & Concordance"        = "(III) Cellular Structure & Concordance",
+  "Cell Structure"                          = "(III) Cellular Structure & Concordance",
+  "Batch Effects & Confounder Mixing"       = "(IV) Batch Effects & Confounder Mixing",
+  "Batch Mixing"                            = "(IV) Batch Effects & Confounder Mixing",
+  "Biological Signal & Downstream"          = "(V) Biological Signal & Downstream Fidelity",
+  "Biological Signal & Downstream Fidelity" = "(V) Biological Signal & Downstream Fidelity",
+  "Bio-Signal & DE"                         = "(V) Biological Signal & Downstream Fidelity",
+  "Trajectory Dynamics"                     = "(VI) Trajectory & Lineage Dynamics",
+  "Trajectory & Lineage Dynamics"           = "(VI) Trajectory & Lineage Dynamics",
+  "Trajectory"                              = "(VI) Trajectory & Lineage Dynamics",
+  "Cross-Modal Relationships"               = "(VII) Cross-Modal Coupling & Modularity",
+  "Cross-Modal Coupling & Modularity"       = "(VII) Cross-Modal Coupling & Modularity",
+  "Cross-Modal"                             = "(VII) Cross-Modal Coupling & Modularity",
+  "Computational Scalability"               = "(VIII) Computational Scalability",
+  "Scalability"                             = "(VIII) Computational Scalability"
 )
 
 #' @keywords internal

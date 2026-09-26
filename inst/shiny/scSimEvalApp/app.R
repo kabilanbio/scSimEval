@@ -9,6 +9,14 @@ library(DT)
 library(Matrix)
 library(scSimEval)
 
+# If running in local checkout, source updated visualizations to guarantee latest bugfixes
+for (p in c("R/10_visualizations.R", "../../R/10_visualizations.R", "../../../R/10_visualizations.R")) {
+  if (file.exists(p)) {
+    try(source(p, local = FALSE), silent = TRUE)
+    break
+  }
+}
+
 # Set max upload size to 500 MB for large single-cell datasets
 options(shiny.maxRequestSize = 500 * 1024^2)
 
@@ -18,6 +26,45 @@ if (demo_data_path == "" || !file.exists(demo_data_path)) {
   demo_data_path <- file.path("data", "demo_benchmark_data.rds")
 }
 initial_demo <- if (file.exists(demo_data_path)) readRDS(demo_data_path) else NULL
+
+# Standardize Category names to canonical 8 package categories
+standardize_benchmark_categories <- function(df) {
+  if (is.null(df) || nrow(df) == 0) return(df)
+  legacy_map <- c(
+    "Distributional Properties"               = "(I) Distributional Properties",
+    "Distribution"                            = "(I) Distributional Properties",
+    "Correlation & Dependencies"              = "(II) Correlations & Zero-Inflation",
+    "Correlations & Zero-Inflation"           = "(II) Correlations & Zero-Inflation",
+    "Correlation"                             = "(II) Correlations & Zero-Inflation",
+    "Cellular Structure & Mixing"             = "(III) Cellular Structure & Concordance",
+    "Cellular Structure & Concordance"        = "(III) Cellular Structure & Concordance",
+    "Cell Structure"                          = "(III) Cellular Structure & Concordance",
+    "Batch Effects & Confounder Mixing"       = "(IV) Batch Effects & Confounder Mixing",
+    "Batch Mixing"                            = "(IV) Batch Effects & Confounder Mixing",
+    "Biological Signal & Downstream"          = "(V) Biological Signal & Downstream Fidelity",
+    "Biological Signal & Downstream Fidelity" = "(V) Biological Signal & Downstream Fidelity",
+    "Bio-Signal & DE"                         = "(V) Biological Signal & Downstream Fidelity",
+    "Trajectory Dynamics"                     = "(VI) Trajectory & Lineage Dynamics",
+    "Trajectory & Lineage Dynamics"           = "(VI) Trajectory & Lineage Dynamics",
+    "Trajectory"                              = "(VI) Trajectory & Lineage Dynamics",
+    "Traj."                                   = "(VI) Trajectory & Lineage Dynamics",
+    "Cross-Modal Relationships"               = "(VII) Cross-Modal Coupling & Modularity",
+    "Cross-Modal Coupling & Modularity"       = "(VII) Cross-Modal Coupling & Modularity",
+    "Cross-Modal"                             = "(VII) Cross-Modal Coupling & Modularity",
+    "Computational Scalability"               = "(VIII) Computational Scalability",
+    "Scalability"                             = "(VIII) Computational Scalability"
+  )
+  if ("Category" %in% colnames(df)) {
+    df$Category <- ifelse(df$Category %in% names(legacy_map),
+                          legacy_map[df$Category], df$Category)
+  }
+  if ("Metric" %in% colnames(df)) {
+    mc <- scSimEval:::.METRIC_CATEGORY_MAP[df$Metric]
+    idx <- !is.na(mc)
+    df$Category[idx] <- mc[idx]
+  }
+  df
+}
 
 # ==============================================================================
 # Helper Functions: Robust Matrix and Label Reading
@@ -225,7 +272,7 @@ ui <- page_navbar(
               tags$span(class = "category-pill", style = "background-color: #0D9488;", "(II) Correlations & Zero-Inflation (6 metrics)"),
               tags$span(class = "category-pill", style = "background-color: #B91C1C;", "(III) Cellular Structure & Concordance (10 metrics)"),
               tags$span(class = "category-pill", style = "background-color: #D97706;", "(IV) Batch Effects & Confounder Mixing (7 metrics)"),
-              tags$span(class = "category-pill", style = "background-color: #C2410C;", "(V) Biological Signal & Downstream Fidelity (7 metrics)"),
+              tags$span(class = "category-pill", style = "background-color: #C2410C;", "(V) Biological Signal & Downstream Fidelity (15 metrics)"),
               tags$span(class = "category-pill", style = "background-color: #7C3AED;", "(VI) Trajectory & Lineage Dynamics (2 metrics)"),
               tags$span(class = "category-pill", style = "background-color: #334155;", "(VII) Cross-Modal Coupling & Modularity (6 metrics)"),
               tags$span(class = "category-pill", style = "background-color: #15803D;", "(VIII) Computational Scalability (2 metrics)")
@@ -400,10 +447,7 @@ ui <- page_navbar(
           div(
             class = "bubble-scroll-container",
             uiOutput("ui_bubble_plot_render")
-          ),
-          hr(),
-          h5("Method Ranking Leaderboard (Average Fidelity Score)", style = "font-weight: 700;"),
-          DTOutput("table_bubble_leaderboard")
+          )
         )
       )
     )
@@ -959,6 +1003,7 @@ server <- function(input, output, session) {
           if (!"Score" %in% colnames(tbl_i) && "Value" %in% colnames(tbl_i)) {
             tbl_i$Score <- tbl_i$Value
           }
+          tbl_i <- standardize_benchmark_categories(tbl_i)
           results_list[[i]] <- tbl_i
         }
         
@@ -1071,6 +1116,7 @@ server <- function(input, output, session) {
           if (!"Score" %in% colnames(tbl_i) && "Value" %in% colnames(tbl_i)) {
             tbl_i$Score <- tbl_i$Value
           }
+          tbl_i <- standardize_benchmark_categories(tbl_i)
           results_list[[i]] <- tbl_i
         }
         
@@ -1125,6 +1171,7 @@ server <- function(input, output, session) {
       
       if (!"Method" %in% colnames(df) && "Simulator" %in% colnames(df)) df$Method <- df$Simulator
       if (!"Score" %in% colnames(df) && "Value" %in% colnames(df)) df$Score <- df$Value
+      df <- standardize_benchmark_categories(df)
       
       rv$benchmark_df <- df
       rv$methods <- unique(df$Method)
@@ -1199,6 +1246,7 @@ server <- function(input, output, session) {
     req(filtered_bubble_data())
     df <- filtered_bubble_data()
     req(nrow(df) > 0)
+    df <- standardize_benchmark_categories(df)
     
     p <- plot_benchmark_bubble_matrix(
       data              = df,
@@ -1247,16 +1295,6 @@ server <- function(input, output, session) {
     leaderboard$Fidelity_Score <- round(leaderboard$Score, 4)
     
     leaderboard[, c("Overall_Rank", "Method", "Average_Fidelity", "Fidelity_Score")]
-  })
-  
-  output$table_bubble_leaderboard <- renderDT({
-    req(leaderboard_reactive())
-    datatable(
-      leaderboard_reactive(),
-      options = list(pageLength = 10, dom = "t"),
-      rownames = FALSE,
-      class = "compact stripe hover"
-    )
   })
   
   output$download_bubble_jpeg <- downloadHandler(
