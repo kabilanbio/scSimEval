@@ -1001,6 +1001,8 @@ plot_scalability_benchmark <- function(
   layout <- match.arg(layout)
 
   df <- .ingest_bubble_data(benchmark_data)
+  df$Metric[df$Metric == "elapsed_time"] <- "elapsed_time_seconds"
+  df$Metric[df$Metric == "memory_mb"] <- "peak_memory_mb"
   sc_mets <- c("elapsed_time_seconds", "peak_memory_mb")
   sc_df <- df[df$Metric %in% sc_mets, , drop = FALSE]
   if (nrow(sc_df) == 0) stop("No computational scalability metrics (Category VIII) found in benchmark_data.")
@@ -2489,9 +2491,22 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
       Method    = tbl$Data_Name,
       Category  = tbl$Category,
       Metric    = tbl$Metric,
-      Score_Raw = tbl$Value,
+      Score_Raw = if (!is.null(tbl$Score)) tbl$Score else tbl$Value,
       stringsAsFactors = FALSE
     ))
+  }
+
+  # Direct evaluation result object with benchmark_summary_table or metrics_summary_table
+  if (is.list(data) && !is.data.frame(data)) {
+    if ("benchmark_summary_table" %in% names(data)) {
+      return(.ingest_bubble_data(data$benchmark_summary_table))
+    }
+    if ("metrics_summary_table" %in% names(data)) {
+      return(.ingest_bubble_data(data$metrics_summary_table))
+    }
+    if ("summary_table" %in% names(data)) {
+      return(.ingest_bubble_data(data$summary_table))
+    }
   }
 
   # Named list of individual benchmark outputs
@@ -2502,11 +2517,15 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
       tbl  <- NULL
       if (is.list(item) && !is.null(item$benchmark_summary_table)) tbl <- item$benchmark_summary_table
       if (is.list(item) && !is.null(item$metrics_summary_table))   tbl <- item$metrics_summary_table
+      if (is.list(item) && !is.null(item$summary_table))           tbl <- item$summary_table
       if (is.data.frame(item)) tbl <- item
-      if (!is.null(tbl))
-        rows[[nm]] <- data.frame(Method = nm, Category = tbl$Category,
-                                  Metric = tbl$Metric, Score_Raw = tbl$Value,
+      if (!is.null(tbl)) {
+        val <- if (!is.null(tbl$Score)) tbl$Score else if (!is.null(tbl$Value)) tbl$Value else NA_real_
+        mth <- if (!is.null(tbl$Method)) tbl$Method else nm
+        rows[[nm]] <- data.frame(Method = mth, Category = tbl$Category,
+                                  Metric = tbl$Metric, Score_Raw = val,
                                   stringsAsFactors = FALSE)
+      }
     }
     if (length(rows) == 0) stop("No valid benchmark tables found in the named list.")
     return(do.call(rbind, rows))

@@ -23,10 +23,11 @@ Invisibly returns the Shiny app process object.
 }
 \description{
 Launches the Shiny web application embedded in the \pkg{scSimEval} package.
-  Provides an intuitive graphical interface to ingest single-cell reference and simulated datasets,
-  configure ground-truth-free evaluation pipelines, interactively inspect the flagship 62-measure
-  bubble matrix, adjust category weighting for custom method rankings, and export
-  high-resolution (600 DPI) figures and tables.
+  Provides an intuitive graphical interface to ingest single-cell reference and simulated datasets
+  (individual or batch multiple datasets), specify computational scalability metrics (elapsed time and peak memory),
+  interactively inspect the flagship 62-measure comparative bubble matrix, explore all 8 diagnostic figures,
+  adjust category weighting for custom method rankings, and export
+  high-resolution JPEGs (300 DPI), multi-page PDF reports, Excel (.xlsx) workbooks, and complete results ZIP packages.
 }
 \examples{
 \dontrun{
