@@ -10,7 +10,7 @@ library(Matrix)
 library(scSimEval)
 
 # If running in local checkout, source updated visualizations to guarantee latest bugfixes
-for (p in c("R/10_visualizations.R", "../../R/10_visualizations.R", "../../../R/10_visualizations.R")) {
+for (p in c("10_visualizations.R", "R/10_visualizations.R", "../../R/10_visualizations.R", "../../../R/10_visualizations.R")) {
   if (file.exists(p)) {
     try(source(p, local = FALSE), silent = TRUE)
     break
@@ -1251,6 +1251,7 @@ server <- function(input, output, session) {
     p <- plot_benchmark_bubble_matrix(
       data              = df,
       base_size         = 11,
+      compact_strips    = TRUE,
       show_missing_dots = FALSE,
       normalize_scores  = TRUE
     )
