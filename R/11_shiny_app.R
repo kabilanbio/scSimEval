@@ -37,15 +37,16 @@ launch_scSimEval_app <- function(port = NULL, host = "127.0.0.1", launch.browser
     )
   }
   
-  app_dir <- system.file("shiny", "scSimEvalApp", package = "scSimEval")
-  if (app_dir == "" || !dir.exists(app_dir)) {
-    # Fallback check for local development checkout
-    fallback_dir <- file.path("inst", "shiny", "scSimEvalApp")
-    if (dir.exists(fallback_dir)) {
-      app_dir <- fallback_dir
-    } else {
-      stop("Could not find the 'scSimEvalApp' directory in the installed package. Please ensure scSimEval is properly installed.", call. = FALSE)
-    }
+  # Check local development repository first, then fall back to installed package directory
+  local_app_dir <- file.path("inst", "shiny", "scSimEvalApp")
+  installed_app_dir <- system.file("shiny", "scSimEvalApp", package = "scSimEval")
+  
+  if (file.exists(file.path(local_app_dir, "app.R"))) {
+    app_dir <- normalizePath(local_app_dir)
+  } else if (installed_app_dir != "" && dir.exists(installed_app_dir)) {
+    app_dir <- installed_app_dir
+  } else {
+    stop("Could not find the 'scSimEvalApp' directory in the local path or installed package. Please ensure scSimEval is properly installed.", call. = FALSE)
   }
   
   message("Starting scSimEval Benchmarking Studio...")
