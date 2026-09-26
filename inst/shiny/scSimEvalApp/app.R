@@ -20,7 +20,7 @@ if (demo_data_path == "" || !file.exists(demo_data_path)) {
 initial_demo <- if (file.exists(demo_data_path)) readRDS(demo_data_path) else NULL
 
 # ==============================================================================
-# Helper Functions: Robust Matrix and Label Ingestion
+# Helper Functions: Robust Matrix and Label Reading
 # ==============================================================================
 read_uploaded_matrix <- function(file_path, file_name) {
   if (is.null(file_path) || !file.exists(file_path)) return(NULL)
@@ -198,7 +198,7 @@ ui <- page_navbar(
           p("A unified scientific framework for evaluating and comparing single-cell transcriptomics (scRNA-seq), chromatin accessibility (scATAC-seq), and paired multiomics simulation techniques against empirical biological reference datasets.", style = "font-size: 1.05rem; opacity: 0.95; max-width: 1050px; line-height: 1.5;"),
           hr(style = "border-color: rgba(255,255,255,0.25); margin: 18px 0;"),
           div(
-            actionButton("btn_go_data", "1. Data Ingestion & Evaluation", class = "btn btn-outline-light me-2 mb-2", icon = icon("database")),
+            actionButton("btn_go_data", "1. Data Upload & Evaluation", class = "btn btn-outline-light me-2 mb-2", icon = icon("database")),
             actionButton("btn_go_bubble", "2. Comparative Bubble Matrix", class = "btn btn-success me-2 mb-2", icon = icon("chart-pie")),
             actionButton("btn_go_viz", "3. Diagnostic Visualizations", class = "btn btn-info text-white me-2 mb-2", icon = icon("chart-line")),
             actionButton("btn_go_download", "4. Download Results", class = "btn btn-outline-light me-2 mb-2", icon = icon("download")),
@@ -244,8 +244,8 @@ ui <- page_navbar(
           card_body(
             div(class = "guide-step",
                 div(class = "guide-num", "1"),
-                tags$b("Data Ingestion: "),
-                "Explore pre-computed benchmarks for 6 simulators or upload your own reference empirical counts and simulated datasets (individual or batch)."
+                tags$b("Data Upload & Evaluation: "),
+                "Explore pre-computed benchmarks for 6 simulators or upload your own biological reference counts and simulated datasets (single-cell or multiomics modalities)."
             ),
             div(class = "guide-step",
                 div(class = "guide-num", "2"),
@@ -270,15 +270,15 @@ ui <- page_navbar(
     "Data Hub",
     layout_sidebar(
       sidebar = sidebar(
-        width = 400,
-        title = "Data Ingestion & Evaluation",
+        width = 420,
+        title = "Data Upload & Evaluation",
         
         radioButtons(
-          "opt_data_mode", "Choose Ingestion Mode:",
+          "opt_data_mode", "Choose Evaluation Mode:",
           choices = c(
             "Option 1: Explore Demo Benchmark (6 Simulators)" = "demo",
-            "Option 2: Evaluate Single Simulator" = "single",
-            "Option 3: Evaluate Multiple Simulators (Batch)" = "multi",
+            "Option 2: Single-Cell Evaluation (scRNA-seq / scATAC-seq)" = "unimodal",
+            "Option 3: Multiomics Evaluation (scRNA-seq + scATAC-seq)" = "multiomics",
             "Option 4: Upload Saved Results (.rds / .csv)" = "upload_bench"
           ),
           selected = "demo"
@@ -292,47 +292,45 @@ ui <- page_navbar(
           actionButton("btn_load_demo", "Load Demo Benchmark (6 Simulators)", class = "btn btn-success w-100", icon = icon("play"))
         ),
         
-        # Mode 2: Single Simulator
+        # Mode 2: Single-Cell Evaluation (scRNA-seq or scATAC-seq) - 1 or multiple simulators
         conditionalPanel(
-          condition = "input.opt_data_mode == 'single'",
-          h6(tags$b("1. Count Matrices")),
-          fileInput("file_single_ref", "Reference Dataset (Real Cells):", accept = c(".rds", ".csv", ".tsv", ".txt")),
-          fileInput("file_single_sim", "Simulated Dataset:", accept = c(".rds", ".csv", ".tsv", ".txt")),
-          textInput("txt_single_name", "Simulator Method Name:", value = "MySimulator"),
+          condition = "input.opt_data_mode == 'unimodal'",
+          h6(tags$b("1. Reference Biological Dataset (Real Cells)")),
+          fileInput("file_uni_ref", "Reference Count Matrix (.rds / .csv / .tsv / .txt):", accept = c(".rds", ".csv", ".tsv", ".txt")),
           
-          h6(tags$b("2. Computational Scalability (2 Metrics)")),
-          fluidRow(
-            column(6, numericInput("num_single_time", "Elapsed Time (s):", value = 35.0, min = 0.1, step = 0.5)),
-            column(6, numericInput("num_single_mem", "Peak RAM (MB):", value = 820.0, min = 1, step = 10))
-          ),
+          h6(tags$b("2. Simulated Datasets (Select 1 or Multiple Files)")),
+          fileInput("file_uni_sims", "Simulated Count Matrices:", multiple = TRUE, accept = c(".rds", ".csv", ".tsv", ".txt")),
           
-          h6(tags$b("3. Optional Annotations")),
-          fileInput("file_single_celltypes", "Optional Cell Type Labels (.rds / .csv / .txt):", accept = c(".rds", ".csv", ".tsv", ".txt")),
-          fileInput("file_single_batch", "Optional Batch Annotations (.rds / .csv / .txt):", accept = c(".rds", ".csv", ".tsv", ".txt")),
+          h6(tags$b("3. Configure Simulator Details & Scalability (2 Metrics)")),
+          p("For each simulated dataset, specify the simulator name and scalability metrics:", style = "font-size: 0.85rem; color: #555;"),
+          uiOutput("ui_uni_sim_inputs"),
           
-          checkboxInput("chk_append_single", "Append to current benchmark (compare together)", value = TRUE),
-          actionButton("btn_run_single_eval", "Run Evaluation", class = "btn btn-primary w-100", icon = icon("calculator"))
+          h6(tags$b("4. Optional Biological Annotations")),
+          fileInput("file_uni_celltypes", "Optional Cell Type Labels (.rds / .csv / .txt):", accept = c(".rds", ".csv", ".tsv", ".txt")),
+          fileInput("file_uni_batch", "Optional Batch Annotations (.rds / .csv / .txt):", accept = c(".rds", ".csv", ".tsv", ".txt")),
+          
+          checkboxInput("chk_append_uni", "Append to current benchmark (compare together)", value = FALSE),
+          actionButton("btn_run_uni_eval", "Evaluate Single-Cell Simulators", class = "btn btn-primary w-100", icon = icon("calculator"))
         ),
         
-        # Mode 3: Multiple Simulators (Batch)
+        # Mode 3: Multiomics Evaluation (scRNA-seq + scATAC-seq) - 1 or multiple simulators
         conditionalPanel(
-          condition = "input.opt_data_mode == 'multi'",
-          h6(tags$b("1. Reference Biological Dataset")),
-          fileInput("file_multi_ref", "Reference Dataset (Real Cells):", accept = c(".rds", ".csv", ".tsv", ".txt")),
+          condition = "input.opt_data_mode == 'multiomics'",
+          h6(tags$b("1. Reference Multiomics Dataset (Real Cells)")),
+          fileInput("file_multi_ref_rna", "Reference RNA Count Matrix (.rds / .csv / .tsv / .txt):", accept = c(".rds", ".csv", ".tsv", ".txt")),
+          fileInput("file_multi_ref_atac", "Reference ATAC Count Matrix (.rds / .csv / .tsv / .txt):", accept = c(".rds", ".csv", ".tsv", ".txt")),
           
-          h6(tags$b("2. Multiple Simulated Datasets")),
-          fileInput("file_multi_sims", "Select Simulated Matrices (2 or more files):", multiple = TRUE, accept = c(".rds", ".csv", ".tsv", ".txt")),
+          h6(tags$b("2. Simulated Multiomics Datasets")),
+          numericInput("num_multi_sims", "Number of Multiomics Simulators to Compare:", value = 1, min = 1, max = 5, step = 1),
+          p("Provide simulated RNA and ATAC matrices along with scalability metrics for each simulator:", style = "font-size: 0.85rem; color: #555;"),
+          uiOutput("ui_multiomics_sim_inputs"),
           
-          h6(tags$b("3. Optional Annotations (Shared)")),
+          h6(tags$b("3. Optional Biological Annotations")),
           fileInput("file_multi_celltypes", "Optional Cell Type Labels (.rds / .csv / .txt):", accept = c(".rds", ".csv", ".tsv", ".txt")),
           fileInput("file_multi_batch", "Optional Batch Annotations (.rds / .csv / .txt):", accept = c(".rds", ".csv", ".tsv", ".txt")),
           
-          h6(tags$b("4. Configure Simulator Details & Scalability")),
-          p("For each selected simulator, specify its name and scalability metrics:", style = "font-size: 0.85rem; color: #555;"),
-          uiOutput("ui_multi_sim_scalability_inputs"),
-          
-          hr(),
-          actionButton("btn_run_multi_eval", "Evaluate All Simulators", class = "btn btn-primary w-100", icon = icon("cogs"))
+          checkboxInput("chk_append_multi", "Append to current benchmark (compare together)", value = FALSE),
+          actionButton("btn_run_multi_eval", "Evaluate Multiomics Simulators", class = "btn btn-primary w-100", icon = icon("dna"))
         ),
         
         # Mode 4: Saved Benchmark Upload
@@ -887,129 +885,65 @@ server <- function(input, output, session) {
   })
   
   # ----------------------------------------------------------------------------
-  # Data Hub: Dynamic Inputs for Multiple Simulators Upload (Mode 3)
+  # Data Hub: Mode 2 Dynamic Inputs (Single-Cell: scRNA-seq / scATAC-seq)
   # ----------------------------------------------------------------------------
-  output$ui_multi_sim_scalability_inputs <- renderUI({
-    req(input$file_multi_sims)
-    n_files <- nrow(input$file_multi_sims)
-    if (n_files == 0) return(NULL)
+  output$ui_uni_sim_inputs <- renderUI({
+    if (is.null(input$file_uni_sims) || nrow(input$file_uni_sims) == 0) {
+      return(p("Upload one or more simulated count matrices above to configure simulator names and scalability metrics.", style = "font-size: 0.85rem; color: #6c757d; font-style: italic;"))
+    }
+    n_files <- nrow(input$file_uni_sims)
     
     inputs_list <- lapply(seq_len(n_files), function(i) {
-      fname <- input$file_multi_sims$name[i]
+      fname <- input$file_uni_sims$name[i]
       default_name <- tools::file_path_sans_ext(fname)
       
       div(
         class = "sim-input-card",
         tags$b(paste0("Simulator ", i, ": "), style = "font-size: 0.9rem; color: #1B4F72;"),
-        textInput(paste0("multi_sim_name_", i), "Method Name:", value = default_name),
+        textInput(paste0("uni_name_", i), "Simulator Name:", value = default_name),
         fluidRow(
-          column(6, numericInput(paste0("multi_sim_time_", i), "Elapsed Time (s):", value = round(25 + i * 12, 1), min = 0.1, step = 0.5)),
-          column(6, numericInput(paste0("multi_sim_mem_", i), "Peak RAM (MB):", value = round(650 + i * 180, 0), min = 1, step = 10))
+          column(6, numericInput(paste0("uni_time_", i), "Elapsed Time (s):", value = round(25 + i * 10, 1), min = 0.1, step = 0.5)),
+          column(6, numericInput(paste0("uni_mem_", i), "Peak RAM (MB):", value = round(650 + i * 150, 0), min = 1, step = 10))
         )
       )
     })
-    
     tagList(inputs_list)
   })
   
   # ----------------------------------------------------------------------------
-  # Data Hub: Mode 2 - Run Single Simulator Evaluation
+  # Data Hub: Mode 2 Evaluation Trigger (Single-Cell: 1 or Multiple Simulators)
   # ----------------------------------------------------------------------------
-  observeEvent(input$btn_run_single_eval, {
-    req(input$file_single_ref, input$file_single_sim)
-    
-    withProgress(message = "Evaluating simulator...", detail = "Loading count matrices", value = 0.2, {
-      tryCatch({
-        ref_mat <- read_uploaded_matrix(input$file_single_ref$datapath, input$file_single_ref$name)
-        sim_mat <- read_uploaded_matrix(input$file_single_sim$datapath, input$file_single_sim$name)
-        
-        incProgress(0.3, detail = "Computing 62 evaluation metrics...")
-        
-        sim_name <- trimws(input$txt_single_name)
-        if (sim_name == "") sim_name <- "Simulator"
-        
-        elapsed_sec <- as.numeric(input$num_single_time)
-        peak_ram <- as.numeric(input$num_single_mem)
-        
-        cell_types_vec <- read_uploaded_labels(input$file_single_celltypes$datapath, input$file_single_celltypes$name)
-        batch_vec <- read_uploaded_labels(input$file_single_batch$datapath, input$file_single_batch$name)
-        
-        res <- evaluate_simulation_accuracy(
-          ref_data = ref_mat,
-          sim_data = sim_mat,
-          memory_mb = peak_ram,
-          elapsed_time = elapsed_sec,
-          compute_bivariate = FALSE,
-          verbose = FALSE
-        )
-        
-        incProgress(0.3, detail = "Formatting results table...")
-        
-        tbl <- res$metrics_summary_table
-        tbl$Method <- sim_name
-        
-        if (!"Score" %in% colnames(tbl) && "Value" %in% colnames(tbl)) {
-          tbl$Score <- tbl$Value
-        }
-        
-        if (isTRUE(input$chk_append_single) && !is.null(rv$benchmark_df)) {
-          existing_clean <- rv$benchmark_df[rv$benchmark_df$Method != sim_name, , drop = FALSE]
-          combined <- rbind(existing_clean, tbl[, intersect(colnames(existing_clean), colnames(tbl))])
-          rv$benchmark_df <- combined
-          rv$methods <- unique(combined$Method)
-          rv$source_name <- paste0("Combined Benchmark (", length(rv$methods), " Simulators)")
-        } else {
-          rv$benchmark_df <- tbl
-          rv$methods <- sim_name
-          rv$source_name <- paste0("Single Evaluation: ", sim_name)
-        }
-        
-        rv$toy_ref <- ref_mat
-        rv$toy_sim <- sim_mat
-        
-        updateCheckboxGroupInput(session, "sel_bubble_methods", choices = rv$methods, selected = rv$methods)
-        incProgress(0.2, detail = "Done!")
-        showNotification(paste0("Successfully evaluated '", sim_name, "'!"), type = "message")
-      }, error = function(e) {
-        showNotification(paste("Evaluation error:", e$message), type = "error")
-      })
-    })
-  })
-  
-  # ----------------------------------------------------------------------------
-  # Data Hub: Mode 3 - Run Multiple Simulators Evaluation
-  # ----------------------------------------------------------------------------
-  observeEvent(input$btn_run_multi_eval, {
-    req(input$file_multi_ref, input$file_multi_sims)
-    n_files <- nrow(input$file_multi_sims)
+  observeEvent(input$btn_run_uni_eval, {
+    req(input$file_uni_ref, input$file_uni_sims)
+    n_files <- nrow(input$file_uni_sims)
     req(n_files > 0)
     
-    withProgress(message = "Batch Evaluation", value = 0, {
+    withProgress(message = "Single-Cell Evaluation", value = 0, {
       tryCatch({
         incProgress(0.1, detail = "Loading biological reference matrix...")
-        ref_mat <- read_uploaded_matrix(input$file_multi_ref$datapath, input$file_multi_ref$name)
+        ref_mat <- read_uploaded_matrix(input$file_uni_ref$datapath, input$file_uni_ref$name)
         
-        cell_types_vec <- read_uploaded_labels(input$file_multi_celltypes$datapath, input$file_multi_celltypes$name)
-        batch_vec <- read_uploaded_labels(input$file_multi_batch$datapath, input$file_multi_batch$name)
+        cell_types_vec <- read_uploaded_labels(input$file_uni_celltypes$datapath, input$file_uni_celltypes$name)
+        batch_vec <- read_uploaded_labels(input$file_uni_batch$datapath, input$file_uni_batch$name)
         
         results_list <- list()
         first_sim_mat <- NULL
         
         for (i in seq_len(n_files)) {
-          sim_name <- input[[paste0("multi_sim_name_", i)]]
+          sim_name <- input[[paste0("uni_name_", i)]]
           if (is.null(sim_name) || trimws(sim_name) == "") {
-            sim_name <- tools::file_path_sans_ext(input$file_multi_sims$name[i])
+            sim_name <- tools::file_path_sans_ext(input$file_uni_sims$name[i])
           }
           
-          sim_time <- as.numeric(input[[paste0("multi_sim_time_", i)]])
+          sim_time <- as.numeric(input[[paste0("uni_time_", i)]])
           if (is.null(sim_time) || is.na(sim_time)) sim_time <- 30.0
           
-          sim_mem <- as.numeric(input[[paste0("multi_sim_mem_", i)]])
+          sim_mem <- as.numeric(input[[paste0("uni_mem_", i)]])
           if (is.null(sim_mem) || is.na(sim_mem)) sim_mem <- 800.0
           
           incProgress(0.7 / n_files, detail = sprintf("Evaluating [%d/%d]: %s", i, n_files, sim_name))
           
-          sim_mat <- read_uploaded_matrix(input$file_multi_sims$datapath[i], input$file_multi_sims$name[i])
+          sim_mat <- read_uploaded_matrix(input$file_uni_sims$datapath[i], input$file_uni_sims$name[i])
           if (i == 1) first_sim_mat <- sim_mat
           
           res_i <- evaluate_simulation_accuracy(
@@ -1029,19 +963,137 @@ server <- function(input, output, session) {
           results_list[[i]] <- tbl_i
         }
         
-        incProgress(0.1, detail = "Consolidating all evaluated datasets...")
+        incProgress(0.1, detail = "Consolidating evaluated datasets...")
         combined_df <- do.call(rbind, results_list)
         
-        rv$benchmark_df <- combined_df
-        rv$methods <- unique(combined_df$Method)
+        if (isTRUE(input$chk_append_uni) && !is.null(rv$benchmark_df)) {
+          existing_clean <- rv$benchmark_df[!rv$benchmark_df$Method %in% unique(combined_df$Method), , drop = FALSE]
+          rv$benchmark_df <- rbind(existing_clean, combined_df[, intersect(colnames(existing_clean), colnames(combined_df))])
+        } else {
+          rv$benchmark_df <- combined_df
+        }
+        
+        rv$methods <- unique(rv$benchmark_df$Method)
         rv$toy_ref <- ref_mat
         rv$toy_sim <- first_sim_mat
-        rv$source_name <- sprintf("Batch Evaluated: %d Simulators against Reference", length(rv$methods))
+        rv$source_name <- sprintf("Single-Cell Benchmark (%d Simulators)", length(rv$methods))
         
         updateCheckboxGroupInput(session, "sel_bubble_methods", choices = rv$methods, selected = rv$methods)
-        showNotification(sprintf("Batch evaluation complete! Evaluated %d simulators simultaneously.", length(rv$methods)), type = "message")
+        showNotification(sprintf("Single-cell evaluation complete! Evaluated %d simulator(s).", n_files), type = "message")
       }, error = function(e) {
-        showNotification(paste("Multi-simulator evaluation error:", e$message), type = "error")
+        showNotification(paste("Evaluation error:", e$message), type = "error")
+      })
+    })
+  })
+  
+  # ----------------------------------------------------------------------------
+  # Data Hub: Mode 3 Dynamic Inputs (Multiomics: scRNA-seq + scATAC-seq)
+  # ----------------------------------------------------------------------------
+  output$ui_multiomics_sim_inputs <- renderUI({
+    n_sims <- if (!is.null(input$num_multi_sims)) as.integer(input$num_multi_sims) else 1
+    if (is.na(n_sims) || n_sims < 1) n_sims <- 1
+    if (n_sims > 5) n_sims <- 5
+    
+    inputs_list <- lapply(seq_len(n_sims), function(i) {
+      default_name <- paste("MultiSimulator", i)
+      div(
+        class = "sim-input-card",
+        tags$b(paste0("Simulator ", i, ": "), style = "font-size: 0.9rem; color: #1B4F72;"),
+        textInput(paste0("multi_sim_name_", i), "Simulator Name:", value = default_name),
+        fileInput(paste0("file_multi_sim_rna_", i), "Simulated RNA Matrix (.rds / .csv / .txt):", accept = c(".rds", ".csv", ".tsv", ".txt")),
+        fileInput(paste0("file_multi_sim_atac_", i), "Simulated ATAC Matrix (.rds / .csv / .txt):", accept = c(".rds", ".csv", ".tsv", ".txt")),
+        fluidRow(
+          column(6, numericInput(paste0("multi_sim_time_", i), "Elapsed Time (s):", value = round(45 + i * 15, 1), min = 0.1, step = 0.5)),
+          column(6, numericInput(paste0("multi_sim_mem_", i), "Peak RAM (MB):", value = round(1100 + i * 250, 0), min = 1, step = 10))
+        )
+      )
+    })
+    tagList(inputs_list)
+  })
+  
+  # ----------------------------------------------------------------------------
+  # Data Hub: Mode 3 Evaluation Trigger (Multiomics Simulators)
+  # ----------------------------------------------------------------------------
+  observeEvent(input$btn_run_multi_eval, {
+    req(input$file_multi_ref_rna, input$file_multi_ref_atac)
+    n_sims <- if (!is.null(input$num_multi_sims)) as.integer(input$num_multi_sims) else 1
+    if (is.na(n_sims) || n_sims < 1) n_sims <- 1
+    
+    withProgress(message = "Multiomics Evaluation", value = 0, {
+      tryCatch({
+        incProgress(0.1, detail = "Loading biological reference RNA and ATAC...")
+        ref_rna <- read_uploaded_matrix(input$file_multi_ref_rna$datapath, input$file_multi_ref_rna$name)
+        ref_atac <- read_uploaded_matrix(input$file_multi_ref_atac$datapath, input$file_multi_ref_atac$name)
+        
+        cell_types_vec <- read_uploaded_labels(input$file_multi_celltypes$datapath, input$file_multi_celltypes$name)
+        batch_vec <- read_uploaded_labels(input$file_multi_batch$datapath, input$file_multi_batch$name)
+        
+        results_list <- list()
+        first_sim_rna <- NULL
+        
+        for (i in seq_len(n_sims)) {
+          rna_file <- input[[paste0("file_multi_sim_rna_", i)]]
+          atac_file <- input[[paste0("file_multi_sim_atac_", i)]]
+          
+          if (is.null(rna_file) || is.null(atac_file)) {
+            stop(sprintf("Please upload both simulated RNA and ATAC files for Simulator %d.", i))
+          }
+          
+          sim_name <- input[[paste0("multi_sim_name_", i)]]
+          if (is.null(sim_name) || trimws(sim_name) == "") {
+            sim_name <- paste("MultiSimulator", i)
+          }
+          
+          sim_time <- as.numeric(input[[paste0("multi_sim_time_", i)]])
+          if (is.null(sim_time) || is.na(sim_time)) sim_time <- 45.0
+          
+          sim_mem <- as.numeric(input[[paste0("multi_sim_mem_", i)]])
+          if (is.null(sim_mem) || is.na(sim_mem)) sim_mem <- 1200.0
+          
+          incProgress(0.7 / n_sims, detail = sprintf("Evaluating multiomics [%d/%d]: %s", i, n_sims, sim_name))
+          
+          sim_rna <- read_uploaded_matrix(rna_file$datapath, rna_file$name)
+          sim_atac <- read_uploaded_matrix(atac_file$datapath, atac_file$name)
+          if (i == 1) first_sim_rna <- sim_rna
+          
+          res_i <- evaluate_multiomics_accuracy(
+            ref_multi = list(rna = ref_rna, atac = ref_atac),
+            sim_multi = list(rna = sim_rna, atac = sim_atac),
+            cell_types = cell_types_vec,
+            batch_info = batch_vec,
+            memory_mb = sim_mem,
+            elapsed_time = sim_time,
+            compute_bivariate = FALSE,
+            verbose = FALSE
+          )
+          
+          tbl_i <- res_i$benchmark_summary_table
+          tbl_i$Method <- sim_name
+          if (!"Score" %in% colnames(tbl_i) && "Value" %in% colnames(tbl_i)) {
+            tbl_i$Score <- tbl_i$Value
+          }
+          results_list[[i]] <- tbl_i
+        }
+        
+        incProgress(0.1, detail = "Consolidating multiomics benchmark...")
+        combined_df <- do.call(rbind, results_list)
+        
+        if (isTRUE(input$chk_append_multi) && !is.null(rv$benchmark_df)) {
+          existing_clean <- rv$benchmark_df[!rv$benchmark_df$Method %in% unique(combined_df$Method), , drop = FALSE]
+          rv$benchmark_df <- rbind(existing_clean, combined_df[, intersect(colnames(existing_clean), colnames(combined_df))])
+        } else {
+          rv$benchmark_df <- combined_df
+        }
+        
+        rv$methods <- unique(rv$benchmark_df$Method)
+        rv$toy_ref <- ref_rna
+        rv$toy_sim <- first_sim_rna
+        rv$source_name <- sprintf("Multiomics Benchmark (%d Simulators)", length(rv$methods))
+        
+        updateCheckboxGroupInput(session, "sel_bubble_methods", choices = rv$methods, selected = rv$methods)
+        showNotification(sprintf("Multiomics evaluation complete! Evaluated %d simulator(s).", n_sims), type = "message")
+      }, error = function(e) {
+        showNotification(paste("Multiomics evaluation error:", e$message), type = "error")
       })
     })
   })

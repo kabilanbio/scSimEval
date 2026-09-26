@@ -1,10 +1,9 @@
 #' @title Launch Interactive scSimEval Benchmarking Studio
 #' @description Launches the Shiny web application embedded in the \pkg{scSimEval} package.
-#'   Provides an intuitive graphical interface to ingest single-cell reference and simulated datasets
-#'   (individual or batch multiple datasets), specify computational scalability metrics (elapsed time and peak memory),
-#'   interactively inspect the flagship 62-measure comparative bubble matrix, explore all 8 diagnostic figures,
-#'   adjust category weighting for custom method rankings, and export
-#'   high-resolution JPEGs (300 DPI), multi-page PDF reports, Excel (.xlsx) workbooks, and complete results ZIP packages.
+#'   Provides an intuitive graphical interface to upload biological reference and simulated datasets
+#'   (single-cell scRNA-seq, scATAC-seq, or paired multiomics), specify computational scalability metrics (elapsed time and peak memory),
+#'   interactively inspect the flagship 62-measure comparative bubble matrix, explore diagnostic figures,
+#'   and export high-resolution figures (600 DPI publication quality), multi-page PDF reports, Excel (.xlsx) workbooks, and complete results ZIP packages.
 #'
 #' @param port Optional port number for the local web server. Default is \code{NULL} (random open port).
 #' @param host Character string specifying the IP address to listen on. Defaults to \code{"127.0.0.1"}.
