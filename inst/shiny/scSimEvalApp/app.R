@@ -133,18 +133,18 @@ ui <- page_navbar(
     tags$style(HTML("
       .navbar { box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-weight: 600; }
       .nav-link { font-size: 0.95rem; }
-      .stat-card { border-radius: 10px; border-left: 5px solid #1B4F72; box-shadow: 0 3px 6px rgba(0,0,0,0.05); background: white; padding: 16px; margin-bottom: 15px; }
-      .stat-number { font-size: 2.2rem; font-weight: 800; color: #1B4F72; line-height: 1; }
-      .stat-label { font-size: 0.82rem; text-transform: uppercase; color: #7F8C8D; font-weight: 600; letter-spacing: 0.5px; }
-      .category-pill { display: inline-block; padding: 5px 12px; border-radius: 14px; font-size: 0.82rem; font-weight: 600; color: white; margin: 3px; }
-      .hero-box { background: linear-gradient(135deg, #1B4F72 0%, #2C3E50 100%); color: white; border-radius: 12px; padding: 26px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(27,79,114,0.25); }
-      .card-header { font-weight: 700; color: #2C3E50; background-color: #F8F9F9; }
-      .btn-primary { background-color: #1B4F72; border-color: #1B4F72; }
-      .btn-primary:hover { background-color: #154360; border-color: #154360; }
-      .btn-success { background-color: #16A085; border-color: #16A085; }
-      .btn-success:hover { background-color: #117A65; border-color: #117A65; }
-      .guide-step { background: #FFFFFF; border-radius: 10px; border: 1px solid #E2E8F0; padding: 16px; margin-bottom: 14px; }
-      .guide-num { display: inline-block; width: 30px; height: 30px; line-height: 30px; border-radius: 50%; background: #1B4F72; color: white; font-weight: 800; text-align: center; margin-right: 10px; }
+      .stat-card { border-radius: 8px; border-left: 4px solid #1E3A8A; box-shadow: 0 1px 4px rgba(0,0,0,0.05); background: white; padding: 16px; margin-bottom: 15px; }
+      .stat-number { font-size: 2.1rem; font-weight: 800; line-height: 1; }
+      .stat-label { font-size: 0.8rem; text-transform: uppercase; color: #64748B; font-weight: 600; letter-spacing: 0.5px; margin-top: 5px; }
+      .category-pill { display: inline-block; padding: 4px 11px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; color: white; margin: 3px; }
+      .hero-box { background: linear-gradient(135deg, #1E3A5F 0%, #243B55 100%); color: white; border-radius: 10px; padding: 24px; margin-bottom: 20px; box-shadow: 0 3px 10px rgba(30,58,95,0.15); }
+      .card-header { font-weight: 700; color: #1E293B; background-color: #F8FAFC; border-bottom: 1px solid #E2E8F0; }
+      .btn-primary { background-color: #1E3A8A; border-color: #1E3A8A; }
+      .btn-primary:hover { background-color: #172554; border-color: #172554; }
+      .btn-success { background-color: #0D9488; border-color: #0D9488; }
+      .btn-success:hover { background-color: #0F766E; border-color: #0F766E; }
+      .guide-step { background: #FFFFFF; border-radius: 8px; border: 1px solid #E2E8F0; padding: 15px; margin-bottom: 12px; }
+      .guide-num { display: inline-block; width: 28px; height: 28px; line-height: 28px; border-radius: 50%; background: #1E3A8A; color: white; font-weight: 700; text-align: center; margin-right: 10px; font-size: 0.85rem; }
       
       /* Keep all 7 visual sub-panels in a single non-wrapping row */
       .nav-pills {
@@ -185,33 +185,33 @@ ui <- page_navbar(
   ),
   
   # ============================================================================
-  # TAB 1: OVERVIEW
+  # TAB 1: HOME
   # ============================================================================
   nav_panel(
-    "Overview",
+    "Home",
     fluidRow(
       column(
         12,
         div(
           class = "hero-box",
-          h2("scSimEval: Single-Cell Simulation Benchmarking Studio", style = "font-weight: 800;"),
-          p("A simple, ground-truth-free evaluation toolkit to assess how realistic simulated data are compared to real biological datasets. Evaluates single-cell and multiomics simulation methods across 62 curated metrics and 8 foundational categories.", style = "font-size: 1.05rem; opacity: 0.95;"),
-          hr(style = "border-color: rgba(255,255,255,0.25);"),
+          h2("scSimEval: Single-Cell & Multiomics Simulation Benchmarking Studio", style = "font-weight: 800; font-size: 1.85rem; letter-spacing: -0.5px;"),
+          p("A unified scientific framework for evaluating and comparing single-cell transcriptomics (scRNA-seq), chromatin accessibility (scATAC-seq), and paired multiomics simulation techniques against empirical biological reference datasets.", style = "font-size: 1.05rem; opacity: 0.95; max-width: 1050px; line-height: 1.5;"),
+          hr(style = "border-color: rgba(255,255,255,0.25); margin: 18px 0;"),
           div(
-            actionButton("btn_go_data", "1. Load Data", class = "btn btn-outline-light me-2", icon = icon("upload")),
-            actionButton("btn_go_bubble", "2. Comparative Bubble Matrix", class = "btn btn-success me-2", icon = icon("chart-pie")),
-            actionButton("btn_go_viz", "3. View All 7 Diagnostic Figures", class = "btn btn-info me-2 text-white", icon = icon("images")),
-            actionButton("btn_go_download", "4. Download Results", class = "btn btn-outline-light me-2", icon = icon("download")),
-            actionButton("btn_go_help", "Getting Started & Help", class = "btn btn-warning text-dark", icon = icon("book-open"))
+            actionButton("btn_go_data", "1. Data Ingestion & Evaluation", class = "btn btn-outline-light me-2 mb-2", icon = icon("database")),
+            actionButton("btn_go_bubble", "2. Comparative Bubble Matrix", class = "btn btn-success me-2 mb-2", icon = icon("chart-pie")),
+            actionButton("btn_go_viz", "3. Diagnostic Visualizations", class = "btn btn-info text-white me-2 mb-2", icon = icon("chart-line")),
+            actionButton("btn_go_download", "4. Download Results", class = "btn btn-outline-light me-2 mb-2", icon = icon("download")),
+            actionButton("btn_go_help", "Documentation & Help", class = "btn btn-outline-light mb-2", icon = icon("book-open"))
           )
         )
       )
     ),
     fluidRow(
-      column(3, div(class = "stat-card", div(class = "stat-number", "62"), div(class = "stat-label", "Evaluation Metrics"))),
-      column(3, div(class = "stat-card", div(class = "stat-number", "8"), div(class = "stat-label", "Evaluation Categories"))),
-      column(3, div(class = "stat-card", div(class = "stat-number", "2"), div(class = "stat-label", "Scalability Metrics (Time & RAM)"))),
-      column(3, div(class = "stat-card", div(class = "stat-number", "100%"), div(class = "stat-label", "Ground-Truth-Free")))
+      column(3, div(class = "stat-card", style = "border-left-color: #1E3A8A;", div(class = "stat-number", style = "color: #1E3A8A;", "62"), div(class = "stat-label", "Curated Evaluation Measures"))),
+      column(3, div(class = "stat-card", style = "border-left-color: #0D9488;", div(class = "stat-number", style = "color: #0D9488;", "8"), div(class = "stat-label", "Canonical Biological Categories"))),
+      column(3, div(class = "stat-card", style = "border-left-color: #4F46E5;", div(class = "stat-number", style = "color: #4F46E5;", "3"), div(class = "stat-label", "Supported Data Modalities"))),
+      column(3, div(class = "stat-card", style = "border-left-color: #0284C7;", div(class = "stat-number", style = "color: #0284C7;", "0 – 1"), div(class = "stat-label", "Standardized Fidelity Scale")))
     ),
     fluidRow(
       column(
@@ -220,41 +220,42 @@ ui <- page_navbar(
           card_header("Eight Evaluation Categories"),
           card_body(
             tags$div(
-              tags$span(class = "category-pill", style = "background-color: #2E86AB;", "(I) Distributional Properties (14 metrics)"),
-              tags$span(class = "category-pill", style = "background-color: #17A589;", "(II) Correlations & Zero-Inflation (6 metrics)"),
-              tags$span(class = "category-pill", style = "background-color: #C0392B;", "(III) Cellular Structure & Concordance (10 metrics)"),
-              tags$span(class = "category-pill", style = "background-color: #D4AC0D;", "(IV) Batch Effects & Confounder Mixing (7 metrics)"),
-              tags$span(class = "category-pill", style = "background-color: #CA6F1E;", "(V) Biological Signal & Downstream Fidelity (7 metrics)"),
-              tags$span(class = "category-pill", style = "background-color: #7D3C98;", "(VI) Trajectory & Lineage Dynamics (2 metrics)"),
-              tags$span(class = "category-pill", style = "background-color: #2E4057;", "(VII) Cross-Modal Coupling & Modularity (6 metrics)"),
-              tags$span(class = "category-pill", style = "background-color: #1E8449;", "(VIII) Computational Scalability (2 metrics)")
+              style = "margin-bottom: 14px;",
+              tags$span(class = "category-pill", style = "background-color: #2563EB;", "(I) Distributional Properties (14 metrics)"),
+              tags$span(class = "category-pill", style = "background-color: #0D9488;", "(II) Correlations & Zero-Inflation (6 metrics)"),
+              tags$span(class = "category-pill", style = "background-color: #B91C1C;", "(III) Cellular Structure & Concordance (10 metrics)"),
+              tags$span(class = "category-pill", style = "background-color: #D97706;", "(IV) Batch Effects & Confounder Mixing (7 metrics)"),
+              tags$span(class = "category-pill", style = "background-color: #C2410C;", "(V) Biological Signal & Downstream Fidelity (7 metrics)"),
+              tags$span(class = "category-pill", style = "background-color: #7C3AED;", "(VI) Trajectory & Lineage Dynamics (2 metrics)"),
+              tags$span(class = "category-pill", style = "background-color: #334155;", "(VII) Cross-Modal Coupling & Modularity (6 metrics)"),
+              tags$span(class = "category-pill", style = "background-color: #15803D;", "(VIII) Computational Scalability (2 metrics)")
             ),
             hr(),
-            h5("Why Ground-Truth-Free Evaluation?", style = "font-weight: 700;"),
-            p("Traditional evaluation methods often depend on artificial synthetic labels (such as preset lists of differentially expressed genes or pre-simulated gene networks). This can create circular evaluation where simulators are evaluated on their own internal hypotheses."),
-            p(tags$b("scSimEval"), " measures statistical divergence, clustering consistency, and manifold geometry directly against real biological reference datasets.")
+            h5("Evaluation Methodology", style = "font-weight: 700; color: #1E293B;"),
+            p("The scSimEval framework systematically benchmarks simulation tools across biological, technical, and computational dimensions. By comparing simulated single-cell profiles directly against genuine empirical reference data, it quantifies how faithfully synthetic datasets reproduce true biological properties."),
+            p("All raw metrics are transformed through direction-aware standardization to a common [0, 1] scale, allowing seamless multi-metric synthesis, visual matrix comparisons, and objective method rankings.", style = "margin-bottom: 0;")
           )
         )
       ),
       column(
         5,
         card(
-          card_header("Quick-Start Guide"),
+          card_header("Standardized Benchmarking Workflow"),
           card_body(
             div(class = "guide-step",
                 div(class = "guide-num", "1"),
-                tags$b("Load Data: "),
-                "Click 'Load Demo Benchmark' in Data Hub to immediately view 6 simulators, or upload your own real reference and simulated datasets."
+                tags$b("Data Ingestion: "),
+                "Explore pre-computed benchmarks for 6 simulators or upload your own reference empirical counts and simulated datasets (individual or batch)."
             ),
             div(class = "guide-step",
                 div(class = "guide-num", "2"),
-                tags$b("Comparative Bubble Matrix: "),
-                "Compare all simulators side-by-side in one matrix. Use the horizontal slider to smoothly scroll across all metrics."
+                tags$b("Comparative Synthesis: "),
+                "Examine the 62-metric bubble matrix comparing all simulators side-by-side, along with the automated performance leaderboard."
             ),
             div(class = "guide-step",
                 div(class = "guide-num", "3"),
-                tags$b("Download Results: "),
-                "Export publication-ready 600 DPI images, Excel tables (.xlsx), full multi-page PDF reports, or download all files in one zip archive."
+                tags$b("Diagnostic & Publication Deliverables: "),
+                "Inspect category summaries, distribution QC, PCA/MDS ordinations, and export high-resolution (600 DPI) figures and Excel workbooks."
             )
           )
         )
@@ -836,7 +837,7 @@ ui <- page_navbar(
             h4("5. Frequently Asked Questions (FAQ)", style = "font-weight: 700; color: #1B4F72;"),
             tags$ul(
               tags$li(tags$b("What file formats are supported? "), "You can upload .rds (matrices or data frames), .csv, .tsv, or .txt files."),
-              tags$li(tags$b("Do I need external ground truth? "), "No. scSimEval is 100% ground-truth-free and measures how well simulated data match genuine biological reference datasets."),
+              tags$li(tags$b("Do I need artificial ground truth labels? "), "No. scSimEval evaluates how well simulated data reproduce genuine biological reference datasets across statistical, cellular, and molecular properties."),
               tags$li(tags$b("How should I measure runtime and memory? "), "Record the wall-clock execution time (seconds) and the peak resident memory (MB) consumed by your simulator, then enter them in the Scalability inputs.")
             )
           )
