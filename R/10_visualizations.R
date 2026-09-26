@@ -2423,7 +2423,9 @@ plot_benchmark_bubble_matrix <- function(
       x        = NULL,
       y        = y_title,
       caption  = paste0(
-        "Circle: standard performance (< 0.96)  |  Square: top performer (>= 0.96)  |  Grey dot: metric not computed.\n",
+        "Circle: standard performance (< 0.96)  |  Square: top performer (>= 0.96)",
+        if (show_missing_dots) "  |  Grey dot: metric not computed." else ".\n",
+        if (show_missing_dots) "\n" else "",
         "All ", length(unique(df$Display_Metric)), " metrics direction-normalized: for error/distance metrics, scores are inverted as 1 - norm(x) so 1.0 always indicates closest agreement to empirical reference."
       )
     ) +

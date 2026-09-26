@@ -92,7 +92,7 @@ export_single_jpeg <- function(file, plot_obj, width = 14, height = 9, dpi = 600
 # Generate Multi-Page PDF Report
 generate_all_plots_pdf <- function(file, benchmark_data, toy_ref = NULL, toy_sim = NULL) {
   grDevices::pdf(file, width = 14, height = 9, onefile = TRUE)
-  try(print(plot_benchmark_bubble_matrix(benchmark_data, base_size = 9.5)), silent = TRUE)
+  try(print(plot_benchmark_bubble_matrix(benchmark_data, base_size = 9.5, show_missing_dots = FALSE)), silent = TRUE)
   try(print(plot_evaluation_summary(benchmark_data, base_size = 12)), silent = TRUE)
   try(print(plot_scalability_benchmark(benchmark_data, base_size = 12)), silent = TRUE)
   try(print(plot_metric_boxplots(benchmark_data, base_size = 11)), silent = TRUE)
@@ -383,10 +383,9 @@ ui <- page_navbar(
         
         uiOutput("ui_bubble_method_picker"),
         
-        checkboxInput("chk_bubble_missing", "Show Missing Dots (Unmeasured)", value = TRUE),
-        
-        sliderInput("sld_bubble_width", "Matrix Display Width (px):", min = 800, max = 2600, value = 1400, step = 50),
-        p("Tip: Adjust width slider to smoothly scroll horizontally and view all metrics without squishing.", style = "font-size: 0.82rem; color: #666;"),
+        sliderInput("sld_bubble_width", "Matrix Display Width (px):", min = 1200, max = 3200, value = 2200, step = 50),
+        sliderInput("sld_bubble_height", "Matrix Display Height (px):", min = 450, max = 1100, value = 680, step = 20),
+        p("Tip: Default 2200 x 680 px matches the R package publication format (23:7 aspect ratio). Use the horizontal scrollbar to inspect all 62 measures smoothly without squishing.", style = "font-size: 0.82rem; color: #666;"),
         
         hr(),
         h6(tags$b("Download This Plot:")),
@@ -1201,19 +1200,26 @@ server <- function(input, output, session) {
     df <- filtered_bubble_data()
     req(nrow(df) > 0)
     
-    plot_benchmark_bubble_matrix(
+    p <- plot_benchmark_bubble_matrix(
       data              = df,
-      title             = "scSimEval Studio: Multi-Dimensional Simulation Fidelity Matrix",
-      subtitle          = "Standardized Direction-Aware Fidelity Scores [0, 1] Across 8 Canonical Evaluation Categories",
-      base_size         = 10.5,
-      show_missing_dots = input$chk_bubble_missing,
+      base_size         = 11,
+      show_missing_dots = FALSE,
       normalize_scores  = TRUE
+    )
+    
+    n_metrics <- length(unique(df$Metric))
+    p + ggplot2::labs(
+      caption = paste0(
+        "Circle: standard performance (< 0.96)  |  Square: top performer (>= 0.96).\n",
+        "All ", n_metrics, " metrics direction-normalized: for error/distance metrics, scores are inverted as 1 - norm(x) so 1.0 always indicates closest agreement to empirical reference."
+      )
     )
   })
   
   output$ui_bubble_plot_render <- renderUI({
-    w <- if (!is.null(input$sld_bubble_width)) paste0(input$sld_bubble_width, "px") else "1400px"
-    plotOutput("plot_bubble_matrix", width = w, height = "850px")
+    w <- if (!is.null(input$sld_bubble_width)) paste0(input$sld_bubble_width, "px") else "2200px"
+    h <- if (!is.null(input$sld_bubble_height)) paste0(input$sld_bubble_height, "px") else "680px"
+    plotOutput("plot_bubble_matrix", width = w, height = h)
   })
   
   output$plot_bubble_matrix <- renderPlot({
@@ -1256,13 +1262,13 @@ server <- function(input, output, session) {
   output$download_bubble_jpeg <- downloadHandler(
     filename = function() { paste0("scSimEval_bubble_matrix_", Sys.Date(), ".jpeg") },
     content = function(file) {
-      export_single_jpeg(file, bubble_plot_reactive(), width = 16, height = 10, dpi = 600)
+      export_single_jpeg(file, bubble_plot_reactive(), width = 23, height = 7, dpi = 600)
     }
   )
   output$download_bubble_pdf <- downloadHandler(
     filename = function() { paste0("scSimEval_bubble_matrix_", Sys.Date(), ".pdf") },
     content = function(file) {
-      grDevices::pdf(file, width = 16, height = 10)
+      grDevices::pdf(file, width = 23, height = 7)
       print(bubble_plot_reactive())
       grDevices::dev.off()
     }
@@ -1511,7 +1517,7 @@ server <- function(input, output, session) {
       generate_all_plots_pdf(file.path(tmp_dir, "scSimEval_all_plots_report.pdf"), rv$benchmark_df, rv$toy_ref, rv$toy_sim)
       
       # 5. Publication-Ready JPEGs at 600 DPI
-      try(export_single_jpeg(file.path(fig_dir, "01_bubble_matrix.jpeg"), bubble_plot_reactive(), width = 16, height = 10, dpi = 600), silent = TRUE)
+      try(export_single_jpeg(file.path(fig_dir, "01_bubble_matrix.jpeg"), bubble_plot_reactive(), width = 23, height = 7, dpi = 600), silent = TRUE)
       try(export_single_jpeg(file.path(fig_dir, "02_evaluation_summary.jpeg"), eval_summary_reactive(), width = 13, height = 7.5, dpi = 600), silent = TRUE)
       try(export_single_jpeg(file.path(fig_dir, "03_scalability_benchmark.jpeg"), scale_bench_reactive(), width = 13, height = 8, dpi = 600), silent = TRUE)
       try(export_single_jpeg(file.path(fig_dir, "04_metric_boxplots.jpeg"), metric_box_reactive(), width = 13, height = 7.5, dpi = 600), silent = TRUE)
