@@ -21,12 +21,18 @@ evaluate_trajectory_metrics(
 \item{cell_types_sim}{Optional vector of simulated cell types (for lineage tree inference).}
 }
 \value{
-A named list of trajectory accuracy metrics.
+A named list of trajectory accuracy metrics:
+  \describe{
+    \item{pseudotime_correlation}{Spearman correlation between reference and simulated pseudotime.}
+    \item{tree_height_rmse}{Root mean squared error of lineage tree branch heights.}
+    \item{graph_alignment}{Concordance of pairwise graph distances along trajectory landmarks.}
+    \item{lineage_expression_fidelity}{Mean correlation of gene expression trends along lineages.}
+  }
 }
 \description{
 Evaluates trajectory preservation using pseudotime correlation, branch height
-discrepancy, and univariate distribution distance metrics on pseudotime.
-If raw count matrices are provided, pseudotime and lineage trees are automatically
+discrepancy (RMSE), trajectory graph alignment, and gene expression patterns along lineages.
+If raw count matrices are provided, pseudotime, graphs, and lineage trees are automatically
 inferred directly from the scRNA-seq data.
 }
 \examples{

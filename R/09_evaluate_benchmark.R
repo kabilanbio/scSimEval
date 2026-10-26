@@ -44,6 +44,9 @@
 evaluate_simulation_accuracy <- function(
   ref_data,
   sim_data,
+  cell_types = NULL,
+  cell_types_ref = NULL,
+  cell_types_sim = NULL,
   compute_bivariate = TRUE,
   threads = 1,
   memory_mb = NULL,
@@ -51,6 +54,8 @@ evaluate_simulation_accuracy <- function(
   peak_memory_mb = NULL,
   verbose = TRUE
 ) {
+  if (is.null(cell_types_ref) && !is.null(cell_types)) cell_types_ref <- cell_types
+  if (is.null(cell_types_sim) && !is.null(cell_types)) cell_types_sim <- cell_types
   if (is.null(memory_mb) && !is.null(peak_memory_mb)) {
     memory_mb <- peak_memory_mb
   }
@@ -284,9 +289,59 @@ evaluate_simulation_accuracy <- function(
     stringsAsFactors = FALSE
   )
   
-  # Step 6: Computational Scalability (Category VIII)
+  # Step 6: Trajectory & Lineage Dynamics (Category VI)
+  if (verbose) message("[6/7] Evaluating trajectory and lineage dynamics...")
+  traj_res <- tryCatch({
+    evaluate_trajectory_metrics(
+      ref_data = ref_data,
+      sim_data = sim_data,
+      cell_types_ref = cell_types_ref,
+      cell_types_sim = cell_types_sim
+    )
+  }, error = function(e) NULL)
+  
+  if (!is.null(traj_res)) {
+    if (!is.null(traj_res$pseudotime_correlation) && !is.na(traj_res$pseudotime_correlation)) {
+      summary_rows[[length(summary_rows) + 1]] <- data.frame(
+        Category = "Trajectory Dynamics",
+        Property = "pseudotime",
+        Metric = "pseudotime_correlation",
+        Value = as.numeric(traj_res$pseudotime_correlation),
+        stringsAsFactors = FALSE
+      )
+    }
+    if (!is.null(traj_res$tree_height_rmse) && !is.na(traj_res$tree_height_rmse)) {
+      summary_rows[[length(summary_rows) + 1]] <- data.frame(
+        Category = "Trajectory Dynamics",
+        Property = "lineage_tree",
+        Metric = "tree_height_rmse",
+        Value = as.numeric(traj_res$tree_height_rmse),
+        stringsAsFactors = FALSE
+      )
+    }
+    if (!is.null(traj_res$graph_alignment) && !is.na(traj_res$graph_alignment)) {
+      summary_rows[[length(summary_rows) + 1]] <- data.frame(
+        Category = "Trajectory Dynamics",
+        Property = "trajectory_graph",
+        Metric = "graph_alignment",
+        Value = as.numeric(traj_res$graph_alignment),
+        stringsAsFactors = FALSE
+      )
+    }
+    if (!is.null(traj_res$lineage_expression_fidelity) && !is.na(traj_res$lineage_expression_fidelity)) {
+      summary_rows[[length(summary_rows) + 1]] <- data.frame(
+        Category = "Trajectory Dynamics",
+        Property = "lineage_dynamics",
+        Metric = "lineage_expression_fidelity",
+        Value = as.numeric(traj_res$lineage_expression_fidelity),
+        stringsAsFactors = FALSE
+      )
+    }
+  }
+  
+  # Step 7: Computational Scalability (Category VIII)
   if (!is.null(elapsed_time) || !is.null(memory_mb)) {
-    if (verbose) message("[6/6] Logging computational scalability metrics...")
+    if (verbose) message("[7/7] Logging computational scalability metrics...")
     if (!is.null(elapsed_time)) {
       summary_rows[[length(summary_rows) + 1]] <- data.frame(
         Category = "Computational Scalability",
@@ -706,6 +761,26 @@ evaluate_multiomics_accuracy <- function(
       Property = "lineage_tree",
       Metric = "tree_height_rmse",
       Value = as.numeric(traj_eval$tree_height_rmse),
+      Modality = m1_name,
+      stringsAsFactors = FALSE
+    )
+  }
+  if (!is.null(traj_eval$graph_alignment) && !is.na(traj_eval$graph_alignment)) {
+    master_rows[[length(master_rows) + 1]] <- data.frame(
+      Category = "Trajectory Dynamics",
+      Property = "trajectory_graph",
+      Metric = "graph_alignment",
+      Value = as.numeric(traj_eval$graph_alignment),
+      Modality = m1_name,
+      stringsAsFactors = FALSE
+    )
+  }
+  if (!is.null(traj_eval$lineage_expression_fidelity) && !is.na(traj_eval$lineage_expression_fidelity)) {
+    master_rows[[length(master_rows) + 1]] <- data.frame(
+      Category = "Trajectory Dynamics",
+      Property = "lineage_dynamics",
+      Metric = "lineage_expression_fidelity",
+      Value = as.numeric(traj_eval$lineage_expression_fidelity),
       Modality = m1_name,
       stringsAsFactors = FALSE
     )

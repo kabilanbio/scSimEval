@@ -95,6 +95,8 @@ export(infer_scrna_pseudotime)
 export(infer_scrna_lineage_tree)
 export(calc_pseudotime_correlation)
 export(calc_tree_height_discrepancy)
+export(calc_trajectory_graph_alignment)
+export(calc_lineage_expression_fidelity)
 export(evaluate_trajectory_metrics)
 
 # 07_multiomics_coupling

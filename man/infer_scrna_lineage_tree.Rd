@@ -4,12 +4,12 @@
 \alias{infer_scrna_lineage_tree}
 \title{Automatically Infer Lineage Tree (hclust) from scRNA-seq Counts & Cell Types}
 \usage{
-infer_scrna_lineage_tree(data, cell_types, method = "ward.D2")
+infer_scrna_lineage_tree(data, cell_types = NULL, method = "ward.D2")
 }
 \arguments{
 \item{data}{Expression or count matrix (genes x cells).}
 
-\item{cell_types}{Factor or vector of cell-type annotations for each cell.}
+\item{cell_types}{Factor or vector of cell-type annotations for each cell (optional).}
 
 \item{method}{Linkage method for hierarchical clustering (default "ward.D2").}
 }
@@ -18,7 +18,8 @@ An \code{hclust} tree object representing the cell-type lineage tree.
 }
 \description{
 Builds a hierarchical clustering lineage tree between cell-type centroids
-from scRNA-seq expression data.
+from scRNA-seq expression data. If cell types are omitted or have fewer than 2
+classes, cells are clustered automatically along the principal trajectory.
 }
 \examples{
 data(example_scrna, package = "scSimEval")

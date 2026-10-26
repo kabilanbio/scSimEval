@@ -90,9 +90,11 @@ utils::globalVariables(c(
   "PVE_Group_Sim"                    = "Group PVE",
   "PVE_Discrepancy"                  = "Group PVE Discrepancy",
 
-  # (VI) Trajectory & Lineage Dynamics (2)
+  # (VI) Trajectory & Lineage Dynamics (4)
   "pseudotime_correlation"           = "Pseudotime Corr. (rho)",
   "tree_height_rmse"                 = "Lineage Tree RMSE",
+  "graph_alignment"                  = "Trajectory Graph Alignment",
+  "lineage_expression_fidelity"      = "Lineage Expression Fidelity",
 
   # (VII) Cross-Modal Coupling & Modularity (6)
   "cross_modal_accuracy"             = "Cross-Modal Accuracy",
@@ -175,9 +177,11 @@ utils::globalVariables(c(
   "PVE_Group_Sim"                    = "(V) Biological Signal & Downstream Fidelity",
   "PVE_Discrepancy"                  = "(V) Biological Signal & Downstream Fidelity",
 
-  # (VI) Trajectory & Lineage Dynamics (2)
+  # (VI) Trajectory & Lineage Dynamics (4)
   "pseudotime_correlation"           = "(VI) Trajectory & Lineage Dynamics",
   "tree_height_rmse"                 = "(VI) Trajectory & Lineage Dynamics",
+  "graph_alignment"                  = "(VI) Trajectory & Lineage Dynamics",
+  "lineage_expression_fidelity"      = "(VI) Trajectory & Lineage Dynamics",
 
   # (VII) Cross-Modal Coupling & Modularity (6)
   "cross_modal_accuracy"             = "(VII) Cross-Modal Coupling & Modularity",
@@ -304,6 +308,8 @@ utils::globalVariables(c(
   "calinski_harabasz_sim"       = "global",
   "pseudotime_correlation"      = "global",
   "tree_height_rmse"            = "global",
+  "graph_alignment"             = "global",
+  "lineage_expression_fidelity" = "global",
   "FOSCTTM"                     = "global",
   "cross_modal_accuracy"        = "global",
   "cross_modal_F1"              = "global",
@@ -364,6 +370,8 @@ utils::globalVariables(c(
   "seurat_mixing_metric"        = "mixing metric",
   "pseudotime_correlation"      = "pseudotime correlation",
   "tree_height_rmse"            = "tree height RMSE",
+  "graph_alignment"             = "trajectory graph alignment",
+  "lineage_expression_fidelity" = "lineage expression patterns",
   "FOSCTTM"                     = "FOSCTTM cross-modality",
   "rv_coefficient"              = "RV coefficient",
   "elapsed_time_seconds"        = "elapsed time (s)",
@@ -441,7 +449,7 @@ standardize_benchmark_categories <- function(df) {
   "SimBench_DE_Fidelity_Score", "Log2FC_Pearson_Corr", "Log2FC_Spearman_Corr", "Top_DEG_Jaccard_Overlap",
   "Distribution_Score", "Classifier_Accuracy", "Classifier_Macro_F1", "Classifier_Macro_Recall",
   "Silhouette_Sim", "PVE_Group_Sim",
-  "pseudotime_correlation",
+  "pseudotime_correlation", "graph_alignment", "lineage_expression_fidelity",
   "cross_modal_accuracy", "cross_modal_F1", "match_at_1", "rv_coefficient", "module_correlation_r"
 )
 

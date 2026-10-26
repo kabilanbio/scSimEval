@@ -115,7 +115,7 @@ standardize_benchmark_categories <- function(df) {
   "cms", "isi", "seurat_mixing_metric", "shannon_entropy", 
   "SimBench_DE_Fidelity_Score", "Log2FC_Pearson_Corr", "Log2FC_Spearman_Corr", "Top_DEG_Jaccard_Overlap", 
   "Distribution_Score", "Classifier_Accuracy", "Classifier_Macro_F1", "Classifier_Macro_Recall", 
-  "Silhouette_Sim", "PVE_Group_Sim", "pseudotime_correlation", 
+  "Silhouette_Sim", "PVE_Group_Sim", "pseudotime_correlation", "graph_alignment", "lineage_expression_fidelity",
   "cross_modal_accuracy", "cross_modal_F1", "match_at_1", "rv_coefficient", "module_correlation_r"
 )
 
@@ -2692,9 +2692,18 @@ ui <- page_navbar(
         # Mode 4: Upload Saved Results (.rds / .csv)
         conditionalPanel(
           condition = "input.opt_data_mode == 'upload_bench'",
-          p("Load a previously saved benchmark result file (.rds or .csv) from scSimEval.", style = "font-size: 0.82rem; color: #475569;"),
-          fileInput("file_bench_upload", "Select Saved File(s) (.rds / .csv):", multiple = TRUE, accept = c(".rds", ".csv")),
-          actionButton("btn_load_uploaded_bench", "Load Saved Results", class = "btn btn-secondary w-100", icon = icon("folder-open"))
+          div(
+            style = "background: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 6px; padding: 12px; margin-bottom: 12px;",
+            div(style = "font-weight: 700; color: #1E3A8A; font-size: 0.86rem; margin-bottom: 6px;", icon("file-arrow-up", class = "me-1"), "Upload Saved Benchmark Results"),
+            p("Load a previously saved benchmark result session (.rds or .csv) to reproduce all leaderboards, bubble matrices, and diagnostic plots without rerunning evaluations.",
+              style = "font-size: 0.78rem; color: #475569; margin-bottom: 10px; line-height: 1.4;"),
+            div(
+              style = "font-size: 0.76rem; color: #64748B; margin-bottom: 10px;",
+              icon("circle-info", class = "me-1 text-primary"),
+              "Use the file selection card in the Main Panel to choose and load your saved benchmark results."
+            ),
+            actionButton("btn_sidebar_jump_upload_bench", "Select File in Main Panel →", class = "btn btn-outline-primary btn-sm w-100", icon = icon("arrow-right"))
+          )
         )
       ),
       uiOutput("ui_datahub_main_panel")
@@ -2816,7 +2825,7 @@ ui <- page_navbar(
               # Dataset Navigation Tabs (All Datasets Average vs Individual Datasets)
               uiOutput("ui_bubble_dataset_pills"),
 
-              p("Each column represents a simulation method; each row represents an evaluation metric. Larger bubbles show higher scores (closer match to real data). Colors indicate metric categories.", style = "font-size: 0.84rem; color: #64748B; margin-bottom: 12px;"),
+              p("Each row represents a simulation method; each column represents an evaluation metric. Larger bubbles show higher scores (closer match to real data). Colors indicate metric categories.", style = "font-size: 0.84rem; color: #64748B; margin-bottom: 12px;"),
               div(
                 class = "bubble-scroll-container",
                 uiOutput("ui_bubble_plot_render")
@@ -2836,7 +2845,7 @@ ui <- page_navbar(
             ),
             card_body(
               p(
-                "Overall simulator rankings averaged across all evaluation metrics. Metrics where lower values are better (such as error, runtime, and memory) are inverted, and all scores are scaled between 0.00 and 1.00:",
+                "Overall simulator rankings averaged across all evaluation metrics, with all scores scaled between 0.00 and 1.00:",
                 style = "font-size: 0.84rem; color: #64748B; margin-bottom: 12px;"
               ),
               DTOutput("table_leaderboard_dt")
@@ -5893,6 +5902,56 @@ server <- function(input, output, session) {
               }, silent = TRUE)
             }
             
+            # Trajectory & Lineage Dynamics (Category VI)
+            if (!any(grepl("Trajectory", tbl_sd$Category, ignore.case = TRUE))) {
+              try({
+                traj_sd <- evaluate_trajectory_metrics(
+                  ref_data = ref_mat_d,
+                  sim_data = sim_mat_d,
+                  cell_types_ref = ct_ref,
+                  cell_types_sim = ct_sim
+                )
+                traj_rows <- list()
+                if (!is.null(traj_sd$pseudotime_correlation) && !is.na(traj_sd$pseudotime_correlation)) {
+                  traj_rows[[length(traj_rows) + 1]] <- data.frame(
+                    Category = "(VI) Trajectory & Lineage Dynamics",
+                    Property = "pseudotime",
+                    Metric = "pseudotime_correlation",
+                    Value = as.numeric(traj_sd$pseudotime_correlation),
+                    stringsAsFactors = FALSE
+                  )
+                }
+                if (!is.null(traj_sd$tree_height_rmse) && !is.na(traj_sd$tree_height_rmse)) {
+                  traj_rows[[length(traj_rows) + 1]] <- data.frame(
+                    Category = "(VI) Trajectory & Lineage Dynamics",
+                    Property = "lineage_tree",
+                    Metric = "tree_height_rmse",
+                    Value = as.numeric(traj_sd$tree_height_rmse),
+                    stringsAsFactors = FALSE
+                  )
+                }
+                if (!is.null(traj_sd$graph_alignment) && !is.na(traj_sd$graph_alignment)) {
+                  traj_rows[[length(traj_rows) + 1]] <- data.frame(
+                    Category = "(VI) Trajectory & Lineage Dynamics",
+                    Property = "trajectory_graph",
+                    Metric = "graph_alignment",
+                    Value = as.numeric(traj_sd$graph_alignment),
+                    stringsAsFactors = FALSE
+                  )
+                }
+                if (!is.null(traj_sd$lineage_expression_fidelity) && !is.na(traj_sd$lineage_expression_fidelity)) {
+                  traj_rows[[length(traj_rows) + 1]] <- data.frame(
+                    Category = "(VI) Trajectory & Lineage Dynamics",
+                    Property = "lineage_dynamics",
+                    Metric = "lineage_expression_fidelity",
+                    Value = as.numeric(traj_sd$lineage_expression_fidelity),
+                    stringsAsFactors = FALSE
+                  )
+                }
+                if (length(traj_rows) > 0) tbl_sd <- rbind(tbl_sd, do.call(rbind, traj_rows))
+              }, silent = TRUE)
+            }
+            
             tbl_sd$Method <- sim_name
             tbl_sd$Dataset <- d_label
             if ("Value" %in% colnames(tbl_sd)) tbl_sd$Score_Raw <- tbl_sd$Value
@@ -6334,67 +6393,251 @@ server <- function(input, output, session) {
   observeEvent(input$btn_run_multi_eval_main, run_multiomics_evaluation())
   # Data Hub: Mode 4 - Load Saved Benchmark File
   # ----------------------------------------------------------------------------
-  observeEvent(input$btn_load_uploaded_bench, {
-    req(input$file_bench_upload)
+  process_uploaded_benchmark_file <- function(file_info) {
+    req(file_info)
     tryCatch({
-      ext <- tolower(tools::file_ext(input$file_bench_upload$name))
-      if (ext == "rds") {
-        obj <- readRDS(input$file_bench_upload$datapath)
+      ext <- tolower(tools::file_ext(file_info$name))
+      datapath <- file_info$datapath
+      
+      # Check magic bytes to detect if an Excel (.xlsx / PK zip) was saved with .rds or other extension
+      magic <- tryCatch(readBin(datapath, what = "raw", n = 4), error = function(e) raw(0))
+      is_pk_zip <- length(magic) >= 2 && magic[1] == as.raw(0x50) && magic[2] == as.raw(0x4B)
+      
+      df <- NULL
+      dataset_summary <- NULL
+      loaded_matrices <- list()
+      ref_matrices    <- list()
+      sim_matrices    <- list()
+      toy_ref         <- NULL
+      toy_sim         <- NULL
+      cell_types      <- NULL
+      batch           <- NULL
+      cell_types_map  <- list()
+      batches_map     <- list()
+      is_multi        <- FALSE
+      datasets_vec    <- NULL
+      
+      if (is_pk_zip) {
+        # Recovered Excel workbook (.xlsx) saved with .rds or .xlsx extension
+        tmp_xlsx <- tempfile(fileext = ".xlsx")
+        file.copy(datapath, tmp_xlsx)
+        if (requireNamespace("openxlsx", quietly = TRUE)) {
+          sheets <- openxlsx::getSheetNames(tmp_xlsx)
+          bench_sheet <- grep("all_benchmark|benchmark|metrics|summary", sheets, ignore.case = TRUE, value = TRUE)
+          if (length(bench_sheet) == 0) bench_sheet <- sheets[1]
+          df <- openxlsx::read.xlsx(tmp_xlsx, sheet = bench_sheet[1])
+          
+          prop_sheet <- grep("dataset_properties|dataset_summary|properties", sheets, ignore.case = TRUE, value = TRUE)
+          if (length(prop_sheet) > 0) {
+            dataset_summary <- openxlsx::read.xlsx(tmp_xlsx, sheet = prop_sheet[1])
+          }
+        } else if (requireNamespace("readxl", quietly = TRUE)) {
+          sheets <- readxl::excel_sheets(tmp_xlsx)
+          bench_sheet <- grep("all_benchmark|benchmark|metrics|summary", sheets, ignore.case = TRUE, value = TRUE)
+          if (length(bench_sheet) == 0) bench_sheet <- sheets[1]
+          df <- as.data.frame(readxl::read_excel(tmp_xlsx, sheet = bench_sheet[1]))
+          prop_sheet <- grep("dataset_properties|dataset_summary|properties", sheets, ignore.case = TRUE, value = TRUE)
+          if (length(prop_sheet) > 0) {
+            dataset_summary <- as.data.frame(readxl::read_excel(tmp_xlsx, sheet = prop_sheet[1]))
+          }
+        } else {
+          stop("File format is an Excel workbook. Please install 'openxlsx' or 'readxl' to parse.")
+        }
+      } else if (ext == "rds") {
+        obj <- tryCatch(readRDS(datapath), error = function(e) {
+          # Graceful fallback if readRDS threw unknown input format on misnamed zip/excel
+          if (grepl("unknown input format", e$message, ignore.case = TRUE)) {
+            tmp_xlsx <- tempfile(fileext = ".xlsx")
+            file.copy(datapath, tmp_xlsx)
+            if (requireNamespace("openxlsx", quietly = TRUE)) {
+              sheets <- openxlsx::getSheetNames(tmp_xlsx)
+              bench_sheet <- grep("all_benchmark|benchmark|metrics|summary", sheets, ignore.case = TRUE, value = TRUE)
+              if (length(bench_sheet) == 0) bench_sheet <- sheets[1]
+              df_rec <- openxlsx::read.xlsx(tmp_xlsx, sheet = bench_sheet[1])
+              prop_sheet <- grep("dataset_properties|dataset_summary|properties", sheets, ignore.case = TRUE, value = TRUE)
+              if (length(prop_sheet) > 0) {
+                dataset_summary <<- openxlsx::read.xlsx(tmp_xlsx, sheet = prop_sheet[1])
+              }
+              return(df_rec)
+            }
+          }
+          stop(e$message)
+        })
+        
         if (is.data.frame(obj)) {
           df <- obj
-        } else if (is.list(obj) && !is.null(obj$benchmark_summary_table)) {
-          df <- obj$benchmark_summary_table
-        } else if (is.list(obj) && !is.null(obj$metrics_summary_table)) {
-          df <- obj$metrics_summary_table
-        } else if (is.list(obj) && !is.null(obj$summary_table)) {
-          df <- obj$summary_table
+        } else if (is.list(obj)) {
+          if (!is.null(obj$benchmark_df)) {
+            df <- obj$benchmark_df
+          } else if (!is.null(obj$benchmark_summary_table)) {
+            df <- obj$benchmark_summary_table
+          } else if (!is.null(obj$metrics_summary_table)) {
+            df <- obj$metrics_summary_table
+          } else if (!is.null(obj$summary_table)) {
+            df <- obj$summary_table
+          } else {
+            stop("Unrecognized RDS format. Must contain benchmark summary table.")
+          }
+          
+          dataset_summary <- obj$dataset_summary_df %||% (obj$dataset_summary %||% obj$dataset_properties)
+          loaded_matrices <- obj$all_matrices %||% list()
+          ref_matrices    <- obj$ref_matrices %||% list()
+          sim_matrices    <- obj$sim_matrices %||% list()
+          toy_ref         <- obj$toy_ref
+          toy_sim         <- obj$toy_sim
+          cell_types      <- obj$cell_types
+          batch           <- obj$batch
+          cell_types_map  <- obj$cell_types_map %||% list()
+          batches_map     <- obj$batches_map %||% list()
+          is_multi        <- isTRUE(obj$is_multidataset)
+          datasets_vec    <- obj$datasets
         } else {
-          stop("Unrecognized RDS format. Must contain benchmark summary table.")
-        }
-        
-        if (is.list(obj) && !is.null(obj$dataset_summary)) {
-          rv$dataset_summary_df <- obj$dataset_summary
-        } else if (is.list(obj) && !is.null(obj$dataset_properties)) {
-          rv$dataset_summary_df <- obj$dataset_properties
-        } else {
-          rv$dataset_summary_df <- NULL
+          stop("Unrecognized RDS format.")
         }
       } else if (ext == "csv") {
-        df <- utils::read.csv(input$file_bench_upload$datapath, check.names = FALSE)
-        rv$dataset_summary_df <- NULL
+        df <- utils::read.csv(datapath, check.names = FALSE)
       } else {
         stop("Unsupported file type. Please upload .rds or .csv.")
       }
       
+      req(df)
       if (!"Method" %in% colnames(df) && "Simulator" %in% colnames(df)) df$Method <- df$Simulator
       if (!"Score" %in% colnames(df) && "Value" %in% colnames(df)) df$Score <- df$Value
       df <- standardize_benchmark_categories(df)
       
-      rv$benchmark_df <- df
-      rv$methods <- unique(df$Method)
-      rv$source_name <- paste0("Uploaded File: ", input$file_bench_upload$name)
+      # Synthesize minimal dataset properties table if missing
+      if (is.null(dataset_summary) || nrow(dataset_summary) == 0) {
+        d_names <- if ("Dataset" %in% colnames(df)) unique(as.character(df$Dataset)) else "Dataset 1"
+        dataset_summary <- data.frame(
+          Dataset            = d_names,
+          Simulators         = paste(unique(df$Method), collapse = ", "),
+          Metrics_Evaluated  = length(unique(df$Metric)),
+          Status             = "Loaded & Benchmarked",
+          stringsAsFactors   = FALSE
+        )
+      }
+      
+      rv$benchmark_df       <- df
+      rv$methods            <- unique(df$Method)
+      rv$dataset_summary_df <- dataset_summary
+      rv$all_matrices       <- loaded_matrices
+      rv$ref_matrices       <- ref_matrices
+      rv$sim_matrices       <- sim_matrices
+      rv$toy_ref            <- toy_ref
+      rv$toy_sim            <- toy_sim
+      rv$cell_types         <- cell_types
+      rv$batch              <- batch
+      rv$cell_types_map     <- cell_types_map
+      rv$batches_map        <- batches_map
+      rv$is_multidataset    <- is_multi || (length(unique(df$Dataset)) > 1)
+      rv$datasets           <- datasets_vec %||% unique(df$Dataset)
+      rv$source_name        <- paste0("Uploaded Session: ", file_info$name)
+      
       mode_data$upload_bench <- list(
         benchmark_df       = df,
         methods            = rv$methods,
-        all_matrices       = list(),
-        ref_matrices       = list(),
-        sim_matrices       = list(),
-        dataset_summary_df = NULL,
-        toy_ref            = NULL,
-        toy_sim            = NULL,
-        cell_types         = NULL,
-        batch              = NULL,
+        all_matrices       = loaded_matrices,
+        ref_matrices       = ref_matrices,
+        sim_matrices       = sim_matrices,
+        dataset_summary_df = dataset_summary,
+        toy_ref            = toy_ref,
+        toy_sim            = toy_sim,
+        cell_types         = cell_types,
+        batch              = batch,
+        cell_types_map     = cell_types_map,
+        batches_map        = batches_map,
+        is_multidataset    = rv$is_multidataset,
+        datasets           = rv$datasets,
         source_name        = rv$source_name
       )
       sync_active_mode_data("upload_bench")
       
       updateCheckboxGroupInput(session, "sel_bubble_methods", choices = rv$methods, selected = rv$methods)
-      sc_log("SUCCESS", paste0("Uploaded benchmark results loaded from '", input$file_bench_upload$name, "': ", nrow(df), " records across ", length(rv$methods), " simulators: ", paste(rv$methods, collapse = ", "), "."), "Upload")
-      showNotification("Benchmark results loaded successfully!", type = "message")
+      
+      # Reset & prime triggers so Bubble Matrix and Overview plots render immediately
+      rv_plot_triggers$bubble <- 1
+      rv_plot_triggers$sum    <- 1
+      
+      sc_log("SUCCESS", paste0("Uploaded benchmark results loaded from '", file_info$name, "': ", nrow(df), " records across ", length(rv$methods), " simulators: ", paste(rv$methods, collapse = ", "), "."), "Upload")
+      showNotification(
+        sprintf("Benchmark session loaded successfully! %d metric records across %d simulators (%s).",
+                nrow(df), length(rv$methods), paste(rv$methods, collapse = ", ")),
+        type = "message",
+        duration = 6
+      )
     }, error = function(e) {
       sc_log("ERROR", paste("Failed to load uploaded benchmark file:", e$message), "Upload")
-      showNotification(paste("Upload error:", e$message), type = "error")
+      showNotification(paste("Upload error:", e$message), type = "error", duration = 8)
     })
+  }
+
+  # Observers for file upload and action buttons
+  observeEvent(input$file_bench_upload, {
+    process_uploaded_benchmark_file(input$file_bench_upload)
+  })
+  observeEvent(input$btn_load_uploaded_bench, {
+    process_uploaded_benchmark_file(input$file_bench_upload)
+  })
+  observeEvent(input$file_bench_upload_main, {
+    process_uploaded_benchmark_file(input$file_bench_upload_main)
+  })
+  observeEvent(input$btn_load_uploaded_bench_main, {
+    process_uploaded_benchmark_file(input$file_bench_upload %||% input$file_bench_upload_main)
+  })
+  observeEvent(input$btn_sidebar_jump_upload_bench, {
+    nav_select("datahub_subtabs", "Upload & Configure Data")
+  })
+  observeEvent(input$btn_upload_goto_bubble, {
+    nav_select("nav_active", "Comparative Bubble Matrix")
+  })
+  observeEvent(input$btn_upload_goto_viz, {
+    nav_select("nav_active", "Visualizations")
+  })
+  observeEvent(input$btn_upload_goto_master, {
+    nav_select("nav_active", "Benchmark Results & Export")
+  })
+
+  # Dynamic status card displayed in Data Hub Main Panel when data is loaded
+  output$ui_uploaded_bench_status_card <- renderUI({
+    req(rv$benchmark_df)
+    n_records <- nrow(rv$benchmark_df)
+    n_sims <- length(rv$methods %||% unique(rv$benchmark_df$Method))
+    n_metrics <- length(unique(rv$benchmark_df$Metric))
+    has_mats <- (!is.null(rv$all_matrices) && length(rv$all_matrices) > 0) || !is.null(rv$toy_ref)
+    
+    div(
+      class = "mt-4",
+      div(
+        style = "background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 8px; padding: 20px;",
+        div(
+          class = "d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3",
+          div(
+            class = "d-flex align-items-center gap-2",
+            icon("circle-check", class = "text-success fs-4"),
+            tags$h5("Benchmark Session Active & Ready for Analysis", style = "margin: 0; font-weight: 700; color: #166534;")
+          ),
+          span(class = "badge bg-success-subtle text-success border border-success-subtle", rv$source_name %||% "Uploaded Benchmark Session")
+        ),
+        p(
+          sprintf("Successfully loaded %d metric evaluations across %d simulators (%s) and %d distinct evaluation criteria.",
+                  n_records, n_sims, paste(rv$methods, collapse = ", "), n_metrics),
+          style = "font-size: 0.88rem; color: #15803D; margin-bottom: 14px;"
+        ),
+        if (has_mats) {
+          p(icon("dna", class = "me-1 text-success"), "Count matrices included: Visual diagnostic plots (PCA/UMAP and Expression QC) are fully active.",
+            style = "font-size: 0.82rem; color: #166534; margin-bottom: 16px;")
+        } else {
+          p(icon("circle-info", class = "me-1 text-primary"), "Metrics summary session: Comparative Bubble Matrix, Fidelity Leaderboards, Radar Profiles, and Master Results tables are fully interactive.",
+            style = "font-size: 0.82rem; color: #1E3A8A; margin-bottom: 16px;")
+        },
+        div(
+          class = "d-flex flex-wrap gap-2",
+          actionButton("btn_upload_goto_bubble", "View Comparative Bubble Matrix →", class = "btn btn-success btn-sm", icon = icon("chart-scatter")),
+          actionButton("btn_upload_goto_viz", "Inspect Visualizations →", class = "btn btn-outline-success btn-sm", icon = icon("chart-pie")),
+          actionButton("btn_upload_goto_master", "View Master Table & Export →", class = "btn btn-outline-secondary btn-sm", icon = icon("table"))
+        )
+      )
+    )
   })
   
   
@@ -7093,14 +7336,28 @@ server <- function(input, output, session) {
           } else if (mode == "multiomics") {
             render_multiomics_upload_workspace()
           } else if (mode == "upload_bench") {
-            card(
-              card_header(tags$b("Upload Saved Benchmark Results (.rds / .csv)", style = "color: #1E3A8A; font-size: 0.95rem;")),
-              card_body(
-                style = "padding: 30px;",
-                p("Load a previously saved benchmark result file (.rds or .csv) from scSimEval to inspect visualizations and explore metrics.", style = "color: #64748B;"),
-                fileInput("file_bench_upload_main", "Select Saved File(s) (.rds / .csv):", multiple = TRUE, accept = c(".rds", ".csv")),
-                actionButton("btn_load_uploaded_bench_main", "Load Saved Results", class = "btn btn-primary px-4 py-2", icon = icon("folder-open"))
-              )
+            tagList(
+              card(
+                card_header(
+                  class = "d-flex justify-content-between align-items-center py-2",
+                  tags$span(icon("file-arrow-up", class = "me-2 text-primary"), tags$b("Upload Saved Benchmark Session (.rds / .csv)")),
+                  span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "Reproduce Plots & Tables")
+                ),
+                card_body(
+                  style = "padding: 24px;",
+                  p("Upload a previously saved benchmark result session (.rds or .csv) from scSimEval to instantly reproduce all leaderboards, bubble matrices, diagnostic figures, and master tables without rerunning heavy evaluations.",
+                    style = "color: #475569; font-size: 0.88rem; line-height: 1.5; margin-bottom: 16px;"),
+                  div(
+                    style = "max-width: 600px;",
+                    fileInput("file_bench_upload", "Select Saved File (.rds / .csv):", multiple = FALSE, accept = c(".rds", ".csv", ".xlsx"), width = "100%"),
+                    div(
+                      class = "d-flex gap-2 align-items-center mt-2",
+                      actionButton("btn_load_uploaded_bench", "Load Saved Results", class = "btn btn-primary px-4 py-2", icon = icon("folder-open"))
+                    )
+                  )
+                )
+              ),
+              uiOutput("ui_uploaded_bench_status_card")
             )
           } else {
             render_unimodal_upload_workspace()
@@ -9288,7 +9545,6 @@ server <- function(input, output, session) {
       }
     }
     if (is.null(ref_mat)) ref_mat <- rv$toy_ref
-    req(ref_mat)
     
     sim_choice <- input$sel_dist_sim %||% "Simulator 1"
     sim_mat <- NULL
@@ -9332,7 +9588,16 @@ server <- function(input, output, session) {
       sim_mat <- rv$sim_matrices[[1]]
     }
     if (is.null(sim_mat)) sim_mat <- rv$toy_sim
-    req(sim_mat)
+
+    if (is.null(ref_mat) || is.null(sim_mat)) {
+      return(
+        ggplot2::ggplot() +
+          ggplot2::annotate("text", x = 0.5, y = 0.58, label = "Count Matrices Not Bundled in Uploaded Summary", fontface = "bold", size = 5.2, color = "#1E293B") +
+          ggplot2::annotate("text", x = 0.5, y = 0.42, label = "This uploaded session contains complete evaluation metrics across all 62 criteria.\nRaw and simulated count matrices were not included in this summary table export.\n\nAll Leaderboards, Bubble Matrices, and Metric Summary charts (Tabs 3, 5, and 6) are fully active.", size = 3.8, color = "#64748B", lineheight = 1.3) +
+          ggplot2::theme_void() +
+          ggplot2::theme(plot.background = ggplot2::element_rect(fill = "#F8FAFC", color = "#CBD5E1", linewidth = 1))
+      )
+    }
     
     withProgress(message = "Rendering Distribution QC", detail = "Evaluating expression densities...", {
       lay <- if (!is.null(input$sel_dist_layout) && input$sel_dist_layout %in% c("full", "density_only", "grid_compact")) {
@@ -9835,17 +10100,27 @@ server <- function(input, output, session) {
       }
     }
     if (is.null(ref_mat)) ref_mat <- rv$toy_ref
-    req(ref_mat)
     req(rv_plot_triggers$emb > 0)
+    
+    sim_list <- if (!is.null(rv$sim_matrices) && length(rv$sim_matrices) > 0) {
+      rv$sim_matrices
+    } else if (!is.null(rv$toy_sim)) {
+      list("Simulated" = rv$toy_sim)
+    } else {
+      NULL
+    }
+    
+    if (is.null(ref_mat) || is.null(sim_list) || length(sim_list) == 0) {
+      return(
+        ggplot2::ggplot() +
+          ggplot2::annotate("text", x = 0.5, y = 0.58, label = "Count Matrices Not Bundled in Uploaded Summary", fontface = "bold", size = 5.2, color = "#1E293B") +
+          ggplot2::annotate("text", x = 0.5, y = 0.42, label = "Dimension reduction (PCA / UMAP) requires raw and simulated count matrices.\nCount matrices were not included in this summary table export.\n\nAll Leaderboards, Bubble Matrices, and Metric Summary charts (Tabs 3, 5, and 6) are fully active.", size = 3.8, color = "#64748B", lineheight = 1.3) +
+          ggplot2::theme_void() +
+          ggplot2::theme(plot.background = ggplot2::element_rect(fill = "#F8FAFC", color = "#CBD5E1", linewidth = 1))
+      )
+    }
+    
     withProgress(message = "Computing Cell Embeddings", detail = "Running low-dimensional projection...", {
-      sim_list <- if (!is.null(rv$sim_matrices) && length(rv$sim_matrices) > 0) {
-        rv$sim_matrices
-      } else if (!is.null(rv$toy_sim)) {
-        list("Simulated" = rv$toy_sim)
-      } else {
-        NULL
-      }
-      req(sim_list)
       
       sel_methods <- input$chk_emb_methods
       clean_all <- get_clean_emb_sim_names(cur_dset)
@@ -10045,16 +10320,38 @@ server <- function(input, output, session) {
     }
   )
   
+  # Helper to bundle complete benchmarking session state for full reproducibility
+  build_session_export_object <- function(df_custom = NULL) {
+    df_to_save <- df_custom %||% rv$benchmark_df
+    list(
+      benchmark_df            = df_to_save,
+      benchmark_summary_table = df_to_save,
+      methods                 = rv$methods %||% unique(df_to_save$Method),
+      method_rankings         = tryCatch(leaderboard_reactive(), error = function(e) NULL),
+      dataset_summary_df      = rv$dataset_summary_df,
+      dataset_summary         = rv$dataset_summary_df,
+      all_matrices            = rv$all_matrices,
+      ref_matrices            = rv$ref_matrices,
+      sim_matrices            = rv$sim_matrices,
+      toy_ref                 = rv$toy_ref,
+      toy_sim                 = rv$toy_sim,
+      cell_types              = rv$cell_types,
+      batch                   = rv$batch,
+      cell_types_map          = rv$cell_types_map,
+      batches_map             = rv$batches_map,
+      is_multidataset         = rv$is_multidataset,
+      datasets                = rv$datasets,
+      source_name             = rv$source_name,
+      timestamp               = Sys.time(),
+      version                 = "0.99.9"
+    )
+  }
+
   output$download_rds <- downloadHandler(
     filename = function() { paste0("scSimEval_benchmark_results_", Sys.Date(), ".rds") },
     content = function(file) {
       req(rv$benchmark_df)
-      saveRDS(list(
-        benchmark_summary_table = rv$benchmark_df,
-        methods = rv$methods,
-        method_rankings = leaderboard_reactive(),
-        dataset_summary = rv$dataset_summary_df
-      ), file)
+      saveRDS(build_session_export_object(), file)
     }
   )
   
@@ -10088,12 +10385,7 @@ server <- function(input, output, session) {
       }
       
       # 6. Serialized R Data Object (.rds)
-      saveRDS(list(
-        benchmark_summary_table = rv$benchmark_df,
-        methods = rv$methods,
-        method_rankings = leader_df,
-        dataset_summary = rv$dataset_summary_df
-      ), file.path(tmp_dir, "scSimEval_benchmark_data.rds"))
+      saveRDS(build_session_export_object(), file.path(tmp_dir, "scSimEval_benchmark_data.rds"))
       
       # 7. Informative README
       readme_lines <- c(
@@ -10155,103 +10447,14 @@ server <- function(input, output, session) {
     }
   )
 
-  # Benchmark Results Session Export (Exclusively .rds for reproduction)
+  # Benchmark Results Session Export (Exclusively .rds for full reproduction)
   output$download_benchmark_data <- downloadHandler(
     filename = function() {
       paste0("scSimEval_benchmark_session_", Sys.Date(), ".rds")
     },
     content = function(file) {
       req(rv$benchmark_df)
-      fmt <- input$sel_download_format %||% "xlsx"
-      
-      # Export active filtered rows if user has filtered the table in DT
-      df_export <- rv$benchmark_df
-      if (!is.null(input$table_master_export_rows_all) && 
-          length(input$table_master_export_rows_all) > 0 && 
-          length(input$table_master_export_rows_all) < nrow(df_export)) {
-        df_export <- df_export[input$table_master_export_rows_all, , drop = FALSE]
-      }
-      
-      # Retain both raw evaluation metric values and normalized scores in exported table
-      raw_val <- if ("Score_Raw" %in% colnames(df_export)) {
-        df_export$Score_Raw
-      } else if ("Value" %in% colnames(df_export)) {
-        df_export$Value
-      } else if ("Raw_Value" %in% colnames(df_export)) {
-        df_export$Raw_Value
-      } else {
-        df_export$Score
-      }
-      norm_val <- if ("Score" %in% colnames(df_export)) {
-        df_export$Score
-      } else if ("Score_Norm" %in% colnames(df_export)) {
-        df_export$Score_Norm
-      } else {
-        raw_val
-      }
-      df_export$Score_Norm <- NULL
-      df_export$Value <- NULL
-      df_export$Raw_Value <- NULL
-      df_export$Score_Raw <- round(as.numeric(raw_val), 4)
-      df_export$Score <- round(as.numeric(norm_val), 4)
-      pref_cols <- c("Dataset", "Method", "Category", intersect("Property", colnames(df_export)), "Metric", "Score_Raw", "Score")
-      col_order <- unique(c(pref_cols, colnames(df_export)))
-      col_order <- intersect(col_order, colnames(df_export))
-      df_export <- df_export[, col_order, drop = FALSE]
-      
-      if (fmt == "xlsx") {
-        export_excel_workbook(file, df_export, leaderboard_reactive(), rv$dataset_summary_df)
-      } else if (fmt == "csv") {
-        utils::write.csv(df_export, file, row.names = FALSE)
-      } else if (fmt == "tsv") {
-        utils::write.table(df_export, file, sep = "\t", row.names = FALSE, quote = FALSE)
-      } else if (fmt == "rds") {
-        saveRDS(list(
-          benchmark_summary_table = df_export,
-          methods = rv$methods,
-          method_rankings = leaderboard_reactive(),
-          dataset_summary = rv$dataset_summary_df
-        ), file)
-      } else if (fmt == "zip") {
-        tmp_dir <- file.path(tempdir(), paste0("scSimEval_data_", as.integer(Sys.time())))
-        dir.create(tmp_dir, showWarnings = FALSE, recursive = TRUE)
-        leader_df <- leaderboard_reactive()
-        
-        export_excel_workbook(file.path(tmp_dir, "scSimEval_benchmark_results.xlsx"), df_export, leader_df, rv$dataset_summary_df)
-        utils::write.csv(df_export, file.path(tmp_dir, "scSimEval_benchmark_results.csv"), row.names = FALSE)
-        utils::write.table(df_export, file.path(tmp_dir, "scSimEval_benchmark_results.tsv"), sep = "\t", row.names = FALSE, quote = FALSE)
-        if (!is.null(leader_df)) utils::write.csv(leader_df, file.path(tmp_dir, "scSimEval_method_rankings.csv"), row.names = FALSE)
-        if (!is.null(rv$dataset_summary_df)) utils::write.csv(rv$dataset_summary_df, file.path(tmp_dir, "scSimEval_dataset_properties.csv"), row.names = FALSE)
-        saveRDS(list(
-          benchmark_summary_table = df_export,
-          methods = rv$methods,
-          method_rankings = leader_df,
-          dataset_summary = rv$dataset_summary_df
-        ), file.path(tmp_dir, "scSimEval_benchmark_data.rds"))
-        
-        readme_lines <- c(
-          "scSimEval Benchmark Results Data Archive",
-          "========================================",
-          paste0("Generated on: ", Sys.time()),
-          paste0("Source: ", rv$source_name %||% "scSimEval Shiny Evaluation"),
-          "",
-          "Files included in this archive:",
-          "  - scSimEval_benchmark_results.xlsx : Full results workbook with rankings & category summaries",
-          "  - scSimEval_benchmark_results.csv  : Master benchmark scores table in CSV format",
-          "  - scSimEval_benchmark_results.tsv  : Master benchmark scores table in TSV format",
-          if (!is.null(leader_df)) "  - scSimEval_method_rankings.csv    : Overall simulator leaderboard rankings" else NULL,
-          if (!is.null(rv$dataset_summary_df)) "  - scSimEval_dataset_properties.csv : Dataset metadata and quality metrics" else NULL,
-          "  - scSimEval_benchmark_data.rds     : Complete R list object for downstream scripting in R",
-          "",
-          "Note: Individual high-resolution publication figures (JPEG 600 DPI, PDF) can be customized",
-          "and downloaded directly from the Comparative Bubble Matrix and Visualizations tabs."
-        )
-        writeLines(stats::na.omit(readme_lines), file.path(tmp_dir, "README_scSimEval.txt"))
-        
-        zip_files <- list.files(tmp_dir, full.names = FALSE, recursive = TRUE)
-        zip::zip(file, files = zip_files, root = tmp_dir)
-        unlink(tmp_dir, recursive = TRUE)
-      }
+      saveRDS(build_session_export_object(), file)
     }
   )
   

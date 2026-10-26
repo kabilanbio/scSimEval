@@ -7,7 +7,7 @@
 infer_scrna_pseudotime(data, n_top = 500)
 }
 \arguments{
-\item{data}{Expression or count matrix (genes x cells).}
+\item{data}{Expression or count matrix (genes x cells), or SingleCellExperiment object.}
 
 \item{n_top}{Number of top variable genes to use (default 500).}
 }

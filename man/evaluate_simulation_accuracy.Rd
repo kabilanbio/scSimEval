@@ -7,6 +7,9 @@
 evaluate_simulation_accuracy(
   ref_data,
   sim_data,
+  cell_types = NULL,
+  cell_types_ref = NULL,
+  cell_types_sim = NULL,
   compute_bivariate = TRUE,
   threads = 1,
   memory_mb = NULL,
