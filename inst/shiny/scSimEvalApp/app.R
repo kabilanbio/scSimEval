@@ -4177,26 +4177,35 @@ server <- function(input, output, session) {
   # ============================================================================
   # LIVE RUNNING LOGS & DIAGNOSTIC ENGINE (v0.99.9)
   # ============================================================================
-  sc_log_store <- reactiveValues(
-    entries = list(),
-    counter = 0,
-    last_update = Sys.time()
-  )
+  # Session-level log storage container (plain environment for safe context-free reading/writing)
+  log_storage <- new.env(parent = emptyenv())
+  log_storage$entries <- list()
+  log_storage$counter <- 0L
+  
+  # Reactive invalidation signal to notify Shiny outputs when new logs arrive
+  sc_log_version <- reactiveVal(0L)
 
   sc_log <- function(level = c("INFO", "NOTE", "WARNING", "ERROR", "SUCCESS"), msg, component = "System", details = NULL) {
     level <- match.arg(level)
     cat(sprintf("[%s] [%-7s] [%-12s] %s\n", format(Sys.time(), "%H:%M:%S"), level, component, msg))
-    sc_log_store$counter <- sc_log_store$counter + 1
+    log_storage$counter <- log_storage$counter + 1L
     new_entry <- list(
-      id = sc_log_store$counter,
+      id = log_storage$counter,
       time = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
       level = level,
       component = component,
       message = as.character(msg),
       details = if (!is.null(details) && nzchar(as.character(details))) as.character(details) else NULL
     )
-    sc_log_store$entries <- c(sc_log_store$entries, list(new_entry))
-    sc_log_store$last_update <- Sys.time()
+    log_storage$entries[[log_storage$counter]] <- new_entry
+    
+    # Notify reactive consumers safely without error if outside reactive consumer
+    tryCatch({
+      isolate({
+        sc_log_version(sc_log_version() + 1L)
+      })
+    }, error = function(e) NULL)
+    
     invisible(new_entry)
   }
 
@@ -9872,9 +9881,9 @@ server <- function(input, output, session) {
   # Reactive expression returning filtered log entries
   filtered_log_entries <- reactive({
     input$btn_refresh_logs
-    sc_log_store$last_update
+    sc_log_version()
     
-    entries <- sc_log_store$entries
+    entries <- log_storage$entries
     if (length(entries) == 0) return(list())
     
     # Severity filter
@@ -9899,28 +9908,29 @@ server <- function(input, output, session) {
   
   # KPI Metric Output Badges
   output$log_stat_total <- renderUI({
-    sc_log_store$last_update
-    length(sc_log_store$entries)
+    sc_log_version()
+    length(log_storage$entries)
   })
   
   output$log_stat_error <- renderUI({
-    sc_log_store$last_update
-    sum(vapply(sc_log_store$entries, function(e) identical(e$level, "ERROR"), logical(1)))
+    sc_log_version()
+    sum(vapply(log_storage$entries, function(e) identical(e$level, "ERROR"), logical(1)))
   })
   
   output$log_stat_warning <- renderUI({
-    sc_log_store$last_update
-    sum(vapply(sc_log_store$entries, function(e) identical(e$level, "WARNING"), logical(1)))
+    sc_log_version()
+    sum(vapply(log_storage$entries, function(e) identical(e$level, "WARNING"), logical(1)))
   })
   
   output$log_stat_note_info <- renderUI({
-    sc_log_store$last_update
-    sum(vapply(sc_log_store$entries, function(e) e$level %in% c("NOTE", "INFO", "SUCCESS"), logical(1)))
+    sc_log_version()
+    sum(vapply(log_storage$entries, function(e) e$level %in% c("NOTE", "INFO", "SUCCESS"), logical(1)))
   })
   
   output$log_console_status_line <- renderUI({
+    sc_log_version()
     f_count <- length(filtered_log_entries())
-    t_count <- length(sc_log_store$entries)
+    t_count <- length(log_storage$entries)
     sprintf("Showing %d of %d events", f_count, t_count)
   })
   
@@ -9971,15 +9981,16 @@ server <- function(input, output, session) {
   
   # Clear Logs Action
   observeEvent(input$btn_clear_logs, {
-    sc_log_store$entries <- list()
-    sc_log_store$counter <- 0
+    log_storage$entries <- list()
+    log_storage$counter <- 0L
+    sc_log_version(isolate(sc_log_version()) + 1L)
     sc_log("INFO", "Diagnostic log history cleared by user session.", "Console")
     showNotification("Console logs cleared.", type = "message", duration = 3)
   })
   
   # Refresh Logs Action
   observeEvent(input$btn_refresh_logs, {
-    sc_log_store$last_update <- Sys.time()
+    sc_log_version(isolate(sc_log_version()) + 1L)
   })
   
   # Download Logs Handler (.txt)
@@ -9988,7 +9999,7 @@ server <- function(input, output, session) {
       paste0("scSimEval_logs_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".txt")
     },
     content = function(file) {
-      entries <- sc_log_store$entries
+      entries <- log_storage$entries
       hdr <- c(
         "================================================================================",
         " scSimEval: Single-Cell Multiomics Simulation Benchmarking Studio",
