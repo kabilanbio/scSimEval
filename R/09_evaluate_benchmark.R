@@ -813,6 +813,8 @@ evaluate_multiomics_accuracy <- function(
   
   list(
     benchmark_summary_table = master_table,
+    metrics_summary_table   = master_table,
+    summary_table           = master_table,
     pairing = pairing,
     mod1_unimodal = m1_eval,
     mod2_unimodal = m2_eval,

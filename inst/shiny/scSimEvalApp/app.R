@@ -62,7 +62,7 @@ for (p in c("09_evaluate_benchmark.R", "R/09_evaluate_benchmark.R", "../../R/09_
 
 # Standardize Category names to canonical 8 package categories
 standardize_benchmark_categories <- function(df) {
-  if (is.null(df) || nrow(df) == 0) return(df)
+  if (is.null(df) || !is.data.frame(df) || nrow(df) == 0) return(df)
   legacy_map <- c(
     "Distributional Properties"               = "(I) Distributional Properties",
     "Distribution"                            = "(I) Distributional Properties",
@@ -98,10 +98,13 @@ standardize_benchmark_categories <- function(df) {
     
     needs_reassign <- !is.na(mc) & (
       is.na(df$Category) | df$Category == "" | df$Category == "Uncategorized" |
-      (df$Metric %in% batch_metrics & df$Category != "(IV) Batch Effects & Confounder Mixing") |
-      (df$Metric %in% zero_metrics & df$Category != "(II) Correlations & Zero-Inflation")
+      (!is.na(df$Category) & df$Metric %in% batch_metrics & df$Category != "(IV) Batch Effects & Confounder Mixing") |
+      (!is.na(df$Category) & df$Metric %in% zero_metrics & df$Category != "(II) Correlations & Zero-Inflation")
     )
-    df$Category[needs_reassign] <- mc[needs_reassign]
+    needs_reassign[is.na(needs_reassign)] <- FALSE
+    if (any(needs_reassign)) {
+      df$Category[needs_reassign] <- mc[needs_reassign]
+    }
   }
   df
 }
@@ -2089,6 +2092,97 @@ ui <- page_navbar(
         50% { opacity: 0.35; transform: scale(0.85); }
         100% { opacity: 1; transform: scale(1); }
       }
+
+      /* ===== PREVENT FILE UPLOAD AUTO-SCROLL TO TOP (SHINY INPUT FIX) ===== */
+      /* By default Shiny applies 'position: absolute !important; top: -99999px !important; left: -99999px !important;' to input[type=file]. */
+      /* When focused or clicked, browsers automatically jump/scroll to top:0 to bring the element into view. */
+      /* We pin input[type='file'] directly inside .btn-file with 100% width and height so it stays right under the mouse. */
+      .btn-file {
+        position: relative !important;
+        overflow: hidden !important;
+      }
+      .btn-file input[type='file'],
+      input[type='file'].shiny-input-file,
+      .shiny-bound-input[type='file'] {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-width: 100% !important;
+        min-height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        opacity: 0 !important;
+        cursor: pointer !important;
+        display: block !important;
+        z-index: 5 !important;
+      }
+      .input-group-btn,
+      .input-group-prepend,
+      .input-group-append {
+        position: relative !important;
+      }
+    ")),
+    tags$script(HTML("
+      /* Robust Scroll-Position Lock for File Inputs */
+      (function() {
+        var lastScrollY = 0;
+        var trackedElements = [];
+
+        function saveAllScrollPositions() {
+          lastScrollY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+          trackedElements = [];
+          
+          // Query all potentially scrollable parent containers
+          var candidates = document.querySelectorAll(
+            '.main, .bslib-page-navbar, .sidebar, .layout-sidebar, .tab-content, .card-body, .container-fluid, [style*=\"overflow\"]'
+          );
+          for (var i = 0; i < candidates.length; i++) {
+            var el = candidates[i];
+            if (el.scrollHeight > el.clientHeight && el.scrollTop > 0) {
+              trackedElements.push({ el: el, top: el.scrollTop, left: el.scrollLeft });
+            }
+          }
+        }
+
+        function restoreAllScrollPositions() {
+          if (lastScrollY > 0) {
+            window.scrollTo({ top: lastScrollY, behavior: 'instant' });
+            document.documentElement.scrollTop = lastScrollY;
+            document.body.scrollTop = lastScrollY;
+          }
+          for (var i = 0; i < trackedElements.length; i++) {
+            var item = trackedElements[i];
+            if (item.el) {
+              item.el.scrollTop = item.top;
+              if (item.left > 0) item.el.scrollLeft = item.left;
+            }
+          }
+        }
+
+        // Intercept mousedown, click, and focus on file inputs and Browse buttons
+        $(document).on('mousedown click focus', '.btn-file, .btn-file input[type=\"file\"], .input-group-btn, .shiny-input-container:has(input[type=\"file\"])', function() {
+          saveAllScrollPositions();
+          
+          // Re-apply across multiple browser animation frames to counteract any browser auto-scroll
+          requestAnimationFrame(restoreAllScrollPositions);
+          setTimeout(restoreAllScrollPositions, 0);
+          setTimeout(restoreAllScrollPositions, 20);
+          setTimeout(restoreAllScrollPositions, 60);
+          setTimeout(restoreAllScrollPositions, 150);
+          setTimeout(restoreAllScrollPositions, 300);
+        });
+
+        // Also restore position when file dialog completes / input changes
+        $(document).on('change', 'input[type=\"file\"]', function() {
+          setTimeout(restoreAllScrollPositions, 20);
+          setTimeout(restoreAllScrollPositions, 100);
+          setTimeout(restoreAllScrollPositions, 250);
+        });
+      })();
     ")),
     div(
       id = "app_busy_pill",
@@ -4960,7 +5054,7 @@ server <- function(input, output, session) {
       "",
       "# Helper: Standardize Category Names",
       "standardize_benchmark_categories <- function(df) {",
-      "  if (is.null(df) || nrow(df) == 0) return(df)",
+      "  if (is.null(df) || !is.data.frame(df) || nrow(df) == 0) return(df)",
       "  if (exists('standardize_benchmark_categories', where = asNamespace('scSimEval'), mode = 'function')) {",
       "    return(scSimEval::standardize_benchmark_categories(df))",
       "  }",
@@ -5152,7 +5246,7 @@ server <- function(input, output, session) {
             sprintf("    threads      = %d,", n_cores),
             "    verbose      = FALSE",
             "  )",
-            sprintf("  tbl_%d_%d <- res_%d_%d$metrics_summary_table", s, d, s, d),
+            sprintf("  tbl_%d_%d <- if (!is.null(res_%d_%d$metrics_summary_table)) res_%d_%d$metrics_summary_table else res_%d_%d$benchmark_summary_table", s, d, s, d, s, d),
             sprintf("  tbl_%d_%d$Method  <- sim_name_%d_%d", s, d, s, d),
             sprintf("  tbl_%d_%d$Dataset <- dset_name_%d", s, d, d),
             sprintf("  if (!'Score' %%in%% colnames(tbl_%d_%d) && 'Value' %%in%% colnames(tbl_%d_%d)) tbl_%d_%d$Score <- tbl_%d_%d$Value", s, d, s, d, s, d, s, d),
@@ -5459,7 +5553,16 @@ server <- function(input, output, session) {
               threads = n_cores_uni,
               verbose = FALSE
             )
-            tbl_sd <- res_sd$metrics_summary_table
+            tbl_sd <- if (!is.null(res_sd$metrics_summary_table)) {
+              res_sd$metrics_summary_table
+            } else if (!is.null(res_sd$benchmark_summary_table)) {
+              res_sd$benchmark_summary_table
+            } else {
+              res_sd$summary_table
+            }
+            if (is.null(tbl_sd) || !is.data.frame(tbl_sd)) {
+              stop(sprintf("Failed to retrieve single-cell evaluation table for '%s'.", sim_name))
+            }
             
             # Align cell types if provided
             ct_sim <- NULL
@@ -5896,7 +5999,16 @@ server <- function(input, output, session) {
               threads = n_cores_multi,
               verbose = FALSE
             )
-            tbl_m_sd <- res_multi_sd$metrics_summary_table
+            tbl_m_sd <- if (!is.null(res_multi_sd$metrics_summary_table)) {
+              res_multi_sd$metrics_summary_table
+            } else if (!is.null(res_multi_sd$benchmark_summary_table)) {
+              res_multi_sd$benchmark_summary_table
+            } else {
+              res_multi_sd$summary_table
+            }
+            if (is.null(tbl_m_sd) || !is.data.frame(tbl_m_sd)) {
+              stop(sprintf("Failed to retrieve multiomics evaluation table for '%s'.", sim_name))
+            }
             tbl_m_sd$Method <- sim_name
             tbl_m_sd$Dataset <- d_label
             if ("Value" %in% colnames(tbl_m_sd)) tbl_m_sd$Score_Raw <- tbl_m_sd$Value

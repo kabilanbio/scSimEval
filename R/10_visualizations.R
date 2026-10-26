@@ -407,7 +407,7 @@ utils::globalVariables(c(
 #' standardize_benchmark_categories(df)
 #' @export
 standardize_benchmark_categories <- function(df) {
-  if (is.null(df) || nrow(df) == 0) return(df)
+  if (is.null(df) || !is.data.frame(df) || nrow(df) == 0) return(df)
   legacy_map <- .LEGACY_CATEGORY_MAP
   if ("Category" %in% colnames(df)) {
     df$Category <- ifelse(df$Category %in% names(legacy_map),
@@ -420,10 +420,13 @@ standardize_benchmark_categories <- function(df) {
     
     needs_reassign <- !is.na(mc) & (
       is.na(df$Category) | df$Category == "" | df$Category == "Uncategorized" |
-      (df$Metric %in% batch_metrics & df$Category != "(IV) Batch Effects & Confounder Mixing") |
-      (df$Metric %in% zero_metrics & df$Category != "(II) Correlations & Zero-Inflation")
+      (!is.na(df$Category) & df$Metric %in% batch_metrics & df$Category != "(IV) Batch Effects & Confounder Mixing") |
+      (!is.na(df$Category) & df$Metric %in% zero_metrics & df$Category != "(II) Correlations & Zero-Inflation")
     )
-    df$Category[needs_reassign] <- mc[needs_reassign]
+    needs_reassign[is.na(needs_reassign)] <- FALSE
+    if (any(needs_reassign)) {
+      df$Category[needs_reassign] <- mc[needs_reassign]
+    }
   }
   df
 }
