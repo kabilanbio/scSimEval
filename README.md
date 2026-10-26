@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://kabilanbio.github.io/scSimEval/)
-[![Bioconductor submission](https://img.shields.io/badge/Bioconductor-submission%20v0.99.8-brightgreen.svg)](https://github.com/BiocStaging/scSimEval)
+[![Bioconductor submission](https://img.shields.io/badge/Bioconductor-submission%20v0.99.9-brightgreen.svg)](https://github.com/BiocStaging/scSimEval)
 
 **`scSimEval`** is a unified evaluation and benchmarking toolkit designed to systematically quantify how faithfully single-cell simulation methods reproduce empirical biological experiments.
 

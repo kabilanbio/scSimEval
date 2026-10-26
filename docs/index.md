@@ -262,9 +262,9 @@ directions:
     - **Bubble Size:** Directly proportional to the standardized score
       ($`0.00`$ to $`1.00`$). Larger bubbles indicate higher simulation
       quality.
-    - **Glyph Shape:** Top-performing tools ($`\ge 0.96`$) are
-      highlighted with bold squares, while standard scores are shown as
-      circles.
+    - **Glyph Outline:** Top-performing tools ($`\ge 0.96`$) are
+      highlighted with bold circular outlines, while standard scores are shown as
+      circles with standard outlines.
     - **Category Colors:** Distinct color for each evaluation category.
     - **Leaderboard Ranking:** Simulation methods are ordered
       top-to-bottom on the vertical axis by composite average score.

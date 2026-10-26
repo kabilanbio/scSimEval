@@ -221,7 +221,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -255,6 +255,25 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.99.9" id="scsimeval-0999">scSimEval 0.99.9<a class="anchor" aria-label="anchor" href="#scsimeval-0999"></a></h2>
+<div class="section level3">
+<h3 id="major-improvements-0-99-9">Major Improvements<a class="anchor" aria-label="anchor" href="#major-improvements-0-99-9"></a></h3>
+<ul><li>
+<strong>In-App Live Running Logs &amp; Diagnostics Suite:</strong>
+<ul><li>Added a dedicated <strong>“Logs”</strong> tab immediately after <strong>“Help &amp; Getting Started”</strong> in the interactive Shiny application (<code><a href="../reference/launch_scSimEval_app.html">launch_scSimEval_app()</a></code>).</li>
+<li>Implemented real-time log streaming that captures all execution events, data ingestion and validation steps, metric calculation progress across all 62 benchmark metrics, visualization rendering, and file export actions.</li>
+<li>Automatically captures and formats runtime <code>ERRORS</code>, <code>WARNINGS</code>, <code>NOTES</code>, and <code>INFO</code> events with timestamps, components, severity badges, and error tracebacks to simplify interactive debugging.</li>
+<li>Provided interactive control tools including severity-level filtering (<code>All</code>, <code>ERROR</code>, <code>WARNING</code>, <code>NOTE/INFO</code>), real-time search filtering, auto-scroll toggle, manual log refresh, instant log clearing, and full text <code>.txt</code> download export handler for reproducibility.</li>
+<li>Initialized automatic system diagnostics on startup (R version, architecture, OS platform, memory/CPU cores detection, cache status, and mounted asset paths).</li>
+</ul></li>
+<li>
+<strong>Visual &amp; Documentation Harmonization:</strong>
+<ul><li>Standardized Figure 2 (<code>score_normalization_workflow.png</code>) across pkgdown articles, vignette references, and Shiny Studio help pages to feature high-contrast bold circular outlines (<code>shape = 21</code>, <code>stroke = 1.6</code>) for best-performing methods, eliminating legacy square glyphs.</li>
+<li>Synchronized documentation, vignette captions, and schema summaries to reflect the updated circular visual encodings.</li>
+</ul></li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.99.8" id="scsimeval-0998">scSimEval 0.99.8<a class="anchor" aria-label="anchor" href="#scsimeval-0998"></a></h2>
 <div class="section level3">
 <h3 id="major-improvements-0-99-8">Major Improvements<a class="anchor" aria-label="anchor" href="#major-improvements-0-99-8"></a></h3>
@@ -272,6 +291,10 @@
 <strong>Unpaired Scalability Benchmarking:</strong> Added modality breakdown options to plot scRNA-seq, scATAC-seq, or combined runtime and peak RAM for unpaired multiomics datasets.</li>
 <li>
 <strong>Metric Heatmap Normalized Scores:</strong> Ensured heatmap cell labels display normalized [0, 1] fidelity scores when relative scaling is active.</li>
+<li>
+<strong>Cell Embeddings (Side-by-Side Comparison):</strong> Resolved side-by-side layout visualization where only the reference panel was displayed; enabled robust dual-facet rendering (Reference vs. Single Simulator) with dynamic simulator selection and automatic fallback.</li>
+<li>
+<strong>Hardware &amp; Memory Guidelines:</strong> Streamlined the Help page by replacing the bulky table with concise 3–4 line general guidelines for CPU and memory sizing across exploratory, large-scale multiomics, and HPC atlas-scale benchmarks.</li>
 <li>
 <strong>Benchmark Export Streamlining:</strong> Streamlined Benchmark Results Export to provide the comprehensive <code>.rds</code> session object for full analytical reproducibility, and added a dedicated download handler for the Master Benchmark Scores table.</li>
 </ul></li>

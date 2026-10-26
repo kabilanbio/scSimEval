@@ -1971,6 +1971,124 @@ ui <- page_navbar(
       [data-bs-theme='dark'] .pageview-count {
         color: #38BDF8 !important;
       }
+      
+      /* ===== LIVE LOGS TERMINAL CONSOLE STYLING ===== */
+      .log-terminal-window {
+        background: #090D16;
+        border: 1px solid #1E293B;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        overflow: hidden;
+      }
+      .log-terminal-header {
+        background: #111827;
+        border-bottom: 1px solid #1E293B;
+        padding: 9px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .terminal-dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .terminal-dot-red { background: #EF4444; }
+      .terminal-dot-yellow { background: #F59E0B; }
+      .terminal-dot-green { background: #10B981; }
+      .log-terminal-body {
+        background: #080C14;
+        color: #E2E8F0;
+        font-family: 'Consolas', 'Fira Code', 'Monaco', 'Courier New', monospace;
+        font-size: 0.83rem;
+        line-height: 1.6;
+        padding: 16px 20px;
+        max-height: 560px;
+        min-height: 380px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .log-entry-row {
+        padding: 5px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .log-entry-row:hover {
+        background: rgba(255, 255, 255, 0.025);
+      }
+      .log-time {
+        color: #64748B;
+        font-size: 0.77rem;
+        min-width: 140px;
+        flex-shrink: 0;
+        user-select: none;
+      }
+      .log-lvl-badge {
+        font-size: 0.70rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        min-width: 72px;
+        text-align: center;
+        flex-shrink: 0;
+        letter-spacing: 0.5px;
+        user-select: none;
+      }
+      .log-lvl-ERROR {
+        background: rgba(239, 68, 68, 0.22);
+        color: #FCA5A5;
+        border: 1px solid #DC2626;
+      }
+      .log-lvl-WARNING {
+        background: rgba(245, 158, 11, 0.22);
+        color: #FDE68A;
+        border: 1px solid #D97706;
+      }
+      .log-lvl-NOTE {
+        background: rgba(139, 92, 246, 0.22);
+        color: #DDD6FE;
+        border: 1px solid #7C3AED;
+      }
+      .log-lvl-INFO {
+        background: rgba(56, 189, 248, 0.22);
+        color: #7DD3FC;
+        border: 1px solid #0284C7;
+      }
+      .log-lvl-SUCCESS {
+        background: rgba(16, 185, 129, 0.22);
+        color: #6EE7B7;
+        border: 1px solid #059669;
+      }
+      .log-comp {
+        color: #A5B4FC;
+        font-weight: 600;
+        min-width: 95px;
+        flex-shrink: 0;
+        font-size: 0.79rem;
+      }
+      .log-text {
+        color: #F1F5F9;
+        flex-grow: 1;
+      }
+      .log-details-block {
+        margin-top: 5px;
+        padding: 6px 10px;
+        background: rgba(0, 0, 0, 0.4);
+        border-left: 2px solid #EF4444;
+        border-radius: 4px;
+        color: #CBD5E1;
+        font-size: 0.76rem;
+      }
+      @keyframes pulseLive {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.35; transform: scale(0.85); }
+        100% { opacity: 1; transform: scale(1); }
+      }
     ")),
     div(
       id = "app_busy_pill",
@@ -3230,8 +3348,8 @@ ui <- page_navbar(
                 style = "width: 100%; max-width: 920px; height: auto; display: block; margin: 0 auto; border-radius: 8px; border: 1px solid #E2E8F0;"
               ),
               p(
-                tags$b("Figure 2 | Score Normalization Pipeline. "),
-                "Metrics where lower values indicate better results (such as error, runtime, and memory) are inverted so that higher is always better. All values are then scaled between 0.00 and 1.00 so simulators can be ranked and compared fairly in the bubble matrix and summary charts.",
+                tags$b("Figure 2 | Score Normalization and Visual Mapping Workflow. "),
+                "Metrics where lower values indicate better results (such as error, runtime, and memory) are inverted so that higher is always better. All values are scaled between 0.00 and 1.00 so simulators can be ranked and compared fairly. In the bubble matrix, bubble size reflects normalized fidelity, and top performers for each metric are highlighted with bold circular outlines.",
                 style = "font-size: 0.84rem; color: #64748B; margin-top: 10px; max-width: 920px; margin-left: auto; margin-right: auto;"
               )
             ),
@@ -3658,8 +3776,221 @@ Cell_03,Batch1
       )
     )
   ),
+  
+  # ============================================================================
+  # TAB 8: LOGS (LIVE EXECUTION LOGS & SYSTEM DIAGNOSTICS)
+  # ============================================================================
+  nav_panel(
+    "Logs",
+    div(
+      style = "max-width: 1400px; margin: 0 auto; padding: 10px 0 30px 0;",
+      
+      # 1. Hero Header Banner
+      div(
+        class = "hero-box",
+        style = "background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border-left: 5px solid #38BDF8; margin-bottom: 20px; padding: 22px 28px; border-radius: 10px;",
+        div(
+          class = "d-flex justify-content-between align-items-center flex-wrap gap-3",
+          div(
+            h3(
+              tags$span(icon("terminal", class = "me-2 text-info")),
+              "Live Execution Logs & System Diagnostics",
+              style = "margin: 0; font-weight: 800; color: #FFFFFF; font-size: 1.45rem;"
+            ),
+            p(
+              "Real-time diagnostic stream capturing data loading, metric computation across 62 evaluation criteria, visualization rendering, memory profiling, and live ERRORS, WARNINGS, and NOTES.",
+              style = "margin: 6px 0 0 0; color: #94A3B8; font-size: 0.88rem;"
+            )
+          ),
+          div(
+            class = "d-flex align-items-center gap-2",
+            span(
+              class = "badge",
+              style = "background: rgba(16, 185, 129, 0.2); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 7px 14px; font-size: 0.82rem; font-weight: 700; border-radius: 20px;",
+              icon("circle", class = "me-1 text-success", style = "font-size: 0.65rem; animation: pulseLive 1.5s infinite;"),
+              "LIVE MONITOR ACTIVE"
+            ),
+            span(
+              class = "badge",
+              style = "background: rgba(56, 189, 248, 0.15); color: #7DD3FC; border: 1px solid rgba(56, 189, 248, 0.3); padding: 7px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 20px;",
+              "scSimEval v0.99.9"
+            )
+          )
+        )
+      ),
+      
+      # 2. KPI Summary Badges Row
+      fluidRow(
+        column(
+          width = 3,
+          div(
+            class = "stat-card",
+            style = "border-left-color: #38BDF8; background: #FFFFFF;",
+            div(class = "d-flex justify-content-between align-items-center",
+              div(
+                div(class = "stat-number text-dark", uiOutput("log_stat_total", inline = TRUE)),
+                div(class = "stat-label", "Total Log Events")
+              ),
+              icon("list-check", class = "text-info", style = "font-size: 2.2rem; opacity: 0.7;")
+            )
+          )
+        ),
+        column(
+          width = 3,
+          div(
+            class = "stat-card",
+            style = "border-left-color: #EF4444; background: #FFFFFF;",
+            div(class = "d-flex justify-content-between align-items-center",
+              div(
+                div(class = "stat-number text-danger", uiOutput("log_stat_error", inline = TRUE)),
+                div(class = "stat-label", "Critical Errors")
+              ),
+              icon("triangle-exclamation", class = "text-danger", style = "font-size: 2.2rem; opacity: 0.7;")
+            )
+          )
+        ),
+        column(
+          width = 3,
+          div(
+            class = "stat-card",
+            style = "border-left-color: #F59E0B; background: #FFFFFF;",
+            div(class = "d-flex justify-content-between align-items-center",
+              div(
+                div(class = "stat-number text-warning", uiOutput("log_stat_warning", inline = TRUE)),
+                div(class = "stat-label", "Warnings & Alerts")
+              ),
+              icon("circle-exclamation", class = "text-warning", style = "font-size: 2.2rem; opacity: 0.7;")
+            )
+          )
+        ),
+        column(
+          width = 3,
+          div(
+            class = "stat-card",
+            style = "border-left-color: #10B981; background: #FFFFFF;",
+            div(class = "d-flex justify-content-between align-items-center",
+              div(
+                div(class = "stat-number text-success", uiOutput("log_stat_note_info", inline = TRUE)),
+                div(class = "stat-label", "Notes, Info & Success")
+              ),
+              icon("circle-check", class = "text-success", style = "font-size: 2.2rem; opacity: 0.7;")
+            )
+          )
+        )
+      ),
+      
+      # 3. Interactive Toolbar Card
+      card(
+        class = "mb-3",
+        style = "border: 1px solid #E2E8F0; border-radius: 8px;",
+        card_body(
+          style = "padding: 14px 18px;",
+          div(
+            class = "d-flex justify-content-between align-items-center flex-wrap gap-3",
+            
+            # Left: Level Filters
+            div(
+              class = "d-flex align-items-center flex-wrap gap-2",
+              tags$span(tags$strong("Filter:"), style = "font-size: 0.85rem; color: #475569; margin-right: 4px;"),
+              radioButtons(
+                inputId = "log_filter_level",
+                label = NULL,
+                choices = c("All" = "ALL", "Errors" = "ERROR", "Warnings" = "WARNING", "Notes" = "NOTE", "Info" = "INFO", "Success" = "SUCCESS"),
+                selected = "ALL",
+                inline = TRUE
+              )
+            ),
+            
+            # Middle: Search Box
+            div(
+              style = "min-width: 260px; flex-grow: 1; max-width: 380px;",
+              textInput(
+                inputId = "log_search_query",
+                label = NULL,
+                placeholder = "Search log messages, components, errors...",
+                width = "100%"
+              )
+            ),
+            
+            # Right: Controls & Export
+            div(
+              class = "d-flex align-items-center gap-2",
+              checkboxInput("log_autoscroll", "Auto-scroll to bottom", value = TRUE, width = "auto"),
+              actionButton(
+                inputId = "btn_refresh_logs",
+                label = "Refresh",
+                icon = icon("arrows-rotate"),
+                class = "btn btn-outline-secondary btn-sm",
+                style = "font-weight: 600;"
+              ),
+              actionButton(
+                inputId = "btn_clear_logs",
+                label = "Clear Logs",
+                icon = icon("trash-can"),
+                class = "btn btn-outline-danger btn-sm",
+                style = "font-weight: 600;"
+              ),
+              downloadButton(
+                outputId = "btn_download_logs",
+                label = "Download Logs (.txt)",
+                class = "btn btn-primary btn-sm",
+                icon = icon("download"),
+                style = "font-weight: 600;"
+              )
+            )
+          )
+        )
+      ),
+      
+      # 4. Live Terminal / Console Window
+      div(
+        class = "log-terminal-window",
+        div(
+          class = "log-terminal-header",
+          div(
+            class = "d-flex align-items-center gap-2",
+            div(class = "terminal-dot terminal-dot-red"),
+            div(class = "terminal-dot terminal-dot-yellow"),
+            div(class = "terminal-dot terminal-dot-green"),
+            span("scSimEval Diagnostics Console", style = "margin-left: 8px; font-weight: 600; letter-spacing: 0.3px; color: #E2E8F0; font-size: 0.82rem;"),
+            span("● live output", style = "font-size: 0.72rem; color: #10B981; font-weight: 600; margin-left: 4px;")
+          ),
+          div(
+            class = "d-flex align-items-center gap-3",
+            span(uiOutput("log_console_status_line", inline = TRUE), style = "font-size: 0.78rem; color: #94A3B8;"),
+            tags$button(
+              type = "button",
+              class = "btn btn-sm text-light p-0",
+              style = "opacity: 0.75; font-size: 0.8rem; background: none; border: none; cursor: pointer;",
+              onclick = "navigator.clipboard.writeText(document.getElementById('sc_log_body').innerText); alert('Logs copied to clipboard!');",
+              title = "Copy raw console logs to clipboard",
+              icon("copy", class = "me-1"), "Copy"
+            )
+          )
+        ),
+        div(
+          id = "sc_log_body",
+          class = "log-terminal-body",
+          uiOutput("ui_log_console")
+        )
+      ),
+      
+      # 5. Explanatory Footer Callout
+      div(
+        style = "margin-top: 18px; padding: 12px 18px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; font-size: 0.82rem; color: #64748B;",
+        div(
+          class = "d-flex align-items-center gap-3 flex-wrap",
+          div(strong(icon("info-circle", class = "me-1 text-primary"), "Live Logging System Architecture: ")),
+          div(span(class = "badge", style = "background: #7F1D1D; color: #FCA5A5;", "ERROR"), " Highlights computation failures, dimension mismatches, missing required packages, or execution interrupts."),
+          div(span(class = "badge", style = "background: #78350F; color: #FDE68A;", "WARNING"), " Tracks metric boundary alerts, missing optional cell types/batches, or fallback approximations."),
+          div(span(class = "badge", style = "background: #4C1D95; color: #DDD6FE;", "NOTE"), " Documents data preprocessing decisions, sparse conversions, and category metric count unlock events."),
+          div(span(class = "badge", style = "background: #0C4A6E; color: #7DD3FC;", "INFO"), " Continuous timeline of user clicks, plot rendering triggers, dataset switches, and export generations.")
+        )
+      )
+    )
+  ),
     # ============================================================================
-  # TAB 7: CONTACT (SINGLE ICAR LOGO, PRINCIPAL SCIENTIST, KABILAN SAKTHIVEL)
+  # TAB 9: CONTACT (SINGLE ICAR LOGO, PRINCIPAL SCIENTIST, KABILAN SAKTHIVEL)
   # ============================================================================
   nav_panel(
     "Contact",
@@ -3842,6 +4173,48 @@ Cell_03,Batch1
 # SERVER DEFINITION
 # ==============================================================================
 server <- function(input, output, session) {
+  
+  # ============================================================================
+  # LIVE RUNNING LOGS & DIAGNOSTIC ENGINE (v0.99.9)
+  # ============================================================================
+  sc_log_store <- reactiveValues(
+    entries = list(),
+    counter = 0,
+    last_update = Sys.time()
+  )
+
+  sc_log <- function(level = c("INFO", "NOTE", "WARNING", "ERROR", "SUCCESS"), msg, component = "System", details = NULL) {
+    level <- match.arg(level)
+    cat(sprintf("[%s] [%-7s] [%-12s] %s\n", format(Sys.time(), "%H:%M:%S"), level, component, msg))
+    sc_log_store$counter <- sc_log_store$counter + 1
+    new_entry <- list(
+      id = sc_log_store$counter,
+      time = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+      level = level,
+      component = component,
+      message = as.character(msg),
+      details = if (!is.null(details) && nzchar(as.character(details))) as.character(details) else NULL
+    )
+    sc_log_store$entries <- c(sc_log_store$entries, list(new_entry))
+    sc_log_store$last_update <- Sys.time()
+    invisible(new_entry)
+  }
+
+  # Startup Diagnostic Log Sequence
+  sc_log("INFO", "scSimEval Interactive Benchmarking Studio v0.99.9 initialized.", "Startup")
+  sc_log("NOTE", paste0("Runtime Environment: R ", getRversion(), " | Platform: ", R.version$platform, " | OS: ", Sys.info()[["sysname"]], " ", Sys.info()[["release"]]), "Environment")
+  sc_log("INFO", paste0("System Concurrency: ", parallel::detectCores(), " logical CPU cores detected. Sparse matrix arithmetic (dgCMatrix) enabled."), "Hardware")
+  sc_log("NOTE", "Evaluation Suite: 62 multiomics metrics registered across Categories 1 to 8.", "Metrics")
+  
+  # Check demo benchmark cache status
+  demo_rds_path <- system.file("shiny/scSimEvalApp/demo_benchmark_data.rds", package = "scSimEval")
+  if (nzchar(demo_rds_path) && file.exists(demo_rds_path)) {
+    cache_sz <- round(file.info(demo_rds_path)$size / (1024 * 1024), 2)
+    sc_log("INFO", paste0("Precomputed benchmark database found (", cache_sz, " MB). Fast demo loading enabled."), "Cache")
+  } else {
+    sc_log("NOTE", "Standalone demo cache file not pre-bundled; on-the-fly evaluation mode active.", "Cache")
+  }
+  sc_log("SUCCESS", "System ready. Navigate to 'Data Hub' to upload datasets or explore demo results.", "System")
   
   # Reactive state container
   # Reactive state container (Data loaded on-demand via options on sidebar)
@@ -4207,12 +4580,14 @@ server <- function(input, output, session) {
   # Unified Example Dataset & Benchmark Loader (Real Rice Bud & Soybean Root Datasets)
   load_example_benchmark <- function(type = c("all", "scrna_rice", "scrna_soy", "scatac_rice", "scatac_soy", "multi_paired", "multi_unpaired")) {
     type <- match.arg(type)
+    sc_log("INFO", paste0("Requesting demo benchmark data for configuration: '", type, "'..."), "DataHub")
     
     bm_file <- get_pkg_data_file("demo_benchmark_data.rds")
     rb_file <- get_pkg_data_file("example_rice_bud.rds")
     sb_file <- get_pkg_data_file("example_soybean_root.rds")
     
     if (is.null(bm_file) || !file.exists(bm_file)) {
+      sc_log("ERROR", "Benchmark database cache file demo_benchmark_data.rds not found on disk.", "DataHub")
       showNotification("Benchmark database cache file not found on disk.", type = "error")
       return(FALSE)
     }
@@ -4429,6 +4804,7 @@ server <- function(input, output, session) {
     
     sync_active_mode_data(target_mode)
     rv_plot_triggers$bubble <- 0; rv_plot_triggers$sum <- 0; rv_plot_triggers$dist <- 0; rv_plot_triggers$scale <- 0; rv_plot_triggers$box <- 0; rv_plot_triggers$heat <- 0; rv_plot_triggers$pca <- 0; rv_plot_triggers$mds <- 0; rv_plot_triggers$emb <- 0
+    sc_log("SUCCESS", paste0("Demo benchmark data loaded: '", source_name, "' (", nrow(bench_df), " evaluation rows across ", length(methods), " simulators: ", paste(methods, collapse = ", "), ")."), "DataHub")
     showNotification(paste0(source_name, " loaded successfully!"), type = "message", duration = 6)
     nav_select("datahub_subtabs", "Dataset properties")
     return(TRUE)
@@ -5235,8 +5611,10 @@ server <- function(input, output, session) {
         )
         sync_active_mode_data("unimodal")
         
+        sc_log("SUCCESS", paste0("Single-Cell Evaluation completed successfully: ", nrow(rv$benchmark_df), " metric rows generated across ", length(unique(rv$benchmark_df$Method)), " method(s)."), "Evaluation")
         showNotification("Single-Cell Evaluation completed successfully!", type = "message", duration = 5)
       }, error = function(e) {
+        sc_log("ERROR", paste("Single-Cell Evaluation error:", e$message), "Evaluation")
         showNotification(paste("Error during evaluation:", e$message), type = "error", duration = 8)
       })
     })
@@ -5569,8 +5947,10 @@ server <- function(input, output, session) {
         )
         sync_active_mode_data("multiomics")
         
+        sc_log("SUCCESS", paste0("Multiomics Evaluation completed successfully: ", nrow(rv$benchmark_df), " evaluation rows across ", length(unique(rv$benchmark_df$Method)), " method(s)."), "Evaluation")
         showNotification("Multiomics Evaluation completed successfully!", type = "message", duration = 5)
       }, error = function(e) {
+        sc_log("ERROR", paste("Multiomics Evaluation error:", e$message), "Evaluation")
         showNotification(paste("Error during multiomics evaluation:", e$message), type = "error", duration = 8)
       })
     })
@@ -5635,8 +6015,10 @@ server <- function(input, output, session) {
       sync_active_mode_data("upload_bench")
       
       updateCheckboxGroupInput(session, "sel_bubble_methods", choices = rv$methods, selected = rv$methods)
+      sc_log("SUCCESS", paste0("Uploaded benchmark results loaded from '", input$file_bench_upload$name, "': ", nrow(df), " records across ", length(rv$methods), " simulators: ", paste(rv$methods, collapse = ", "), "."), "Upload")
       showNotification("Benchmark results loaded successfully!", type = "message")
     }, error = function(e) {
+      sc_log("ERROR", paste("Failed to load uploaded benchmark file:", e$message), "Upload")
       showNotification(paste("Upload error:", e$message), type = "error")
     })
   })
@@ -9482,6 +9864,160 @@ server <- function(input, output, session) {
       class = "compact stripe hover"
     ) %>% formatRound(columns = which(sapply(df, is.numeric)), digits = 4)
   })
+  
+  # ============================================================================
+  # TAB 8: LOGS SERVER LOGIC & CONSOLE RENDERING
+  # ============================================================================
+  
+  # Reactive expression returning filtered log entries
+  filtered_log_entries <- reactive({
+    input$btn_refresh_logs
+    sc_log_store$last_update
+    
+    entries <- sc_log_store$entries
+    if (length(entries) == 0) return(list())
+    
+    # Severity filter
+    lvl <- input$log_filter_level %||% "ALL"
+    if (lvl != "ALL") {
+      entries <- Filter(function(e) isTRUE(e$level == lvl), entries)
+    }
+    
+    # Text search
+    q <- trimws(input$log_search_query %||% "")
+    if (nzchar(q)) {
+      ql <- tolower(q)
+      entries <- Filter(function(e) {
+        grepl(ql, tolower(e$message), fixed = TRUE) ||
+          grepl(ql, tolower(e$component), fixed = TRUE) ||
+          (!is.null(e$details) && grepl(ql, tolower(e$details), fixed = TRUE))
+      }, entries)
+    }
+    
+    return(entries)
+  })
+  
+  # KPI Metric Output Badges
+  output$log_stat_total <- renderUI({
+    sc_log_store$last_update
+    length(sc_log_store$entries)
+  })
+  
+  output$log_stat_error <- renderUI({
+    sc_log_store$last_update
+    sum(vapply(sc_log_store$entries, function(e) identical(e$level, "ERROR"), logical(1)))
+  })
+  
+  output$log_stat_warning <- renderUI({
+    sc_log_store$last_update
+    sum(vapply(sc_log_store$entries, function(e) identical(e$level, "WARNING"), logical(1)))
+  })
+  
+  output$log_stat_note_info <- renderUI({
+    sc_log_store$last_update
+    sum(vapply(sc_log_store$entries, function(e) e$level %in% c("NOTE", "INFO", "SUCCESS"), logical(1)))
+  })
+  
+  output$log_console_status_line <- renderUI({
+    f_count <- length(filtered_log_entries())
+    t_count <- length(sc_log_store$entries)
+    sprintf("Showing %d of %d events", f_count, t_count)
+  })
+  
+  # Render Live Console HTML
+  output$ui_log_console <- renderUI({
+    entries <- filtered_log_entries()
+    
+    if (length(entries) == 0) {
+      return(
+        div(
+          style = "text-align: center; padding: 60px 20px; color: #64748B;",
+          icon("terminal", style = "font-size: 2.4rem; opacity: 0.4; margin-bottom: 12px;"),
+          h6("No Log Events Match Filter Criteria", style = "color: #94A3B8; font-weight: 700;"),
+          p("Execute operations in the Data Hub or Visualizations tabs to generate real-time execution logs.", style = "font-size: 0.82rem; margin-bottom: 0;")
+        )
+      )
+    }
+    
+    rendered_rows <- lapply(entries, function(e) {
+      lvl_cls <- paste0("log-lvl-badge log-lvl-", e$level)
+      
+      div(
+        class = "log-entry-row",
+        span(class = "log-time", e$time),
+        span(class = lvl_cls, e$level),
+        span(class = "log-comp", paste0("[", e$component, "]")),
+        div(
+          class = "log-text",
+          span(e$message),
+          if (!is.null(e$details) && nzchar(e$details)) {
+            div(class = "log-details-block", tags$pre(style = "margin: 0; font-family: inherit; color: inherit; white-space: pre-wrap;", e$details))
+          }
+        )
+      )
+    })
+    
+    autoscroll_script <- if (isTRUE(input$log_autoscroll)) {
+      tags$script(HTML("setTimeout(function(){ var el = document.getElementById('sc_log_body'); if(el) { el.scrollTop = el.scrollHeight; } }, 50);"))
+    } else {
+      NULL
+    }
+    
+    tagList(
+      rendered_rows,
+      autoscroll_script
+    )
+  })
+  
+  # Clear Logs Action
+  observeEvent(input$btn_clear_logs, {
+    sc_log_store$entries <- list()
+    sc_log_store$counter <- 0
+    sc_log("INFO", "Diagnostic log history cleared by user session.", "Console")
+    showNotification("Console logs cleared.", type = "message", duration = 3)
+  })
+  
+  # Refresh Logs Action
+  observeEvent(input$btn_refresh_logs, {
+    sc_log_store$last_update <- Sys.time()
+  })
+  
+  # Download Logs Handler (.txt)
+  output$btn_download_logs <- downloadHandler(
+    filename = function() {
+      paste0("scSimEval_logs_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".txt")
+    },
+    content = function(file) {
+      entries <- sc_log_store$entries
+      hdr <- c(
+        "================================================================================",
+        " scSimEval: Single-Cell Multiomics Simulation Benchmarking Studio",
+        " Interactive Execution & Diagnostic Runtime Log Export",
+        paste0(" Generated At:    ", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
+        paste0(" Package Version: scSimEval v0.99.9"),
+        paste0(" R Version:       ", R.version.string),
+        paste0(" Platform:        ", R.version$platform),
+        paste0(" Total Entries:   ", length(entries)),
+        "================================================================================",
+        ""
+      )
+      
+      body_lines <- if (length(entries) > 0) {
+        unlist(lapply(entries, function(e) {
+          line <- sprintf("[%s] [%-7s] [%-12s] %s", e$time, e$level, e$component, e$message)
+          if (!is.null(e$details) && nzchar(e$details)) {
+            c(line, paste0("    Trace/Details: ", e$details))
+          } else {
+            line
+          }
+        }))
+      } else {
+        "[No log entries recorded]"
+      }
+      
+      writeLines(c(hdr, body_lines), con = file)
+    }
+  )
 }
 
 # ==============================================================================

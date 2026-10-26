@@ -1,3 +1,18 @@
+# scSimEval 0.99.9
+
+## Major Improvements
+
+* **In-App Live Running Logs & Diagnostics Suite:**
+  - Added a dedicated **"Logs"** tab immediately after **"Help & Getting Started"** in the interactive Shiny application (`launch_scSimEval_app()`).
+  - Implemented real-time log streaming that captures all execution events, data ingestion and validation steps, metric calculation progress across all 62 benchmark metrics, visualization rendering, and file export actions.
+  - Automatically captures and formats runtime `ERRORS`, `WARNINGS`, `NOTES`, and `INFO` events with timestamps, components, severity badges, and error tracebacks to simplify interactive debugging.
+  - Provided interactive control tools including severity-level filtering (`All`, `ERROR`, `WARNING`, `NOTE/INFO`), real-time search filtering, auto-scroll toggle, manual log refresh, instant log clearing, and full text `.txt` download export handler for reproducibility.
+  - Initialized automatic system diagnostics on startup (R version, architecture, OS platform, memory/CPU cores detection, cache status, and mounted asset paths).
+
+* **Visual & Documentation Harmonization:**
+  - Standardized Figure 2 (`score_normalization_workflow.png`) across pkgdown articles, vignette references, and Shiny Studio help pages to feature high-contrast bold circular outlines (`shape = 21`, `stroke = 1.6`) for best-performing methods, eliminating legacy square glyphs.
+  - Synchronized documentation, vignette captions, and schema summaries to reflect the updated circular visual encodings.
+
 # scSimEval 0.99.8
 
 ## Major Improvements

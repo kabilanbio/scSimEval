@@ -105,15 +105,15 @@ scSimEval.\*\* Box 1 shows the two-step normalization process: direction
 inversion for lower-is-better metrics followed by min-max scaling to a
 standard 0 to 1 range. Box 2 illustrates the visual mapping into bubble
 matrices, where bubble size reflects simulation quality and top
-performers are highlighted with bold
-squares.](figures/score_normalization_workflow.png)
+performers for each metric are highlighted with bold circular
+outlines.](figures/score_normalization_workflow.png)
 
 **Figure 2: Score normalization and visual mapping workflow in
 scSimEval.** Box 1 shows the two-step normalization process: direction
 inversion for lower-is-better metrics followed by min-max scaling to a
 standard 0 to 1 range. Box 2 illustrates the visual mapping into bubble
 matrices, where bubble size reflects simulation quality and top
-performers are highlighted with bold squares.
+performers for each metric are highlighted with bold circular outlines.
 
 ### 3.1 Two-Step Score Normalization
 
