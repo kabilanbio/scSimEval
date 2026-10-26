@@ -500,6 +500,29 @@ compute_dataset_embeddings <- function(reference,
   dataset_names <- names(all_datasets)
   results <- list()
   
+  # Extract biological cell types for the empirical reference
+  ref_ct_actual <- NULL
+  if (!is.null(cell_types)) {
+    if (is.list(cell_types) && !is.data.frame(cell_types) && !is.factor(cell_types)) {
+      if (!is.null(cell_types[["Reference"]]) && length(cell_types[["Reference"]]) == ncol(ref_mat)) {
+        ref_ct_actual <- as.character(cell_types[["Reference"]])
+      } else {
+        for (item in cell_types) {
+          if (length(item) == ncol(ref_mat)) {
+            ref_ct_actual <- as.character(item)
+            break
+          }
+        }
+      }
+    } else if (is.data.frame(cell_types)) {
+      v <- if (!is.null(cell_types$CellType)) cell_types$CellType else if (!is.null(cell_types$Cell_Type)) cell_types$Cell_Type else cell_types[[1]]
+      if (length(v) == ncol(ref_mat)) ref_ct_actual <- as.character(v)
+    } else if (length(cell_types) == ncol(ref_mat)) {
+      ref_ct_actual <- as.character(cell_types)
+    }
+  }
+  ref_pca_centroids <- list()
+  
   for (dname in dataset_names) {
     mat <- all_datasets[[dname]]
     if (is.null(mat) || length(dim(mat)) < 2) next
@@ -593,24 +616,90 @@ compute_dataset_embeddings <- function(reference,
     }
     
     # 6. Unsupervised Cluster Recovery (k-means on PCA)
-    k_clust <- if (!is.null(cell_types)) length(unique(stats::na.omit(as.character(cell_types)))) else 3
+    k_clust <- if (!is.null(ref_ct_actual)) {
+      length(unique(stats::na.omit(ref_ct_actual)))
+    } else if (!is.null(cell_types) && !is.list(cell_types)) {
+      length(unique(stats::na.omit(as.character(cell_types))))
+    } else {
+      3
+    }
     k_clust <- max(2, min(k_clust, n_cells - 1))
     km_fit <- tryCatch(
       stats::kmeans(pca_coords, centers = k_clust, nstart = 5),
-      error = function(e) list(cluster = rep(1, n_cells))
+      error = function(e) list(cluster = rep(1, n_cells), centers = matrix(0, 1, ncol(pca_coords)))
     )
     
-    # 7. Metadata alignment
-    ct_vec <- if (!is.null(cell_types)) {
-      if (is.list(cell_types) && !is.null(cell_types[[dname]]) && length(cell_types[[dname]]) == n_cells) {
-        as.character(cell_types[[dname]])
-      } else if (length(cell_types) == n_cells) {
-        as.character(cell_types)
+    # 7. Exact Biological Cell Type Alignment & Nearest-Neighbor Transfer
+    ct_vec <- NULL
+    
+    # 1. Direct list lookup
+    if (is.list(cell_types) && !is.data.frame(cell_types) && !is.factor(cell_types)) {
+      if (!is.null(cell_types[[dname]]) && length(cell_types[[dname]]) == n_cells) {
+        ct_vec <- as.character(cell_types[[dname]])
       } else {
-        paste0("Type_", km_fit$cluster)
+        m_idx <- match(tolower(dname), tolower(names(cell_types)))
+        if (!is.na(m_idx) && length(cell_types[[m_idx]]) == n_cells) {
+          ct_vec <- as.character(cell_types[[m_idx]])
+        }
       }
-    } else {
-      paste0("Type_", km_fit$cluster)
+    }
+    
+    # 2. Match by cell barcode/name
+    if (is.null(ct_vec) && !is.null(cell_types) && !is.null(names(cell_types)) && !is.null(colnames(mat))) {
+      m_cells <- match(colnames(mat), names(cell_types))
+      if (sum(!is.na(m_cells)) >= 0.7 * n_cells) {
+        ct_vec <- as.character(cell_types[m_cells])
+        ct_vec[is.na(ct_vec)] <- "Unknown"
+      }
+    }
+    
+    # 3. Exact cell count match
+    if (is.null(ct_vec) && !is.null(cell_types) && !is.list(cell_types) && length(cell_types) == n_cells) {
+      ct_vec <- as.character(cell_types)
+    }
+    
+    # 4. Reference dataset fallback to ref_ct_actual
+    if (is.null(ct_vec) && dname == "Reference" && !is.null(ref_ct_actual) && length(ref_ct_actual) == n_cells) {
+      ct_vec <- ref_ct_actual
+    }
+    
+    # 5. If this is Reference, compute reference PCA centroids for biological cell types
+    if (dname == "Reference" && !is.null(ct_vec) && !all(grepl("^Cluster ", ct_vec))) {
+      ref_pca_centroids <- list()
+      for (u_ct in unique(ct_vec)) {
+        idx_u <- which(ct_vec == u_ct)
+        if (length(idx_u) > 0) {
+          ref_pca_centroids[[u_ct]] <- colMeans(pca_coords[idx_u, , drop = FALSE])
+        }
+      }
+    }
+    
+    # 6. Simulator dataset: Transfer biological cell type labels from Reference via PCA centroid proximity
+    if (is.null(ct_vec) && dname != "Reference" && length(ref_pca_centroids) >= 2) {
+      ct_vec <- tryCatch({
+        km_centers <- km_fit$centers
+        u_ref_types <- names(ref_pca_centroids)
+        clust_to_type <- character(nrow(km_centers))
+        for (ci in seq_len(nrow(km_centers))) {
+          c_vec <- km_centers[ci, , drop = TRUE]
+          dists <- vapply(u_ref_types, function(rt) {
+            cent <- ref_pca_centroids[[rt]]
+            k_len <- min(length(c_vec), length(cent))
+            sqrt(sum((c_vec[seq_len(k_len)] - cent[seq_len(k_len)])^2))
+          }, numeric(1))
+          clust_to_type[ci] <- u_ref_types[which.min(dists)]
+        }
+        clust_to_type[km_fit$cluster]
+      }, error = function(e) NULL)
+    }
+    
+    # 7. Final fallback: Use ref_ct_actual if length matches, else "Cluster X"
+    if (is.null(ct_vec) || any(is.na(ct_vec)) || length(ct_vec) != n_cells) {
+      if (!is.null(ref_ct_actual) && length(ref_ct_actual) == n_cells) {
+        ct_vec <- ref_ct_actual
+      } else {
+        ct_vec <- paste0("Cluster ", km_fit$cluster)
+      }
     }
     
     b_vec <- if (!is.null(batch)) {
@@ -619,10 +708,10 @@ compute_dataset_embeddings <- function(reference,
       } else if (length(batch) == n_cells) {
         as.character(batch)
       } else {
-        "Batch1"
+        "Batch 1"
       }
     } else {
-      "Batch1"
+      "Batch 1"
     }
     
     c_names <- if (!is.null(colnames(mat))) colnames(mat) else paste0("Cell_", seq_len(n_cells))
@@ -713,17 +802,25 @@ plot_dataset_embeddings <- function(embedding_data,
   if (color_by == "cell_type") {
     p <- p + ggplot2::geom_point(ggplot2::aes(color = .data$Cell_Type), size = pt_size, alpha = alpha) +
       ggplot2::labs(color = "Cell Type")
-    n_colors <- length(unique(df$Cell_Type))
+    n_colors <- length(unique(stats::na.omit(df$Cell_Type)))
     if (n_colors <= 9 && requireNamespace("RColorBrewer", quietly = TRUE)) {
       p <- p + ggplot2::scale_color_brewer(palette = palette)
+    } else {
+      cols <- grDevices::colorRampPalette(RColorBrewer::brewer.pal(min(8, max(3, n_colors)), palette))(n_colors)
+      p <- p + ggplot2::scale_color_manual(values = cols)
     }
+    p <- p + ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 3.5, alpha = 1)))
   } else if (color_by == "cluster") {
     p <- p + ggplot2::geom_point(ggplot2::aes(color = .data$Cluster), size = pt_size, alpha = alpha) +
-      ggplot2::labs(color = "Recovered Cluster")
-    n_colors <- length(unique(df$Cluster))
+      ggplot2::labs(color = "Cluster")
+    n_colors <- length(unique(stats::na.omit(df$Cluster)))
     if (n_colors <= 9 && requireNamespace("RColorBrewer", quietly = TRUE)) {
       p <- p + ggplot2::scale_color_brewer(palette = "Set2")
+    } else {
+      cols <- grDevices::colorRampPalette(RColorBrewer::brewer.pal(min(8, max(3, n_colors)), "Set2"))(n_colors)
+      p <- p + ggplot2::scale_color_manual(values = cols)
     }
+    p <- p + ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 3.5, alpha = 1)))
   } else if (color_by == "library_size") {
     p <- p + ggplot2::geom_point(ggplot2::aes(color = .data$Library_Size), size = pt_size, alpha = alpha) +
       ggplot2::scale_color_viridis_c(option = "plasma", name = "Library Size")
@@ -735,33 +832,29 @@ plot_dataset_embeddings <- function(embedding_data,
       ggplot2::labs(color = "Dataset")
   }
   
-  plot_title <- if (!is.null(title)) {
-    title
-  } else {
-    sprintf("Cell Embedding Space (%s) - %s Comparison", red_label, ifelse(layout == "side_by_side", "Reference vs. Simulator", "Multi-Simulator Benchmarking"))
-  }
-  
-  plot_subtitle <- sprintf("Reduced dimension space colored by %s; points = %d total cells across %d dataset conditions",
-                           gsub("_", " ", color_by), nrow(df), length(unique(df$Dataset)))
-  
   p <- p +
     ggplot2::labs(
-      title = plot_title,
-      subtitle = plot_subtitle,
+      title = NULL,
+      subtitle = NULL,
       x = paste(red_label, "1"),
       y = paste(red_label, "2")
     ) +
     ggplot2::theme_bw(base_size = base_size) +
     ggplot2::theme(
-      plot.title = ggplot2::element_text(face = "bold", size = base_size * 1.15, color = "#1E293B"),
-      plot.subtitle = ggplot2::element_text(size = base_size * 0.88, color = "#64748B", margin = ggplot2::margin(b = 10)),
-      axis.title = ggplot2::element_text(face = "bold", size = base_size * 0.95, color = "#1E293B"),
-      strip.text = ggplot2::element_text(face = "bold", size = base_size * 0.92, color = "#0F172A"),
-      strip.background = ggplot2::element_rect(fill = "#F1F5F9", color = "#CBD5E1", linewidth = 0.6),
-      legend.title = ggplot2::element_text(face = "bold", size = base_size * 0.88),
-      legend.text = ggplot2::element_text(size = base_size * 0.82),
-      panel.border = ggplot2::element_rect(color = "#CBD5E1", fill = NA, linewidth = 0.6),
-      panel.grid.minor = ggplot2::element_blank()
+      plot.title = ggplot2::element_blank(),
+      plot.subtitle = ggplot2::element_blank(),
+      axis.title = ggplot2::element_text(size = base_size, color = "#1E293B"),
+      axis.text = ggplot2::element_text(size = base_size * 0.85, color = "#475569"),
+      strip.text = ggplot2::element_text(face = "bold", size = base_size * 0.95, color = "#0F172A"),
+      strip.background = ggplot2::element_rect(fill = "#F8FAFC", color = "#CBD5E1", linewidth = 0.5),
+      legend.position = "right",
+      legend.title = ggplot2::element_text(face = "bold", size = base_size * 0.90, color = "#1E293B"),
+      legend.text = ggplot2::element_text(size = base_size * 0.85, color = "#334155"),
+      legend.background = ggplot2::element_blank(),
+      legend.key = ggplot2::element_blank(),
+      panel.border = ggplot2::element_rect(color = "#CBD5E1", fill = NA, linewidth = 0.5),
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_line(color = "#F1F5F9", linewidth = 0.5)
     )
   
   if (layout == "facet") {
@@ -2094,12 +2187,13 @@ ui <- page_navbar(
       }
 
       /* ===== PREVENT FILE UPLOAD AUTO-SCROLL TO TOP (SHINY INPUT FIX) ===== */
-      /* By default Shiny applies 'position: absolute !important; top: -99999px !important; left: -99999px !important;' to input[type=file]. */
-      /* When focused or clicked, browsers automatically jump/scroll to top:0 to bring the element into view. */
-      /* We pin input[type='file'] directly inside .btn-file with 100% width and height so it stays right under the mouse. */
+      html, body {
+        scroll-behavior: auto !important;
+      }
       .btn-file {
         position: relative !important;
         overflow: hidden !important;
+        display: inline-block !important;
       }
       .btn-file input[type='file'],
       input[type='file'].shiny-input-file,
@@ -2118,7 +2212,8 @@ ui <- page_navbar(
         opacity: 0 !important;
         cursor: pointer !important;
         display: block !important;
-        z-index: 5 !important;
+        visibility: visible !important;
+        z-index: 9999 !important;
       }
       .input-group-btn,
       .input-group-prepend,
@@ -2127,61 +2222,173 @@ ui <- page_navbar(
       }
     ")),
     tags$script(HTML("
-      /* Robust Scroll-Position Lock for File Inputs */
+      /* Proactive DOM Style Neuter & Continuous Scroll-Position Lock for File Inputs */
       (function() {
-        var lastScrollY = 0;
-        var trackedElements = [];
+        // 1. Proactively neuter Shiny's inline style on file inputs
+        function neuterFileInput(el) {
+          if (!el) return;
+          el.style.setProperty('position', 'absolute', 'important');
+          el.style.setProperty('top', '0px', 'important');
+          el.style.setProperty('left', '0px', 'important');
+          el.style.setProperty('right', '0px', 'important');
+          el.style.setProperty('bottom', '0px', 'important');
+          el.style.setProperty('width', '100%', 'important');
+          el.style.setProperty('height', '100%', 'important');
+          el.style.setProperty('min-width', '100%', 'important');
+          el.style.setProperty('min-height', '100%', 'important');
+          el.style.setProperty('margin', '0px', 'important');
+          el.style.setProperty('padding', '0px', 'important');
+          el.style.setProperty('opacity', '0', 'important');
+          el.style.setProperty('cursor', 'pointer', 'important');
+          el.style.setProperty('display', 'block', 'important');
+          el.style.setProperty('visibility', 'visible', 'important');
+          el.style.setProperty('z-index', '9999', 'important');
+          var p = el.parentElement;
+          if (p) {
+            p.style.setProperty('position', 'relative', 'important');
+            p.style.setProperty('overflow', 'hidden', 'important');
+          }
+        }
 
-        function saveAllScrollPositions() {
-          lastScrollY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-          trackedElements = [];
-          
-          // Query all potentially scrollable parent containers
-          var candidates = document.querySelectorAll(
-            '.main, .bslib-page-navbar, .sidebar, .layout-sidebar, .tab-content, .card-body, .container-fluid, [style*=\"overflow\"]'
-          );
-          for (var i = 0; i < candidates.length; i++) {
-            var el = candidates[i];
-            if (el.scrollHeight > el.clientHeight && el.scrollTop > 0) {
-              trackedElements.push({ el: el, top: el.scrollTop, left: el.scrollLeft });
+        function neuterAllFileInputs() {
+          var inputs = document.querySelectorAll('input[type=\"file\"]');
+          for (var i = 0; i < inputs.length; i++) {
+            neuterFileInput(inputs[i]);
+          }
+        }
+
+        // Run immediately and observe DOM changes
+        neuterAllFileInputs();
+        if (window.MutationObserver) {
+          var observer = new MutationObserver(function() {
+            neuterAllFileInputs();
+          });
+          observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style', 'class']
+          });
+        }
+
+        $(document).on('shiny:connected shiny:sessioninitialized shiny:value shiny:idle shiny:inputchanged', function() {
+          neuterAllFileInputs();
+        });
+
+        // 2. High-precision scroll state tracking & continuous enforcement
+        var activeScrollMap = [];
+        var isLockActive = false;
+
+        function recordCurrentScroll() {
+          activeScrollMap = [];
+          // Save window / document scroll
+          var winY = window.pageYOffset || (document.documentElement ? document.documentElement.scrollTop : 0) || (document.body ? document.body.scrollTop : 0) || 0;
+          var winX = window.pageXOffset || (document.documentElement ? document.documentElement.scrollLeft : 0) || (document.body ? document.body.scrollLeft : 0) || 0;
+          activeScrollMap.push({ target: 'window', top: winY, left: winX });
+
+          // Save all currently scrolled containers (.main, sidebar, layout-sidebar, etc.)
+          var allNodes = document.querySelectorAll('*');
+          for (var i = 0; i < allNodes.length; i++) {
+            var n = allNodes[i];
+            if (n.scrollTop > 0 || n.scrollLeft > 0) {
+              activeScrollMap.push({ target: n, top: n.scrollTop, left: n.scrollLeft });
             }
           }
         }
 
-        function restoreAllScrollPositions() {
-          if (lastScrollY > 0) {
-            window.scrollTo({ top: lastScrollY, behavior: 'instant' });
-            document.documentElement.scrollTop = lastScrollY;
-            document.body.scrollTop = lastScrollY;
-          }
-          for (var i = 0; i < trackedElements.length; i++) {
-            var item = trackedElements[i];
-            if (item.el) {
-              item.el.scrollTop = item.top;
-              if (item.left > 0) item.el.scrollLeft = item.left;
+        function applyRecordedScroll() {
+          if (!activeScrollMap || activeScrollMap.length === 0) return;
+          for (var i = 0; i < activeScrollMap.length; i++) {
+            var item = activeScrollMap[i];
+            if (item.target === 'window') {
+              if (item.top > 0 || item.left > 0) {
+                window.scrollTo({ top: item.top, left: item.left, behavior: 'instant' });
+                if (document.documentElement) {
+                  document.documentElement.scrollTop = item.top;
+                  document.documentElement.scrollLeft = item.left;
+                }
+                if (document.body) {
+                  document.body.scrollTop = item.top;
+                  document.body.scrollLeft = item.left;
+                }
+              }
+            } else if (item.target && item.target.isConnected) {
+              item.target.scrollTop = item.top;
+              item.target.scrollLeft = item.left;
             }
           }
         }
 
-        // Intercept mousedown, click, and focus on file inputs and Browse buttons
-        $(document).on('mousedown click focus', '.btn-file, .btn-file input[type=\"file\"], .input-group-btn, .shiny-input-container:has(input[type=\"file\"])', function() {
-          saveAllScrollPositions();
+        function lockScrollDuringUpload() {
+          neuterAllFileInputs();
+          recordCurrentScroll();
+          isLockActive = true;
           
-          // Re-apply across multiple browser animation frames to counteract any browser auto-scroll
-          requestAnimationFrame(restoreAllScrollPositions);
-          setTimeout(restoreAllScrollPositions, 0);
-          setTimeout(restoreAllScrollPositions, 20);
-          setTimeout(restoreAllScrollPositions, 60);
-          setTimeout(restoreAllScrollPositions, 150);
-          setTimeout(restoreAllScrollPositions, 300);
+          var startTime = performance.now();
+          function frameLock(currentTime) {
+            if (!isLockActive) return;
+            applyRecordedScroll();
+            if (currentTime - startTime < 2500) {
+              requestAnimationFrame(frameLock);
+            } else {
+              isLockActive = false;
+            }
+          }
+          requestAnimationFrame(frameLock);
+
+          var intervals = [0, 20, 50, 100, 200, 400, 700, 1000, 1500, 2000, 2500];
+          for (var k = 0; k < intervals.length; k++) {
+            setTimeout(applyRecordedScroll, intervals[k]);
+          }
+        }
+
+        // Intercept pointer/mouse events in CAPTURE phase before browser default actions
+        var eventTypes = ['pointerdown', 'mousedown', 'click'];
+        for (var eIdx = 0; eIdx < eventTypes.length; eIdx++) {
+          document.addEventListener(eventTypes[eIdx], function(e) {
+            var t = e.target;
+            if (t && (t.matches('input[type=\"file\"]') || t.closest('.btn-file, .input-group-btn, .shiny-input-container, label[for*=\"file\"]'))) {
+              lockScrollDuringUpload();
+            }
+          }, true);
+        }
+
+        // On hover or pointer enter, preemptively neuter file inputs so they are never at -99999px
+        var hoverEvents = ['pointerover', 'mouseover', 'mouseenter'];
+        for (var hIdx = 0; hIdx < hoverEvents.length; hIdx++) {
+          document.addEventListener(hoverEvents[hIdx], function(e) {
+            var t = e.target;
+            if (t && (t.matches('input[type=\"file\"]') || t.closest('.btn-file, .input-group-btn, .shiny-input-container'))) {
+              neuterAllFileInputs();
+            }
+          }, true);
+        }
+
+        // On focusin in capture phase, prevent scroll jumping
+        document.addEventListener('focusin', function(e) {
+          var t = e.target;
+          if (t && (t.matches('input[type=\"file\"]') || t.closest('.btn-file, .input-group-btn, .shiny-input-container'))) {
+            applyRecordedScroll();
+          }
+        }, true);
+
+        // When window regains focus (file chooser dismissed/closed) or input changes
+        window.addEventListener('focus', function() {
+          applyRecordedScroll();
+          setTimeout(applyRecordedScroll, 50);
+          setTimeout(applyRecordedScroll, 150);
         });
 
-        // Also restore position when file dialog completes / input changes
-        $(document).on('change', 'input[type=\"file\"]', function() {
-          setTimeout(restoreAllScrollPositions, 20);
-          setTimeout(restoreAllScrollPositions, 100);
-          setTimeout(restoreAllScrollPositions, 250);
-        });
+        document.addEventListener('change', function(e) {
+          var t = e.target;
+          if (t && t.matches && t.matches('input[type=\"file\"]')) {
+            applyRecordedScroll();
+            setTimeout(applyRecordedScroll, 50);
+            setTimeout(applyRecordedScroll, 150);
+            setTimeout(applyRecordedScroll, 300);
+            setTimeout(applyRecordedScroll, 600);
+          }
+        }, true);
       })();
     ")),
     div(
@@ -4876,16 +5083,30 @@ server <- function(input, output, session) {
     ct_map <- list()
     bt_map <- list()
     if (!is.null(rb)) {
-      ct_map[["Rice Bud_RNA"]] <- get_rb_ct()
-      ct_map[["Rice Bud_ATAC"]] <- get_rb_ct()
-      bt_map[["Rice Bud_RNA"]] <- get_rb_bt()
-      bt_map[["Rice Bud_ATAC"]] <- get_rb_bt()
+      rb_ct <- get_rb_ct()
+      rb_bt <- get_rb_bt()
+      ct_map[["Rice Bud_RNA"]] <- rb_ct
+      ct_map[["Rice Bud_ATAC"]] <- rb_ct
+      ct_map[["Rice Bud"]] <- rb_ct
+      ct_map[["Rice Bud (scRNA-seq)_RNA"]] <- rb_ct
+      ct_map[["Rice Bud (scATAC-seq)_ATAC"]] <- rb_ct
+      bt_map[["Rice Bud_RNA"]] <- rb_bt
+      bt_map[["Rice Bud_ATAC"]] <- rb_bt
+      bt_map[["Rice Bud"]] <- rb_bt
     }
     if (!is.null(sb)) {
-      ct_map[["Soybean Root_RNA"]] <- get_sb_ct("rna")
-      ct_map[["Soybean Root_ATAC"]] <- get_sb_ct("atac")
-      bt_map[["Soybean Root_RNA"]] <- get_sb_bt("rna")
-      bt_map[["Soybean Root_ATAC"]] <- get_sb_bt("atac")
+      sb_ct_r <- get_sb_ct("rna")
+      sb_ct_a <- get_sb_ct("atac")
+      sb_bt_r <- get_sb_bt("rna")
+      sb_bt_a <- get_sb_bt("atac")
+      ct_map[["Soybean Root_RNA"]] <- sb_ct_r
+      ct_map[["Soybean Root_ATAC"]] <- sb_ct_a
+      ct_map[["Soybean Root"]] <- sb_ct_r
+      ct_map[["Soybean Root (scRNA-seq)_RNA"]] <- sb_ct_r
+      ct_map[["Soybean Root (scATAC-seq)_ATAC"]] <- sb_ct_a
+      bt_map[["Soybean Root_RNA"]] <- sb_bt_r
+      bt_map[["Soybean Root_ATAC"]] <- sb_bt_a
+      bt_map[["Soybean Root"]] <- sb_bt_r
     }
     
     mode_data[[target_mode]] <- list(
@@ -5505,6 +5726,15 @@ server <- function(input, output, session) {
           ct_vec <- if (!is.null(ct_file) && nrow(ct_file) > 0) read_uploaded_labels(ct_file$datapath, ct_file$name) else (if (!has_upload_ref) initial_demo$toy_data$cell_types else NULL)
           bt_vec <- if (!is.null(bt_file) && nrow(bt_file) > 0) read_uploaded_labels(bt_file$datapath, bt_file$name) else (if (!has_upload_ref) initial_demo$toy_data$batch else NULL)
           
+          if (!is.null(ct_vec)) {
+            rv$cell_types_map[[d_label]] <- ct_vec
+            rv$cell_types_map[[paste0(d_label, "_RNA")]] <- ct_vec
+          }
+          if (!is.null(bt_vec)) {
+            rv$batches_map[[d_label]] <- bt_vec
+            rv$batches_map[[paste0(d_label, "_RNA")]] <- bt_vec
+          }
+          
           summary_rows[[length(summary_rows) + 1]] <- extract_dataset_summary(
             ref_mat_d, role = "Biological Reference", method_name = paste0("Empirical Reference (", d_label, ")"),
             modality = "Single-Cell (Counts)", cell_types = ct_vec, batch_info = bt_vec
@@ -5719,6 +5949,8 @@ server <- function(input, output, session) {
           toy_sim            = rv$toy_sim,
           cell_types         = rv$cell_types,
           batch              = rv$batch,
+          cell_types_map     = rv$cell_types_map,
+          batches_map        = rv$batches_map,
           source_name        = "User Evaluated Single-Cell Benchmarks"
         )
         sync_active_mode_data("unimodal")
@@ -5934,6 +6166,25 @@ server <- function(input, output, session) {
             eval_bt <- if (!is.null(bt_r_disp) || !is.null(bt_a_disp)) list(RNA = bt_r_disp, ATAC = bt_a_disp) else NULL
           }
           
+          if (!is.null(ct_r_disp)) {
+            rv$cell_types_map[[paste0(d_label, "_RNA")]] <- ct_r_disp
+            rv$cell_types_map[[d_label]] <- ct_r_disp
+          }
+          if (!is.null(ct_a_disp)) {
+            rv$cell_types_map[[paste0(d_label, "_ATAC")]] <- ct_a_disp
+          }
+          if (!is.null(bt_r_disp)) {
+            rv$batches_map[[paste0(d_label, "_RNA")]] <- bt_r_disp
+            rv$batches_map[[d_label]] <- bt_r_disp
+          }
+          if (!is.null(bt_a_disp)) {
+            rv$batches_map[[paste0(d_label, "_ATAC")]] <- bt_a_disp
+          }
+          if (d == 1) {
+            rv$cell_types <- if (!is.null(ct_r_disp)) ct_r_disp else ct_a_disp
+            rv$batch <- if (!is.null(bt_r_disp)) bt_r_disp else bt_a_disp
+          }
+          
           summary_rows[[length(summary_rows) + 1]] <- extract_dataset_summary(
             ref_rna_d, role = "Biological Reference (RNA)", method_name = paste0("Empirical Reference (", d_label, ")"),
             modality = "RNA-seq", cell_types = ct_r_disp, batch_info = bt_r_disp
@@ -6064,6 +6315,8 @@ server <- function(input, output, session) {
           toy_sim            = rv$toy_sim,
           cell_types         = rv$cell_types,
           batch              = rv$batch,
+          cell_types_map     = rv$cell_types_map,
+          batches_map        = rv$batches_map,
           source_name        = "User Evaluated Multiomics Benchmarks"
         )
         sync_active_mode_data("multiomics")
@@ -6277,6 +6530,15 @@ server <- function(input, output, session) {
           ct_vec <- if (!is.null(ct_file) && nrow(ct_file) > 0) read_uploaded_labels(ct_file$datapath, ct_file$name) else NULL
           bt_vec <- if (!is.null(bt_file) && nrow(bt_file) > 0) read_uploaded_labels(bt_file$datapath, bt_file$name) else NULL
           
+          if (!is.null(ct_vec)) {
+            rv$cell_types_map[[d_label]] <- ct_vec
+            rv$cell_types_map[[paste0(d_label, "_RNA")]] <- ct_vec
+          }
+          if (!is.null(bt_vec)) {
+            rv$batches_map[[d_label]] <- bt_vec
+            rv$batches_map[[paste0(d_label, "_RNA")]] <- bt_vec
+          }
+          
           if (!is.null(ref_file) && nrow(ref_file) > 0) {
             incProgress(0.5 / n_dsets, detail = sprintf("Reading %s reference...", d_label))
             ref_mat_d <- read_uploaded_matrix(ref_file$datapath, ref_file$name)
@@ -6360,10 +6622,42 @@ server <- function(input, output, session) {
           dname_custom <- input[[paste0("multi_dset_name_", d)]]
           d_label <- if (!is.null(dname_custom) && trimws(dname_custom) != "") trimws(dname_custom) else sprintf("Dataset %d", d)
           
-          ct_file <- input[[paste0("file_multi_celltypes_", d)]]
-          bt_file <- input[[paste0("file_multi_batch_", d)]]
-          ct_vec <- if (!is.null(ct_file) && nrow(ct_file) > 0) read_uploaded_labels(ct_file$datapath, ct_file$name) else NULL
-          bt_vec <- if (!is.null(bt_file) && nrow(bt_file) > 0) read_uploaded_labels(bt_file$datapath, bt_file$name) else NULL
+          if (identical(input$opt_multi_pairing, "unpaired")) {
+            ct_r_f <- input[[paste0("file_multi_celltypes_rna_", d)]] %||% input[[paste0("file_multi_celltypes_", d)]]
+            ct_a_f <- input[[paste0("file_multi_celltypes_atac_", d)]]
+            bt_r_f <- input[[paste0("file_multi_batch_rna_", d)]] %||% input[[paste0("file_multi_batch_", d)]]
+            bt_a_f <- input[[paste0("file_multi_batch_atac_", d)]]
+            ct_r_vec <- if (!is.null(ct_r_f) && nrow(ct_r_f) > 0) read_uploaded_labels(ct_r_f$datapath, ct_r_f$name) else NULL
+            ct_a_vec <- if (!is.null(ct_a_f) && nrow(ct_a_f) > 0) read_uploaded_labels(ct_a_f$datapath, ct_a_f$name) else NULL
+            bt_r_vec <- if (!is.null(bt_r_f) && nrow(bt_r_f) > 0) read_uploaded_labels(bt_r_f$datapath, bt_r_f$name) else NULL
+            bt_a_vec <- if (!is.null(bt_a_f) && nrow(bt_a_f) > 0) read_uploaded_labels(bt_a_f$datapath, bt_a_f$name) else NULL
+          } else {
+            ct_file <- input[[paste0("file_multi_celltypes_", d)]]
+            bt_file <- input[[paste0("file_multi_batch_", d)]]
+            ct_r_vec <- if (!is.null(ct_file) && nrow(ct_file) > 0) read_uploaded_labels(ct_file$datapath, ct_file$name) else NULL
+            ct_a_vec <- ct_r_vec
+            bt_r_vec <- if (!is.null(bt_file) && nrow(bt_file) > 0) read_uploaded_labels(bt_file$datapath, bt_file$name) else NULL
+            bt_a_vec <- bt_r_vec
+          }
+          
+          if (!is.null(ct_r_vec)) {
+            rv$cell_types_map[[paste0(d_label, "_RNA")]] <- ct_r_vec
+            rv$cell_types_map[[d_label]] <- ct_r_vec
+          }
+          if (!is.null(ct_a_vec)) {
+            rv$cell_types_map[[paste0(d_label, "_ATAC")]] <- ct_a_vec
+          }
+          if (!is.null(bt_r_vec)) {
+            rv$batches_map[[paste0(d_label, "_RNA")]] <- bt_r_vec
+            rv$batches_map[[d_label]] <- bt_r_vec
+          }
+          if (!is.null(bt_a_vec)) {
+            rv$batches_map[[paste0(d_label, "_ATAC")]] <- bt_a_vec
+          }
+          if (d == 1) {
+            rv$cell_types <- if (!is.null(ct_r_vec)) ct_r_vec else ct_a_vec
+            rv$batch <- if (!is.null(bt_r_vec)) bt_r_vec else bt_a_vec
+          }
           
           if (!is.null(ref_rna_file) && nrow(ref_rna_file) > 0) {
             incProgress(0.2 / n_dsets, detail = sprintf("Reading %s RNA reference...", d_label))
@@ -6372,7 +6666,7 @@ server <- function(input, output, session) {
             
             s_row <- extract_dataset_summary(
               ref_rna_d, role = "Biological Reference (RNA)", method_name = paste0("Empirical RNA (", d_label, ")"),
-              modality = "RNA-seq", cell_types = ct_vec, batch_info = bt_vec
+              modality = "RNA-seq", cell_types = ct_r_vec, batch_info = bt_r_vec
             )
             s_row$Dataset <- d_label
             summary_rows[[length(summary_rows) + 1]] <- s_row
@@ -6380,8 +6674,6 @@ server <- function(input, output, session) {
             all_mats[[paste0("[", d_label, "] Empirical RNA Reference")]] <- ref_rna_d
             if (d == 1) {
               rv$toy_ref <- ref_rna_d
-              rv$cell_types <- ct_vec
-              rv$batch <- bt_vec
             }
           }
           
@@ -6392,7 +6684,7 @@ server <- function(input, output, session) {
             
             s_row <- extract_dataset_summary(
               ref_atac_d, role = "Biological Reference (ATAC)", method_name = paste0("Empirical ATAC (", d_label, ")"),
-              modality = "ATAC-seq", cell_types = ct_vec, batch_info = bt_vec
+              modality = "ATAC-seq", cell_types = ct_a_vec, batch_info = bt_a_vec
             )
             s_row$Dataset <- d_label
             summary_rows[[length(summary_rows) + 1]] <- s_row
@@ -6413,7 +6705,7 @@ server <- function(input, output, session) {
               
               s_row <- extract_dataset_summary(
                 sim_rna_d, role = "Simulated (RNA)", method_name = paste0(sim_name, " RNA (", d_label, ")"),
-                modality = "RNA-seq", cell_types = ct_vec, batch_info = bt_vec
+                modality = "RNA-seq", cell_types = ct_r_vec, batch_info = bt_r_vec
               )
               s_row$Dataset <- d_label
               summary_rows[[length(summary_rows) + 1]] <- s_row
@@ -6429,7 +6721,7 @@ server <- function(input, output, session) {
               
               s_row <- extract_dataset_summary(
                 sim_atac_d, role = "Simulated (ATAC)", method_name = paste0(sim_name, " ATAC (", d_label, ")"),
-                modality = "ATAC-seq", cell_types = ct_vec, batch_info = bt_vec
+                modality = "ATAC-seq", cell_types = ct_a_vec, batch_info = bt_a_vec
               )
               s_row$Dataset <- d_label
               summary_rows[[length(summary_rows) + 1]] <- s_row
@@ -6457,6 +6749,8 @@ server <- function(input, output, session) {
         mode_data$multiomics$toy_sim            <- rv$toy_sim
         mode_data$multiomics$cell_types         <- rv$cell_types
         mode_data$multiomics$batch              <- rv$batch
+        mode_data$multiomics$cell_types_map     <- rv$cell_types_map
+        mode_data$multiomics$batches_map        <- rv$batches_map
         mode_data$multiomics$source_name        <- "Inspected Multiomics Datasets"
         sync_active_mode_data("multiomics")
         
@@ -9602,18 +9896,55 @@ server <- function(input, output, session) {
         names(sim_list_filtered) <- clean_names
       }
       
-      ct_vec <- if (!is.null(rv$cell_types_map) && !is.null(rv$cell_types_map[[paste0(cur_dset_clean, "_", cur_mod)]])) {
-        rv$cell_types_map[[paste0(cur_dset_clean, "_", cur_mod)]]
-      } else {
-        rv$cell_types
+      find_matching_vector <- function(map_or_val, dset_c, dset_raw, mod_c, n_exp) {
+        if (is.null(map_or_val)) return(NULL)
+        if (is.list(map_or_val) && !is.data.frame(map_or_val) && !is.factor(map_or_val)) {
+          cand_keys <- c(
+            paste0(dset_c, "_", mod_c),
+            paste0(dset_raw, "_", mod_c),
+            paste0(dset_c, "_", tolower(mod_c)),
+            paste0(dset_raw, "_", tolower(mod_c)),
+            paste0(dset_c, " (sc", mod_c, "-seq)"),
+            paste0(dset_raw, " (sc", mod_c, "-seq)"),
+            dset_c,
+            dset_raw,
+            mod_c,
+            tolower(mod_c)
+          )
+          for (k in cand_keys) {
+            if (k %in% names(map_or_val)) {
+              res <- find_matching_vector(map_or_val[[k]], dset_c, dset_raw, mod_c, n_exp)
+              if (!is.null(res)) return(res)
+            }
+          }
+          for (k in cand_keys) {
+            m_idx <- match(tolower(k), tolower(names(map_or_val)))
+            if (!is.na(m_idx)) {
+              res <- find_matching_vector(map_or_val[[m_idx]], dset_c, dset_raw, mod_c, n_exp)
+              if (!is.null(res)) return(res)
+            }
+          }
+          for (item in map_or_val) {
+            res <- find_matching_vector(item, dset_c, dset_raw, mod_c, n_exp)
+            if (!is.null(res)) return(res)
+          }
+        }
+        if (is.data.frame(map_or_val)) {
+          v <- if (!is.null(map_or_val$CellType)) map_or_val$CellType else if (!is.null(map_or_val$Cell_Type)) map_or_val$Cell_Type else if (!is.null(map_or_val$Batch)) map_or_val$Batch else map_or_val[[1]]
+          if (length(v) == n_exp) return(as.character(v))
+        }
+        if (length(map_or_val) == n_exp) return(as.character(map_or_val))
+        return(NULL)
       }
-      bt_vec <- if (!is.null(rv$batches_map) && !is.null(rv$batches_map[[paste0(cur_dset_clean, "_", cur_mod)]])) {
-        rv$batches_map[[paste0(cur_dset_clean, "_", cur_mod)]]
-      } else {
-        rv$batch
+      
+      ct_vec <- find_matching_vector(rv$cell_types_map, cur_dset_clean, cur_dset, cur_mod, ncol(ref_mat))
+      if (is.null(ct_vec)) {
+        ct_vec <- find_matching_vector(rv$cell_types, cur_dset_clean, cur_dset, cur_mod, ncol(ref_mat))
       }
-      if (!is.null(ct_vec) && length(ct_vec) != ncol(ref_mat)) ct_vec <- NULL
-      if (!is.null(bt_vec) && length(bt_vec) != ncol(ref_mat)) bt_vec <- NULL
+      bt_vec <- find_matching_vector(rv$batches_map, cur_dset_clean, cur_dset, cur_mod, ncol(ref_mat))
+      if (is.null(bt_vec)) {
+        bt_vec <- find_matching_vector(rv$batch, cur_dset_clean, cur_dset, cur_mod, ncol(ref_mat))
+      }
       
       n_pcs <- if (!is.null(input$sld_emb_pcs)) input$sld_emb_pcs else 20
       perp <- if (!is.null(input$sld_emb_perp)) input$sld_emb_perp else 15

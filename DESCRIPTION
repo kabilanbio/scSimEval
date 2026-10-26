@@ -37,7 +37,7 @@ Description: A simple and unified evaluation toolkit for benchmarking single-cel
 License: MIT + file LICENSE
 URL: https://kabilanbio.github.io/scSimEval/, https://github.com/kabilanbio/scSimEval
 BugReports: https://github.com/kabilanbio/scSimEval/issues
-biocViews: SingleCell, Transcriptomics, ATACSeq, QualityControl, DimensionReduction, DifferentialExpression, GeneExpression, Normalization, Software
+biocViews: SingleCell, Transcriptomics, ATACSeq, QualityControl, DimensionReduction, DifferentialExpression, GeneExpression, Normalization, Alignment, Pathways, Network, Software
 Encoding: UTF-8
 LazyData: false
 Depends:
@@ -95,5 +95,8 @@ Suggests:
     Seurat,
     irlba,
     Rtsne,
-    uwot
+    uwot,
+    RcppParallel,
+    RhpcBLASctl,
+    data.table
 Config/roxygen2/version: 8.1.0

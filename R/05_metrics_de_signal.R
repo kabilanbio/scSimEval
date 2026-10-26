@@ -184,11 +184,21 @@ evaluate_simbench_signals <- function(
   p_sig = 0.05,
   bi_cutoff = 0.3
 ) {
+  ref_celltypes <- as.character(ref_celltypes)
+  sim_celltypes <- as.character(sim_celltypes)
+  if (length(ref_celltypes) != ncol(ref_mat)) ref_celltypes <- rep(ref_celltypes, length.out = ncol(ref_mat))
+  if (length(sim_celltypes) != ncol(sim_mat)) sim_celltypes <- rep(sim_celltypes, length.out = ncol(sim_mat))
+  
   # Subset to the 2 most abundant cell types in reference
+  u_types <- unique(stats::na.omit(ref_celltypes))
+  if (length(u_types) < 2) return(data.frame())
   top2 <- names(sort(table(ref_celltypes), decreasing = TRUE))[seq_len(2)]
   
   idx_ref <- which(ref_celltypes %in% top2)
   idx_sim <- which(sim_celltypes %in% top2)
+  idx_ref <- idx_ref[idx_ref <= ncol(ref_mat)]
+  idx_sim <- idx_sim[idx_sim <= ncol(sim_mat)]
+  if (length(idx_ref) < 4 || length(idx_sim) < 4) return(data.frame())
   
   r_sub <- normalize_counts(ref_mat[, idx_ref, drop = FALSE])
   s_sub <- normalize_counts(sim_mat[, idx_sim, drop = FALSE])

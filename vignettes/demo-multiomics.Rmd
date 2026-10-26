@@ -5,7 +5,7 @@ output:
     toc: true
     toc_depth: 3
     number_sections: false
-    self_contained: true
+    self_contained: false
 vignette: >
   %\VignetteIndexEntry{Demonstration 3: Multiomics (scRNA-seq + scATAC-seq) Simulation Evaluation}
   %\VignetteEngine{knitr::rmarkdown}

@@ -407,7 +407,7 @@ utils::globalVariables(c(
 #' standardize_benchmark_categories(df)
 #' @export
 standardize_benchmark_categories <- function(df) {
-  if (is.null(df) || nrow(df) == 0) return(df)
+  if (is.null(df) || !is.data.frame(df) || nrow(df) == 0) return(df)
   legacy_map <- .LEGACY_CATEGORY_MAP
   if ("Category" %in% colnames(df)) {
     df$Category <- ifelse(df$Category %in% names(legacy_map),
@@ -420,10 +420,13 @@ standardize_benchmark_categories <- function(df) {
     
     needs_reassign <- !is.na(mc) & (
       is.na(df$Category) | df$Category == "" | df$Category == "Uncategorized" |
-      (df$Metric %in% batch_metrics & df$Category != "(IV) Batch Effects & Confounder Mixing") |
-      (df$Metric %in% zero_metrics & df$Category != "(II) Correlations & Zero-Inflation")
+      (!is.na(df$Category) & df$Metric %in% batch_metrics & df$Category != "(IV) Batch Effects & Confounder Mixing") |
+      (!is.na(df$Category) & df$Metric %in% zero_metrics & df$Category != "(II) Correlations & Zero-Inflation")
     )
-    df$Category[needs_reassign] <- mc[needs_reassign]
+    needs_reassign[is.na(needs_reassign)] <- FALSE
+    if (any(needs_reassign)) {
+      df$Category[needs_reassign] <- mc[needs_reassign]
+    }
   }
   df
 }
@@ -3376,15 +3379,10 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
 #' @examples
 #' data(example_scrna, package = "scSimEval")
 #' res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
+#' p <- plot_evaluation_summary(res)
+#' print(p)
 #' @export
 #' @aliases plot_benchmark_summary_bars plot_summary_bars
-#' @examples
-#' \donttest{
-#' pth <- system.file("shiny/scSimEvalApp/data/demo_benchmark_data.rds", package = "scSimEval")
-#' demo <- readRDS(pth)
-#' p <- plot_evaluation_summary(demo$benchmark_summary_table)
-#' print(p)
-#' }
 plot_evaluation_summary <- function(
   data,
   method_classes    = NULL,
@@ -3669,16 +3667,10 @@ plot_evaluation_summary <- function(
 }
 
 #' @rdname plot_evaluation_summary
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
 #' @export
 plot_benchmark_summary_bars <- plot_evaluation_summary
 
 #' @rdname plot_evaluation_summary
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
 #' @export
 plot_summary_bars <- plot_evaluation_summary
 
@@ -3771,6 +3763,29 @@ compute_dataset_embeddings <- function(reference,
   dataset_names <- names(all_datasets)
   results <- list()
   
+  # Extract biological cell types for the empirical reference
+  ref_ct_actual <- NULL
+  if (!is.null(cell_types)) {
+    if (is.list(cell_types) && !is.data.frame(cell_types) && !is.factor(cell_types)) {
+      if (!is.null(cell_types[["Reference"]]) && length(cell_types[["Reference"]]) == ncol(ref_mat)) {
+        ref_ct_actual <- as.character(cell_types[["Reference"]])
+      } else {
+        for (item in cell_types) {
+          if (length(item) == ncol(ref_mat)) {
+            ref_ct_actual <- as.character(item)
+            break
+          }
+        }
+      }
+    } else if (is.data.frame(cell_types)) {
+      v <- if (!is.null(cell_types$CellType)) cell_types$CellType else if (!is.null(cell_types$Cell_Type)) cell_types$Cell_Type else cell_types[[1]]
+      if (length(v) == ncol(ref_mat)) ref_ct_actual <- as.character(v)
+    } else if (length(cell_types) == ncol(ref_mat)) {
+      ref_ct_actual <- as.character(cell_types)
+    }
+  }
+  ref_pca_centroids <- list()
+  
   for (dname in dataset_names) {
     mat <- all_datasets[[dname]]
     if (is.null(mat) || length(dim(mat)) < 2) next
@@ -3843,24 +3858,90 @@ compute_dataset_embeddings <- function(reference,
     }
     
     # 6. Unsupervised Cluster Recovery (k-means on PCA)
-    k_clust <- if (!is.null(cell_types)) length(unique(stats::na.omit(as.character(cell_types)))) else 3
+    k_clust <- if (!is.null(ref_ct_actual)) {
+      length(unique(stats::na.omit(ref_ct_actual)))
+    } else if (!is.null(cell_types) && !is.list(cell_types)) {
+      length(unique(stats::na.omit(as.character(cell_types))))
+    } else {
+      3
+    }
     k_clust <- max(2, min(k_clust, n_cells - 1))
     km_fit <- tryCatch(
       suppressWarnings(stats::kmeans(pca_coords, centers = k_clust, iter.max = 50, nstart = 5)),
-      error = function(e) list(cluster = rep(1, n_cells))
+      error = function(e) list(cluster = rep(1, n_cells), centers = matrix(0, 1, ncol(pca_coords)))
     )
     
-    # 7. Metadata alignment
-    ct_vec <- if (!is.null(cell_types)) {
-      if (is.list(cell_types) && !is.null(cell_types[[dname]]) && length(cell_types[[dname]]) == n_cells) {
-        as.character(cell_types[[dname]])
-      } else if (length(cell_types) == n_cells) {
-        as.character(cell_types)
+    # 7. Exact Biological Cell Type Alignment & Nearest-Neighbor Transfer
+    ct_vec <- NULL
+    
+    # 1. Direct list lookup
+    if (is.list(cell_types) && !is.data.frame(cell_types) && !is.factor(cell_types)) {
+      if (!is.null(cell_types[[dname]]) && length(cell_types[[dname]]) == n_cells) {
+        ct_vec <- as.character(cell_types[[dname]])
       } else {
-        paste0("Cluster_", km_fit$cluster)
+        m_idx <- match(tolower(dname), tolower(names(cell_types)))
+        if (!is.na(m_idx) && length(cell_types[[m_idx]]) == n_cells) {
+          ct_vec <- as.character(cell_types[[m_idx]])
+        }
       }
-    } else {
-      paste0("Cluster_", km_fit$cluster)
+    }
+    
+    # 2. Match by cell barcode/name
+    if (is.null(ct_vec) && !is.null(cell_types) && !is.null(names(cell_types)) && !is.null(colnames(mat))) {
+      m_cells <- match(colnames(mat), names(cell_types))
+      if (sum(!is.na(m_cells)) >= 0.7 * n_cells) {
+        ct_vec <- as.character(cell_types[m_cells])
+        ct_vec[is.na(ct_vec)] <- "Unknown"
+      }
+    }
+    
+    # 3. Exact cell count match
+    if (is.null(ct_vec) && !is.null(cell_types) && !is.list(cell_types) && length(cell_types) == n_cells) {
+      ct_vec <- as.character(cell_types)
+    }
+    
+    # 4. Reference dataset fallback to ref_ct_actual
+    if (is.null(ct_vec) && dname == "Reference" && !is.null(ref_ct_actual) && length(ref_ct_actual) == n_cells) {
+      ct_vec <- ref_ct_actual
+    }
+    
+    # 5. If this is Reference, compute reference PCA centroids for biological cell types
+    if (dname == "Reference" && !is.null(ct_vec) && !all(grepl("^Cluster ", ct_vec))) {
+      ref_pca_centroids <- list()
+      for (u_ct in unique(ct_vec)) {
+        idx_u <- which(ct_vec == u_ct)
+        if (length(idx_u) > 0) {
+          ref_pca_centroids[[u_ct]] <- colMeans(pca_coords[idx_u, , drop = FALSE])
+        }
+      }
+    }
+    
+    # 6. Simulator dataset: Transfer biological cell type labels from Reference via PCA centroid proximity
+    if (is.null(ct_vec) && dname != "Reference" && length(ref_pca_centroids) >= 2) {
+      ct_vec <- tryCatch({
+        km_centers <- km_fit$centers
+        u_ref_types <- names(ref_pca_centroids)
+        clust_to_type <- character(nrow(km_centers))
+        for (ci in seq_len(nrow(km_centers))) {
+          c_vec <- km_centers[ci, , drop = TRUE]
+          dists <- vapply(u_ref_types, function(rt) {
+            cent <- ref_pca_centroids[[rt]]
+            k_len <- min(length(c_vec), length(cent))
+            sqrt(sum((c_vec[seq_len(k_len)] - cent[seq_len(k_len)])^2))
+          }, numeric(1))
+          clust_to_type[ci] <- u_ref_types[which.min(dists)]
+        }
+        clust_to_type[km_fit$cluster]
+      }, error = function(e) NULL)
+    }
+    
+    # 7. Final fallback: Use ref_ct_actual if length matches, else "Cluster X"
+    if (is.null(ct_vec) || any(is.na(ct_vec)) || length(ct_vec) != n_cells) {
+      if (!is.null(ref_ct_actual) && length(ref_ct_actual) == n_cells) {
+        ct_vec <- ref_ct_actual
+      } else {
+        ct_vec <- paste0("Cluster ", km_fit$cluster)
+      }
     }
     
     b_vec <- if (!is.null(batch)) {
@@ -3869,10 +3950,10 @@ compute_dataset_embeddings <- function(reference,
       } else if (length(batch) == n_cells) {
         as.character(batch)
       } else {
-        "Batch1"
+        "Batch 1"
       }
     } else {
-      "Batch1"
+      "Batch 1"
     }
     
     c_names <- if (!is.null(colnames(mat))) colnames(mat) else paste0("Cell_", seq_len(n_cells))
@@ -4027,7 +4108,7 @@ plot_dataset_embeddings <- function(embedding_data,
   )
   
   is_numeric_color <- is.numeric(df[[color_col]])
-  legend_name <- gsub("_", " ", color_col)
+  legend_name <- if (color_col == "Cell_Type") "Cell Type" else gsub("_", " ", color_col)
   
   p <- ggplot2::ggplot(df, ggplot2::aes(x = Dim1, y = Dim2))
   
@@ -4046,36 +4127,32 @@ plot_dataset_embeddings <- function(embedding_data,
       cols <- grDevices::colorRampPalette(RColorBrewer::brewer.pal(min(8, max(3, n_cats)), palette))(n_cats)
       p <- p + ggplot2::scale_color_manual(values = cols, name = legend_name)
     }
-    p <- p + ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 4, alpha = 1)))
+    p <- p + ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(size = 3.5, alpha = 1)))
   }
-  
-  # Dynamic title and subtitle
-  plot_title <- if (!is.null(title)) {
-    title
-  } else {
-    paste0(red_label, " Projection: Biological Reference vs. Simulators")
-  }
-  
-  plot_sub <- paste0("Color: ", legend_name, " | Layout: ", layout, " | Total Cells: ", formatC(nrow(df), format = "d", big.mark = ","))
   
   p <- p +
     ggplot2::labs(
-      title = plot_title,
-      subtitle = plot_sub,
+      title = NULL,
+      subtitle = NULL,
       x = paste0(red_label, " 1"),
       y = paste0(red_label, " 2")
     ) +
     ggplot2::theme_bw(base_size = base_size) +
     ggplot2::theme(
-      plot.title = ggplot2::element_text(face = "bold", size = base_size * 1.15, color = "#1E293B"),
-      plot.subtitle = ggplot2::element_text(size = base_size * 0.88, color = "#64748B", margin = ggplot2::margin(b = 10)),
-      axis.title = ggplot2::element_text(face = "bold", size = base_size * 0.95, color = "#1E293B"),
-      strip.text = ggplot2::element_text(face = "bold", size = base_size * 0.92, color = "#0F172A"),
-      strip.background = ggplot2::element_rect(fill = "#F1F5F9", color = "#CBD5E1", linewidth = 0.6),
-      legend.title = ggplot2::element_text(face = "bold", size = base_size * 0.88),
-      legend.text = ggplot2::element_text(size = base_size * 0.82),
-      panel.border = ggplot2::element_rect(color = "#CBD5E1", fill = NA, linewidth = 0.6),
-      panel.grid.minor = ggplot2::element_blank()
+      plot.title = ggplot2::element_blank(),
+      plot.subtitle = ggplot2::element_blank(),
+      axis.title = ggplot2::element_text(size = base_size, color = "#1E293B"),
+      axis.text = ggplot2::element_text(size = base_size * 0.85, color = "#475569"),
+      strip.text = ggplot2::element_text(face = "bold", size = base_size * 0.95, color = "#0F172A"),
+      strip.background = ggplot2::element_rect(fill = "#F8FAFC", color = "#CBD5E1", linewidth = 0.5),
+      legend.position = "right",
+      legend.title = ggplot2::element_text(face = "bold", size = base_size * 0.90, color = "#1E293B"),
+      legend.text = ggplot2::element_text(size = base_size * 0.85, color = "#334155"),
+      legend.background = ggplot2::element_blank(),
+      legend.key = ggplot2::element_blank(),
+      panel.border = ggplot2::element_rect(color = "#CBD5E1", fill = NA, linewidth = 0.5),
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_line(color = "#F1F5F9", linewidth = 0.5)
     )
   
   if (layout == "facet") {

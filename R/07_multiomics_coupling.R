@@ -66,9 +66,9 @@ calc_cross_modality_correlation <- function(
     n <- length(i1)
     if (th > 1 && n >= 100 && requireNamespace("BiocParallel", quietly = TRUE)) {
       bparam <- if (.Platform$OS.type == "windows") {
-        BiocParallel::SnowParam(workers = min(th, 8))
+        BiocParallel::SnowParam(workers = th)
       } else {
-        BiocParallel::MulticoreParam(workers = min(th, 8))
+        BiocParallel::MulticoreParam(workers = th)
       }
       chunk_size <- max(25, ceiling(n / (th * 4)))
       chunks <- split(seq_len(n), ceiling(seq_len(n) / chunk_size))

@@ -77,14 +77,6 @@ across the 8 canonical evaluation categories and overall composite performance.
 \examples{
 data(example_scrna, package = "scSimEval")
 res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
-\donttest{
-pth <- system.file("shiny/scSimEvalApp/data/demo_benchmark_data.rds", package = "scSimEval")
-demo <- readRDS(pth)
-p <- plot_evaluation_summary(demo$benchmark_summary_table)
+p <- plot_evaluation_summary(res)
 print(p)
-}
-data(example_scrna, package = "scSimEval")
-res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
-data(example_scrna, package = "scSimEval")
-res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
 }

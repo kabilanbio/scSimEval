@@ -40,11 +40,37 @@ calc_dunn <- function(dist_mat, cluster_labels) {
     dist_mat <- stats::dist(t(as.matrix(dist_mat)))
   }
   cluster_labels <- as.numeric(as.factor(cluster_labels))
-  if (requireNamespace("clValid", quietly = TRUE)) {
-    clValid::dunn(dist_mat, cluster_labels)
-  } else {
-    NA_real_
+  if (length(unique(cluster_labels)) < 2 || length(cluster_labels) < 3) return(NA_real_)
+  val <- tryCatch({
+    if (requireNamespace("clValid", quietly = TRUE)) {
+      clValid::dunn(dist_mat, cluster_labels)
+    } else {
+      NA_real_
+    }
+  }, error = function(e) NA_real_)
+  if (is.na(val)) {
+    val <- tryCatch({
+      dmat <- as.matrix(dist_mat)
+      u_cl <- unique(cluster_labels)
+      k <- length(u_cl)
+      if (k < 2) return(NA_real_)
+      max_intra <- 0
+      for (cl in u_cl) {
+        idx <- which(cluster_labels == cl)
+        if (length(idx) > 1) max_intra <- max(max_intra, max(dmat[idx, idx]))
+      }
+      min_inter <- Inf
+      for (i in seq_len(k - 1)) {
+        idx_i <- which(cluster_labels == u_cl[i])
+        for (j in seq.int(i + 1, k)) {
+          idx_j <- which(cluster_labels == u_cl[j])
+          min_inter <- min(min_inter, min(dmat[idx_i, idx_j]))
+        }
+      }
+      if (max_intra > 0 && is.finite(min_inter)) min_inter / max_intra else 0
+    }, error = function(e) NA_real_)
   }
+  val
 }
 
 #' Calculate Cluster Connectivity
@@ -81,11 +107,45 @@ calc_connectivity <- function(dist_mat, cluster_labels) {
 #' @export
 calc_davies_bouldin <- function(data, cluster_labels) {
   cluster_labels <- as.numeric(as.factor(cluster_labels))
-  if (requireNamespace("clusterSim", quietly = TRUE)) {
-    clusterSim::index.DB(t(as.matrix(data)), cluster_labels)$DB
-  } else {
-    NA_real_
+  if (length(unique(cluster_labels)) < 2 || length(cluster_labels) < 3) return(NA_real_)
+  val <- tryCatch({
+    if (requireNamespace("clusterSim", quietly = TRUE)) {
+      res <- clusterSim::index.DB(t(as.matrix(data)), cluster_labels)
+      if (is.list(res) && "DB" %in% names(res)) as.numeric(res$DB) else as.numeric(res)
+    } else {
+      NA_real_
+    }
+  }, error = function(e) NA_real_)
+  if (is.na(val)) {
+    val <- tryCatch({
+      X <- t(as.matrix(data))
+      u_cl <- unique(cluster_labels)
+      k <- length(u_cl)
+      if (k < 2) return(NA_real_)
+      centroids <- list()
+      s_i <- numeric(k)
+      for (idx_c in seq_len(k)) {
+        cl <- u_cl[idx_c]
+        idx <- which(cluster_labels == cl)
+        cl_mat <- X[idx, , drop = FALSE]
+        cent <- colMeans(cl_mat)
+        centroids[[idx_c]] <- cent
+        diffs <- sweep(cl_mat, 2, cent, "-")
+        s_i[idx_c] <- mean(sqrt(rowSums(diffs^2)))
+      }
+      r_ij <- matrix(0, k, k)
+      for (i in seq_len(k)) {
+        for (j in seq_len(k)) {
+          if (i != j) {
+            m_ij <- sqrt(sum((centroids[[i]] - centroids[[j]])^2))
+            r_ij[i, j] <- if (m_ij > 0) (s_i[i] + s_i[j]) / m_ij else 0
+          }
+        }
+      }
+      mean(apply(r_ij, 1, max))
+    }, error = function(e) NA_real_)
   }
+  val
 }
 
 #' Calculate Calinski-Harabasz Index (CH)
@@ -100,11 +160,36 @@ calc_davies_bouldin <- function(data, cluster_labels) {
 #' @export
 calc_calinski_harabasz <- function(data, cluster_labels) {
   cluster_labels <- as.numeric(as.factor(cluster_labels))
-  if (requireNamespace("fpc", quietly = TRUE)) {
-    fpc::calinhara(t(as.matrix(data)), cluster_labels)
-  } else {
-    NA_real_
+  if (length(unique(cluster_labels)) < 2 || length(cluster_labels) < 3) return(NA_real_)
+  val <- tryCatch({
+    if (requireNamespace("fpc", quietly = TRUE)) {
+      fpc::calinhara(t(as.matrix(data)), cluster_labels)
+    } else {
+      NA_real_
+    }
+  }, error = function(e) NA_real_)
+  if (is.na(val)) {
+    val <- tryCatch({
+      X <- t(as.matrix(data))
+      n <- nrow(X)
+      k <- length(unique(cluster_labels))
+      if (k < 2 || n <= k) return(NA_real_)
+      overall_mean <- colMeans(X)
+      ss_b <- 0
+      ss_w <- 0
+      for (cl in unique(cluster_labels)) {
+        idx <- which(cluster_labels == cl)
+        n_cl <- length(idx)
+        cl_mat <- X[idx, , drop = FALSE]
+        cl_mean <- colMeans(cl_mat)
+        ss_b <- ss_b + n_cl * sum((cl_mean - overall_mean)^2)
+        diff_cl <- sweep(cl_mat, 2, cl_mean, "-")
+        ss_w <- ss_w + sum(diff_cl^2)
+      }
+      if (ss_w > 0) (ss_b / (k - 1)) / (ss_w / (n - k)) else 0
+    }, error = function(e) NA_real_)
   }
+  val
 }
 
 #' Calculate Adjusted Rand Index (ARI)
@@ -638,13 +723,30 @@ evaluate_clustering_metrics <- function(
   ref_data = NULL,
   ref_cell_types = NULL
 ) {
+  n_cells_sim <- ncol(data)
   if (is.null(cluster_info) && !is.null(cell_types)) {
-    cluster_info <- cell_types
+    if (is.list(cell_types) && !is.data.frame(cell_types) && !is.factor(cell_types)) {
+      lens <- vapply(cell_types, length, integer(1))
+      match_idx <- which(lens == n_cells_sim)
+      if (length(match_idx) > 0) cluster_info <- cell_types[[match_idx[1]]] else cluster_info <- cell_types[[1]]
+    } else {
+      cluster_info <- cell_types
+    }
   }
-  if (is.null(cluster_info)) {
-    stop("cluster_info or cell_types must be provided.")
+  
+  if (is.null(cluster_info) || length(cluster_info) != n_cells_sim || length(unique(stats::na.omit(cluster_info))) < 2) {
+    k_fallback <- min(5, max(2, n_cells_sim - 1))
+    d_norm_temp <- normalize_counts(data)
+    if (inherits(d_norm_temp, "Matrix")) d_norm_temp <- as.matrix(d_norm_temp)
+    pca_temp <- fast_pca(t(d_norm_temp), n_pcs = min(15, n_cells_sim - 1, nrow(d_norm_temp) - 1), n_hvg = 2000, scale = FALSE)
+    km_fallback <- tryCatch(
+      suppressWarnings(stats::kmeans(pca_temp, centers = k_fallback, iter.max = 50, nstart = 5)),
+      error = function(e) list(cluster = rep(seq_len(k_fallback), length.out = n_cells_sim))
+    )
+    cluster_info <- factor(paste0("Cluster_", km_fallback$cluster))
+  } else {
+    cluster_info <- as.factor(cluster_info)
   }
-  cluster_info <- as.factor(cluster_info)
   
   d_use <- normalize_counts(data)
   if (inherits(d_use, "Matrix")) d_use <- as.matrix(d_use)

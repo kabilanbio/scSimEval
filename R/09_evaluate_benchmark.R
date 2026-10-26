@@ -54,6 +54,19 @@ evaluate_simulation_accuracy <- function(
   if (is.null(memory_mb) && !is.null(peak_memory_mb)) {
     memory_mb <- peak_memory_mb
   }
+  
+  threads <- max(1L, as.integer(threads %||% 1L))
+  if (requireNamespace("RcppParallel", quietly = TRUE)) {
+    try(RcppParallel::setThreadOptions(numThreads = threads), silent = TRUE)
+  }
+  if (requireNamespace("RhpcBLASctl", quietly = TRUE)) {
+    try(RhpcBLASctl::blas_set_num_threads(threads), silent = TRUE)
+    try(RhpcBLASctl::omp_set_num_threads(threads), silent = TRUE)
+  }
+  if (requireNamespace("data.table", quietly = TRUE)) {
+    try(data.table::setDTthreads(threads), silent = TRUE)
+  }
+
   # Step 1: Extract properties
   if (verbose) message("[1/5] Extracting cell-level properties...")
   ref_cell <- extract_cell_properties(ref_data, verbose = FALSE)
@@ -63,26 +76,51 @@ evaluate_simulation_accuracy <- function(
   ref_feat <- extract_feature_properties(ref_data, verbose = FALSE)
   sim_feat <- extract_feature_properties(sim_data, verbose = FALSE)
   
-  # Step 2: Compute Univariate Accuracy Metrics (Cell Level)
+  # Step 2: Compute Univariate Accuracy Metrics (Cell & Feature Level) in Parallel
   if (verbose) message("[3/5] Computing univariate accuracy metrics...")
   cell_props_to_eval <- c("library_size", "log_library_size", "zero_fraction_cell", "cell_cor")
-  cell_results <- list()
-  for (p in cell_props_to_eval) {
-    if (!is.null(ref_cell[[p]]) && !is.null(sim_cell[[p]]) && length(ref_cell[[p]]) > 0) {
-      cell_results[[p]] <- calc_all_univariate_metrics(ref_cell[[p]], sim_cell[[p]], p)
-    }
-  }
-  
-  # Step 3: Compute Univariate Accuracy Metrics (Feature Level)
   feat_props_to_eval <- c("mean_expression", "variance", "sd", "cv", "zero_fraction_feature", "dispersion", "gene_cor")
+  cell_results <- list()
   feat_results <- list()
-  for (p in feat_props_to_eval) {
-    if (!is.null(ref_feat[[p]]) && !is.null(sim_feat[[p]]) && length(ref_feat[[p]]) > 0) {
-      feat_results[[p]] <- calc_all_univariate_metrics(ref_feat[[p]], sim_feat[[p]], p)
+  
+  all_props <- c(
+    lapply(cell_props_to_eval, function(p) list(type = "cell", name = p, r = ref_cell[[p]], s = sim_cell[[p]])),
+    lapply(feat_props_to_eval, function(p) list(type = "feat", name = p, r = ref_feat[[p]], s = sim_feat[[p]]))
+  )
+  all_props <- all_props[vapply(all_props, function(x) !is.null(x$r) && !is.null(x$s) && length(x$r) > 0, logical(1))]
+
+  if (threads > 1 && length(all_props) > 1 && requireNamespace("BiocParallel", quietly = TRUE)) {
+    bparam_u <- if (.Platform$OS.type == "windows") {
+      BiocParallel::SnowParam(workers = min(threads, length(all_props)))
+    } else {
+      BiocParallel::MulticoreParam(workers = min(threads, length(all_props)))
+    }
+    prop_results <- tryCatch({
+      suppressWarnings(BiocParallel::bplapply(all_props, function(item) {
+        calc_all_univariate_metrics(item$r, item$s, item$name)
+      }, BPPARAM = bparam_u))
+    }, error = function(e) NULL)
+    
+    if (!is.null(prop_results)) {
+      for (idx in seq_along(all_props)) {
+        item <- all_props[[idx]]
+        if (item$type == "cell") cell_results[[item$name]] <- prop_results[[idx]]
+        else feat_results[[item$name]] <- prop_results[[idx]]
+      }
+    } else {
+      for (item in all_props) {
+        if (item$type == "cell") cell_results[[item$name]] <- calc_all_univariate_metrics(item$r, item$s, item$name)
+        else feat_results[[item$name]] <- calc_all_univariate_metrics(item$r, item$s, item$name)
+      }
+    }
+  } else {
+    for (item in all_props) {
+      if (item$type == "cell") cell_results[[item$name]] <- calc_all_univariate_metrics(item$r, item$s, item$name)
+      else feat_results[[item$name]] <- calc_all_univariate_metrics(item$r, item$s, item$name)
     }
   }
   
-  # Step 4: Compute Bivariate Accuracy Metrics
+  # Step 4: Compute Bivariate Accuracy Metrics in Parallel
   bivariate_results <- list()
   if (compute_bivariate) {
     if (verbose) message("[4/5] Computing bivariate metrics (Fasano-Franceschini, Peacock, KDE zstat, 2D EMD)...")
@@ -104,9 +142,9 @@ evaluate_simulation_accuracy <- function(
 
     if (threads > 1 && requireNamespace("BiocParallel", quietly = TRUE)) {
       bparam <- if (.Platform$OS.type == "windows") {
-        BiocParallel::SnowParam(workers = min(threads, 4))
+        BiocParallel::SnowParam(workers = min(threads, length(biv_configs)))
       } else {
-        BiocParallel::MulticoreParam(workers = min(threads, 4))
+        BiocParallel::MulticoreParam(workers = min(threads, length(biv_configs)))
       }
       biv_list <- tryCatch({
         suppressWarnings(BiocParallel::bplapply(biv_configs, function(cfg) {
@@ -114,7 +152,7 @@ evaluate_simulation_accuracy <- function(
         }, BPPARAM = bparam))
       }, error = function(e) NULL)
       if (!is.null(biv_list)) {
-        bivariate_results <- biv_list
+        bivariate_results <- stats::setNames(biv_list, names(biv_configs))
       } else {
         for (nm in names(biv_configs)) {
           cfg <- biv_configs[[nm]]
@@ -384,6 +422,19 @@ evaluate_multiomics_accuracy <- function(
   if (is.null(memory_mb) && !is.null(peak_memory_mb)) {
     memory_mb <- peak_memory_mb
   }
+  
+  threads <- max(1L, as.integer(threads %||% 1L))
+  if (requireNamespace("RcppParallel", quietly = TRUE)) {
+    try(RcppParallel::setThreadOptions(numThreads = threads), silent = TRUE)
+  }
+  if (requireNamespace("RhpcBLASctl", quietly = TRUE)) {
+    try(RhpcBLASctl::blas_set_num_threads(threads), silent = TRUE)
+    try(RhpcBLASctl::omp_set_num_threads(threads), silent = TRUE)
+  }
+  if (requireNamespace("data.table", quietly = TRUE)) {
+    try(data.table::setDTthreads(threads), silent = TRUE)
+  }
+  
   mod_names <- names(ref_multi)
   if (is.null(mod_names) || length(mod_names) < 2) {
     mod_names <- c("Modality_1", "Modality_2")
@@ -423,49 +474,68 @@ evaluate_multiomics_accuracy <- function(
   # ============================================================================
   # 2. Cellular Structure & Clustering Accuracy (Category 3)
   # ============================================================================
-  # Extract modality 1 specific cell types and batches (handles vector, factor, data.frame, and named list inputs)
-  extract_label_vector <- function(x, n_expected, mod_name) {
+  # Extract modality specific cell types and batches (handles vector, factor, data.frame, and named list inputs)
+  extract_label_vector <- function(x, n_expected, mod_name, fallback_idx = 1) {
     if (is.null(x)) return(NULL)
     if (is.data.frame(x)) {
       v <- if (!is.null(x$CellType)) x$CellType else if (!is.null(x$Batch)) x$Batch else if (ncol(x) >= 2) x[[2]] else x[[1]]
       if (length(v) == n_expected) return(as.character(v))
     }
     if (is.list(x) && !is.data.frame(x) && !is.factor(x)) {
-      if (!is.null(x[[mod_name]])) return(extract_label_vector(x[[mod_name]], n_expected, mod_name))
-      return(extract_label_vector(x[[1]], n_expected, mod_name))
+      if (!is.null(x[[mod_name]])) return(extract_label_vector(x[[mod_name]], n_expected, mod_name, fallback_idx))
+      m_idx <- match(tolower(mod_name), tolower(names(x)))
+      if (!is.na(m_idx)) return(extract_label_vector(x[[m_idx]], n_expected, mod_name, fallback_idx))
+      if (length(x) >= fallback_idx) return(extract_label_vector(x[[fallback_idx]], n_expected, mod_name, fallback_idx))
+      return(extract_label_vector(x[[1]], n_expected, mod_name, fallback_idx))
     }
     if (length(x) == n_expected) return(as.character(x))
     return(NULL)
   }
-  ct_m1 <- extract_label_vector(cell_types, ncol(ref_multi[[1]]), m1_name)
-  bt_m1 <- extract_label_vector(batch_info, ncol(ref_multi[[1]]), m1_name)
+  ct_m1 <- extract_label_vector(cell_types, ncol(ref_multi[[1]]), m1_name, fallback_idx = 1)
+  ct_m2 <- extract_label_vector(cell_types, ncol(ref_multi[[2]]), m2_name, fallback_idx = 2)
+  bt_m1 <- extract_label_vector(batch_info, ncol(ref_multi[[1]]), m1_name, fallback_idx = 1)
+  bt_m2 <- extract_label_vector(batch_info, ncol(ref_multi[[2]]), m2_name, fallback_idx = 2)
 
-  clustering_res <- list()
-  if (!is.null(ct_m1)) {
-    if (verbose) message("=== [Step 3] Evaluating Cellular Structure & Clustering Preservation ===")
-    clu_eval <- evaluate_clustering_metrics(
-      data = sim_multi[[1]],
-      cell_types = ct_m1,
-      ref_data = ref_multi[[1]]
-    )
-    clustering_res <- clu_eval
-    
-    clu_metrics_to_record <- c(
-      "silhouette_sim", "silhouette_ref", "dunn_sim", "davies_bouldin_sim",
-      "calinski_harabasz_sim", "ari", "nmi", "ami", "fmi", "homogeneity",
-      "completeness", "v_measure", "clustering_accuracy", "neighborhood_purity", "cdi"
-    )
-    for (cm in clu_metrics_to_record) {
-      if (!is.null(clu_eval[[cm]])) {
-        master_rows[[length(master_rows) + 1]] <- data.frame(
-          Category = "Cellular Structure & Mixing",
-          Property = "clustering",
-          Metric = cm,
-          Value = as.numeric(clu_eval[[cm]]),
-          Modality = m1_name,
-          stringsAsFactors = FALSE
-        )
-      }
+  if (verbose) message(sprintf("=== [Step 3] Evaluating Cellular Structure & Clustering Preservation (%s & %s) ===", m1_name, m2_name))
+  clu_eval_m1 <- evaluate_clustering_metrics(
+    data = sim_multi[[1]],
+    cell_types = ct_m1,
+    ref_data = ref_multi[[1]],
+    ref_cell_types = ct_m1
+  )
+  clu_eval_m2 <- evaluate_clustering_metrics(
+    data = sim_multi[[2]],
+    cell_types = ct_m2,
+    ref_data = ref_multi[[2]],
+    ref_cell_types = ct_m2
+  )
+  clustering_res <- list(m1 = clu_eval_m1, m2 = clu_eval_m2)
+  
+  clu_metrics_to_record <- c(
+    "silhouette_sim", "silhouette_ref", "dunn_sim", "davies_bouldin_sim",
+    "calinski_harabasz_sim", "ari", "nmi", "ami", "fmi", "homogeneity",
+    "completeness", "v_measure", "clustering_accuracy", "neighborhood_purity", "cdi"
+  )
+  for (cm in clu_metrics_to_record) {
+    if (!is.null(clu_eval_m1[[cm]]) && !is.na(clu_eval_m1[[cm]])) {
+      master_rows[[length(master_rows) + 1]] <- data.frame(
+        Category = "Cellular Structure & Mixing",
+        Property = "clustering",
+        Metric = cm,
+        Value = as.numeric(clu_eval_m1[[cm]]),
+        Modality = m1_name,
+        stringsAsFactors = FALSE
+      )
+    }
+    if (!is.null(clu_eval_m2[[cm]]) && !is.na(clu_eval_m2[[cm]])) {
+      master_rows[[length(master_rows) + 1]] <- data.frame(
+        Category = "Cellular Structure & Mixing",
+        Property = "clustering",
+        Metric = cm,
+        Value = as.numeric(clu_eval_m2[[cm]]),
+        Modality = m2_name,
+        stringsAsFactors = FALSE
+      )
     }
   }
   
@@ -509,86 +579,105 @@ evaluate_multiomics_accuracy <- function(
   signal_res <- list()
   if (!is.null(ct_m1)) {
     if (verbose) message("=== [Step 5] Evaluating Biological Signal Fidelity (SimBench DE/DV/DD/DP/BD) ===")
-    sig_eval <- evaluate_simbench_signals(
-      ref_mat = ref_multi[[1]],
-      sim_mat = sim_multi[[1]],
-      ref_celltypes = ct_m1,
-      sim_celltypes = ct_m1
-    )
-    signal_res$simbench_signals <- sig_eval
+    sim_ct_m1 <- if (length(ct_m1) == ncol(sim_multi[[1]])) ct_m1 else rep(ct_m1, length.out = ncol(sim_multi[[1]]))
+    sim_bt_m1 <- if (!is.null(bt_m1)) (if (length(bt_m1) == ncol(sim_multi[[1]])) bt_m1 else rep(bt_m1, length.out = ncol(sim_multi[[1]]))) else NULL
     
-    for (i in seq_len(nrow(sig_eval))) {
+    sig_eval <- tryCatch({
+      evaluate_simbench_signals(
+        ref_mat = ref_multi[[1]],
+        sim_mat = sim_multi[[1]],
+        ref_celltypes = ct_m1,
+        sim_celltypes = sim_ct_m1
+      )
+    }, error = function(e) NULL)
+    
+    if (!is.null(sig_eval) && is.data.frame(sig_eval) && nrow(sig_eval) > 0) {
+      signal_res$simbench_signals <- sig_eval
+      for (i in seq_len(nrow(sig_eval))) {
+        master_rows[[length(master_rows) + 1]] <- data.frame(
+          Category = "Biological Signal & Downstream",
+          Property = "simbench_signal",
+          Metric = paste0(sig_eval$Signal_Type[i], "_abs_error"),
+          Value = as.numeric(sig_eval$Absolute_Error[i]),
+          Modality = m1_name,
+          stringsAsFactors = FALSE
+        )
+      }
+    }
+    
+    # Predictive cell identity classifier
+    pred_model <- tryCatch({
+      evaluate_predictive_de_model(
+        data = sim_multi[[1]],
+        group = sim_ct_m1
+      )
+    }, error = function(e) NULL)
+    if (!is.null(pred_model)) {
+      signal_res$predictive_model <- pred_model
       master_rows[[length(master_rows) + 1]] <- data.frame(
         Category = "Biological Signal & Downstream",
-        Property = "simbench_signal",
-        Metric = paste0(sig_eval$Signal_Type[i], "_abs_error"),
-        Value = as.numeric(sig_eval$Absolute_Error[i]),
+        Property = "cell_identity_prediction",
+        Metric = "predictive_accuracy",
+        Value = as.numeric(pred_model$accuracy),
+        Modality = m1_name,
+        stringsAsFactors = FALSE
+      )
+      master_rows[[length(master_rows) + 1]] <- data.frame(
+        Category = "Biological Signal & Downstream",
+        Property = "cell_identity_prediction",
+        Metric = "predictive_macro_F1",
+        Value = as.numeric(pred_model$F1),
         Modality = m1_name,
         stringsAsFactors = FALSE
       )
     }
     
-    # Predictive cell identity classifier
-    pred_model <- evaluate_predictive_de_model(
-      data = sim_multi[[1]],
-      group = ct_m1
-    )
-    signal_res$predictive_model <- pred_model
-    master_rows[[length(master_rows) + 1]] <- data.frame(
-      Category = "Biological Signal & Downstream",
-      Property = "cell_identity_prediction",
-      Metric = "predictive_accuracy",
-      Value = as.numeric(pred_model$accuracy),
-      Modality = m1_name,
-      stringsAsFactors = FALSE
-    )
-    master_rows[[length(master_rows) + 1]] <- data.frame(
-      Category = "Biological Signal & Downstream",
-      Property = "cell_identity_prediction",
-      Metric = "predictive_macro_F1",
-      Value = as.numeric(pred_model$F1),
-      Modality = m1_name,
-      stringsAsFactors = FALSE
-    )
-    
     # Deconvolution mixture accuracy
-    deconv_res <- calc_deconvolution_accuracy(
-      true_proportions = ct_m1,
-      estimated_proportions = ct_m1,
-      batch_ref = bt_m1,
-      batch_sim = bt_m1
-    )
-    signal_res$deconvolution <- deconv_res
-    master_rows[[length(master_rows) + 1]] <- data.frame(
-      Category = "Biological Signal & Downstream",
-      Property = "cell_mixture",
-      Metric = "deconvolution_RMSE",
-      Value = as.numeric(deconv_res$deconvolution_rmse),
-      Modality = m1_name,
-      stringsAsFactors = FALSE
-    )
-    master_rows[[length(master_rows) + 1]] <- data.frame(
-      Category = "Biological Signal & Downstream",
-      Property = "cell_mixture",
-      Metric = "deconvolution_JSD",
-      Value = as.numeric(deconv_res$deconvolution_jsd),
-      Modality = m1_name,
-      stringsAsFactors = FALSE
-    )
-    
-    # Delta variance if batch_info available
-    if (!is.null(bt_m1)) {
-      dv_ref <- calc_delta_variance(ref_multi[[1]], replicates = bt_m1, conditions = ct_m1)
-      dv_sim <- calc_delta_variance(sim_multi[[1]], replicates = bt_m1, conditions = ct_m1)
-      dv_mae <- mean(abs(dv_ref$delta_variance - dv_sim$delta_variance), na.rm = TRUE)
+    deconv_res <- tryCatch({
+      calc_deconvolution_accuracy(
+        true_proportions = ct_m1,
+        estimated_proportions = sim_ct_m1,
+        batch_ref = bt_m1,
+        batch_sim = sim_bt_m1
+      )
+    }, error = function(e) NULL)
+    if (!is.null(deconv_res)) {
+      signal_res$deconvolution <- deconv_res
       master_rows[[length(master_rows) + 1]] <- data.frame(
         Category = "Biological Signal & Downstream",
-        Property = "pseudoreplication",
-        Metric = "delta_variance_MAE",
-        Value = as.numeric(dv_mae),
+        Property = "cell_mixture",
+        Metric = "deconvolution_RMSE",
+        Value = as.numeric(deconv_res$deconvolution_rmse),
         Modality = m1_name,
         stringsAsFactors = FALSE
       )
+      master_rows[[length(master_rows) + 1]] <- data.frame(
+        Category = "Biological Signal & Downstream",
+        Property = "cell_mixture",
+        Metric = "deconvolution_JSD",
+        Value = as.numeric(deconv_res$deconvolution_jsd),
+        Modality = m1_name,
+        stringsAsFactors = FALSE
+      )
+    }
+    
+    # Delta variance if batch_info available
+    if (!is.null(bt_m1) && !is.null(sim_bt_m1)) {
+      dv_mae <- tryCatch({
+        dv_ref <- calc_delta_variance(ref_multi[[1]], replicates = bt_m1, conditions = ct_m1)
+        dv_sim <- calc_delta_variance(sim_multi[[1]], replicates = sim_bt_m1, conditions = sim_ct_m1)
+        mean(abs(dv_ref$delta_variance - dv_sim$delta_variance), na.rm = TRUE)
+      }, error = function(e) NA_real_)
+      if (!is.na(dv_mae)) {
+        master_rows[[length(master_rows) + 1]] <- data.frame(
+          Category = "Biological Signal & Downstream",
+          Property = "pseudoreplication",
+          Metric = "delta_variance_MAE",
+          Value = as.numeric(dv_mae),
+          Modality = m1_name,
+          stringsAsFactors = FALSE
+        )
+      }
     }
   }
   
@@ -596,11 +685,12 @@ evaluate_multiomics_accuracy <- function(
   # 5. Trajectory & Differentiation Lineage Dynamics (Category 6)
   # ============================================================================
   if (verbose) message("=== [Step 6] Evaluating Trajectory & Lineage Dynamics Inferred from scRNA-seq ===")
+  sim_ct_traj <- if (!is.null(ct_m1)) (if (length(ct_m1) == ncol(sim_multi[[1]])) ct_m1 else rep(ct_m1, length.out = ncol(sim_multi[[1]]))) else NULL
   traj_eval <- evaluate_trajectory_metrics(
     ref_data = ref_multi[[1]],
     sim_data = sim_multi[[1]],
     cell_types_ref = ct_m1,
-    cell_types_sim = ct_m1
+    cell_types_sim = sim_ct_traj
   )
   master_rows[[length(master_rows) + 1]] <- data.frame(
     Category = "Trajectory Dynamics",
