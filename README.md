@@ -17,7 +17,7 @@ The package supports:
 ## Workflow Overview
 
 <p align="center">
-  <img src="man/figures/workflow_diagram.png" width="95%" alt="scSimEval Workflow Architecture">
+  <img src="vignettes/figures/workflow_diagram.png" width="95%" alt="scSimEval Workflow Architecture">
 </p>
 
 ---
