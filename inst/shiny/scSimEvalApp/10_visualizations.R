@@ -22,58 +22,86 @@ utils::globalVariables(c(
 # ============================================================================
 
 #' @keywords internal
-#' @keywords internal
 .METRIC_DISPLAY_LABELS <- c(
-  # (I) Distributional Properties (14)
-  "KS"                               = "KS Distance",
+  # (I) Distributional Properties (7 Gold-Standard + legacy aliases)
   "Wasserstein"                      = "Wasserstein Dist.",
+  "KS"                               = "KS Distance",
   "MAD"                              = "MAD",
+  "Bhattacharyya"                    = "Bhattacharyya Dist.",
+  "Runs_Statistic"                   = "Runs Statistic",
+  "NN_Mismatch"                      = "NN Mismatch",
+  "Between_Dataset_Silh_Global"      = "Inter-Dataset Silhouette",
+  # Legacy / collinear Category I aliases:
   "MAE"                              = "MAE",
   "RMSE"                             = "RMSE",
   "OV"                               = "Overlap Coeff.",
-  "Bhattacharyya"                    = "Bhattacharyya Dist.",
   "ECDF_DiffArea"                    = "ECDF Diff. Area",
-  "Runs_Statistic"                   = "Runs Statistic",
+  "Runs_PValue"                      = "Runs P-Value",
+  "Between_Dataset_Silh_Local"       = "Inter-Dataset Silh. (Local)",
   "Fasano_Franceschini_2D_KS"        = "Fasano-Franceschini 2D",
   "Peacock_2D_KS"                    = "Peacock 2D",
   "KDE_Bivariate_zstat"              = "2D KDE z-stat",
-  "MMD"                              = "MMD",
-  "Frechet_SingleCell_Distance"      = "Frechet SC Dist.",
 
-  # (II) Correlations & Zero-Inflation (6)
-  "bcv_discrepancy"                  = "Biological CV (BCV)",
-  "dropout_curve_midpoint_x0"        = "Dropout Midpoint (x0)",
-  "dropout_curve_slope_k"            = "Dropout Slope (k)",
+  # (II) Correlations & Zero-Inflation (4 Gold-Standard + legacy aliases)
   "midpoint_error"                   = "Dropout Midpoint Error",
   "slope_error"                      = "Dropout Slope Error",
-  "r2_discrepancy"                   = "Dropout Curve R2 Discrepancy",
+  "r2_discrepancy"                   = "Dropout R2 Discrepancy",
   "excess_zero_weight_discrepancy"   = "Excess Zero Weight Discrepancy",
+  # Legacy aliases:
+  "dropout_curve_midpoint_x0"        = "Dropout Midpoint (x0)",
+  "dropout_curve_slope_k"            = "Dropout Slope (k)",
   "mean_variance_r2"                 = "Mean-Variance R2",
+  "bcv_discrepancy"                  = "Biological CV (BCV)",
   "cell_pearson_cor"                 = "Cell Pearson Corr.",
   "feature_pearson_cor"              = "Feature Pearson Corr.",
 
-  # (III) Cellular Structure & Concordance (10)
+  # (III) Cellular Structure & Concordance (8 Gold-Standard + legacy aliases)
+  "MMD"                              = "MMD",
+  "Frechet_SingleCell_Distance"      = "Frechet SC Dist.",
+  "Generative_Precision"             = "Generative Precision",
+  "Generative_Recall"                = "Generative Recall",
   "silhouette_sim"                   = "Silhouette ASW",
-  "dunn_sim"                         = "Dunn Index",
   "davies_bouldin_sim"               = "Davies-Bouldin",
-  "calinski_harabasz_sim"            = "Calinski-Harabasz",
   "ari"                              = "ARI",
   "nmi"                              = "NMI",
+  # Legacy / collinear Category III aliases:
+  "dunn_sim"                         = "Dunn Index",
+  "calinski_harabasz_sim"            = "Calinski-Harabasz",
+  "cdi"                              = "Cluster Density Index",
   "ami"                              = "AMI",
+  "fmi"                              = "Fowlkes-Mallows (FMI)",
+  "homogeneity"                      = "Homogeneity",
+  "completeness"                     = "Completeness",
   "v_measure"                        = "V-Measure",
+  "clustering_accuracy"              = "Clustering Accuracy",
   "neighborhood_purity"              = "Neighborhood Purity",
-  "Generative_Precision"             = "Generative Precision",
+  "silhouette_ref"                   = "Reference Silhouette",
 
-  # (IV) Batch Effects & Confounder Mixing (7)
+  # (IV) Batch Effects & Confounder Mixing (6 Gold-Standard + legacy aliases)
   "batch_silhouette"                 = "Batch Silhouette",
-  "shannon_entropy"                  = "Shannon Entropy",
   "pcr_r2"                           = "PC Regression R2",
   "cms"                              = "CMS Score",
   "isi"                              = "LISI / ISI",
   "seurat_mixing_metric"             = "Seurat Mixing",
+  "cross_batch_F1"                   = "Cross-Batch F1",
+  # Legacy / collinear Category IV aliases:
+  "shannon_entropy"                  = "Shannon Entropy",
   "ldf_diff"                         = "ldfDiff",
+  "local_structure"                  = "Local Structure",
+  "cross_batch_accuracy"             = "Cross-Batch Accuracy",
 
-  # (V) Biological Signal & Downstream Fidelity (15)
+  # (V) Biological Signal & Downstream Fidelity (8 Gold-Standard + legacy aliases)
+  "DE (Mean Shift)_abs_error"        = "DE (Mean Shift) Error",
+  "DV (Variability)_abs_error"       = "DV (Variability) Error",
+  "DD (Distribution)_abs_error"      = "DD (Distribution) Error",
+  "DP (Proportion/Dropout)_abs_error"= "DP (Zero Proportion) Error",
+  "BD (Bimodal Index)_abs_error"     = "BD (Bimodal Index) Error",
+  "predictive_macro_F1"              = "Predictive Identity Macro-F1",
+  "deconvolution_RMSE"               = "Deconvolution RMSE",
+  "delta_variance_MAE"               = "Delta Variance MAE",
+  # Legacy / collinear Category V aliases:
+  "predictive_accuracy"              = "Predictive Accuracy",
+  "deconvolution_JSD"                = "Deconvolution JSD",
   "SimBench_SMAPE"                   = "SimBench SMAPE",
   "SimBench_DE_Fidelity_Score"       = "DE Fidelity (1-SMAPE)",
   "Log2FC_Pearson_Corr"              = "Log2FC Pearson Corr",
@@ -90,77 +118,104 @@ utils::globalVariables(c(
   "PVE_Group_Sim"                    = "Group PVE",
   "PVE_Discrepancy"                  = "Group PVE Discrepancy",
 
-  # (VI) Trajectory & Lineage Dynamics (4)
+  # (VI) Trajectory & Lineage Dynamics (4 Gold-Standard)
   "pseudotime_correlation"           = "Pseudotime Corr. (rho)",
   "tree_height_rmse"                 = "Lineage Tree RMSE",
   "graph_alignment"                  = "Trajectory Graph Alignment",
   "lineage_expression_fidelity"      = "Lineage Expression Fidelity",
 
-  # (VII) Cross-Modal Coupling & Modularity (6)
-  "cross_modal_accuracy"             = "Cross-Modal Accuracy",
-  "cross_modal_F1"                   = "Cross-Modal F1",
+  # (VII) Cross-Modal Coupling & Modularity (9 Gold-Standard + legacy aliases)
   "FOSCTTM"                          = "FOSCTTM",
   "match_at_1"                       = "Match@1",
+  "cell_pearson_cor"                 = "Cross-Modal Generation PCC",
+  "mean_coupling_cor"                = "Regulatory Coupling (r)",
+  "cross_modal_F1"                   = "Cross-Modal F1",
   "rv_coefficient"                   = "RV Coefficient",
   "module_correlation_r"             = "Module Corr. (r)",
+  # Legacy aliases:
+  "feature_pearson_cor"              = "Feature Pearson Corr.",
+  "cross_modal_accuracy"             = "Cross-Modal Accuracy",
+  "global_PCC"                       = "Global Accessibility PCC",
 
-  # (VIII) Computational Scalability (2)
+  # (VIII) Computational Scalability (2 Gold-Standard)
   "elapsed_time_seconds"             = "Elapsed Time (s)",
   "peak_memory_mb"                   = "Peak RAM (MiB)"
 )
 
 #' @keywords internal
 .METRIC_CATEGORY_MAP <- c(
-  # (I) Distributional Properties (14)
-  "KS"                               = "(I) Distributional Properties",
+  # (I) Distributional Properties
   "Wasserstein"                      = "(I) Distributional Properties",
+  "KS"                               = "(I) Distributional Properties",
   "MAD"                              = "(I) Distributional Properties",
+  "Bhattacharyya"                    = "(I) Distributional Properties",
+  "Runs_Statistic"                   = "(I) Distributional Properties",
+  "NN_Mismatch"                      = "(I) Distributional Properties",
+  "Between_Dataset_Silh_Global"      = "(I) Distributional Properties",
   "MAE"                              = "(I) Distributional Properties",
   "RMSE"                             = "(I) Distributional Properties",
   "OV"                               = "(I) Distributional Properties",
-  "Bhattacharyya"                    = "(I) Distributional Properties",
   "ECDF_DiffArea"                    = "(I) Distributional Properties",
-  "Runs_Statistic"                   = "(I) Distributional Properties",
+  "Runs_PValue"                      = "(I) Distributional Properties",
+  "Between_Dataset_Silh_Local"       = "(I) Distributional Properties",
   "Fasano_Franceschini_2D_KS"        = "(I) Distributional Properties",
   "Peacock_2D_KS"                    = "(I) Distributional Properties",
   "KDE_Bivariate_zstat"              = "(I) Distributional Properties",
-  "MMD"                              = "(I) Distributional Properties",
-  "Frechet_SingleCell_Distance"      = "(I) Distributional Properties",
 
-  # (II) Correlations & Zero-Inflation (6)
-  "bcv_discrepancy"                  = "(II) Correlations & Zero-Inflation",
-  "dropout_curve_midpoint_x0"        = "(II) Correlations & Zero-Inflation",
-  "dropout_curve_slope_k"            = "(II) Correlations & Zero-Inflation",
+  # (II) Correlations & Zero-Inflation
   "midpoint_error"                   = "(II) Correlations & Zero-Inflation",
   "slope_error"                      = "(II) Correlations & Zero-Inflation",
   "r2_discrepancy"                   = "(II) Correlations & Zero-Inflation",
   "excess_zero_weight_discrepancy"   = "(II) Correlations & Zero-Inflation",
+  "dropout_curve_midpoint_x0"        = "(II) Correlations & Zero-Inflation",
+  "dropout_curve_slope_k"            = "(II) Correlations & Zero-Inflation",
   "mean_variance_r2"                 = "(II) Correlations & Zero-Inflation",
-  "cell_pearson_cor"                 = "(II) Correlations & Zero-Inflation",
-  "feature_pearson_cor"              = "(II) Correlations & Zero-Inflation",
+  "bcv_discrepancy"                  = "(II) Correlations & Zero-Inflation",
 
-  # (III) Cellular Structure & Concordance (10)
+  # (III) Cellular Structure & Concordance
+  "MMD"                              = "(III) Cellular Structure & Concordance",
+  "Frechet_SingleCell_Distance"      = "(III) Cellular Structure & Concordance",
+  "Generative_Precision"             = "(III) Cellular Structure & Concordance",
+  "Generative_Recall"                = "(III) Cellular Structure & Concordance",
   "silhouette_sim"                   = "(III) Cellular Structure & Concordance",
-  "dunn_sim"                         = "(III) Cellular Structure & Concordance",
   "davies_bouldin_sim"               = "(III) Cellular Structure & Concordance",
-  "calinski_harabasz_sim"            = "(III) Cellular Structure & Concordance",
   "ari"                              = "(III) Cellular Structure & Concordance",
   "nmi"                              = "(III) Cellular Structure & Concordance",
+  "dunn_sim"                         = "(III) Cellular Structure & Concordance",
+  "calinski_harabasz_sim"            = "(III) Cellular Structure & Concordance",
+  "cdi"                              = "(III) Cellular Structure & Concordance",
   "ami"                              = "(III) Cellular Structure & Concordance",
+  "fmi"                              = "(III) Cellular Structure & Concordance",
+  "homogeneity"                      = "(III) Cellular Structure & Concordance",
+  "completeness"                     = "(III) Cellular Structure & Concordance",
   "v_measure"                        = "(III) Cellular Structure & Concordance",
+  "clustering_accuracy"              = "(III) Cellular Structure & Concordance",
   "neighborhood_purity"              = "(III) Cellular Structure & Concordance",
-  "Generative_Precision"             = "(III) Cellular Structure & Concordance",
+  "silhouette_ref"                   = "(III) Cellular Structure & Concordance",
 
-  # (IV) Batch Effects & Confounder Mixing (7)
+  # (IV) Batch Effects & Confounder Mixing
   "batch_silhouette"                 = "(IV) Batch Effects & Confounder Mixing",
-  "shannon_entropy"                  = "(IV) Batch Effects & Confounder Mixing",
   "pcr_r2"                           = "(IV) Batch Effects & Confounder Mixing",
   "cms"                              = "(IV) Batch Effects & Confounder Mixing",
   "isi"                              = "(IV) Batch Effects & Confounder Mixing",
   "seurat_mixing_metric"             = "(IV) Batch Effects & Confounder Mixing",
+  "cross_batch_F1"                   = "(IV) Batch Effects & Confounder Mixing",
+  "shannon_entropy"                  = "(IV) Batch Effects & Confounder Mixing",
   "ldf_diff"                         = "(IV) Batch Effects & Confounder Mixing",
+  "local_structure"                  = "(IV) Batch Effects & Confounder Mixing",
+  "cross_batch_accuracy"             = "(IV) Batch Effects & Confounder Mixing",
 
-  # (V) Biological Signal & Downstream Fidelity (15)
+  # (V) Biological Signal & Downstream Fidelity
+  "DE (Mean Shift)_abs_error"        = "(V) Biological Signal & Downstream Fidelity",
+  "DV (Variability)_abs_error"       = "(V) Biological Signal & Downstream Fidelity",
+  "DD (Distribution)_abs_error"      = "(V) Biological Signal & Downstream Fidelity",
+  "DP (Proportion/Dropout)_abs_error"= "(V) Biological Signal & Downstream Fidelity",
+  "BD (Bimodal Index)_abs_error"     = "(V) Biological Signal & Downstream Fidelity",
+  "predictive_macro_F1"              = "(V) Biological Signal & Downstream Fidelity",
+  "deconvolution_RMSE"               = "(V) Biological Signal & Downstream Fidelity",
+  "delta_variance_MAE"               = "(V) Biological Signal & Downstream Fidelity",
+  "predictive_accuracy"              = "(V) Biological Signal & Downstream Fidelity",
+  "deconvolution_JSD"                = "(V) Biological Signal & Downstream Fidelity",
   "SimBench_SMAPE"                   = "(V) Biological Signal & Downstream Fidelity",
   "SimBench_DE_Fidelity_Score"       = "(V) Biological Signal & Downstream Fidelity",
   "Log2FC_Pearson_Corr"              = "(V) Biological Signal & Downstream Fidelity",
@@ -177,24 +232,118 @@ utils::globalVariables(c(
   "PVE_Group_Sim"                    = "(V) Biological Signal & Downstream Fidelity",
   "PVE_Discrepancy"                  = "(V) Biological Signal & Downstream Fidelity",
 
-  # (VI) Trajectory & Lineage Dynamics (4)
+  # (VI) Trajectory & Lineage Dynamics
   "pseudotime_correlation"           = "(VI) Trajectory & Lineage Dynamics",
   "tree_height_rmse"                 = "(VI) Trajectory & Lineage Dynamics",
   "graph_alignment"                  = "(VI) Trajectory & Lineage Dynamics",
   "lineage_expression_fidelity"      = "(VI) Trajectory & Lineage Dynamics",
 
-  # (VII) Cross-Modal Coupling & Modularity (6)
-  "cross_modal_accuracy"             = "(VII) Cross-Modal Coupling & Modularity",
-  "cross_modal_F1"                   = "(VII) Cross-Modal Coupling & Modularity",
+  # (VII) Cross-Modal Coupling & Modularity
   "FOSCTTM"                          = "(VII) Cross-Modal Coupling & Modularity",
   "match_at_1"                       = "(VII) Cross-Modal Coupling & Modularity",
+  "cell_pearson_cor"                 = "(VII) Cross-Modal Coupling & Modularity",
+  "mean_coupling_cor"                = "(VII) Cross-Modal Coupling & Modularity",
+  "cross_modal_F1"                   = "(VII) Cross-Modal Coupling & Modularity",
   "rv_coefficient"                   = "(VII) Cross-Modal Coupling & Modularity",
   "module_correlation_r"             = "(VII) Cross-Modal Coupling & Modularity",
+  "feature_pearson_cor"              = "(VII) Cross-Modal Coupling & Modularity",
+  "cross_modal_accuracy"             = "(VII) Cross-Modal Coupling & Modularity",
+  "global_PCC"                       = "(VII) Cross-Modal Coupling & Modularity",
 
-  # (VIII) Computational Scalability (2)
+  # (VIII) Computational Scalability
   "elapsed_time_seconds"             = "(VIII) Computational Scalability",
   "peak_memory_mb"                   = "(VIII) Computational Scalability"
 )
+
+#' Canonical 48 Gold-Standard Evaluation Metrics Specification
+#' @keywords internal
+.GOLD_STANDARD_48_SPEC <- list(
+  "(I) Distributional Properties" = list(
+    props = c("library_size", "zero_fraction_cell", "cell_cor",
+              "mean_expression", "variance", "cv", "zero_fraction_feature", "dispersion", "gene_cor"),
+    metrics = c("Wasserstein", "KS", "MAD", "Bhattacharyya", "Runs_Statistic", "NN_Mismatch", "Between_Dataset_Silh_Global")
+  ),
+  "(II) Correlations & Zero-Inflation" = list(
+    props = c("dropout_curve", "excess_zero_weights"),
+    metrics = c("midpoint_error", "slope_error", "r2_discrepancy", "excess_zero_weight_discrepancy",
+                "dropout_curve_midpoint_x0", "dropout_curve_slope_k", "mean_variance_r2", "bcv_discrepancy")
+  ),
+  "(III) Cellular Structure & Concordance" = list(
+    props = c("manifold", "clustering"),
+    metrics = c("MMD", "Frechet_SingleCell_Distance", "Generative_Precision", "Generative_Recall",
+                "silhouette_sim", "davies_bouldin_sim", "ari", "nmi")
+  ),
+  "(IV) Batch Effects & Confounder Mixing" = list(
+    props = c("batch_mixing"),
+    metrics = c("batch_silhouette", "pcr_r2", "cms", "isi", "seurat_mixing_metric", "cross_batch_F1")
+  ),
+  "(V) Biological Signal & Downstream Fidelity" = list(
+    props = c("simbench_signal", "cell_identity_prediction", "cell_mixture", "pseudoreplication"),
+    metrics = c("DE (Mean Shift)_abs_error", "DV (Variability)_abs_error", "DD (Distribution)_abs_error",
+                "DP (Proportion/Dropout)_abs_error", "BD (Bimodal Index)_abs_error",
+                "predictive_macro_F1", "deconvolution_RMSE", "delta_variance_MAE")
+  ),
+  "(VI) Trajectory & Lineage Dynamics" = list(
+    props = c("pseudotime", "lineage_tree", "trajectory_graph", "lineage_dynamics"),
+    metrics = c("pseudotime_correlation", "tree_height_rmse", "graph_alignment", "lineage_expression_fidelity")
+  ),
+  "(VII) Cross-Modal Coupling & Modularity" = list(
+    props = c("cross_feature_correlation", "cell_alignment", "in_silico_generation",
+              "regulatory_coupling", "label_transfer", "chromatin_coaccessibility", "coexpression_modularity"),
+    metrics = c("Wasserstein", "KS", "FOSCTTM", "match_at_1", "cell_pearson_cor",
+                "mean_coupling_cor", "cross_modal_F1", "rv_coefficient", "module_correlation_r")
+  ),
+  "(VIII) Computational Scalability" = list(
+    props = c("resource_usage"),
+    metrics = c("elapsed_time_seconds", "peak_memory_mb")
+  )
+)
+
+#' Filter Benchmark Data to the 48 Gold-Standard Metrics
+#'
+#' Filters any benchmark results table (whether containing 72, 62, or 48 metrics)
+#' to the curated, non-redundant 48 Gold-Standard evaluation metrics, eliminating
+#' collinear duplicate metrics ($r = 1.000$) to prevent distortion of overall
+#' simulator fidelity leaderboards.
+#'
+#' @param df A data.frame of benchmark metrics or a scSimEval benchmark session object.
+#' @return Cleaned data.frame containing strictly the 48 Gold-Standard metrics.
+#' @examples
+#' data(example_scrna, package = "scSimEval")
+#' @export
+filter_gold_standard_metrics <- function(df) {
+  if (is.null(df)) return(NULL)
+  is_session <- is.list(df) && !is.data.frame(df) && (!is.null(df$benchmark_df) || !is.null(df$benchmark_summary_table))
+  target_df <- if (is_session) (df$benchmark_df %||% df$benchmark_summary_table) else df
+  if (!is.data.frame(target_df) || nrow(target_df) == 0) return(df)
+
+  # Standardize categories first
+  target_df <- standardize_benchmark_categories(target_df)
+
+  keep_rows <- rep(FALSE, nrow(target_df))
+  for (cat_name in names(.GOLD_STANDARD_48_SPEC)) {
+    spec <- .GOLD_STANDARD_48_SPEC[[cat_name]]
+    cat_match <- (target_df$Category == cat_name) |
+                 grepl(sub("^\\([I|V|X]+\\)\\s*", "", cat_name), target_df$Category)
+
+    prop_match <- if ("Property" %in% colnames(target_df)) {
+      target_df$Property %in% spec$props
+    } else {
+      rep(TRUE, nrow(target_df))
+    }
+
+    met_match <- target_df$Metric %in% spec$metrics
+    keep_rows <- keep_rows | (cat_match & prop_match & met_match)
+  }
+
+  res_df <- target_df[keep_rows, , drop = FALSE]
+  if (is_session) {
+    df$benchmark_df <- res_df
+    if (!is.null(df$benchmark_summary_table)) df$benchmark_summary_table <- res_df
+    return(df)
+  }
+  return(res_df)
+}
 
 .CANONICAL_CATEGORY_ORDER <- c(
   "(I) Distributional Properties",
@@ -423,7 +572,7 @@ standardize_benchmark_categories <- function(df) {
   }
   if ("Metric" %in% colnames(df)) {
     mc <- .METRIC_CATEGORY_MAP[df$Metric]
-    batch_metrics <- c("batch_silhouette", "shannon_entropy", "pcr_r2", "cms", "isi", "seurat_mixing_metric", "ldf_diff")
+    batch_metrics <- c("batch_silhouette", "shannon_entropy", "pcr_r2", "cms", "isi", "seurat_mixing_metric", "ldf_diff", "cross_batch_F1", "cross_batch_accuracy")
     zero_metrics  <- c("midpoint_error", "slope_error", "r2_discrepancy", "excess_zero_weight_discrepancy", "dropout_curve_midpoint_x0", "dropout_curve_slope_k", "mean_variance_r2", "bcv_discrepancy")
     
     needs_reassign <- !is.na(mc) & (
@@ -440,17 +589,18 @@ standardize_benchmark_categories <- function(df) {
 }
 
 #' @keywords internal
-#' @keywords internal
 .HIGHER_IS_BETTER_METRICS <- c(
   "OV",
   "mean_variance_r2", "cell_pearson_cor", "feature_pearson_cor",
-  "silhouette_sim", "dunn_sim", "calinski_harabasz_sim", "ari", "nmi", "ami", "v_measure", "neighborhood_purity", "Generative_Precision",
-  "cms", "isi", "seurat_mixing_metric", "shannon_entropy",
+  "silhouette_sim", "dunn_sim", "calinski_harabasz_sim", "ari", "nmi", "ami", "v_measure", "neighborhood_purity",
+  "Generative_Precision", "Generative_Recall",
+  "cms", "isi", "shannon_entropy",
   "SimBench_DE_Fidelity_Score", "Log2FC_Pearson_Corr", "Log2FC_Spearman_Corr", "Top_DEG_Jaccard_Overlap",
   "Distribution_Score", "Classifier_Accuracy", "Classifier_Macro_F1", "Classifier_Macro_Recall",
+  "predictive_macro_F1",
   "Silhouette_Sim", "PVE_Group_Sim",
   "pseudotime_correlation", "graph_alignment", "lineage_expression_fidelity",
-  "cross_modal_accuracy", "cross_modal_F1", "match_at_1", "rv_coefficient", "module_correlation_r"
+  "cross_modal_accuracy", "cross_modal_F1", "match_at_1", "mean_coupling_cor", "rv_coefficient", "module_correlation_r"
 )
 
 # Shared publication ggplot2 theme
@@ -1793,7 +1943,7 @@ plot_benchmark_summary <- function(
 #' and evaluated biological/computational measures on the y-axis, grouped by the 8 canonical
 #' evaluation categories. Displays the exact original raw evaluation score in text inside every cell,
 #' with cell fill colors scaled by relative fidelity (direction-aware, ensuring balanced visual contrast
-#' across all 62 measures without scale distortion from high-magnitude metrics like RAM or runtime).
+#' across all 48 gold-standard measures without scale distortion from high-magnitude metrics like RAM or runtime).
 #'
 #' \if{html}{\figure{metric_heatmap.png}{options: width="800" alt="Cross-Metric Z-Scored Heatmap"}}
 #'
@@ -1802,7 +1952,7 @@ plot_benchmark_summary <- function(
 #' @param metrics Optional character vector of specific metrics to include. Default \code{NULL} (all).
 #' @param scale_fill Character. Cell color fill scaling: \code{"relative"} (default; direction-aware
 #'   min-max normalized fidelity in [0, 1] across methods per metric, ensuring balanced color contrast
-#'   across all 62 measures while cell text displays exact raw numbers) or \code{"raw"} (direct numeric values).
+#'   across all 48 gold-standard measures while cell text displays exact raw numbers) or \code{"raw"} (direct numeric values).
 #' @param top_n_properties Optional integer. If specified, restricts to top N most variable metrics. Default \code{NULL} (all metrics).
 #' @param facet_by_category Logical. Whether to group rows into vertical category banner panels across all 8 categories. Default \code{TRUE}.
 #' @param cluster_rows Logical. Hierarchically cluster measures along y-axis. Default \code{FALSE}.
@@ -2374,7 +2524,7 @@ plot_metric_mds <- function(
 #' Generates a dual-panel PCA dashboard for evaluating single-cell simulation benchmark metrics
 #' and methods.
 #'
-#' All metrics present in \code{benchmark_data} (e.g. all 62 canonical metrics across categories)
+#' All metrics present in \code{benchmark_data} (e.g. all 48 gold-standard metrics across categories)
 #' are mathematically considered in the PCA decomposition. Panel \code{"both"} displays:
 #' \itemize{
 #'   \item \strong{Panel a (Methods Ordination)}: Simulators mapped into PC1 vs PC2 coordinates with
@@ -2382,7 +2532,7 @@ plot_metric_mds <- function(
 #'   \item \strong{Panel b (PC Loadings Vectors)}: Directional loading vectors (arrows) radiating from
 #'     the origin \code{(0, 0)} to loading coordinates \code{(w1, w2)}, colored by summary type
 #'     (\code{"gene"} = red, \code{"cell"} = blue, \code{"global"} = green) with rounded badge labels.
-#'     Pass \code{top_n_loadings = NULL} or \code{62} to render all metric loading vectors.
+#'     Pass \code{top_n_loadings = NULL} or \code{48} to render all metric loading vectors.
 #' }
 #'
 #' @param benchmark_data Benchmark summary data.frame, matrix, or list.
@@ -2396,7 +2546,7 @@ plot_metric_mds <- function(
 #' @param palette Optional named character vector of colors for simulators.
 #' @param top_n_loadings Integer or \code{NULL}. Maximum number of loading vectors to plot in panel b
 #'   (ordered by vector magnitude in PC1-PC2 space). Default is \code{14} to prevent visual clutter;
-#'   set to \code{NULL} or \code{62} to display all evaluated metrics.
+#'   set to \code{NULL} or \code{48} to display all evaluated metrics.
 #' @param base_size Numeric. Base font size. Default \code{11}.
 #'
 #' @return A \code{ggplot} or \code{patchwork} object representing the ordination figure.
@@ -4300,5 +4450,387 @@ compute_method_leaderboard <- function(benchmark_data) {
   leaderboard$Fidelity_Score   <- round(leaderboard$Score, 4)
 
   leaderboard[, c("Overall_Rank", "Method", "Average_Fidelity", "Fidelity_Score"), drop = FALSE]
+}
+
+
+# -------------------------------------------------------------------------
+# 12. combine_benchmark_results() & append_benchmark_results()
+# -------------------------------------------------------------------------
+
+#' Combine and Append Multiple Single-Cell Benchmark Results
+#'
+#' Harmonizes, standardizes, and consolidates multiple single-cell simulator evaluation datasets
+#' or saved benchmark sessions into a unified multi-dataset benchmark object.
+#'
+#' When the same simulator (e.g., \code{"scDesign3"} or \code{"scMultiSim"}) is evaluated across
+#' multiple empirical datasets, \code{combine_benchmark_results} maintains each distinct dataset
+#' evaluation and provides cross-dataset aggregate fidelity scores across the 48 Gold-Standard
+#' curated metrics. This enables rigorous comparative evaluation and bubble matrix visualization
+#' of average simulator performance across diverse biological contexts.
+#'
+#' @param ... One or more benchmark evaluation objects, tidy data frames, or file paths
+#'   (ending in \code{.rds} or \code{.csv}).
+#' @param list_of_benchmarks Optional list of benchmark objects or data frames.
+#' @param dataset_names Optional character vector specifying custom names for each dataset
+#'   being combined. If \code{NULL}, dataset names are automatically extracted from
+#'   the input objects or generated cleanly (e.g., \code{"Dataset 1"}, \code{"Dataset 2"}).
+#' @param filter_gold_standard Logical. If \code{TRUE} (default), filters all combined datasets
+#'   to the 48 Gold-Standard curated evaluation metrics.
+#' @param recompute_normalized Logical. If \code{TRUE} (default), re-normalizes raw metric
+#'   scores across all evaluated simulators and datasets using direction-aware scaling.
+#'
+#' @return An S3 object of class \code{c("scSimEval_multidataset_benchmark", "scSimEval_consolidated", "list")} containing:
+#'   \itemize{
+#'     \item \code{benchmark_summary_table}: Tidy data frame of cross-dataset average fidelity scores per simulator and metric (ready for \code{\link{plot_benchmark_bubble_matrix}}).
+#'     \item \code{granular_benchmark_table}: Complete combined data frame preserving individual dataset rows.
+#'     \item \code{dataset_summary_table}: Summary table of all combined datasets and simulator counts.
+#'     \item \code{dataset_summary_df}: Alias of \code{dataset_summary_table}.
+#'     \item \code{cross_dataset_stats}: Data frame of mean, SD, SE, and sample count per simulator-metric pair.
+#'     \item \code{methods}: Unique simulator names evaluated across all datasets.
+#'     \item \code{datasets}: Vector of distinct dataset names.
+#'     \item \code{is_multidataset}: Logical indicating whether more than one dataset is included.
+#'     \item \code{n_datasets}: Integer number of datasets.
+#'     \item \code{n_simulators}: Integer number of unique simulators.
+#'   }
+#' @examples
+#' \donttest{
+#' data(example_scrna, package = "scSimEval")
+#' res1 <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
+#' res2 <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
+#' comb <- combine_benchmark_results(res1, res2, dataset_names = c("Cohort A", "Cohort B"))
+#' print(comb$datasets)
+#' }
+#' @export
+#' @aliases append_benchmark_results
+combine_benchmark_results <- function(
+  ...,
+  list_of_benchmarks   = NULL,
+  dataset_names        = NULL,
+  filter_gold_standard = TRUE,
+  recompute_normalized = TRUE
+) {
+  # Gather all benchmark inputs
+  dots <- list(...)
+  if (!is.null(list_of_benchmarks)) {
+    if (is.list(list_of_benchmarks) && !is.data.frame(list_of_benchmarks)) {
+      dots <- c(dots, list_of_benchmarks)
+    } else {
+      dots <- c(dots, list(list_of_benchmarks))
+    }
+  }
+
+  if (length(dots) == 0) {
+    stop("No benchmark results provided to combine.")
+  }
+
+  ingested_dfs <- list()
+  dataset_labels <- character(0)
+
+  for (i in seq_along(dots)) {
+    item <- dots[[i]]
+
+    # If file path, read it
+    if (is.character(item) && length(item) == 1 && file.exists(item)) {
+      file_ext <- tolower(tools::file_ext(item))
+      if (file_ext == "rds") {
+        item <- readRDS(item)
+      } else if (file_ext == "csv") {
+        item <- utils::read.csv(item, stringsAsFactors = FALSE)
+      }
+    }
+
+    # Ingest from session or object
+    df <- NULL
+    if (inherits(item, "scSimEval_multidataset_benchmark") || inherits(item, "scSimEval_consolidated")) {
+      df <- item$granular_benchmark_table %||% item$benchmark_summary_table %||% item$consolidated_summary_table
+    } else if (is.list(item) && !is.data.frame(item)) {
+      df <- item$benchmark_df %||% item$granular_benchmark_table %||% item$benchmark_summary_table %||% item$summary_table
+    } else if (is.data.frame(item)) {
+      df <- item
+    }
+
+    if (is.null(df) || !is.data.frame(df) || nrow(df) == 0) {
+      warning(sprintf("Item %d could not be parsed as a valid benchmark table; skipping.", i))
+      next
+    }
+
+    # Harmonize column names
+    if (!"Method" %in% colnames(df)) {
+      if ("Simulator" %in% colnames(df)) df$Method <- df$Simulator
+      else if ("Data_Name" %in% colnames(df)) df$Method <- df$Data_Name
+      else df$Method <- "Simulation"
+    }
+    if (!"Score_Raw" %in% colnames(df)) {
+      if ("Score" %in% colnames(df)) df$Score_Raw <- df$Score
+      else if ("Value" %in% colnames(df)) df$Score_Raw <- df$Value
+      else df$Score_Raw <- NA_real_
+    }
+    if (!"Score" %in% colnames(df)) df$Score <- df$Score_Raw
+    if (!"Category" %in% colnames(df)) df$Category <- "Uncategorized"
+
+    # Determine dataset name
+    d_label <- NULL
+    if (!is.null(dataset_names) && length(dataset_names) >= i && nzchar(trimws(dataset_names[i]))) {
+      d_label <- trimws(dataset_names[i])
+      df$Dataset <- d_label
+    } else if ("Dataset" %in% colnames(df) && any(nzchar(trimws(as.character(df$Dataset[!is.na(df$Dataset)]))))) {
+      d_label <- unique(as.character(df$Dataset[!is.na(df$Dataset) & nzchar(trimws(df$Dataset))]))[1]
+    } else {
+      d_label <- sprintf("Dataset %d", i)
+      df$Dataset <- d_label
+    }
+
+    # Apply 48 gold standard metrics filtering
+    if (filter_gold_standard) {
+      df <- filter_gold_standard_metrics(df)
+    }
+
+    # Standardize categories
+    df <- standardize_benchmark_categories(df)
+
+    ingested_dfs[[length(ingested_dfs) + 1]] <- df
+    dataset_labels <- c(dataset_labels, d_label)
+  }
+
+  if (length(ingested_dfs) == 0) {
+    stop("None of the supplied inputs contained valid benchmark data.")
+  }
+
+  # Disambiguate dataset labels if duplicate generic names exist
+  unique_dsets <- character(0)
+  for (k in seq_along(ingested_dfs)) {
+    orig_d <- unique(as.character(ingested_dfs[[k]]$Dataset))
+    if (length(orig_d) == 1) {
+      if (orig_d %in% unique_dsets) {
+        new_d <- sprintf("%s (%d)", orig_d, sum(unique_dsets == orig_d) + 1)
+        ingested_dfs[[k]]$Dataset <- new_d
+        unique_dsets <- c(unique_dsets, new_d)
+      } else {
+        unique_dsets <- c(unique_dsets, orig_d)
+      }
+    } else {
+      unique_dsets <- c(unique_dsets, orig_d)
+    }
+  }
+
+  # Find common columns to rbind
+  common_cols <- Reduce(intersect, lapply(ingested_dfs, colnames))
+  required_core <- c("Dataset", "Method", "Category", "Metric", "Score_Raw")
+  missing_core <- setdiff(required_core, common_cols)
+  if (length(missing_core) > 0) {
+    stop(paste("Cannot combine benchmark datasets; missing required columns:", paste(missing_core, collapse = ", ")))
+  }
+
+  combined_granular <- do.call(rbind, lapply(ingested_dfs, function(x) x[, common_cols, drop = FALSE]))
+
+  # Direction-aware score normalization across all combined simulators and datasets
+  if (recompute_normalized) {
+    combined_granular <- .normalize_bubble_scores(combined_granular)
+    combined_granular$Score <- combined_granular$Score_Norm
+  }
+
+  all_methods <- sort(unique(as.character(combined_granular$Method)))
+  all_datasets <- unique(as.character(combined_granular$Dataset))
+
+  # Cross-Dataset Averaged Summary Table
+  has_norm <- "Score_Norm" %in% colnames(combined_granular)
+  agg_raw <- stats::aggregate(
+    combined_granular$Score_Raw,
+    by = list(Method = combined_granular$Method, Category = combined_granular$Category, Metric = combined_granular$Metric),
+    FUN = mean, na.rm = TRUE
+  )
+  colnames(agg_raw)[4] <- "Score_Raw"
+
+  if (has_norm) {
+    agg_norm <- stats::aggregate(
+      combined_granular$Score_Norm,
+      by = list(Method = combined_granular$Method, Category = combined_granular$Category, Metric = combined_granular$Metric),
+      FUN = mean, na.rm = TRUE
+    )
+    agg_raw$Score_Norm <- agg_norm[[4]]
+    agg_raw$Score <- agg_raw$Score_Norm
+  } else {
+    agg_raw$Score <- agg_raw$Score_Raw
+  }
+
+  # Attach Property and Modality if available
+  if ("Property" %in% colnames(combined_granular)) {
+    prop_map <- stats::aggregate(
+      Property ~ Method + Category + Metric,
+      data = combined_granular,
+      FUN = function(x) x[1]
+    )
+    agg_raw <- merge(agg_raw, prop_map, by = c("Method", "Category", "Metric"), all.x = TRUE)
+  }
+  if ("Modality" %in% colnames(combined_granular)) {
+    mod_map <- stats::aggregate(
+      Modality ~ Method + Category + Metric,
+      data = combined_granular,
+      FUN = function(x) x[1]
+    )
+    agg_raw <- merge(agg_raw, mod_map, by = c("Method", "Category", "Metric"), all.x = TRUE)
+  }
+
+  # Cross-dataset statistics (mean, SD, SE, N)
+  calc_stats <- function(v) {
+    v_clean <- v[!is.na(v) & is.finite(v)]
+    n <- length(v_clean)
+    m <- if (n > 0) mean(v_clean) else NA_real_
+    s <- if (n > 1) stats::sd(v_clean) else 0.0
+    se <- if (n > 1) s / sqrt(n) else 0.0
+    c(Mean = m, SD = s, SE = se, N_Datasets = n)
+  }
+
+  stats_list <- stats::aggregate(
+    combined_granular$Score_Raw,
+    by = list(Method = combined_granular$Method, Category = combined_granular$Category, Metric = combined_granular$Metric),
+    FUN = calc_stats
+  )
+  stats_mat <- stats_list[[4]]
+  cross_stats_df <- data.frame(
+    Method      = stats_list$Method,
+    Category    = stats_list$Category,
+    Metric      = stats_list$Metric,
+    Mean_Raw    = stats_mat[, "Mean"],
+    SD_Raw      = stats_mat[, "SD"],
+    SE_Raw      = stats_mat[, "SE"],
+    N_Datasets  = stats_mat[, "N_Datasets"],
+    stringsAsFactors = FALSE
+  )
+
+  # Dataset summary table
+  dset_summary_rows <- lapply(all_datasets, function(ds) {
+    sub_ds <- combined_granular[combined_granular$Dataset == ds, , drop = FALSE]
+    data.frame(
+      Dataset           = ds,
+      Simulators_Count  = length(unique(sub_ds$Method)),
+      Simulators        = paste(unique(sub_ds$Method), collapse = ", "),
+      Metrics_Evaluated = length(unique(sub_ds$Metric)),
+      Records           = nrow(sub_ds),
+      stringsAsFactors  = FALSE
+    )
+  })
+  dataset_summary_df <- do.call(rbind, dset_summary_rows)
+
+  res <- list(
+    benchmark_df            = combined_granular,
+    benchmark_summary_table = agg_raw,
+    granular_benchmark_table = combined_granular,
+    dataset_summary_table   = dataset_summary_df,
+    dataset_summary_df      = dataset_summary_df,
+    cross_dataset_stats     = cross_stats_df,
+    methods                 = all_methods,
+    datasets                = all_datasets,
+    is_multidataset         = length(all_datasets) > 1,
+    n_datasets              = length(all_datasets),
+    n_simulators            = length(all_methods)
+  )
+
+  class(res) <- c("scSimEval_multidataset_benchmark", "scSimEval_consolidated", "list")
+  res
+}
+
+#' @export
+as.data.frame.scSimEval_multidataset_benchmark <- function(x, row.names = NULL, optional = FALSE, ...) {
+  as.data.frame(x$granular_benchmark_table, row.names = row.names, optional = optional, ...)
+}
+
+#' @rdname combine_benchmark_results
+#' @export
+append_benchmark_results <- combine_benchmark_results
+
+
+# -------------------------------------------------------------------------
+# 13. zoom_plot()
+# -------------------------------------------------------------------------
+
+#' Interactive Step-by-Step Zoom In and Zoom Out for Plots
+#'
+#' Applies step-by-step magnification or custom coordinate window zooming to any
+#' \code{ggplot2} figure produced by \code{scSimEval} (including comparative bubble
+#' matrices, evaluation summaries, distributional QC, metric heatmaps, and ordination plots).
+#'
+#' @param p A \code{ggplot} or \code{patchwork} object to zoom.
+#' @param zoom Numeric zoom factor (> 1.0 zooms in, < 1.0 zooms out). Default is 1.0 (no change).
+#' @param step Integer step counter. Each positive step (+1) magnifies by +25% (1.25x),
+#'   while each negative step (-1) demagnifies by -20% (0.8x).
+#' @param xlim Optional numeric range \code{c(xmin, xmax)} to set exact horizontal limits.
+#' @param ylim Optional numeric range \code{c(ymin, ymax)} to set exact vertical limits.
+#' @param center Optional numeric vector \code{c(x_center, y_center)} specifying the focal point of zooming.
+#'   Defaults to the center of the current plot coordinate span.
+#'
+#' @return A modified \code{ggplot} or \code{patchwork} object with adjusted cartesian coordinates.
+#' @examples
+#' data(example_scrna, package = "scSimEval")
+#' res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
+#' p <- plot_evaluation_summary(res)
+#' p_zoom_in <- zoom_plot(p, step = 1)
+#' p_zoom_out <- zoom_plot(p, step = -1)
+#' @export
+zoom_plot <- function(p, zoom = 1.0, step = 0, xlim = NULL, ylim = NULL, center = NULL) {
+  if (!inherits(p, "ggplot") && !inherits(p, "patchwork")) {
+    stop("`p` must be a ggplot or patchwork object.")
+  }
+
+  # Calculate effective zoom factor
+  if (!is.null(step) && step != 0) {
+    zoom <- zoom * (1.25 ^ step)
+  }
+
+  if (is.null(zoom) || zoom <= 0) {
+    zoom <- 1.0
+  }
+
+  # If xlim and ylim are explicitly provided, apply directly
+  if (!is.null(xlim) || !is.null(ylim)) {
+    return(p + ggplot2::coord_cartesian(xlim = xlim, ylim = ylim))
+  }
+
+  if (abs(zoom - 1.0) < 1e-6) {
+    return(p)
+  }
+
+  # Extract plot ranges using ggplot_build
+  tryCatch({
+    gb <- ggplot2::ggplot_build(p)
+    pp <- gb$layout$panel_params[[1]]
+
+    x_range <- NULL
+    y_range <- NULL
+
+    if (!is.null(pp$x.range)) {
+      x_range <- pp$x.range
+    } else if (!is.null(pp$x$continuous_range)) {
+      x_range <- pp$x$continuous_range
+    } else if (!is.null(pp$x$range)) {
+      x_range <- pp$x$range
+    }
+
+    if (!is.null(pp$y.range)) {
+      y_range <- pp$y.range
+    } else if (!is.null(pp$y$continuous_range)) {
+      y_range <- pp$y$continuous_range
+    } else if (!is.null(pp$y$range)) {
+      y_range <- pp$y$range
+    }
+
+    if (is.null(x_range) || is.null(y_range)) {
+      return(p)
+    }
+
+    x_mid <- if (!is.null(center) && length(center) >= 1) center[1] else mean(x_range)
+    y_mid <- if (!is.null(center) && length(center) >= 2) center[2] else mean(y_range)
+
+    x_half_span <- (diff(x_range) / 2) / zoom
+    y_half_span <- (diff(y_range) / 2) / zoom
+
+    new_xlim <- c(x_mid - x_half_span, x_mid + x_half_span)
+    new_ylim <- c(y_mid - y_half_span, y_mid + y_half_span)
+
+    p + ggplot2::coord_cartesian(xlim = new_xlim, ylim = new_ylim)
+  }, error = function(e) {
+    # If coordinate introspection fails, return unmodified plot gracefully
+    p
+  })
 }
 

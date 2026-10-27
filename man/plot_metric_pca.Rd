@@ -37,7 +37,7 @@ plot_metric_pca(
 
 \item{top_n_loadings}{Integer or \code{NULL}. Maximum number of loading vectors to plot in panel b
 (ordered by vector magnitude in PC1-PC2 space). Default is \code{14} to prevent visual clutter;
-set to \code{NULL} or \code{62} to display all evaluated metrics.}
+set to \code{NULL} or \code{48} to display all evaluated metrics.}
 
 \item{base_size}{Numeric. Base font size. Default \code{11}.}
 }
@@ -49,7 +49,7 @@ Generates a dual-panel PCA dashboard for evaluating single-cell simulation bench
 and methods.
 }
 \details{
-All metrics present in \code{benchmark_data} (e.g. all 62 canonical metrics across categories)
+All metrics present in \code{benchmark_data} (e.g. all 48 gold-standard metrics across categories)
 are mathematically considered in the PCA decomposition. Panel \code{"both"} displays:
 \itemize{
   \item \strong{Panel a (Methods Ordination)}: Simulators mapped into PC1 vs PC2 coordinates with
@@ -57,7 +57,7 @@ are mathematically considered in the PCA decomposition. Panel \code{"both"} disp
   \item \strong{Panel b (PC Loadings Vectors)}: Directional loading vectors (arrows) radiating from
     the origin \code{(0, 0)} to loading coordinates \code{(w1, w2)}, colored by summary type
     (\code{"gene"} = red, \code{"cell"} = blue, \code{"global"} = green) with rounded badge labels.
-    Pass \code{top_n_loadings = NULL} or \code{62} to render all metric loading vectors.
+    Pass \code{top_n_loadings = NULL} or \code{48} to render all metric loading vectors.
 }
 }
 \examples{

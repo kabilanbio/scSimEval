@@ -24,8 +24,9 @@ Description: A simple and unified evaluation toolkit for benchmarking single-cel
     subset of cells has both modalities, e.g. DOGMA-seq or mosaic pooling designs),
     handled by subsetting the paired cell fraction for coupling metrics and evaluating
     each modality independently otherwise. The toolkit quantifies simulation realism
-    using 62 metrics organized into 8 easy-to-understand categories:
-    (1) Distribution Differences: Statistical distances between real and simulated values (such as KS, Wasserstein, MAD, and RMSE),
+    using 48 curated, non-redundant gold-standard metrics (39 unimodal, 48 multiomics)
+    organized into 8 canonical categories:
+    (1) Distribution Differences: Statistical distances between real and simulated values (such as KS, Wasserstein, and MAD),
     (2) Summary Properties: Gene correlations, zero counts, and dropout patterns,
     (3) Cell Structure and Clustering: How well distinct cell types and clusters are preserved (such as Silhouette width, ARI, and NMI),
     (4) Batch and Confounder Mixing: How well technical batch variations are captured or mixed,

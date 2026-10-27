@@ -46,24 +46,23 @@ zero-inflation curves, and manifold distances between reference and simulated da
 \if{html}{\figure{workflow_diagram.png}{options: width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 
 
-\strong{Metric Measurement Capacity by Data & Metadata Mode:}
+\strong{Metric Measurement Capacity by Data & Metadata Mode (48 Gold-Standard Suite):}
 \itemize{
-  \item \strong{Count Matrix Alone (No Metadata):} Measures approximately 23 baseline metrics
-    spanning Category I (Distributional Properties: KS, Wasserstein, MAD, MAE, RMSE, OV,
-    Bhattacharyya, ECDF difference, Runs test, 2D Fasano-Franceschini, 2D Peacock, KDE test,
-    MMD, Fréchet distance), Category II (Correlations & Zero-Inflation: BCV discrepancy, dropout
-    curve midpoint/slope, mean-variance R², cell/gene Pearson correlations), and Category VI
-    (Trajectory & Lineage Dynamics: pseudotime correlation, tree height RMSE).
-  \item \strong{+ Cell Types (Optional):} Unlocks 12–15 additional metrics spanning Category III
-    (Cellular Structure & Concordance: ARI, NMI, AMI, Silhouette width, Dunn, Davies-Bouldin,
-    Calinski-Harabasz, V-measure, Neighborhood Purity, Generative Precision/Recall) and Category V
-    (Biological Signal & Downstream Fidelity: SimBench DE/DP/DM/DB/DV signal fidelity, top DEG
-    Jaccard overlap, Log2FC correlation, classifier accuracy and Macro-F1).
+  \item \strong{Count Matrix Alone (No Metadata):} Measures 15 baseline metrics spanning
+    Category I (Distributional Properties: Wasserstein, KS, MAD, Bhattacharyya, Runs test,
+    NN mismatch, Inter-dataset silhouette), Category II (Correlations & Zero-Inflation:
+    dropout curve midpoint/slope error, R2 discrepancy, excess zero-inflation weight discrepancy),
+    and Category VI (Trajectory & Lineage Dynamics: pseudotime correlation, tree height RMSE,
+    graph alignment, lineage dynamics).
+  \item \strong{+ Cell Types (Optional):} Unlocks 15 additional metrics spanning Category III
+    (Cellular Structure & Concordance: MMD, Fréchet SC distance, Generative Precision/Recall,
+    Silhouette width, Davies-Bouldin, ARI, NMI) and Category V (Biological Signal Fidelity:
+    SimBench DE/DV/DD/DP/BD signals, predictive cell identity Macro-F1, deconvolution RMSE).
   \item \strong{+ Batch Annotations (Optional):} Unlocks 7 additional metrics spanning Category IV
-    (Batch Effects & Confounder Mixing: Batch Silhouette width, local neighborhood Shannon Entropy,
-    PCR R², CMS CellMixS, Inverse Simpson Index ISI, Seurat Mixing Metric, LDF difference).
+    (Batch Effects & Confounder Mixing: Batch Silhouette, PCR R2, CMS score, LISI/ISI,
+    Seurat mixing metric, cross-batch F1) and biological replicate delta variance MAE.
   \item \strong{Full Metadata (Count Matrix + Cell Types + Batch):} Unlocks the complete unimodal
-    benchmarking suite of up to 55 metrics.
+    benchmarking suite of 39 metrics (or all 48 metrics for paired multiomics).
 }
 }
 \examples{

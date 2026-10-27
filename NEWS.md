@@ -2,9 +2,42 @@
 
 ## Major Improvements
 
+* **Interactive Step-by-Step Zoom Controls (Shiny App & R Package):**
+  - Integrated an interactive step-by-step Zoom Toolbar on **every plot figure and architectural diagram** in `scSimEval Studio` (`launch_scSimEval_app()`):
+    - Comparative Bubble Matrix (`plot_bubble_matrix`)
+    - Radar & Evaluation Summary (`plot_eval_summary`)
+    - Distribution QC Curves (`plot_dist_qc`)
+    - Scalability Benchmarking (`plot_scale_bench`)
+    - Metric Boxplots & Barplots (`plot_metric_box`)
+    - Performance Heatmap (`plot_metric_heat`)
+    - PCA Ordination (`plot_metric_pca_out`)
+    - MDS Metric Space (`plot_metric_mds_out`)
+    - Cell Embeddings UMAP/t-SNE/PCA (`plot_cell_embeddings`)
+    - Benchmarking Workflow Diagram & Score Normalization Diagram (`workflow_diagram`, `score_normalization_workflow`)
+  - Provides instant, client-side step zoom (+15% step in, -15% step out, 50% to 300% range) with a live magnification percentage badge (`100%`, `115%`, `130%`, etc.), 1-click reset, and a smooth scrollable/pannable viewport container.
+  - Added and exported `zoom_plot(p, zoom = 1.0, step = 0, xlim = NULL, ylim = NULL)` in the R package to allow programmatic step-by-step zooming on any ggplot2 benchmark figure without altering underlying data or scaling factors.
+
+* **Multi-Dataset Benchmarking & "Add to Current Benchmark Results" in Data Mode 4:**
+  - Enabled the **"Add to current benchmark results"** workflow for Data Mode 4 (**"Upload Saved Results"**) in both the sidebar and the Data Hub main panel. Users can now sequentially upload multiple RDS or CSV benchmark datasets (e.g., Rice Bud, Soybean Root, PBMC) into a single unified benchmarking session.
+  - Resolved a critical deduplication issue in single-cell (Mode 2) and multiomics (Mode 3) evaluation pipelines where shared simulator names across distinct datasets were inadvertently overwritten.
+  - When the same simulator (e.g., `scDesign3`, `scMultiSim`, or `MOSim`) is evaluated across multiple datasets, `scSimEval` preserves each dataset's distinct records and automatically calculates the simulator's cross-dataset average performance across the 48 Gold-Standard metrics, updates overall fidelity scores and rankings in the leaderboard, and renders the combined comparative bubble matrix.
+  - Added and exported `combine_benchmark_results(..., list_of_benchmarks, dataset_names, filter_gold_standard, recompute_normalized)` and its alias `append_benchmark_results()` in the R package to consolidate, standardize, and statistically aggregate multiple benchmark datasets or session files into a unified `scSimEval_multidataset_benchmark` object.
+
+* **Streamlined 48 Gold-Standard Curated Evaluation Metrics Architecture (Option A):**
+  - Following systematic sensitivity and collinearity audits, transitioned the evaluation engine to a streamlined, publication-grade **48 Gold-Standard Metrics Suite** (evaluating **39 metrics for unimodal scRNA-seq / scATAC-seq** and **48 metrics for paired single-cell multiomics co-assays** across the 8 canonical categories).
+  - **Eliminated Collinear Redundancies with Empirical Proof:**
+    - Pruned `ECDF_DiffArea` due to mathematical identity with 1D Wasserstein distance by Kantorovich-Rubinstein duality ($r = 1.000$).
+    - Pruned redundant summary moment error scores (`MAE`, `RMSE`) in favor of outlier-resistant `MAD` and global `Wasserstein`.
+    - Pruned collinear clustering partition metrics (`AMI`, `v_measure`, `fmi`, `homogeneity`, `completeness`) in favor of `ari` and `nmi`.
+    - Pruned redundant `shannon_entropy` in favor of hypothesis-tested `cms` (CellMixS) and `isi` (LISI).
+    - Pruned raw accuracy measures in favor of `predictive_macro_F1`, `cross_batch_F1`, and `cross_modal_F1` to eliminate majority-class distortion on rare single-cell populations.
+  - Added new exported function `filter_gold_standard_metrics(df)` which dynamically filters any benchmark dataframe or session object to the 48 Gold-Standard metrics, eliminating collinear duplicates and ensuring clean backwards compatibility when loading historical RDS files.
+  - Updated demo benchmark database (`demo_benchmark_data.rds`) to 48 Gold-Standard metrics (1,569 rows across 6 simulators on 2 datasets).
+  - Synchronized `R/10_visualizations.R` and `inst/shiny/scSimEvalApp/10_visualizations.R` with comprehensive display labels, directional polarity rules, and category mappings.
+
 * **In-App Live Running Logs & Diagnostics Suite:**
   - Added a dedicated **"Logs"** tab immediately after **"Help & Getting Started"** in the interactive Shiny application (`launch_scSimEval_app()`).
-  - Implemented real-time log streaming that captures all execution events, data ingestion and validation steps, metric calculation progress across all 62 benchmark metrics, visualization rendering, and file export actions.
+  - Implemented real-time log streaming that captures all execution events, data ingestion and validation steps, metric calculation progress across all 48 gold-standard benchmark metrics, visualization rendering, and file export actions.
   - Automatically captures and formats runtime `ERRORS`, `WARNINGS`, `NOTES`, and `INFO` events with timestamps, components, severity badges, and error tracebacks to simplify interactive debugging.
   - Provided interactive control tools including severity-level filtering (`All`, `ERROR`, `WARNING`, `NOTE/INFO`), real-time search filtering, auto-scroll toggle, manual log refresh, instant log clearing, and full text `.txt` download export handler for reproducibility.
   - Initialized automatic system diagnostics on startup (R version, architecture, OS platform, memory/CPU cores detection, cache status, and mounted asset paths).

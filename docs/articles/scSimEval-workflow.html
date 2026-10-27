@@ -244,7 +244,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -264,7 +264,7 @@
     <li><a class="dropdown-item" href="../articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (62 Metrics)</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -289,7 +289,7 @@
 Dr. Dwijesh Chandra Mishra, Dr. Shashi Bhushan Lal, Dr. Sudhir
 Srivastava, Dr. Krishna Kumar Chaturvedi, Dr. Sharanbasappa</h4>
             
-            <h4 data-toc-skip class="date">2026-10-26</h4>
+            <h4 data-toc-skip class="date">2026-10-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/kabilanbio/scSimEval/blob/HEAD/vignettes/scSimEval-workflow.Rmd" class="external-link"><code>vignettes/scSimEval-workflow.Rmd</code></a></small>
       <div class="d-none name"><code>scSimEval-workflow.Rmd</code></div>
@@ -309,10 +309,10 @@ pipelines, optimize analysis workflows, and evaluate statistical models.
 A critical question is always: <em>how realistic is the simulated data
 compared to genuine biological experiments?</em></p>
 <p><strong><code>scSimEval</code></strong> provides a comprehensive
-evaluation framework by calculating <strong>62 evaluation measures
-organized into 8 easy-to-understand categories</strong>. It directly
-benchmarks simulated data against empirical reference datasets
-using:</p>
+evaluation framework by calculating <strong>48 Gold-Standard evaluation
+measures organized into 8 easy-to-understand categories (39 for unimodal
+assays, 48 for paired multiomics)</strong>. It directly benchmarks
+simulated data against empirical reference datasets using:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>Real experimental reference data</strong>
@@ -354,12 +354,12 @@ details.</p>
 <p>The following workflow diagram shows the step-by-step benchmarking
 process in <code>scSimEval</code>:</p>
 <div class="figure" style="text-align: center">
-<img src="figures/workflow_diagram.png" class="r-plt" alt="**Figure 1: End-to-end benchmarking workflow of scSimEval.** The framework takes real and simulated single-cell multiomics data, evaluates 62 metrics across 8 foundational categories, and produces standardized scores, comprehensive figures, and ranking leaderboards." width="100%"><p class="caption">
+<img src="figures/workflow_diagram.png" class="r-plt" alt="**Figure 1: End-to-end benchmarking workflow of scSimEval.** The framework takes real and simulated single-cell multiomics data, evaluates 48 gold-standard metrics across 8 foundational categories, and produces standardized scores, comprehensive figures, and ranking leaderboards." width="100%"><p class="caption">
 <strong>Figure 1: End-to-end benchmarking workflow of
 scSimEval.</strong> The framework takes real and simulated single-cell
-multiomics data, evaluates 62 metrics across 8 foundational categories,
-and produces standardized scores, comprehensive figures, and ranking
-leaderboards.
+multiomics data, evaluates 48 gold-standard metrics across 8
+foundational categories, and produces standardized scores, comprehensive
+figures, and ranking leaderboards.
 </p>
 </div>
 <p>The evaluation process follows four simple steps:</p>
@@ -565,7 +565,7 @@ scATAC)</em>
 <strong>Full Metadata</strong> <em>(RNA + ATAC + Cell
 Types + Batch)</em>
 </td>
-<td align="center"><strong>All 62 Metrics</strong></td>
+<td align="center"><strong>All 48 Metrics</strong></td>
 <td align="left">Complete multiomics benchmark suite across all 8
 canonical categories (<strong>Categories I–VIII</strong>).</td>
 </tr>
@@ -575,7 +575,7 @@ canonical categories (<strong>Categories I–VIII</strong>).</td>
 cells)</em>
 </td>
 <td align="left">RNA + ATAC Matrices alone</td>
-<td align="center"><strong>~38–42 Metrics</strong></td>
+<td align="center"><strong>~26 Metrics</strong></td>
 <td align="left">Both unimodal distributions plus population-level
 coupling (co-expression module fidelity, Network Jaccard, cross-modality
 correlation).</td>
@@ -586,7 +586,7 @@ correlation).</td>
 cells)</em>
 </td>
 <td align="left"><strong>RNA + ATAC + Cell Types (+ Batch)</strong></td>
-<td align="center"><strong>Up to ~58 Metrics</strong></td>
+<td align="center"><strong>Up to ~41 Metrics</strong></td>
 <td align="left">
 <em>Essential for unpaired designs:</em> Unlocks
 cluster-matched cross-modal label transfer concordance, cell-type
@@ -598,8 +598,9 @@ regulatory linkage, and technical donor integration.</td>
 <div class="section level3">
 <h3 id="step-2-calculate-evaluation-measures">Step 2: Calculate Evaluation Measures<a class="anchor" aria-label="anchor" href="#step-2-calculate-evaluation-measures"></a>
 </h3>
-<p><code>scSimEval</code> calculates 62 evaluation measures across 8
-core categories.</p>
+<p><code>scSimEval</code> calculates 48 gold-standard evaluation
+measures across 8 core categories (39 unimodal, 48 paired
+multiomics).</p>
 </div>
 <div class="section level3">
 <h3 id="step-3-run-the-complete-benchmark">Step 3: Run the Complete Benchmark<a class="anchor" aria-label="anchor" href="#step-3-run-the-complete-benchmark"></a>
@@ -748,9 +749,9 @@ contrast, the <strong>Shiny App Studio</strong>
 (<code><a href="../reference/launch_scSimEval_app.html">launch_scSimEval_app()</a></code>) bundles a rich pre-computed
 multi-dataset benchmark evaluation suite
 (<code>demo_benchmark_data.rds</code>, 6 simulators evaluated across all
-62 metrics on 2 datasets) allowing interactive exploration of
-leaderboards, bubble matrices, and diagnostic plots without waiting for
-long evaluation runs.</p>
+48 gold-standard metrics on 2 datasets) allowing interactive exploration
+of leaderboards, bubble matrices, and diagnostic plots without waiting
+for long evaluation runs.</p>
 </blockquote>
 <hr>
 </div>
@@ -880,9 +881,9 @@ and concordance:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Davies-Bouldin Index:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">clust_res</span><span class="op">$</span><span class="va">davies_bouldin</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Davies-Bouldin Index: 7.9168</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Adjusted Rand Index (ARI):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">clust_res</span><span class="op">$</span><span class="va">ARI</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Adjusted Rand Index (ARI): -0.0071</span></span>
+<span><span class="co">#&gt; Adjusted Rand Index (ARI): 0.0388</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Normalized Mutual Information (NMI):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">clust_res</span><span class="op">$</span><span class="va">NMI</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Normalized Mutual Information (NMI): 0.0041</span></span></code></pre></div>
+<span><span class="co">#&gt; Normalized Mutual Information (NMI): 0.0385</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
@@ -1007,17 +1008,17 @@ table:</p>
 <span></span>
 <span><span class="va">summary_df</span> <span class="op">&lt;-</span> <span class="va">master_eval</span><span class="op">$</span><span class="va">benchmark_summary_table</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Total evaluated metric instances:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">summary_df</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Total evaluated metric instances: 358</span></span>
+<span><span class="co">#&gt; Total evaluated metric instances: 383</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">summary_df</span><span class="op">$</span><span class="va">Category</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Batch Effects &amp; Confounder Mixing    Biological Signal &amp; Downstream </span></span>
 <span><span class="co">#&gt;                                10                                10 </span></span>
 <span><span class="co">#&gt;       Cellular Structure &amp; Mixing         Computational Scalability </span></span>
-<span><span class="co">#&gt;                                23                                 2 </span></span>
+<span><span class="co">#&gt;                                38                                 2 </span></span>
 <span><span class="co">#&gt;       Correlations &amp; Dependencies         Cross-Modal Relationships </span></span>
 <span><span class="co">#&gt;                                 8                                17 </span></span>
 <span><span class="co">#&gt;         Distributional Properties               Trajectory Dynamics </span></span>
-<span><span class="co">#&gt;                               286                                 2</span></span></code></pre></div>
+<span><span class="co">#&gt;                               286                                12</span></span></code></pre></div>
 <blockquote>
 <p><strong>Parallel Computing with Multi-Core Hardware
 (<code>threads</code>):</strong> Both
@@ -1096,7 +1097,7 @@ overall composite performance with exact score annotations.
 (<code>compute_method_leaderboard</code>)<a class="anchor" aria-label="anchor" href="#b-simulator-performance-leaderboard-compute_method_leaderboard"></a>
 </h3>
 <p>To obtain exact numeric rankings and composite fidelity scores across
-all 62 criteria, <code><a href="../reference/compute_method_leaderboard.html">compute_method_leaderboard()</a></code> extracts the
+all 48 criteria, <code><a href="../reference/compute_method_leaderboard.html">compute_method_leaderboard()</a></code> extracts the
 definitive simulator performance leaderboard:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate the method performance leaderboard</span></span>
@@ -1146,7 +1147,7 @@ candidate simulators.
 </h3>
 <p>To examine exact numeric values for every metric without any loss of
 detail, <code><a href="../reference/plot_metric_heatmap.html">plot_metric_heatmap()</a></code> displays all simulators on
-the horizontal axis and all 62 measures on the vertical axis, printing
+the horizontal axis and all 48 measures on the vertical axis, printing
 <strong>exact raw values inside each cell</strong>:</p>
 <div class="figure" style="text-align: center">
 <img src="figures/metric_heatmap.png" class="r-plt" alt="**Figure 8: Complete benchmark metric heatmap.** Displays exact unnormalized raw scores in bold text inside every cell, grouped cleanly across the 8 evaluation categories." width="88%"><p class="caption">
@@ -1350,19 +1351,19 @@ simultaneously:</p>
 <td align="left">Method 1</td>
 <td align="left">Method 1-scRNA-seq</td>
 <td align="left">scRNA-seq</td>
-<td align="right">153</td>
-<td align="right">0.1561</td>
-<td align="right">2.3206</td>
-<td align="right">2.4504</td>
+<td align="right">175</td>
+<td align="right">0.1559</td>
+<td align="right">2.3205</td>
+<td align="right">2.4503</td>
 </tr>
 <tr class="even">
 <td align="left">Method 1</td>
 <td align="left">Method 1-scATAC-seq</td>
 <td align="left">scATAC-seq</td>
-<td align="right">155</td>
-<td align="right">0.1454</td>
+<td align="right">174</td>
+<td align="right">0.1456</td>
 <td align="right">1.2091</td>
-<td align="right">1.4124</td>
+<td align="right">1.4125</td>
 </tr>
 <tr class="odd">
 <td align="left">Method 1</td>
@@ -1377,16 +1378,16 @@ simultaneously:</p>
 <td align="left">Method 2</td>
 <td align="left">Method 2-scRNA-seq</td>
 <td align="left">scRNA-seq</td>
-<td align="right">153</td>
-<td align="right">0.1563</td>
-<td align="right">2.3206</td>
-<td align="right">2.4504</td>
+<td align="right">175</td>
+<td align="right">0.1565</td>
+<td align="right">2.3208</td>
+<td align="right">2.4505</td>
 </tr>
 <tr class="odd">
 <td align="left">Method 2</td>
 <td align="left">Method 2-scATAC-seq</td>
 <td align="left">scATAC-seq</td>
-<td align="right">155</td>
+<td align="right">174</td>
 <td align="right">0.1456</td>
 <td align="right">1.2091</td>
 <td align="right">1.4125</td>
@@ -1422,18 +1423,18 @@ results, filter metrics, view bubble plots, and export high-resolution
 workspace structured into seven primary navigation tabs:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Tab 1: Home</strong> — Executive overview of the 62
-evaluation measures, biological KPI dimensions, and an interactive
-operational tour across the four ingestion modes (with all-time pageview
-tracking in the cloud app).</li>
+<strong>Tab 1: Home</strong> — Executive overview of the 48
+gold-standard evaluation measures, biological KPI dimensions, and an
+interactive operational tour across the four ingestion modes (with
+all-time pageview tracking in the cloud app).</li>
 <li>
 <strong>Tab 2: Data Hub</strong> — Comprehensive data ingestion
 centre featuring 4 operational modes:
 <ul>
 <li>
 <em>Mode 1: Pre-Computed Benchmark (Demo Data)</em>: Instant 1-click
-loading of a multi-dataset benchmark study across 6 simulators (744
-metric observations) for zero-wait exploration.</li>
+loading of a multi-dataset benchmark study across 6 simulators for
+zero-wait exploration.</li>
 <li>
 <em>Mode 2: Single-Cell RNA/ATAC Evaluation</em>: Evaluates
 empirical reference against simulated count matrices with optional
@@ -1454,7 +1455,7 @@ Generator</strong> (SLURM / PBS / Bash) for cluster execution.</em>
 </li>
 <li>
 <strong>Tab 3: Comparative Bubble Matrix &amp; Leaderboard</strong>
-— Flagship 62-metric comparative matrix with a multi-dataset selector
+— Flagship 48-metric comparative matrix with a multi-dataset selector
 bar (<code>All Datasets (Average)</code> vs. individual datasets
 <code>Dataset 1</code>, <code>Dataset 2</code>, …), Minimalist
 vs. Publication layout toggles, confirmation plot buttons, 600 DPI
@@ -1683,8 +1684,8 @@ evaluate simulation tools across multiple diverse biological tissues,
 cell lines, or conditions (e.g., evaluating 6 simulators across 16
 distinct single-cell datasets, producing
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>16</mn><mo>×</mo><mn>6</mn><mo>=</mo><mn>96</mn></mrow><annotation encoding="application/x-tex">16 \times 6 = 96</annotation></semantics></math>
-simulation comparisons and 5,952 metric observations across all 62
-measures).</p>
+simulation comparisons and 4,608 metric observations across all 48
+gold-standard measures).</p>
 <p>To enable seamless, beginner-friendly execution of such studies
 without crashing computer memory, <code>scSimEval</code> provides
 <code><a href="../reference/benchmark_simulation_suite.html">benchmark_simulation_suite()</a></code>:</p>
@@ -1734,7 +1735,7 @@ files.</p>
 </h2>
 <p>While <code>scSimEval</code> is primarily optimized and demonstrated
 for <strong>scRNA-seq</strong>, <strong>scATAC-seq</strong>, and
-<strong>paired scRNA-seq + scATAC-seq multiomics</strong>, all 62
+<strong>paired scRNA-seq + scATAC-seq multiomics</strong>, all 48
 evaluation measures operate on standard numeric count or continuous
 matrices.</p>
 <p>Consequently, the package can be readily extended to benchmark
@@ -1754,10 +1755,10 @@ coordinates or morphological features.</p>
 </h2>
 <p><code>scSimEval</code> provides a unified, objective, and
 reference-based evaluation toolkit for benchmarking single-cell and
-multiomics simulation methods. With 62 metrics organized into 8 clear
-categories, automated score normalization, and intuitive visualizations,
-it enables researchers to select and validate simulation methods with
-confidence.</p>
+multiomics simulation methods. With 48 gold-standard metrics organized
+into 8 clear categories, automated score normalization, and intuitive
+visualizations, it enables researchers to select and validate simulation
+methods with confidence.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -1806,7 +1807,7 @@ ICAR-IASRI) — <code>kkcchaturvedi@gmail.com</code></p></li>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] scSimEval_0.99.8</span></span>
+<span><span class="co">#&gt; [1] scSimEval_0.99.9</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             </span></span>
@@ -1848,42 +1849,43 @@ ICAR-IASRI) — <code>kkcchaturvedi@gmail.com</code></p></li>
 <span><span class="co">#&gt;  [73] waddR_1.27.0                cluster_2.1.8.3            </span></span>
 <span><span class="co">#&gt;  [75] ade4_1.7-24                 generics_0.1.4             </span></span>
 <span><span class="co">#&gt;  [77] gtable_0.3.6                class_7.3-24               </span></span>
-<span><span class="co">#&gt;  [79] tidyr_1.3.2                 ScaledMatrix_1.21.0        </span></span>
-<span><span class="co">#&gt;  [81] BiocSingular_1.29.1         XVector_0.52.0             </span></span>
-<span><span class="co">#&gt;  [83] flexmix_2.3-21              BiocGenerics_0.59.12       </span></span>
-<span><span class="co">#&gt;  [85] ggrepel_0.9.8               RANN_2.6.3                 </span></span>
-<span><span class="co">#&gt;  [87] pillar_1.11.1               limma_3.99.0               </span></span>
-<span><span class="co">#&gt;  [89] clValid_0.7                 robustbase_0.99-7          </span></span>
-<span><span class="co">#&gt;  [91] splines_4.6.1               dplyr_1.2.1                </span></span>
-<span><span class="co">#&gt;  [93] BiocFileCache_3.3.0         lattice_0.22-9             </span></span>
-<span><span class="co">#&gt;  [95] bit_4.6.0                   tidyselect_1.2.1           </span></span>
-<span><span class="co">#&gt;  [97] SingleCellExperiment_1.35.2 locfit_1.5-9.12            </span></span>
-<span><span class="co">#&gt;  [99] scuttle_1.23.2              clusterSim_0.51-6          </span></span>
-<span><span class="co">#&gt; [101] knitr_1.52                  gridExtra_2.3.1            </span></span>
-<span><span class="co">#&gt; [103] reformulas_0.4.4            IRanges_2.47.5             </span></span>
-<span><span class="co">#&gt; [105] Seqinfo_1.3.2               edgeR_4.99.6               </span></span>
-<span><span class="co">#&gt; [107] SummarizedExperiment_1.43.0 stats4_4.6.1               </span></span>
-<span><span class="co">#&gt; [109] xfun_0.60                   Biobase_2.73.2             </span></span>
-<span><span class="co">#&gt; [111] statmod_1.5.2               diptest_0.77-2             </span></span>
-<span><span class="co">#&gt; [113] randtests_1.0.2             brio_1.1.5                 </span></span>
-<span><span class="co">#&gt; [115] arm_1.15-3                  matrixStats_1.5.0          </span></span>
-<span><span class="co">#&gt; [117] DEoptimR_1.2-2              yaml_2.3.12                </span></span>
-<span><span class="co">#&gt; [119] boot_1.3-32                 kSamples_1.2-12            </span></span>
-<span><span class="co">#&gt; [121] eva_0.2.7                   evaluate_1.0.5             </span></span>
-<span><span class="co">#&gt; [123] codetools_0.2-20            MLmetrics_1.1.3            </span></span>
-<span><span class="co">#&gt; [125] kernlab_0.9-33              tibble_3.3.1               </span></span>
-<span><span class="co">#&gt; [127] cli_3.6.6                   RcppParallel_6.2.1         </span></span>
-<span><span class="co">#&gt; [129] systemfonts_1.3.2           Rdpack_2.6.6               </span></span>
-<span><span class="co">#&gt; [131] jquerylib_0.1.4             dichromat_2.0-1            </span></span>
-<span><span class="co">#&gt; [133] Rcpp_1.1.2                  dbplyr_2.6.0               </span></span>
-<span><span class="co">#&gt; [135] coda_0.19-4.1               parallel_4.6.1             </span></span>
-<span><span class="co">#&gt; [137] pkgdown_2.2.1               ggplot2_4.0.3              </span></span>
-<span><span class="co">#&gt; [139] blob_1.3.0                  mclust_6.1.3               </span></span>
-<span><span class="co">#&gt; [141] lme4_2.0-6                  viridisLite_0.4.3          </span></span>
-<span><span class="co">#&gt; [143] ggridges_0.5.7              scales_1.4.0               </span></span>
-<span><span class="co">#&gt; [145] e1071_1.7-17                purrr_1.2.2                </span></span>
-<span><span class="co">#&gt; [147] fpc_2.2-15                  rlang_1.3.0                </span></span>
-<span><span class="co">#&gt; [149] cowplot_1.2.0</span></span></code></pre></div>
+<span><span class="co">#&gt;  [79] tidyr_1.3.2                 data.table_1.18.6.1        </span></span>
+<span><span class="co">#&gt;  [81] ScaledMatrix_1.21.0         BiocSingular_1.29.1        </span></span>
+<span><span class="co">#&gt;  [83] XVector_0.52.0              flexmix_2.3-21             </span></span>
+<span><span class="co">#&gt;  [85] BiocGenerics_0.59.12        ggrepel_0.9.8              </span></span>
+<span><span class="co">#&gt;  [87] RANN_2.6.3                  pillar_1.11.1              </span></span>
+<span><span class="co">#&gt;  [89] limma_3.99.0                clValid_0.7                </span></span>
+<span><span class="co">#&gt;  [91] robustbase_0.99-7           splines_4.6.1              </span></span>
+<span><span class="co">#&gt;  [93] dplyr_1.2.1                 BiocFileCache_3.3.0        </span></span>
+<span><span class="co">#&gt;  [95] lattice_0.22-9              bit_4.6.0                  </span></span>
+<span><span class="co">#&gt;  [97] tidyselect_1.2.1            SingleCellExperiment_1.35.2</span></span>
+<span><span class="co">#&gt;  [99] locfit_1.5-9.12             scuttle_1.23.2             </span></span>
+<span><span class="co">#&gt; [101] clusterSim_0.51-6           knitr_1.52                 </span></span>
+<span><span class="co">#&gt; [103] gridExtra_2.3.1             reformulas_0.4.4           </span></span>
+<span><span class="co">#&gt; [105] IRanges_2.47.5              Seqinfo_1.3.2              </span></span>
+<span><span class="co">#&gt; [107] edgeR_4.99.6                SummarizedExperiment_1.43.0</span></span>
+<span><span class="co">#&gt; [109] RhpcBLASctl_0.23-42         stats4_4.6.1               </span></span>
+<span><span class="co">#&gt; [111] xfun_0.60                   Biobase_2.73.2             </span></span>
+<span><span class="co">#&gt; [113] statmod_1.5.2               diptest_0.77-2             </span></span>
+<span><span class="co">#&gt; [115] randtests_1.0.2             brio_1.1.5                 </span></span>
+<span><span class="co">#&gt; [117] arm_1.15-3                  matrixStats_1.5.0          </span></span>
+<span><span class="co">#&gt; [119] DEoptimR_1.2-2              yaml_2.3.12                </span></span>
+<span><span class="co">#&gt; [121] boot_1.3-32                 kSamples_1.2-12            </span></span>
+<span><span class="co">#&gt; [123] eva_0.2.7                   evaluate_1.0.5             </span></span>
+<span><span class="co">#&gt; [125] codetools_0.2-20            MLmetrics_1.1.3            </span></span>
+<span><span class="co">#&gt; [127] kernlab_0.9-33              tibble_3.3.1               </span></span>
+<span><span class="co">#&gt; [129] cli_3.6.6                   RcppParallel_6.2.1         </span></span>
+<span><span class="co">#&gt; [131] systemfonts_1.3.2           Rdpack_2.6.6               </span></span>
+<span><span class="co">#&gt; [133] jquerylib_0.1.4             dichromat_2.0-1            </span></span>
+<span><span class="co">#&gt; [135] Rcpp_1.1.2                  dbplyr_2.6.0               </span></span>
+<span><span class="co">#&gt; [137] coda_0.19-4.1               parallel_4.6.1             </span></span>
+<span><span class="co">#&gt; [139] pkgdown_2.2.1               ggplot2_4.0.3              </span></span>
+<span><span class="co">#&gt; [141] blob_1.3.0                  mclust_6.1.3               </span></span>
+<span><span class="co">#&gt; [143] lme4_2.0-6                  viridisLite_0.4.3          </span></span>
+<span><span class="co">#&gt; [145] ggridges_0.5.7              scales_1.4.0               </span></span>
+<span><span class="co">#&gt; [147] e1071_1.7-17                purrr_1.2.2                </span></span>
+<span><span class="co">#&gt; [149] fpc_2.2-15                  rlang_1.3.0                </span></span>
+<span><span class="co">#&gt; [151] cowplot_1.2.0</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

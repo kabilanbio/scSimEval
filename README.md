@@ -24,14 +24,14 @@ The package supports:
 
 ## Key Features
 
-- **62 Comprehensive Evaluation Measures**: Systematically organized into 8 canonical categories:
+- **48 Curated Gold-Standard Evaluation Measures**: Systematically organized into 8 canonical categories (39 for unimodal scRNA-seq / scATAC-seq alone, 48 for paired multiomics):
   1. *Distributional Properties* (statistical distances on library size, CPM expression, zero fractions, MMD, Fréchet distance)
-  2. *Correlations & Zero-Inflation* (BCV, logistic dropout curves, gene co-expression)
-  3. *Cellular Structure & Concordance* (unsupervised clustering fidelity, ARI, NMI, AMI, Silhouette)
-  4. *Batch & Technical Confounders* (batch ASW, Shannon entropy, PCR $R^2$, CMS, LISI)
-  5. *Biological Signals & Marker Genes* (DEG preservation across Simpipe, SimBench, and Shaky Foundations)
-  6. *Trajectory & Lineage Dynamics* (pseudotime rank correlation and lineage branching RMSE)
-  7. *Cross-Modal Coupling & Modularity* (FOSCTTM alignment, Match@1, peak-to-gene $R_V$ linkage)
+  2. *Correlations & Zero-Inflation* (logistic dropout curves, mean-variance fit, excess zero weights)
+  3. *Cellular Structure & Concordance* (unsupervised clustering fidelity, ARI, NMI, Silhouette, Davies-Bouldin, Generative Precision/Recall)
+  4. *Batch & Technical Confounders* (batch ASW, PCR $R^2$, CMS, LISI, Seurat mixing, cross-batch F1)
+  5. *Biological Signals & Marker Genes* (SimBench 5-signal DE/DV/DD/DP/BD, predictive Macro-F1, deconvolution RMSE, delta variance MAE)
+  6. *Trajectory & Lineage Dynamics* (pseudotime rank correlation, tree height RMSE, graph alignment, lineage expression fidelity)
+  7. *Cross-Modal Coupling & Modularity* (FOSCTTM alignment, Match@1, joint cell correlation, peak-to-gene $R_V$ linkage, co-regulatory modules)
   8. *Computational Scalability* (execution runtime in seconds and peak RAM in MiB)
 - **Robust Normalization Engine**: Automated library-size scaling, $\log_2(\text{CPM}+1)$ transformation, and joint low-dimensional latent projections prevent technical sequencing-depth artifacts from confounding evaluations.
 - **Low-Dimensional Cell Embeddings**: Multi-simulator UMAP, t-SNE, and PCA projections comparing reference and simulated cells in grid or 1-to-1 layouts, accompanied by quantitative clustering and manifold quality metrics.

@@ -7,24 +7,23 @@
 #' \if{html}{\figure{workflow_diagram.png}{options: width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 #'
 #' @details
-#' \strong{Metric Measurement Capacity by Data & Metadata Mode:}
+#' \strong{Metric Measurement Capacity by Data & Metadata Mode (48 Gold-Standard Suite):}
 #' \itemize{
-#'   \item \strong{Count Matrix Alone (No Metadata):} Measures approximately 23 baseline metrics
-#'     spanning Category I (Distributional Properties: KS, Wasserstein, MAD, MAE, RMSE, OV,
-#'     Bhattacharyya, ECDF difference, Runs test, 2D Fasano-Franceschini, 2D Peacock, KDE test,
-#'     MMD, Fréchet distance), Category II (Correlations & Zero-Inflation: BCV discrepancy, dropout
-#'     curve midpoint/slope, mean-variance R², cell/gene Pearson correlations), and Category VI
-#'     (Trajectory & Lineage Dynamics: pseudotime correlation, tree height RMSE).
-#'   \item \strong{+ Cell Types (Optional):} Unlocks 12–15 additional metrics spanning Category III
-#'     (Cellular Structure & Concordance: ARI, NMI, AMI, Silhouette width, Dunn, Davies-Bouldin,
-#'     Calinski-Harabasz, V-measure, Neighborhood Purity, Generative Precision/Recall) and Category V
-#'     (Biological Signal & Downstream Fidelity: SimBench DE/DP/DM/DB/DV signal fidelity, top DEG
-#'     Jaccard overlap, Log2FC correlation, classifier accuracy and Macro-F1).
+#'   \item \strong{Count Matrix Alone (No Metadata):} Measures 15 baseline metrics spanning
+#'     Category I (Distributional Properties: Wasserstein, KS, MAD, Bhattacharyya, Runs test,
+#'     NN mismatch, Inter-dataset silhouette), Category II (Correlations & Zero-Inflation:
+#'     dropout curve midpoint/slope error, R2 discrepancy, excess zero-inflation weight discrepancy),
+#'     and Category VI (Trajectory & Lineage Dynamics: pseudotime correlation, tree height RMSE,
+#'     graph alignment, lineage dynamics).
+#'   \item \strong{+ Cell Types (Optional):} Unlocks 15 additional metrics spanning Category III
+#'     (Cellular Structure & Concordance: MMD, Fréchet SC distance, Generative Precision/Recall,
+#'     Silhouette width, Davies-Bouldin, ARI, NMI) and Category V (Biological Signal Fidelity:
+#'     SimBench DE/DV/DD/DP/BD signals, predictive cell identity Macro-F1, deconvolution RMSE).
 #'   \item \strong{+ Batch Annotations (Optional):} Unlocks 7 additional metrics spanning Category IV
-#'     (Batch Effects & Confounder Mixing: Batch Silhouette width, local neighborhood Shannon Entropy,
-#'     PCR R², CMS CellMixS, Inverse Simpson Index ISI, Seurat Mixing Metric, LDF difference).
+#'     (Batch Effects & Confounder Mixing: Batch Silhouette, PCR R2, CMS score, LISI/ISI,
+#'     Seurat mixing metric, cross-batch F1) and biological replicate delta variance MAE.
 #'   \item \strong{Full Metadata (Count Matrix + Cell Types + Batch):} Unlocks the complete unimodal
-#'     benchmarking suite of up to 55 metrics.
+#'     benchmarking suite of 39 metrics (or all 48 metrics for paired multiomics).
 #' }
 #'
 #' @param ref_data Reference count matrix (features x cells).
@@ -83,8 +82,8 @@ evaluate_simulation_accuracy <- function(
   
   # Step 2: Compute Univariate Accuracy Metrics (Cell & Feature Level) in Parallel
   if (verbose) message("[3/5] Computing univariate accuracy metrics...")
-  cell_props_to_eval <- c("library_size", "log_library_size", "zero_fraction_cell", "cell_cor")
-  feat_props_to_eval <- c("mean_expression", "variance", "sd", "cv", "zero_fraction_feature", "dispersion", "gene_cor")
+  cell_props_to_eval <- c("library_size", "zero_fraction_cell", "cell_cor")
+  feat_props_to_eval <- c("mean_expression", "variance", "cv", "zero_fraction_feature", "dispersion", "gene_cor")
   cell_results <- list()
   feat_results <- list()
   
@@ -185,9 +184,8 @@ evaluate_simulation_accuracy <- function(
   # Build tidy summary table
   summary_rows <- list()
   all_univ_metric_names <- c(
-    "MAD", "KS", "MAE", "RMSE", "OV", "Bhattacharyya", "Wasserstein",
-    "ECDF_DiffArea", "Runs_Statistic", "Runs_PValue", "NN_Mismatch",
-    "Between_Dataset_Silh_Global", "Between_Dataset_Silh_Local"
+    "Wasserstein", "KS", "MAD", "Bhattacharyya", "Runs_Statistic",
+    "NN_Mismatch", "Between_Dataset_Silh_Global"
   )
   
   for (prop in names(cell_results)) {
@@ -399,30 +397,23 @@ evaluate_simulation_accuracy <- function(
 #' \if{html}{\figure{workflow_diagram.png}{options: width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 #'
 #' @details
-#' \strong{Multiomics Metric Measurement Capacity by Experimental Design & Metadata:}
+#' \strong{Multiomics Metric Measurement Capacity by Experimental Design & Metadata (48 Metrics):}
 #' \itemize{
 #'   \item \strong{Paired Multiomics (e.g. 10x Chromium Multiome, SHARE-seq, SNARE-seq):}
 #'     \itemize{
-#'       \item \emph{Count Matrices Alone (RNA + ATAC):} Measures approximately 48 metrics spanning
-#'         both unimodal distribution layers (Categories I, II, VI, VIII across both modalities)
-#'         plus Category VII Cross-Modal Coupling (FOSCTTM alignment score, Match@1 nearest neighbor
-#'         accuracy, cross-modal generative prediction accuracy/F1, RV coefficient, and peak-to-gene
-#'         regulatory correlation).
-#'       \item \emph{+ Cell Types:} Unlocks 15–20 additional metrics for cross-modal cell-type
-#'         concordance and cell-type specific epigenetic promoter/enhancer activity.
-#'       \item \emph{+ Batch Info:} Unlocks 10–14 additional metrics evaluating technical confounder
-#'         integration across both RNA and ATAC modalities.
-#'       \item \emph{+ Both (Full Metadata):} Unlocks the complete multiomics suite of all 62 metrics
-#'         across all 8 categories.
+#'       \item \emph{Count Matrices Alone (RNA + ATAC):} Measures unimodal distribution layers
+#'         plus Category VII Cross-Modal Coupling (Wasserstein, KS, FOSCTTM cell alignment score, Match@1,
+#'         cross-modal generation PCC, RV coefficient, and peak-to-gene regulatory coupling).
+#'       \item \emph{+ Cell Types:} Unlocks cross-modal label transfer F1, cell-type clustering concordance,
+#'         and SimBench biological signal fidelity.
+#'       \item \emph{+ Batch Info:} Unlocks batch confounder integration across both RNA and ATAC modalities.
+#'       \item \emph{+ Both (Full Metadata):} Unlocks the complete multiomics suite of all 48 Gold-Standard metrics
+#'         across all 8 canonical categories.
 #'     }
 #'   \item \strong{Unpaired Multiomics (independent scRNA and scATAC from separate cells):}
 #'     \itemize{
-#'       \item \emph{Count Matrices Alone (RNA + ATAC):} Measures approximately 38–42 metrics spanning
-#'         unimodal distributions for both layers plus population-level cross-modal metrics
-#'         (co-expression module fidelity, Network Jaccard similarity, cross-modality correlation).
-#'       \item \emph{+ Cell Types (Crucial for Unpaired):} Unlocks 15–20 additional metrics for
-#'         cluster-matched label transfer concordance and cell-type matched regulatory linkage.
-#'       \item \emph{+ Batch Info:} Unlocks 7–12 additional metrics evaluating batch integration.
+#'       \item Evaluates unimodal distributions for both layers plus population-level modularity metrics
+#'         (co-expression module fidelity, peak co-accessibility, cross-modal label transfer), totaling up to 43 metrics.
 #'     }
 #' }
 #'
@@ -567,9 +558,7 @@ evaluate_multiomics_accuracy <- function(
   clustering_res <- list(m1 = clu_eval_m1, m2 = clu_eval_m2)
   
   clu_metrics_to_record <- c(
-    "silhouette_sim", "silhouette_ref", "dunn_sim", "davies_bouldin_sim",
-    "calinski_harabasz_sim", "ari", "nmi", "ami", "fmi", "homogeneity",
-    "completeness", "v_measure", "clustering_accuracy", "neighborhood_purity", "cdi"
+    "silhouette_sim", "davies_bouldin_sim", "ari", "nmi"
   )
   for (cm in clu_metrics_to_record) {
     if (!is.null(clu_eval_m1[[cm]]) && !is.na(clu_eval_m1[[cm]])) {
@@ -610,9 +599,8 @@ evaluate_multiomics_accuracy <- function(
     batch_res <- b_eval
     
     batch_metrics_to_record <- c(
-      "batch_silhouette", "shannon_entropy", "pcr_r2", "cms", "isi",
-      "seurat_mixing_metric", "ldf_diff", "local_structure",
-      "cross_batch_accuracy", "cross_batch_F1"
+      "batch_silhouette", "pcr_r2", "cms", "isi",
+      "seurat_mixing_metric", "cross_batch_F1"
     )
     for (bm in batch_metrics_to_record) {
       if (!is.null(b_eval[[bm]])) {
@@ -660,7 +648,7 @@ evaluate_multiomics_accuracy <- function(
       }
     }
     
-    # Predictive cell identity classifier
+    # Predictive cell identity classifier (Macro-F1)
     pred_model <- tryCatch({
       evaluate_predictive_de_model(
         data = sim_multi[[1]],
@@ -672,14 +660,6 @@ evaluate_multiomics_accuracy <- function(
       master_rows[[length(master_rows) + 1]] <- data.frame(
         Category = "Biological Signal & Downstream",
         Property = "cell_identity_prediction",
-        Metric = "predictive_accuracy",
-        Value = as.numeric(pred_model$accuracy),
-        Modality = m1_name,
-        stringsAsFactors = FALSE
-      )
-      master_rows[[length(master_rows) + 1]] <- data.frame(
-        Category = "Biological Signal & Downstream",
-        Property = "cell_identity_prediction",
         Metric = "predictive_macro_F1",
         Value = as.numeric(pred_model$F1),
         Modality = m1_name,
@@ -687,7 +667,7 @@ evaluate_multiomics_accuracy <- function(
       )
     }
     
-    # Deconvolution mixture accuracy
+    # Deconvolution mixture accuracy (RMSE)
     deconv_res <- tryCatch({
       calc_deconvolution_accuracy(
         true_proportions = ct_m1,
@@ -703,14 +683,6 @@ evaluate_multiomics_accuracy <- function(
         Property = "cell_mixture",
         Metric = "deconvolution_RMSE",
         Value = as.numeric(deconv_res$deconvolution_rmse),
-        Modality = m1_name,
-        stringsAsFactors = FALSE
-      )
-      master_rows[[length(master_rows) + 1]] <- data.frame(
-        Category = "Biological Signal & Downstream",
-        Property = "cell_mixture",
-        Metric = "deconvolution_JSD",
-        Value = as.numeric(deconv_res$deconvolution_jsd),
         Modality = m1_name,
         stringsAsFactors = FALSE
       )
@@ -807,7 +779,7 @@ evaluate_multiomics_accuracy <- function(
       threads = threads
     )
     
-    cross_cor_metrics <- c("MAD", "KS", "MAE", "RMSE", "OV", "Bhattacharyya", "Wasserstein")
+    cross_cor_metrics <- c("Wasserstein", "KS")
     for (m in cross_cor_metrics) {
       key <- paste0("cross_modality_cor_", m)
       if (!is.null(cross_cor_res[[key]])) {
@@ -849,21 +821,13 @@ evaluate_multiomics_accuracy <- function(
       )
     }
     
-    # 3. In silico generation fidelity
+    # 3. In silico generation fidelity (cell profile correlation)
     gen_fid <- calc_cross_modal_generation(ref_multi[[2]], sim_multi[[2]])
     master_rows[[length(master_rows) + 1]] <- data.frame(
       Category = "Cross-Modal Relationships",
       Property = "in_silico_generation",
       Metric = "cell_pearson_cor",
       Value = as.numeric(gen_fid$mean_cell_pcc),
-      Modality = m2_name,
-      stringsAsFactors = FALSE
-    )
-    master_rows[[length(master_rows) + 1]] <- data.frame(
-      Category = "Cross-Modal Relationships",
-      Property = "in_silico_generation",
-      Metric = "feature_pearson_cor",
-      Value = as.numeric(gen_fid$mean_feat_pcc),
       Modality = m2_name,
       stringsAsFactors = FALSE
     )
@@ -887,19 +851,11 @@ evaluate_multiomics_accuracy <- function(
 
   # --- Metrics evaluated for BOTH Paired and Unpaired Multiomics ---
 
-  # 5. Cross-modal label transfer (population-level classification)
+  # 5. Cross-modal label transfer (population-level classification Macro-F1)
   if (!is.null(cell_types)) {
     ct_m2 <- if (is.list(cell_types) && !is.null(cell_types[[2]])) cell_types[[2]] else cell_types
     if (length(ct_m2) == ncol(sim_multi[[2]])) {
       cpred <- evaluate_cross_modal_prediction(sim_multi[[2]], ct_m2)
-      master_rows[[length(master_rows) + 1]] <- data.frame(
-        Category = "Cross-Modal Relationships",
-        Property = "label_transfer",
-        Metric = "cross_modal_accuracy",
-        Value = as.numeric(cpred$cross_modal_accuracy),
-        Modality = "Joint (Cross-Modal)",
-        stringsAsFactors = FALSE
-      )
       master_rows[[length(master_rows) + 1]] <- data.frame(
         Category = "Cross-Modal Relationships",
         Property = "label_transfer",
@@ -933,18 +889,8 @@ evaluate_multiomics_accuracy <- function(
     stringsAsFactors = FALSE
   )
   
-  # 8. Accessibility profile concordance
-  ct_acc <- if (is.list(cell_types) && !is.null(cell_types[[2]])) cell_types[[2]] else cell_types
-  if (!is.null(ct_acc) && length(ct_acc) != ncol(ref_multi[[2]])) ct_acc <- NULL
-  acc_prof <- calc_accessibility_profile_concordance(ref_multi[[2]], sim_multi[[2]], cell_types = ct_acc)
-  master_rows[[length(master_rows) + 1]] <- data.frame(
-    Category = "Cross-Modal Relationships",
-    Property = "accessibility_profile",
-    Metric = "global_PCC",
-    Value = as.numeric(acc_prof$global_pcc),
-    Modality = m2_name,
-    stringsAsFactors = FALSE
-  )
+  # 8. Accessibility profile concordance (represented by RV coefficient and peak-to-gene regulatory coupling)
+  acc_prof <- tryCatch(calc_accessibility_profile_concordance(ref_multi[[2]], sim_multi[[2]]), error = function(e) NULL)
   
   # ============================================================================
   # 7. Computational Scalability & Usability (Category 8)

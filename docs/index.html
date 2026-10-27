@@ -17,8 +17,8 @@
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
 <meta property="og:title" content="scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations">
-<meta name="description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 62 Evaluation Measures.">
-<meta property="og:description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 62 Evaluation Measures.">
+<meta name="description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Gold-Standard Evaluation Measures.">
+<meta property="og:description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Gold-Standard Evaluation Measures.">
 <meta property="og:image" content="https://kabilanbio.github.io/scSimEval/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -267,7 +267,7 @@
     <li><a class="dropdown-item" href="articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="articles/metrics-catalog.html">Metric Catalog (62 Metrics)</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -304,22 +304,22 @@
 </h2>
 <ul>
 <li>
-<strong>62 Comprehensive Evaluation Measures</strong>: Systematically organized into 8 canonical categories:
+<strong>48 Curated Gold-Standard Evaluation Measures</strong>: Systematically organized into 8 canonical categories (39 for unimodal scRNA-seq / scATAC-seq alone, 48 for paired multiomics):
 <ol style="list-style-type: decimal">
 <li>
 <em>Distributional Properties</em> (statistical distances on library size, CPM expression, zero fractions, MMD, Fréchet distance)</li>
 <li>
-<em>Correlations &amp; Zero-Inflation</em> (BCV, logistic dropout curves, gene co-expression)</li>
+<em>Correlations &amp; Zero-Inflation</em> (logistic dropout curves, mean-variance fit, excess zero weights)</li>
 <li>
-<em>Cellular Structure &amp; Concordance</em> (unsupervised clustering fidelity, ARI, NMI, AMI, Silhouette)</li>
+<em>Cellular Structure &amp; Concordance</em> (unsupervised clustering fidelity, ARI, NMI, Silhouette, Davies-Bouldin, Generative Precision/Recall)</li>
 <li>
-<em>Batch &amp; Technical Confounders</em> (batch ASW, Shannon entropy, PCR <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>, CMS, LISI)</li>
+<em>Batch &amp; Technical Confounders</em> (batch ASW, PCR <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>, CMS, LISI, Seurat mixing, cross-batch F1)</li>
 <li>
-<em>Biological Signals &amp; Marker Genes</em> (DEG preservation across Simpipe, SimBench, and Shaky Foundations)</li>
+<em>Biological Signals &amp; Marker Genes</em> (SimBench 5-signal DE/DV/DD/DP/BD, predictive Macro-F1, deconvolution RMSE, delta variance MAE)</li>
 <li>
-<em>Trajectory &amp; Lineage Dynamics</em> (pseudotime rank correlation and lineage branching RMSE)</li>
+<em>Trajectory &amp; Lineage Dynamics</em> (pseudotime rank correlation, tree height RMSE, graph alignment, lineage expression fidelity)</li>
 <li>
-<em>Cross-Modal Coupling &amp; Modularity</em> (FOSCTTM alignment, <a href="mailto:Match@1" class="email">Match@1</a>, peak-to-gene <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>V</mi></msub><annotation encoding="application/x-tex">R_V</annotation></semantics></math> linkage)</li>
+<em>Cross-Modal Coupling &amp; Modularity</em> (FOSCTTM alignment, <a href="mailto:Match@1" class="email">Match@1</a>, joint cell correlation, peak-to-gene <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>V</mi></msub><annotation encoding="application/x-tex">R_V</annotation></semantics></math> linkage, co-regulatory modules)</li>
 <li>
 <em>Computational Scalability</em> (execution runtime in seconds and peak RAM in MiB)</li>
 </ol>

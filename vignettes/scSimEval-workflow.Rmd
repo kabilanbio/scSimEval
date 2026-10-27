@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 
 Computer simulations of single-cell technologies—specifically single-cell RNA sequencing (**scRNA-seq**), single-cell ATAC sequencing (**scATAC-seq**), and paired **scRNA-seq + scATAC-seq multiomics**—are widely used in bioinformatics research. They help scientists test computational pipelines, optimize analysis workflows, and evaluate statistical models. A critical question is always: *how realistic is the simulated data compared to genuine biological experiments?*
 
-**`scSimEval`** provides a comprehensive evaluation framework by calculating **62 evaluation measures organized into 8 easy-to-understand categories**. It directly benchmarks simulated data against empirical reference datasets using:
+**`scSimEval`** provides a comprehensive evaluation framework by calculating **48 Gold-Standard evaluation measures organized into 8 easy-to-understand categories (39 for unimodal assays, 48 for paired multiomics)**. It directly benchmarks simulated data against empirical reference datasets using:
 
 1. **Real experimental reference data** (`ref_rna`, `ref_atac`)
 2. **Simulated synthetic data** (`sim_rna`, `sim_atac`)
@@ -53,7 +53,7 @@ Computer simulations of single-cell technologies—specifically single-cell RNA 
 
 The following workflow diagram shows the step-by-step benchmarking process in `scSimEval`:
 
-```{r workflow-diagram, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 1: End-to-end benchmarking workflow of scSimEval.** The framework takes real and simulated single-cell multiomics data, evaluates 62 metrics across 8 foundational categories, and produces standardized scores, comprehensive figures, and ranking leaderboards.'}
+```{r workflow-diagram, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 1: End-to-end benchmarking workflow of scSimEval.** The framework takes real and simulated single-cell multiomics data, evaluates 48 gold-standard metrics across 8 foundational categories, and produces standardized scores, comprehensive figures, and ranking leaderboards.'}
 knitr::include_graphics("figures/workflow_diagram.png")
 ```
 
@@ -132,12 +132,12 @@ To evaluate your datasets, `scSimEval` accepts standard single-cell matrices and
 | **Single-Cell** *(scRNA / scATAC)* | Matrix + Batch Info | **~30 Metrics** | *Adds +7 metrics:* Unlocks **Cat IV** (Batch Effects & Confounder Mixing / Batch Silhouette, Shannon Entropy, PCR $R^2$, CMS, ISI, Seurat mixing). |
 | **Single-Cell** *(scRNA / scATAC)* | **Full Metadata** *(Matrix + Cell Types + Batch)* | **Up to ~55 Metrics** | Unlocks the complete unimodal suite across **Categories I, II, III, IV, V, VI, and VIII**. |
 | **Paired Multiomics** *(scRNA + scATAC)* | RNA + ATAC Matrices alone | **~48 Metrics** | Unimodal distributions for both modalities (~40 metrics) PLUS **Cat VII** (Cross-Modal Coupling: FOSCTTM cell alignment, Match@1, cross-modal generation, $R_V$ coefficient, peak-to-gene linkage). |
-| **Paired Multiomics** *(scRNA + scATAC)* | **Full Metadata** *(RNA + ATAC + Cell Types + Batch)* | **All 62 Metrics** | Complete multiomics benchmark suite across all 8 canonical categories (**Categories I–VIII**). |
-| **Unpaired Multiomics** *(Independent cells)* | RNA + ATAC Matrices alone | **~38–42 Metrics** | Both unimodal distributions plus population-level coupling (co-expression module fidelity, Network Jaccard, cross-modality correlation). |
-| **Unpaired Multiomics** *(Independent cells)* | **RNA + ATAC + Cell Types (+ Batch)** | **Up to ~58 Metrics** | *Essential for unpaired designs:* Unlocks cluster-matched cross-modal label transfer concordance, cell-type regulatory linkage, and technical donor integration. |
+| **Paired Multiomics** *(scRNA + scATAC)* | **Full Metadata** *(RNA + ATAC + Cell Types + Batch)* | **All 48 Metrics** | Complete multiomics benchmark suite across all 8 canonical categories (**Categories I–VIII**). |
+| **Unpaired Multiomics** *(Independent cells)* | RNA + ATAC Matrices alone | **~26 Metrics** | Both unimodal distributions plus population-level coupling (co-expression module fidelity, Network Jaccard, cross-modality correlation). |
+| **Unpaired Multiomics** *(Independent cells)* | **RNA + ATAC + Cell Types (+ Batch)** | **Up to ~41 Metrics** | *Essential for unpaired designs:* Unlocks cluster-matched cross-modal label transfer concordance, cell-type regulatory linkage, and technical donor integration. |
 
 ### Step 2: Calculate Evaluation Measures
-`scSimEval` calculates 62 evaluation measures across 8 core categories.
+`scSimEval` calculates 48 gold-standard evaluation measures across 8 core categories (39 unimodal, 48 paired multiomics).
 
 ### Step 3: Run the Complete Benchmark
 Execute the complete evaluation in a single command using `evaluate_simulation_accuracy()`, `evaluate_multiomics_accuracy()`, or `evaluate_multiple_datasets()`.
@@ -216,7 +216,7 @@ cat("Cell types present:", levels(example_scrna$cell_types), "\n")
 
 > **Package Example Datasets vs. Shiny App Demo Data:**
 > The R package datasets above (`example_scrna`, `example_scatac`, `example_multiomics`) are small, runnable raw count matrices (60 features x 80 cells) engineered for rapid demonstration and unit testing in standard R terminal sessions.
-> In contrast, the **Shiny App Studio** (`launch_scSimEval_app()`) bundles a rich pre-computed multi-dataset benchmark evaluation suite (`demo_benchmark_data.rds`, 6 simulators evaluated across all 62 metrics on 2 datasets) allowing interactive exploration of leaderboards, bubble matrices, and diagnostic plots without waiting for long evaluation runs.
+> In contrast, the **Shiny App Studio** (`launch_scSimEval_app()`) bundles a rich pre-computed multi-dataset benchmark evaluation suite (`demo_benchmark_data.rds`, 6 simulators evaluated across all 48 gold-standard metrics on 2 datasets) allowing interactive exploration of leaderboards, bubble matrices, and diagnostic plots without waiting for long evaluation runs.
 
 ---
 
@@ -430,7 +430,7 @@ plot_evaluation_summary(
 
 ### 12.2b Simulator Performance Leaderboard (`compute_method_leaderboard`)
 
-To obtain exact numeric rankings and composite fidelity scores across all 62 criteria, `compute_method_leaderboard()` extracts the definitive simulator performance leaderboard:
+To obtain exact numeric rankings and composite fidelity scores across all 48 criteria, `compute_method_leaderboard()` extracts the definitive simulator performance leaderboard:
 
 ```r
 # Generate the method performance leaderboard
@@ -459,7 +459,7 @@ plot_metric_boxplots(
 
 ### 12.4 Comprehensive Benchmark Heatmap (`plot_metric_heatmap`)
 
-To examine exact numeric values for every metric without any loss of detail, `plot_metric_heatmap()` displays all simulators on the horizontal axis and all 62 measures on the vertical axis, printing **exact raw values inside each cell**:
+To examine exact numeric values for every metric without any loss of detail, `plot_metric_heatmap()` displays all simulators on the horizontal axis and all 48 measures on the vertical axis, printing **exact raw values inside each cell**:
 
 ```{r plot-heatmap-fig, echo=FALSE, fig.align='center', out.width='88%', fig.cap='**Figure 8: Complete benchmark metric heatmap.** Displays exact unnormalized raw scores in bold text inside every cell, grouped cleanly across the 8 evaluation categories.'}
 knitr::include_graphics("figures/metric_heatmap.png")
@@ -564,6 +564,43 @@ consolidated_results <- evaluate_multiple_datasets(
 knitr::kable(consolidated_results$dataset_overview, digits = 4, caption = "Consolidated Benchmark Overview")
 ```
 
+### 13.1 Combining and Appending Multiple Benchmark Results (`combine_benchmark_results`)
+
+When benchmarking single-cell simulators across diverse biological cohorts (e.g., Rice Bud, Soybean Root, PBMC) or multiple experimental batches, `combine_benchmark_results()` consolidates disparate benchmark dataframes or saved sessions into a single, standardized multi-dataset benchmark object (`scSimEval_multidataset_benchmark`):
+
+```r
+# Combine independent benchmark sessions into a unified object
+multi_bench <- combine_benchmark_results(
+  benchmark_rice,
+  benchmark_soybean,
+  dataset_names = c("Rice Bud (Paired)", "Soybean Root (Unpaired)")
+)
+
+# Compute cross-dataset average fidelity scores and overall leaderboard
+leaderboard <- compute_method_leaderboard(multi_bench)
+print(leaderboard)
+
+# Render cross-dataset comparative bubble matrix
+p_bubble <- plot_benchmark_bubble_matrix(
+  multi_bench,
+  title = "Cross-Dataset Simulator Benchmarking (48 Gold-Standard Metrics)"
+)
+```
+
+When identical simulator names (e.g. `scDesign3` or `scMultiSim`) appear in multiple datasets, `combine_benchmark_results()` rigorously preserves every dataset's distinct records, standardizes metric categories, applies gold-standard metric filtering, and calculates cross-dataset statistical metrics (mean, standard deviation, and standard error) across all 48 Gold-Standard metrics.
+
+### 13.2 Interactive Step-by-Step Figure Zooming (`zoom_plot`)
+
+To inspect high-density figures (e.g. large bubble matrices or complex embedding projections) with precision, `scSimEval` provides `zoom_plot()` for programmatic step-by-step magnification in R sessions:
+
+```r
+# Step-by-step zoom in (+30% magnification)
+p_zoomed <- zoom_plot(p_bubble, zoom = 1.3)
+
+# Or step-based magnification (e.g., 2 steps of +15% magnification)
+p_zoomed_step <- zoom_plot(p_bubble, step = 2)
+```
+
 ---
 
 ## 14. Interactive Web Application (Shiny Studio)
@@ -579,15 +616,15 @@ launch_scSimEval_app()
 
 The Shiny app provides a unified, production-ready graphical workspace structured into seven primary navigation tabs:
 
-1. **Tab 1: Home** — Executive overview of the 62 evaluation measures, biological KPI dimensions, and an interactive operational tour across the four ingestion modes (with all-time pageview tracking in the cloud app).
+1. **Tab 1: Home** — Executive overview of the 48 gold-standard evaluation measures, biological KPI dimensions, and an interactive operational tour across the four ingestion modes (with all-time pageview tracking in the cloud app).
 2. **Tab 2: Data Hub** — Comprehensive data ingestion centre featuring 4 operational modes:
-   - *Mode 1: Pre-Computed Benchmark (Demo Data)*: Instant 1-click loading of a multi-dataset benchmark study across 6 simulators (744 metric observations) for zero-wait exploration.
+   - *Mode 1: Pre-Computed Benchmark (Demo Data)*: Instant 1-click loading of a multi-dataset benchmark study across 6 simulators for zero-wait exploration.
    - *Mode 2: Single-Cell RNA/ATAC Evaluation*: Evaluates empirical reference against simulated count matrices with optional cell-type and batch metadata.
    - *Mode 3: Multi-Omics Co-Assays*: Evaluates paired or unpaired multiomics simulations assessing cross-modal coupling and feature alignment.
-   - *Mode 4: Upload Pre-Computed Benchmark Table*: Instant loading of previously calculated benchmark CSV or RDS files.
+   - *Mode 4: Upload Pre-Computed Benchmark Table*: Instant loading of previously calculated benchmark CSV or RDS files. **Includes an "Add to current benchmark results" toggle and dataset naming option** to append newly uploaded datasets to existing benchmarks for cross-dataset simulator averaging.
    *Includes an interactive matrix inspector (Subtab 2), a live **Dataset Properties Summary** QC table (cells, features, sparsity %, library sizes), and an automated **HPC Batch Script Generator** (SLURM / PBS / Bash) for cluster execution.*
-3. **Tab 3: Comparative Bubble Matrix & Leaderboard** — Flagship 62-metric comparative matrix with a multi-dataset selector bar (`All Datasets (Average)` vs. individual datasets `Dataset 1`, `Dataset 2`, ...), Minimalist vs. Publication layout toggles, confirmation plot buttons, 600 DPI figure downloads, and **Download Standalone R Script** for reproducible analysis workflows outside Shiny. Subtab 2 provides visual simulator ranking podiums, composite fidelity rankings, and custom category weight sliders.
-4. **Tab 4: Visualizations** — 8 dedicated diagnostic panels equipped with global multi-dataset selectors, active dataset badges, confirmation controls, and workflow R script downloads:
+3. **Tab 3: Comparative Bubble Matrix & Leaderboard** — Flagship 48-metric comparative matrix with a multi-dataset selector bar (`All Datasets (Average)` vs. individual datasets `Dataset 1`, `Dataset 2`, ...), Minimalist vs. Publication layout toggles, **interactive Step-by-Step Zoom Toolbar**, confirmation plot buttons, 600 DPI figure downloads, and **Download Standalone R Script** for reproducible analysis workflows outside Shiny. Subtab 2 provides visual simulator ranking podiums, composite fidelity rankings, and custom category weight sliders.
+4. **Tab 4: Visualizations** — 8 dedicated diagnostic panels equipped with global multi-dataset selectors, active dataset badges, **interactive Step-by-Step Zoom Toolbar**, confirmation controls, and workflow R script downloads:
    - *1. Evaluation Summary*: Horizontal bar chart ranking simulators across categories and composite fidelity.
    - *2. Distribution QC*: Comparative ECDF curves, KS distances, and gene/cell mean-variance trends.
    - *3. Scalability Benchmark*: Runtime (seconds) vs. Peak RAM (**MiB**), resource cost index, and cell throughput rate.
@@ -597,8 +634,8 @@ The Shiny app provides a unified, production-ready graphical workspace structure
    - *7. MDS Metric Space*: Multidimensional scaling projection of simulator algorithmic proximity.
    - *8. Cell Embeddings*: Dimension reduction projections (UMAP, t-SNE, PCA) comparing reference cells to simulated cells, with quantitative cluster fidelity tables.
 5. **Tab 5: Benchmark Results & Export** — Master Benchmark Scores Table featuring per-column dropdown filtering, explicit dual-value reporting (`Score_Raw` in native statistical units, runtime in seconds, peak RAM in **MiB**, and normalized `Score` in [0, 1]), alongside exports for Excel (`.xlsx`), CSV, TSV, RDS, and full ZIP archives.
-6. **Tab 6: Help & Getting Started** — Comprehensive user manual, formula glossary, metric measurement capacity reference table, hardware sizing guidelines, and input file templates.
-7. **Tab 7: Contact** — ICAR-IASRI institutional details, author profiles, and citation information.
+6. **Tab 6: Help & Getting Started** — Comprehensive user manual, formula glossary, metric measurement capacity reference table, hardware sizing guidelines, input file templates, and interactive zoomable workflow diagrams.
+7. **Tab 7: Logs & Diagnostics** — Real-time in-app event log streaming, error tracebacks, diagnostic stats, filter by log level, and text log download handler.
 
 ---
 
@@ -674,7 +711,7 @@ evaluate_simulation_accuracy(ref_atac_full, sim_atac_full)
 
 ## 16. Large-Scale Multi-Dataset Benchmarking on HPC Clusters
 
-In comprehensive simulation benchmark studies, researchers often evaluate simulation tools across multiple diverse biological tissues, cell lines, or conditions (e.g., evaluating 6 simulators across 16 distinct single-cell datasets, producing $16 \times 6 = 96$ simulation comparisons and 5,952 metric observations across all 62 measures).
+In comprehensive simulation benchmark studies, researchers often evaluate simulation tools across multiple diverse biological tissues, cell lines, or conditions (e.g., evaluating 6 simulators across 16 distinct single-cell datasets, producing $16 \times 6 = 96$ simulation comparisons and 4,608 metric observations across all 48 gold-standard measures).
 
 To enable seamless, beginner-friendly execution of such studies without crashing computer memory, `scSimEval` provides `benchmark_simulation_suite()`:
 
@@ -719,7 +756,7 @@ In the interactive **scSimEval Studio** (`launch_scSimEval_app()`), users can na
 
 ## 17. Extension to Other Single-Cell Data Types
 
-While `scSimEval` is primarily optimized and demonstrated for **scRNA-seq**, **scATAC-seq**, and **paired scRNA-seq + scATAC-seq multiomics**, all 62 evaluation measures operate on standard numeric count or continuous matrices. 
+While `scSimEval` is primarily optimized and demonstrated for **scRNA-seq**, **scATAC-seq**, and **paired scRNA-seq + scATAC-seq multiomics**, all 48 evaluation measures operate on standard numeric count or continuous matrices. 
 
 Consequently, the package can be readily extended to benchmark simulations across other single-cell data modalities, including:
 * **CITE-seq / REAP-seq:** Passing RNA expression counts as Modality 1 and antibody-derived tag (ADT) surface protein counts as Modality 2.
@@ -730,7 +767,7 @@ Consequently, the package can be readily extended to benchmark simulations acros
 
 ## 18. Summary
 
-`scSimEval` provides a unified, objective, and reference-based evaluation toolkit for benchmarking single-cell and multiomics simulation methods. With 62 metrics organized into 8 clear categories, automated score normalization, and intuitive visualizations, it enables researchers to select and validate simulation methods with confidence.
+`scSimEval` provides a unified, objective, and reference-based evaluation toolkit for benchmarking single-cell and multiomics simulation methods. With 48 gold-standard metrics organized into 8 clear categories, automated score normalization, and intuitive visualizations, it enables researchers to select and validate simulation methods with confidence.
 
 ---
 

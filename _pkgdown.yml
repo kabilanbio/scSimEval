@@ -248,7 +248,7 @@ template:
 
 home:
   title: "scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations"
-  description: "Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 62 Evaluation Measures."
+  description: "Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Gold-Standard Evaluation Measures."
 
 navbar:
   title: "scSimEval"
@@ -267,7 +267,7 @@ navbar:
           href: articles/demo-scatac.html
         - text: "3. Multiomics (RNA + ATAC) Evaluation"
           href: articles/demo-multiomics.html
-    - text: "Metric Catalog (62 Metrics)"
+    - text: "Metric Catalog (48 Metrics)"
       href: articles/metrics-catalog.html
     - text: "Reference"
       href: reference/index.html
@@ -279,7 +279,7 @@ navbar:
 
 reference:
   - title: "Master Benchmarking Workflows"
-    desc: "Unified end-to-end evaluation pipelines executing the 62 canonical metrics across unimodal and multiomics simulations."
+    desc: "Unified end-to-end evaluation pipelines executing the 48 gold-standard metrics across unimodal and multiomics simulations."
     contents:
       - evaluate_simulation_accuracy
       - evaluate_multiomics_accuracy
@@ -347,6 +347,7 @@ reference:
     desc: "High-performance matrix calculation helpers and internal dimension-reduction utilities."
     contents:
       - standardize_benchmark_categories
+      - filter_gold_standard_metrics
       - fast_row_vars
       - fast_col_vars
       - fast_sparse_zero_fraction_cell

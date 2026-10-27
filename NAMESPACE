@@ -149,9 +149,13 @@ export(evaluate_multiple_datasets)
 export(benchmark_simulation_suite)
 S3method(print, scSimEval_consolidated)
 S3method(print, scSimEval_multidataset_benchmark)
+S3method(as.data.frame, scSimEval_multidataset_benchmark)
 
 export(evaluate_deg_fidelity)
 
 export(plot_evaluation_summary)
 export(plot_benchmark_summary_bars)
 export(plot_summary_bars)
+export(combine_benchmark_results)
+export(append_benchmark_results)
+export(zoom_plot)

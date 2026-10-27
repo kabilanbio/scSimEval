@@ -20,7 +20,7 @@ test_that("Shiny application files exist and structure is valid", {
   demo_obj <- readRDS(demo_file)
   expect_true(is.list(demo_obj))
   expect_true("benchmark_summary_table" %in% names(demo_obj))
-  expect_gte(length(unique(demo_obj$benchmark_summary_table$Metric)), 60)
+  expect_gte(length(unique(demo_obj$benchmark_summary_table$Metric)), 40)
   expect_gte(length(unique(demo_obj$benchmark_summary_table$Category)), 6)
 })
 

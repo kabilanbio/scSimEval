@@ -26,7 +26,7 @@ plot_metric_heatmap(
 
 \item{scale_fill}{Character. Cell color fill scaling: \code{"relative"} (default; direction-aware
 min-max normalized fidelity in [0, 1] across methods per metric, ensuring balanced color contrast
-across all 62 measures while cell text displays exact raw numbers) or \code{"raw"} (direct numeric values).}
+across all 48 gold-standard measures while cell text displays exact raw numbers) or \code{"raw"} (direct numeric values).}
 
 \item{top_n_properties}{Optional integer. If specified, restricts to top N most variable metrics. Default \code{NULL} (all metrics).}
 
@@ -48,7 +48,7 @@ Produces a 600 DPI comparative heatmap displaying simulators on the x-axis
 and evaluated biological/computational measures on the y-axis, grouped by the 8 canonical
 evaluation categories. Displays the exact original raw evaluation score in text inside every cell,
 with cell fill colors scaled by relative fidelity (direction-aware, ensuring balanced visual contrast
-across all 62 measures without scale distortion from high-magnitude metrics like RAM or runtime).
+across all 48 gold-standard measures without scale distortion from high-magnitude metrics like RAM or runtime).
 }
 \details{
 \if{html}{\figure{metric_heatmap.png}{options: width="800" alt="Cross-Metric Z-Scored Heatmap"}}

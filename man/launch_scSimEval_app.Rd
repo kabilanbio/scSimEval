@@ -29,7 +29,7 @@ Invisibly returns the Shiny app process object.
 Launches the Shiny web application embedded in the \pkg{scSimEval} package.
   Provides an intuitive graphical interface to upload biological reference and simulated datasets
   (single-cell scRNA-seq, scATAC-seq, or paired multiomics), specify computational scalability metrics (elapsed time and peak memory),
-  interactively inspect the flagship 62-measure comparative bubble matrix, explore diagnostic figures,
+  interactively inspect the flagship 48-measure comparative bubble matrix, explore diagnostic figures,
   and export high-resolution figures (600 DPI publication quality), multi-page PDF reports, Excel (.xlsx) workbooks, and complete results ZIP packages.
 }
 \examples{

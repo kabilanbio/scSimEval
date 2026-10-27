@@ -244,7 +244,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -264,7 +264,7 @@
     <li><a class="dropdown-item" href="../articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (62 Metrics)</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -298,8 +298,9 @@
 </h2>
 <p>The <strong>scSimEval Shiny Studio</strong> is a fully
 self-contained, browser-based graphical interface that gives researchers
-access to all 62 evaluation measures and every visualization in the
-package — without writing a single line of R code.</p>
+access to all 48 gold-standard evaluation measures and every
+visualization in the package — without writing a single line of R
+code.</p>
 <p>Launch it locally in R with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kabilanbio.github.io/scSimEval/">scSimEval</a></span><span class="op">)</span></span>
@@ -325,13 +326,13 @@ tables, modal dialogs, and diagnostic containers.</p>
 explicitly highlighting simulation evaluation across single-cell RNA-seq
 (scRNA-seq), single-cell ATAC-seq (scATAC-seq), and single-cell
 multiomics (scRNA-seq + scATAC-seq) datasets against real biological
-references across 62 evaluation measures.</p>
+references across 48 gold-standard evaluation measures.</p>
 <p>In the standalone web deployment (<code>scSimEval_shiny</code>), a
 floating Google Analytics all-time pageview counter badge appears at the
 bottom-right corner, continuously reporting container-lifetime visits
 without UI latency.</p>
 <p>The four <strong>KPI cards</strong> below the hero section display:
-62 evaluation measures, 8 biological dimensions, 3 modalities (RNA /
+48 evaluation measures, 8 biological dimensions, 3 modalities (RNA /
 ATAC / Co-Assay), and the [0, 1] normalized fidelity scale.</p>
 <p>Interactive operational mode cards showcase: 1. <strong>Pre-computed
 Benchmarks:</strong> 1-click loading of benchmark evaluations across
@@ -359,8 +360,8 @@ button panel on the left sidebar:</p>
 </h4>
 <p>Click <strong>Load Demo Benchmark</strong> to instantly populate the
 app with pre-computed multi-dataset results across <strong>Simulator 1
-to Simulator 6</strong> across all 62 measures. No file uploads
-required.</p>
+to Simulator 6</strong> across all 48 gold-standard measures. No file
+uploads required.</p>
 <blockquote>
 <p><strong>Package Example Datasets vs. Shiny App Demo Data:</strong> *
 <strong>R Package Example Datasets (<code>data/</code>):</strong>
@@ -369,12 +370,12 @@ Lightweight, runnable count matrices (<code>example_scrna</code>,
 features × 80 cells) designed for rapid command-line testing of
 individual evaluation functions in R console sessions. * <strong>Shiny
 App Demo Data (<code>inst/shiny/scSimEvalApp/data/</code>):</strong> A
-rich pre-computed benchmark results archive (6 simulators × 62 metrics ×
-2 datasets = 744 metric observations) accompanied by reference and
-simulated count matrices (100 genes × 50 cells). This gives web users an
-immediate, zero-latency tour of all tabs, ranking leaderboards, bubble
-matrices, and 8 visualization panels without requiring computationally
-intensive matrix evaluations.</p>
+rich pre-computed benchmark results archive (6 simulators × 48 metrics ×
+2 datasets) accompanied by reference and simulated count matrices (100
+genes × 50 cells). This gives web users an immediate, zero-latency tour
+of all tabs, ranking leaderboards, bubble matrices, and 8 visualization
+panels without requiring computationally intensive matrix
+evaluations.</p>
 </blockquote>
 </div>
 <div class="section level4">
@@ -405,7 +406,7 @@ confirms the active hardware allocation.</p>
 <ul>
 <li>
 <strong>Paired Co-assay:</strong> Same individual cells in both
-modalities (10x Multiome, SHARE-seq). All 62 metrics including FOSCTTM,
+modalities (10x Multiome, SHARE-seq). All 48 metrics including FOSCTTM,
 <a href="mailto:Match@1" class="email">Match@1</a>, and peak-to-gene
 linkage.</li>
 <li>
@@ -518,7 +519,7 @@ scATAC)</em>
 <strong>Full Metadata</strong> <em>(RNA + ATAC + Cell
 Types + Batch)</em>
 </td>
-<td align="center"><strong>All 62 Metrics</strong></td>
+<td align="center"><strong>All 48 Metrics</strong></td>
 <td align="left">Complete multiomics benchmark suite across all 8
 canonical categories (<strong>Categories I–VIII</strong>).</td>
 </tr>
@@ -528,7 +529,7 @@ canonical categories (<strong>Categories I–VIII</strong>).</td>
 cells)</em>
 </td>
 <td align="left">RNA + ATAC Matrices alone</td>
-<td align="center"><strong>~38–42 Metrics</strong></td>
+<td align="center"><strong>~26 Metrics</strong></td>
 <td align="left">Both unimodal distributions plus population coupling
 (co-expression module fidelity, Network Jaccard, cross-modality
 correlation).</td>
@@ -539,7 +540,7 @@ correlation).</td>
 cells)</em>
 </td>
 <td align="left"><strong>RNA + ATAC + Cell Types (+ Batch)</strong></td>
-<td align="center"><strong>Up to ~58 Metrics</strong></td>
+<td align="center"><strong>Up to ~41 Metrics</strong></td>
 <td align="left">
 <em>Essential for unpaired:</em> Unlocks
 cluster-matched label transfer, cell-type regulatory linkage, and
@@ -588,11 +589,11 @@ benchmarks offline on compute nodes.</li>
 <div class="section level3">
 <h3 id="subtab-1-comparative-bubble-matrix-figure">Subtab 1: Comparative Bubble Matrix Figure<a class="anchor" aria-label="anchor" href="#subtab-1-comparative-bubble-matrix-figure"></a>
 </h3>
-<p>The flagship visualization: every simulator × all 62 metrics in one
-colour-coded matrix. Bubble <strong>diameter</strong> is proportional to
-the normalized fidelity score. The best-performing simulator for each
-metric is rendered with a bold circular outline. Simulators are
-rank-ordered top-to-bottom by composite average score. *
+<p>The flagship visualization: every simulator × all 48 gold-standard
+metrics in one colour-coded matrix. Bubble <strong>diameter</strong> is
+proportional to the normalized fidelity score. The best-performing
+simulator for each metric is rendered with a bold circular outline.
+Simulators are rank-ordered top-to-bottom by composite average score. *
 <strong>Multi-Dataset Selector Bar:</strong> Switch seamlessly between
 <strong>All Datasets (Cross-Dataset Average)</strong> or inspect
 individual datasets (<strong>Dataset 1</strong>, <strong>Dataset
@@ -710,7 +711,7 @@ where 1.0 represents top fidelity.</p>
 <p>An in-app reference guide structured into seven sections: 1.
 <strong>Workflow Architecture &amp; Pipeline</strong> — 4-step pipeline
 diagram and multi-dataset processing. 2. <strong>The Eight Evaluation
-Categories</strong> — tabular reference for all 62 metrics, highlighting
+Categories</strong> — tabular reference for all 48 metrics, highlighting
 peak RAM in <strong>MiB</strong>. 3. <strong>Metric Measurement Capacity
 by Data &amp; Metadata Mode</strong> — detailed reference table
 documenting metric numbers and unlocked categories. 4. <strong>Score
