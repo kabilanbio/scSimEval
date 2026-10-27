@@ -23,3 +23,4 @@ for single-cell generative models as benchmarked in scDesign3 (Song et al., Nat 
 \examples{
 calc_model_aic_bic(-100, 5, 100)
 }
+\keyword{internal}

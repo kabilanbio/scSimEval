@@ -46,7 +46,7 @@ zero-inflation curves, and manifold distances between reference and simulated da
 \if{html}{\figure{workflow_diagram.png}{options: width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 
 
-\strong{Metric Measurement Capacity by Data & Metadata Mode (48 Gold-Standard Suite):}
+\strong{Metric Measurement Capacity by Data & Metadata Mode (48 Curated Evaluation Measures Suite):}
 \itemize{
   \item \strong{Count Matrix Alone (No Metadata):} Measures 15 baseline metrics spanning
     Category I (Distributional Properties: Wasserstein, KS, MAD, Bhattacharyya, Runs test,

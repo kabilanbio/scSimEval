@@ -85,7 +85,7 @@ using strictly the user's provided inputs:
       \item \emph{+ Cell Types:} Unlocks cross-modal label transfer F1, cell-type clustering concordance,
         and SimBench biological signal fidelity.
       \item \emph{+ Batch Info:} Unlocks batch confounder integration across both RNA and ATAC modalities.
-      \item \emph{+ Both (Full Metadata):} Unlocks the complete multiomics suite of all 48 Gold-Standard metrics
+      \item \emph{+ Both (Full Metadata):} Unlocks the complete multiomics suite of all 48 curated evaluation metrics
         across all 8 canonical categories.
     }
   \item \strong{Unpaired Multiomics (independent scRNA and scATAC from separate cells):}

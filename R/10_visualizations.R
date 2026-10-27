@@ -255,7 +255,7 @@ utils::globalVariables(c(
   "peak_memory_mb"                   = "(VIII) Computational Scalability"
 )
 
-#' Canonical 48 Gold-Standard Evaluation Metrics Specification
+#' Canonical 48 Curated Evaluation Metrics Specification
 #' @keywords internal
 .GOLD_STANDARD_48_SPEC <- list(
   "(I) Distributional Properties" = list(
@@ -299,15 +299,15 @@ utils::globalVariables(c(
   )
 )
 
-#' Filter Benchmark Data to the 48 Gold-Standard Metrics
+#' Filter Benchmark Data to the 48 Curated Evaluation Metrics
 #'
 #' Filters any benchmark results table (whether containing 72, 62, or 48 metrics)
-#' to the curated, non-redundant 48 Gold-Standard evaluation metrics, eliminating
+#' to the curated, non-redundant 48 evaluation metrics, eliminating
 #' collinear duplicate metrics ($r = 1.000$) to prevent distortion of overall
 #' simulator fidelity leaderboards.
 #'
 #' @param df A data.frame of benchmark metrics or a scSimEval benchmark session object.
-#' @return Cleaned data.frame containing strictly the 48 Gold-Standard metrics.
+#' @return Cleaned data.frame containing strictly the 48 curated evaluation metrics.
 #' @examples
 #' data(example_scrna, package = "scSimEval")
 #' @export
@@ -1943,7 +1943,7 @@ plot_benchmark_summary <- function(
 #' and evaluated biological/computational measures on the y-axis, grouped by the 8 canonical
 #' evaluation categories. Displays the exact original raw evaluation score in text inside every cell,
 #' with cell fill colors scaled by relative fidelity (direction-aware, ensuring balanced visual contrast
-#' across all 48 gold-standard measures without scale distortion from high-magnitude metrics like RAM or runtime).
+#' across all 48 curated evaluation measures without scale distortion from high-magnitude metrics like RAM or runtime).
 #'
 #' \if{html}{\figure{metric_heatmap.png}{options: width="800" alt="Cross-Metric Z-Scored Heatmap"}}
 #'
@@ -1952,7 +1952,7 @@ plot_benchmark_summary <- function(
 #' @param metrics Optional character vector of specific metrics to include. Default \code{NULL} (all).
 #' @param scale_fill Character. Cell color fill scaling: \code{"relative"} (default; direction-aware
 #'   min-max normalized fidelity in [0, 1] across methods per metric, ensuring balanced color contrast
-#'   across all 48 gold-standard measures while cell text displays exact raw numbers) or \code{"raw"} (direct numeric values).
+#'   across all 48 curated evaluation measures while cell text displays exact raw numbers) or \code{"raw"} (direct numeric values).
 #' @param top_n_properties Optional integer. If specified, restricts to top N most variable metrics. Default \code{NULL} (all metrics).
 #' @param facet_by_category Logical. Whether to group rows into vertical category banner panels across all 8 categories. Default \code{TRUE}.
 #' @param cluster_rows Logical. Hierarchically cluster measures along y-axis. Default \code{FALSE}.
@@ -2524,7 +2524,7 @@ plot_metric_mds <- function(
 #' Generates a dual-panel PCA dashboard for evaluating single-cell simulation benchmark metrics
 #' and methods.
 #'
-#' All metrics present in \code{benchmark_data} (e.g. all 48 gold-standard metrics across categories)
+#' All metrics present in \code{benchmark_data} (e.g. all 48 curated evaluation metrics across categories)
 #' are mathematically considered in the PCA decomposition. Panel \code{"both"} displays:
 #' \itemize{
 #'   \item \strong{Panel a (Methods Ordination)}: Simulators mapped into PC1 vs PC2 coordinates with
@@ -4468,8 +4468,8 @@ compute_method_leaderboard <- function(benchmark_data) {
 #'
 #' When the same simulator (e.g., \code{"scDesign3"} or \code{"scMultiSim"}) is evaluated across
 #' multiple empirical datasets, \code{combine_benchmark_results} maintains each distinct dataset
-#' evaluation and provides cross-dataset aggregate fidelity scores across the 48 Gold-Standard
-#' curated metrics. This enables rigorous comparative evaluation and bubble matrix visualization
+#' evaluation and provides cross-dataset aggregate fidelity scores across the 48 curated
+#' evaluation metrics. This enables rigorous comparative evaluation and bubble matrix visualization
 #' of average simulator performance across diverse biological contexts.
 #'
 #' @param ... One or more benchmark evaluation objects, tidy data frames, or file paths
@@ -4479,7 +4479,7 @@ compute_method_leaderboard <- function(benchmark_data) {
 #'   being combined. If \code{NULL}, dataset names are automatically extracted from
 #'   the input objects or generated cleanly (e.g., \code{"Dataset 1"}, \code{"Dataset 2"}).
 #' @param filter_gold_standard Logical. If \code{TRUE} (default), filters all combined datasets
-#'   to the 48 Gold-Standard curated evaluation metrics.
+#'   to the 48 curated evaluation metrics.
 #' @param recompute_normalized Logical. If \code{TRUE} (default), re-normalizes raw metric
 #'   scores across all evaluated simulators and datasets using direction-aware scaling.
 #'

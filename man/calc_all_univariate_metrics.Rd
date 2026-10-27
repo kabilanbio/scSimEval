@@ -24,3 +24,4 @@ ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_all_univariate_metrics(ref, sim)
 }
+\keyword{internal}

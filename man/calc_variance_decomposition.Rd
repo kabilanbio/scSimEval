@@ -36,3 +36,4 @@ md <- data.frame(donor = example_scrna$batch_info,
                  cell_type = example_scrna$cell_types)
 calc_variance_decomposition(example_scrna$ref, md)
 }
+\keyword{internal}

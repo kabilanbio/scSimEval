@@ -23,3 +23,4 @@ ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_ecdf_diffarea(ref, sim)
 }
+\keyword{internal}

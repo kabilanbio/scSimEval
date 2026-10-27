@@ -299,8 +299,8 @@
 </h2>
 <p>In large-scale benchmarking studies involving multiple simulation
 methods, diverse biological datasets, or multi-core high-performance
-computing (HPC) clusters, running the full 48 Gold-Standard metric
-evaluation can take considerable time. Once an evaluation is complete,
+computing (HPC) clusters, running the full 48 curated evaluation metric
+suite can take considerable time. Once an evaluation is complete,
 researchers typically serialize the output using <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code>
 for long-term storage, publication sharing, and reproducible downstream
 analysis.</p>
@@ -386,11 +386,12 @@ Experimental source or condition. *
 <strong><code>Category</code></strong>: One of the 8 canonical
 evaluation categories (e.g., <code>(I) Distributional Properties</code>,
 <code>(V) Biological Signal &amp; Downstream Fidelity</code>). *
-<strong><code>Metric</code></strong>: Name of the Gold-Standard metric.
-* <strong><code>Score_Raw</code></strong>: Unnormalized empirical value
-in physical units (seconds, peak RAM in MiB, correlation coefficient,
-Kolmogorov-Smirnov distance). * <strong><code>Score</code></strong>:
-Standardized direction-aware fidelity score normalized to
+<strong><code>Metric</code></strong>: Name of the curated evaluation
+metric. * <strong><code>Score_Raw</code></strong>: Unnormalized
+empirical value in physical units (seconds, peak RAM in MiB, correlation
+coefficient, Kolmogorov-Smirnov distance). *
+<strong><code>Score</code></strong>: Standardized direction-aware
+fidelity score normalized to
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>,
 where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1.0</mn><annotation encoding="application/x-tex">1.0</annotation></semantics></math>
@@ -401,7 +402,7 @@ represents top fidelity.</p>
 <h2 id="generating-simulator-leaderboards">3. Generating Simulator Leaderboards<a class="anchor" aria-label="anchor" href="#generating-simulator-leaderboards"></a>
 </h2>
 <p>Use <code><a href="../reference/compute_method_leaderboard.html">compute_method_leaderboard()</a></code> to compute composite
-rankings across all 48 Gold-Standard metrics:</p>
+rankings across all 48 curated evaluation metrics:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute standard overall composite leaderboard</span></span>
 <span><span class="va">leaderboard</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_method_leaderboard.html">compute_method_leaderboard</a></span><span class="op">(</span><span class="va">bench_data</span><span class="op">)</span></span>

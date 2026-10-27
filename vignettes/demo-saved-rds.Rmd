@@ -24,7 +24,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-In large-scale benchmarking studies involving multiple simulation methods, diverse biological datasets, or multi-core high-performance computing (HPC) clusters, running the full 48 Gold-Standard metric evaluation can take considerable time. Once an evaluation is complete, researchers typically serialize the output using `saveRDS()` for long-term storage, publication sharing, and reproducible downstream analysis.
+In large-scale benchmarking studies involving multiple simulation methods, diverse biological datasets, or multi-core high-performance computing (HPC) clusters, running the full 48 curated evaluation metric suite can take considerable time. Once an evaluation is complete, researchers typically serialize the output using `saveRDS()` for long-term storage, publication sharing, and reproducible downstream analysis.
 
 **`scSimEval`** is architected to allow instant reloading, re-analysis, leaderboard ranking, and publication-grade visualization of any pre-saved `.rds` benchmark file — **without re-computing a single metric**.
 
@@ -74,7 +74,7 @@ Each row records:
 * **`Dataset`**: Experimental source or condition.
 * **`Method`**: Simulation algorithm evaluated.
 * **`Category`**: One of the 8 canonical evaluation categories (e.g., `(I) Distributional Properties`, `(V) Biological Signal & Downstream Fidelity`).
-* **`Metric`**: Name of the Gold-Standard metric.
+* **`Metric`**: Name of the curated evaluation metric.
 * **`Score_Raw`**: Unnormalized empirical value in physical units (seconds, peak RAM in MiB, correlation coefficient, Kolmogorov-Smirnov distance).
 * **`Score`**: Standardized direction-aware fidelity score normalized to $[0, 1]$, where $1.0$ represents top fidelity.
 
@@ -82,7 +82,7 @@ Each row records:
 
 # 3. Generating Simulator Leaderboards
 
-Use `compute_method_leaderboard()` to compute composite rankings across all 48 Gold-Standard metrics:
+Use `compute_method_leaderboard()` to compute composite rankings across all 48 curated evaluation metrics:
 
 ```{r default-leaderboard}
 # Compute standard overall composite leaderboard

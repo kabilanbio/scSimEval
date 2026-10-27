@@ -24,3 +24,4 @@ pred <- factor(rep(c("A", "B"), each = 20))
 truth <- factor(rep(c("A", "B"), each = 20))
 calc_homogeneity_completeness_v_measure(pred, truth)
 }
+\keyword{internal}

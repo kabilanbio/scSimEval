@@ -1,6 +1,6 @@
 # inst/shiny/scSimEvalApp/app.R
 # Simulation Evaluation Studio for scRNA-seq, scATAC-seq, and Single-Cell Multiomics
-# Powered by scSimEval (48 Curated Gold-Standard Benchmark Measures)
+# Powered by scSimEval (48 Curated Benchmark Evaluation Measures)
 
 library(shiny)
 library(bslib)
@@ -2598,7 +2598,7 @@ ui <- page_navbar(
             style = "font-weight: 800; font-size: 2.1rem; letter-spacing: -0.03em; color: #FFFFFF; margin-bottom: 10px;"
           ),
           p(
-            "This application is designed for simulation evaluation of single-cell RNA-seq (scRNA-seq), single-cell ATAC-seq (scATAC-seq), and single-cell multiomics (scRNA-seq + scATAC-seq) datasets by comparing them against real reference datasets across 48 gold-standard evaluation measures.",
+            "This application is designed for simulation evaluation of single-cell RNA-seq (scRNA-seq), single-cell ATAC-seq (scATAC-seq), and single-cell multiomics (scRNA-seq + scATAC-seq) datasets by comparing them against real reference datasets across 48 curated evaluation measures.",
             style = "font-size: 1.02rem; color: #CBD5E1; line-height: 1.6; margin-bottom: 0;"
           )
         )
@@ -2640,16 +2640,16 @@ ui <- page_navbar(
                     div("Gene/cell moments, library sparsity (7)", style = "font-size: 0.75rem; color: #64748B;")),
                 div(style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px;",
                     div(tags$b("II. Correlations & Zeros"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
-                    div("Gene-gene, cell-cell, kinetic noise (4)", style = "font-size: 0.75rem; color: #64748B;")),
+                    div("Zero curves, mean-var, excess zeros (4)", style = "font-size: 0.75rem; color: #64748B;")),
                 div(style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px;",
                     div(tags$b("III. Cellular Structure"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
                     div("Clustering ARI/NMI, silhouettes, k-NN (8)", style = "font-size: 0.75rem; color: #64748B;")),
                 div(style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px;",
                     div(tags$b("IV. Batch & Technical Mixing"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
-                    div("kBET, CMS, LISI confounder alignment (6)", style = "font-size: 0.75rem; color: #64748B;")),
+                    div("CMS, ISI, Seurat mixing, batch silhouette (6)", style = "font-size: 0.75rem; color: #64748B;")),
                 div(style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px;",
                     div(tags$b("V. Biological Downstream"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
-                    div("DEG precision/recall, DV, pathway enrichment (8)", style = "font-size: 0.75rem; color: #64748B;")),
+                    div("SimBench DE/DV/DD/DP/BD, deconvolution (8)", style = "font-size: 0.75rem; color: #64748B;")),
                 div(style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px;",
                     div(tags$b("VI. Lineage Dynamics"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
                     div("Pseudotime Spearman/Kendall concordances (4)", style = "font-size: 0.75rem; color: #64748B;")),
@@ -2661,7 +2661,7 @@ ui <- page_navbar(
                     div("Compute duration & peak memory efficiency (2)", style = "font-size: 0.75rem; color: #64748B;"))
               ),
               p(
-                "All metrics are standardized onto a direction-aware [0, 1] fidelity scale, where 1.0 represents perfect concordance with empirical biology. This enables unbiased ranking across simulator architectures across 48 gold-standard evaluation measures.",
+                "All metrics are standardized onto a direction-aware [0, 1] fidelity scale, where 1.0 represents perfect concordance with empirical biology. This enables unbiased ranking across simulator architectures across 48 curated evaluation measures.",
                 style = "font-size: 0.85rem; color: #475569; margin-bottom: 0; line-height: 1.5;"
               )
             )
@@ -2692,7 +2692,7 @@ ui <- page_navbar(
                   div(style = "flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: #EFF6FF; color: #2563EB; font-weight: 700; font-size: 0.82rem; display: flex; align-items: center; justify-content: center; border: 1px solid #BFDBFE;", "2"),
                   div(
                     div(tags$b("Evaluation & Ranking"), style = "font-size: 0.86rem; color: #0F172A;"),
-                    div("Comprehensive evaluation of scRNA-seq, scATAC-seq, and multiomics simulations across 48 gold-standard measures covering distributions, clustering, batch effects, and cross-modality coupling.", style = "font-size: 0.79rem; color: #64748B; line-height: 1.4;")
+                    div("Comprehensive evaluation of scRNA-seq, scATAC-seq, and multiomics simulations across 48 curated evaluation measures covering distributions, clustering, batch effects, and cross-modality coupling.", style = "font-size: 0.79rem; color: #64748B; line-height: 1.4;")
                   )
                 ),
                 div(
@@ -2915,8 +2915,8 @@ ui <- page_navbar(
         radioButtons(
           "rad_bubble_filter_mode", tags$b("Filter Mode:"),
           choices = c(
-            "All 48 Gold-Standard Measures" = "all",
-            "Custom Selection"              = "custom"
+            "All 48 Evaluation Measures" = "all",
+            "Custom Selection"           = "custom"
           ),
           selected = "all"
         ),
@@ -3596,7 +3596,7 @@ ui <- page_navbar(
             tags$h5("Benchmark Results Session Export", style = "margin: 0; font-weight: 700; color: #0F172A; font-size: 1.05rem;"),
             span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "Complete R Data Object (.rds)")
           ),
-          p("Download complete benchmarking session object (.rds) to preserve and reproduce all 48 gold-standard evaluation metrics, rankings, and figures in another R session:",
+          p("Download complete benchmarking session object (.rds) to preserve and reproduce all 48 curated evaluation metrics, rankings, and figures in another R session:",
             style = "margin: 2px 0 0 0; font-size: 0.82rem; color: #64748B;")
         ),
         div(
@@ -3658,7 +3658,7 @@ ui <- page_navbar(
               h4("Simulation Evaluation for Single-Cell and Multiomics Datasets", style = "font-weight: 800; color: #1B4F72; margin-top: 0; font-size: 1.18rem;"),
               p(
                 strong("scSimEval"), " is a comprehensive, publication-grade benchmarking suite for single-cell RNA-seq (scRNA-seq), single-cell ATAC-seq (scATAC-seq), and single-cell multiomics (scRNA-seq + scATAC-seq) simulations. ",
-                "It systematically evaluates how faithfully simulated datasets reproduce real experimental biology across ", strong("48 quantitative gold-standard evaluation metrics organized into 8 canonical categories"), "."
+                "It systematically evaluates how faithfully simulated datasets reproduce real experimental biology across ", strong("48 quantitative evaluation metrics organized into 8 canonical categories"), "."
               ),
               p(
                 "This updated web application features multi-dataset benchmarking, interactive simulator leaderboards, customizable weight modeling, high-density bubble matrices, 8 diagnostic visualization suites, and reproducible R script generators for all plots.",
@@ -3707,7 +3707,7 @@ ui <- page_navbar(
               ),
               p(
                 tags$b("Figure 1 | The scSimEval Benchmarking Workflow. "),
-                "Step 1: Input real reference and simulated count matrices with metadata. Step 2: Calculate 48 gold-standard evaluation metrics across 8 categories. Step 3: Standardize and consolidate all scores into a unified multi-dataset benchmark table. Step 4: Explore simulator rankings, bubble matrices, and high-resolution figures.",
+                "Step 1: Input real reference and simulated count matrices with metadata. Step 2: Calculate 48 curated evaluation metrics across 8 categories. Step 3: Standardize and consolidate all scores into a unified multi-dataset benchmark table. Step 4: Explore simulator rankings, bubble matrices, and high-resolution figures.",
                 style = "font-size: 0.84rem; color: #64748B; margin-top: 10px; max-width: 960px; margin-left: auto; margin-right: auto;"
               )
             ),
@@ -3726,8 +3726,8 @@ ui <- page_navbar(
                 class = "col-md-6",
                 tags$div(
                   style = "background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 16px; height: 100%;",
-                  h6(tags$b("Step 2: Calculate 48 Gold-Standard Metrics"), style = "color: #1B4F72; font-size: 0.90rem;"),
-                  p("scSimEval computes 48 quantitative gold-standard measures across 8 biological and computational categories, assessing statistical properties, zero-inflation, clustering concordance, biological fidelity, batch mixing, and scalability.", style = "font-size: 0.84rem; color: #475569; margin-bottom: 0;")
+                  h6(tags$b("Step 2: Calculate 48 Curated Evaluation Metrics"), style = "color: #1B4F72; font-size: 0.90rem;"),
+                  p("scSimEval computes 48 quantitative evaluation measures across 8 biological and computational categories, assessing statistical properties, zero-inflation, clustering concordance, biological fidelity, batch mixing, and scalability.", style = "font-size: 0.84rem; color: #475569; margin-bottom: 0;")
                 )
               ),
               tags$div(
@@ -3753,7 +3753,7 @@ ui <- page_navbar(
             # Section 2: The Eight Evaluation Categories
             # ------------------------------------------------------------------
             h4("2. The Eight Evaluation Categories", style = "font-weight: 700; color: #1B4F72; font-size: 1.08rem;"),
-            p("The 48 gold-standard evaluation criteria in scSimEval are structured across eight foundational categories covering statistical, cellular, molecular, and computational dimensions:", style = "color: #475569; font-size: 0.88rem;"),
+            p("The 48 curated evaluation criteria in scSimEval are structured across eight foundational categories covering statistical, cellular, molecular, and computational dimensions:", style = "color: #475569; font-size: 0.88rem;"),
             
             tags$div(
               class = "table-responsive",
@@ -3774,49 +3774,49 @@ ui <- page_navbar(
                     tags$td(style = "text-align: center; font-weight: bold;", "I"),
                     tags$td(tags$b("Distributional Properties")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-primary border", "Statistical")),
-                    tags$td("Mean expression, variance, dispersion (CV, Fano factor), library size, detected feature rate, and distribution distances (Wasserstein, Kolmogorov-Smirnov statistic, Bhattacharyya distance, ECDF difference).")
+                    tags$td("Moment and distribution divergence across 9 properties via 7 non-parametric measures: Wasserstein distance, Kolmogorov-Smirnov (KS) statistic, Median Absolute Deviation (MAD), Bhattacharyya distance, Runs test, NN mismatch, and Between-dataset silhouette.")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "II"),
                     tags$td(tags$b("Correlations & Zero-Inflation")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-info border", "Co-expression")),
-                    tags$td("Gene-gene Spearman/Pearson correlation networks, dropout rate curves, zero proportion concordance, and mean-variance trend fidelity.")
+                    tags$td("Non-linear mean-variance fit (R² discrepancy), zero-probability curve fidelity (dropout midpoint error x0, transition slope error k), excess zero weights, and chromatin accessibility sparsity concordance.")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "III"),
                     tags$td(tags$b("Cellular Structure & Concordance")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-success border", "Clustering")),
-                    tags$td("Adjusted Rand Index (ARI), Normalized Mutual Information (NMI), Adjusted Mutual Information (AMI), Silhouette width, cluster purity, and cell-cell distance matrix concordance.")
+                    tags$td("Adjusted Rand Index (ARI), Normalized Mutual Information (NMI), Average Silhouette Width (ASW), Davies-Bouldin index, Generative Precision and Recall, Maximum Mean Discrepancy (MMD), and Fréchet Single-Cell Distance.")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "IV"),
                     tags$td(tags$b("Batch Effects & Confounder Mixing")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-warning border", "Technical")),
-                    tags$td("kBET (batch test), LISI (Local Inverse Simpson Index), Average Silhouette Width for Batch (ASW-batch), and principal component batch correlation.")
+                    tags$td("Batch Silhouette Width, Principal Component Regression (PCR R²), Cell-Specific Mixing Score (CMS), Inverse Simpson's Index (ISI / iLISI), Seurat Mixing Metric, and Cross-Batch F1 Score.")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "V"),
                     tags$td(tags$b("Biological Signal & Downstream Fidelity")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-danger border", "Phenotype")),
-                    tags$td("Differentially Expressed Gene (DEG) concordance (Jaccard index, sensitivity, specificity, logFC correlation), marker gene ranking, and pathway enrichment overlap.")
+                    tags$td("SimBench 5-signal preservation (DE mean shift, DV variance, DD distribution, DP dropout proportion, BD bimodal index), predictive macro-averaged F1, pseudobulk deconvolution RMSE, and delta variance MAE.")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "VI"),
                     tags$td(tags$b("Trajectory & Lineage Dynamics")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-secondary border", "Pseudotime")),
-                    tags$td("Pseudotime correlation with reference, trajectory topology preservation (tree height RMSE, graph alignment), and gene expression patterns along lineages.")
+                    tags$td("Pseudotime Spearman rank correlation with reference, lineage branching tree height RMSE discrepancy, topological trajectory graph alignment, and gene expression pattern fidelity along reconstructed lineages.")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "VII"),
                     tags$td(tags$b("Cross-Modal Coupling & Modularity")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-indigo border", "Multiomics")),
-                    tags$td("Peak-to-gene linkage concordance, cross-modal cell pairing accuracy (FOSCTTM, Match@1), TF regulatory consistency, and multi-layer cluster concordance.")
+                    tags$td("Cross-modality correlation, FOSCTTM, Match@1 cell pairing rate, cross-modal generative F1, modality alignment (RV coefficient), ATAC-RNA network Jaccard, peak co-accessibility fidelity, and co-expression module fidelity.")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "VIII"),
                     tags$td(tags$b("Computational Scalability")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-dark border", "Efficiency")),
-                    tags$td("Wall-clock runtime (seconds), peak RAM memory usage (MiB RAM), cell-scaling rate, and feature-scaling efficiency.")
+                    tags$td("Wall-clock execution runtime (seconds), peak memory consumption (MiB RAM), runtime-memory Pareto trade-offs, and throughput.")
                   )
                 )
               )
@@ -3939,7 +3939,7 @@ ui <- page_navbar(
                     tags$ul(
                       style = "font-size: 0.84rem; color: #475569; padding-left: 16px; margin: 0;",
                       tags$li(tags$b("Pre-Computed Benchmark (Demo Data): "), "Load a precomputed 6-simulator multi-dataset benchmark across Dataset 1 and Dataset 2 for instant exploration."),
-                      tags$li(tags$b("Single-Cell RNA-seq Evaluation: "), "Upload real reference matrices and simulated datasets (.rds, .csv, .tsv, .txt) with optional cell type annotations and batch labels to calculate all 48 gold-standard evaluation metrics (39 unimodal)."),
+                      tags$li(tags$b("Single-Cell RNA-seq Evaluation: "), "Upload real reference matrices and simulated datasets (.rds, .csv, .tsv, .txt) with optional cell type annotations and batch labels to calculate all 48 curated evaluation metrics (39 unimodal)."),
                       tags$li(tags$b("Multi-Omics (RNA + ATAC) Evaluation: "), "Benchmark paired single-cell RNA-seq and ATAC-seq co-assays evaluating cross-modal coupling, peak-to-gene linkages, and feature alignment."),
                       tags$li(tags$b("Upload Pre-Computed Benchmark Table: "), "Directly ingest previously calculated benchmark CSV/RDS tables for instant visualization and leaderboard generation."),
                       tags$li(tags$b("Multi-Dataset Benchmarking: "), "Upload or evaluate across multiple experimental conditions (Dataset 1, Dataset 2, ..., Dataset N) with dynamic simulator renaming."),
@@ -4260,7 +4260,7 @@ Cell_03,Batch1
               div(
                 style = "margin-top: 10px; padding: 10px 14px; background: #F8FAFC; border-left: 3px solid #6366F1; border-radius: 4px; font-size: 0.82rem; color: #475569;",
                 tags$b("Memory Optimization Note: "),
-                "scSimEval utilizes sparse matrix arithmetic (dgCMatrix) and fast low-rank linear algebra to minimize peak memory consumption across all 48 gold-standard evaluation metrics."
+                "scSimEval utilizes sparse matrix arithmetic (dgCMatrix) and fast low-rank linear algebra to minimize peak memory consumption across all 48 curated evaluation metrics."
               )
             )
           )
@@ -4290,7 +4290,7 @@ Cell_03,Batch1
               style = "margin: 0; font-weight: 800; color: #FFFFFF; font-size: 1.45rem;"
             ),
             p(
-              "Real-time diagnostic stream capturing data loading, metric computation across 48 gold-standard evaluation criteria, visualization rendering, memory profiling, and live ERRORS, WARNINGS, and NOTES.",
+              "Real-time diagnostic stream capturing data loading, metric computation across 48 curated evaluation criteria, visualization rendering, memory profiling, and live ERRORS, WARNINGS, and NOTES.",
               style = "margin: 6px 0 0 0; color: #94A3B8; font-size: 0.88rem;"
             )
           ),
@@ -4705,7 +4705,7 @@ server <- function(input, output, session) {
   sc_log("INFO", "scSimEval Interactive Benchmarking Studio v0.99.9 initialized.", "Startup")
   sc_log("NOTE", paste0("Runtime Environment: R ", getRversion(), " | Platform: ", R.version$platform, " | OS: ", Sys.info()[["sysname"]], " ", Sys.info()[["release"]]), "Environment")
   sc_log("INFO", paste0("System Concurrency: ", parallel::detectCores(), " logical CPU cores detected. Sparse matrix arithmetic (dgCMatrix) enabled."), "Hardware")
-  sc_log("NOTE", "Evaluation Suite: 48 gold-standard multiomics metrics registered across Categories 1 to 8.", "Metrics")
+  sc_log("NOTE", "Evaluation Suite: 48 curated multiomics evaluation metrics registered across Categories 1 to 8.", "Metrics")
   
   # Check demo benchmark cache status
   demo_rds_path <- system.file("shiny/scSimEvalApp/demo_benchmark_data.rds", package = "scSimEval")
@@ -7322,7 +7322,7 @@ server <- function(input, output, session) {
             "Because these demo datasets are pre-packaged for demonstration purposes, the methods are labeled as ",
             tags$strong("Simulator 1, Simulator 2, Simulator 3, Simulator 4, Simulator 5, and Simulator 6"),
             " evaluated against an empirical biological reference ground truth across ",
-            tags$strong("48 gold-standard metrics"), " in 8 scientific categories.",
+            tags$strong("48 curated evaluation metrics"), " in 8 scientific categories.",
             style = "font-size: 0.88rem; color: #334155; line-height: 1.6;"
           )
         ),
@@ -7343,7 +7343,7 @@ server <- function(input, output, session) {
               class = "p-3 rounded border h-100",
               style = "background: #F8FAFC;",
               h6(tags$b(icon("layer-group", class = "me-2 text-primary"), "6 Demo Simulators"), style = "color: #1E293B; font-size: 0.88rem; margin-bottom: 6px;"),
-              p("Simulated count matrices for each of the 2 reference datasets (Simulator 1 to Simulator 6) evaluated across 48 gold-standard metrics.", style = "font-size: 0.80rem; color: #64748B; margin: 0;")
+              p("Simulated count matrices for each of the 2 reference datasets (Simulator 1 to Simulator 6) evaluated across 48 curated evaluation metrics.", style = "font-size: 0.80rem; color: #64748B; margin: 0;")
             )
           )
         ),
@@ -7626,7 +7626,7 @@ server <- function(input, output, session) {
                 ),
                 card_body(
                   style = "padding: 24px;",
-                  p("Upload a previously saved benchmark result session (.rds or .csv) from scSimEval to instantly reproduce all leaderboards, bubble matrices, diagnostic figures, and master tables without rerunning heavy evaluations. Check 'Add to current benchmark results' to combine multiple datasets and compute cross-dataset simulator average fidelity across all 48 gold-standard metrics.",
+                  p("Upload a previously saved benchmark result session (.rds or .csv) from scSimEval to instantly reproduce all leaderboards, bubble matrices, diagnostic figures, and master tables without rerunning heavy evaluations. Check 'Add to current benchmark results' to combine multiple datasets and compute cross-dataset simulator average fidelity across all 48 curated evaluation metrics.",
                     style = "color: #475569; font-size: 0.88rem; line-height: 1.5; margin-bottom: 16px;"),
                   div(
                     style = "max-width: 600px;",

@@ -24,3 +24,4 @@ pred <- factor(rep(c("A", "B"), each = 20))
 truth <- factor(rep(c("A", "B"), each = 20))
 calc_clustering_accuracy(pred, truth)
 }
+\keyword{internal}

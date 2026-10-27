@@ -7,7 +7,7 @@
 #' \if{html}{\figure{workflow_diagram.png}{options: width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 #'
 #' @details
-#' \strong{Metric Measurement Capacity by Data & Metadata Mode (48 Gold-Standard Suite):}
+#' \strong{Metric Measurement Capacity by Data & Metadata Mode (48 Curated Evaluation Measures Suite):}
 #' \itemize{
 #'   \item \strong{Count Matrix Alone (No Metadata):} Measures 15 baseline metrics spanning
 #'     Category I (Distributional Properties: Wasserstein, KS, MAD, Bhattacharyya, Runs test,
@@ -407,7 +407,7 @@ evaluate_simulation_accuracy <- function(
 #'       \item \emph{+ Cell Types:} Unlocks cross-modal label transfer F1, cell-type clustering concordance,
 #'         and SimBench biological signal fidelity.
 #'       \item \emph{+ Batch Info:} Unlocks batch confounder integration across both RNA and ATAC modalities.
-#'       \item \emph{+ Both (Full Metadata):} Unlocks the complete multiomics suite of all 48 Gold-Standard metrics
+#'       \item \emph{+ Both (Full Metadata):} Unlocks the complete multiomics suite of all 48 curated evaluation metrics
 #'         across all 8 canonical categories.
 #'     }
 #'   \item \strong{Unpaired Multiomics (independent scRNA and scATAC from separate cells):}

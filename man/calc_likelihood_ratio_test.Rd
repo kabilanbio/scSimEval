@@ -38,3 +38,4 @@ model vs intercept-only null model, or spline trajectory vs linear model).
 \examples{
 calc_likelihood_ratio_test(stats::rnorm(50), stats::rnorm(50))
 }
+\keyword{internal}

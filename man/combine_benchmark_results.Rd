@@ -32,7 +32,7 @@ being combined. If \code{NULL}, dataset names are automatically extracted from
 the input objects or generated cleanly (e.g., \code{"Dataset 1"}, \code{"Dataset 2"}).}
 
 \item{filter_gold_standard}{Logical. If \code{TRUE} (default), filters all combined datasets
-to the 48 Gold-Standard curated evaluation metrics.}
+to the 48 curated evaluation metrics.}
 
 \item{recompute_normalized}{Logical. If \code{TRUE} (default), re-normalizes raw metric
 scores across all evaluated simulators and datasets using direction-aware scaling.}
@@ -59,8 +59,8 @@ or saved benchmark sessions into a unified multi-dataset benchmark object.
 \details{
 When the same simulator (e.g., \code{"scDesign3"} or \code{"scMultiSim"}) is evaluated across
 multiple empirical datasets, \code{combine_benchmark_results} maintains each distinct dataset
-evaluation and provides cross-dataset aggregate fidelity scores across the 48 Gold-Standard
-curated metrics. This enables rigorous comparative evaluation and bubble matrix visualization
+evaluation and provides cross-dataset aggregate fidelity scores across the 48 curated
+evaluation metrics. This enables rigorous comparative evaluation and bubble matrix visualization
 of average simulator performance across diverse biological contexts.
 }
 \examples{

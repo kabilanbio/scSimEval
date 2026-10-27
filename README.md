@@ -24,7 +24,7 @@ The package supports:
 
 ## Key Features
 
-- **48 Curated Gold-Standard Evaluation Measures**: Systematically organized into 8 canonical categories (39 for unimodal scRNA-seq / scATAC-seq alone, 48 for paired multiomics):
+- **48 Curated Evaluation Measures**: Systematically organized into 8 canonical categories (39 for unimodal scRNA-seq / scATAC-seq alone, 48 for paired multiomics):
   1. *Distributional Properties* (statistical distances on library size, CPM expression, zero fractions, MMD, Fréchet distance)
   2. *Correlations & Zero-Inflation* (logistic dropout curves, mean-variance fit, excess zero weights)
   3. *Cellular Structure & Concordance* (unsupervised clustering fidelity, ARI, NMI, Silhouette, Davies-Bouldin, Generative Precision/Recall)

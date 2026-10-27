@@ -248,7 +248,7 @@ template:
 
 home:
   title: "scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations"
-  description: "Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Gold-Standard Evaluation Measures."
+  description: "Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Curated Evaluation Measures."
 
 navbar:
   title: "scSimEval"
@@ -281,7 +281,7 @@ navbar:
 
 reference:
   - title: "Master Benchmarking Workflows"
-    desc: "Unified end-to-end evaluation pipelines executing the 48 gold-standard metrics across unimodal and multiomics simulations."
+    desc: "Unified end-to-end evaluation pipelines executing the 48 curated evaluation metrics across unimodal and multiomics simulations."
     contents:
       - evaluate_simulation_accuracy
       - evaluate_multiomics_accuracy
@@ -362,38 +362,21 @@ reference:
       - subsample_dist_vector
 
   - title: "Category 1: Global & Marginal Distributions"
-    desc: "Evaluation functions assessing univariate and bivariate distribution divergence."
+    desc: "Evaluation functions assessing univariate and bivariate distribution divergence across single-cell feature spaces."
     contents:
       - calc_ks
       - calc_wasserstein_1d
       - calc_mad
-      - calc_mae
-      - calc_rmse
-      - calc_overlap
       - calc_bhattacharyya
-      - calc_ecdf_diffarea
       - calc_runs_test
       - calc_nn_mismatch
       - calc_between_dataset_silhouette
-      - calc_fasano_franceschini
-      - calc_peacock_2d
-      - calc_kde_test
-      - calc_emd_2d
-      - calc_mmd
-      - calc_frechet_singlecell_distance
-      - calc_model_aic_bic
-      - calc_marginal_aic_bic
-      - calc_likelihood_ratio_test
-      - calc_outlier_proportion
-      - calc_all_univariate_metrics
-      - calc_all_bivariate_metrics
 
   - title: "Category 2: Cellular & Feature-Level Properties"
-    desc: "Assessment of zero-inflation dynamics, library size distributions, and kinetic noise decomposition."
+    desc: "Assessment of zero-inflation dynamics, dropout probability curves, and chromatin accessibility sparsity."
     contents:
       - calc_zero_probability_curve
       - calc_excess_zero_weights
-      - calc_kinetic_noise_decomposition
       - calc_accessibility_sparsity_curve
 
   - title: "Category 3: Cell Identity & Clustering Concordance"
@@ -401,31 +384,18 @@ reference:
     contents:
       - calc_ari
       - calc_nmi
-      - calc_ami
-      - calc_clustering_accuracy
-      - calc_fmi
       - calc_silhouette
-      - calc_dunn
-      - calc_connectivity
       - calc_davies_bouldin
-      - calc_calinski_harabasz
-      - calc_homogeneity
-      - calc_completeness
-      - calc_v_measure
-      - calc_homogeneity_completeness_v_measure
-      - calc_neighborhood_purity
-      - calc_cdi
       - calc_generative_precision_recall
+      - calc_mmd
+      - calc_frechet_singlecell_distance
 
   - title: "Category 4: Batch Effect & Confounder Dynamics"
-    desc: "Quantification of technical variation, batch mixing, and local density factor conservation."
+    desc: "Quantification of technical variation, batch mixing, and local neighborhood confounder integration."
     contents:
       - calc_cms
       - calc_isi
       - calc_seurat_mixing_metric
-      - calc_ldf
-      - calc_ldf_diff
-      - calc_local_structure_metric
 
   - title: "Category 5: Differential Expression & Signal Preservation"
     desc: "Recovery of biological contrast, differential gene detection accuracy, and cell-type deconvolution fidelity."
@@ -437,9 +407,6 @@ reference:
       - calc_signal_bd
       - calc_delta_variance
       - calc_deconvolution_accuracy
-      - calc_variance_decomposition
-      - calc_intraclass_correlation
-      - calc_expected_mi
 
   - title: "Category 6: Trajectory & Lineage Dynamics"
     desc: "Inference and benchmarking of differentiation pseudotime trajectories and lineage branching topologies."
@@ -460,7 +427,6 @@ reference:
       - calc_modality_alignment
       - calc_network_jaccard
       - calc_atac_rna_coupling
-      - calc_coregulation_fidelity
       - calc_peak_coaccessibility_fidelity
       - calc_coexpression_module_fidelity
       - calc_accessibility_profile_concordance

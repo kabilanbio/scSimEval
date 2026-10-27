@@ -24,3 +24,4 @@ per gene across donors or biological replicates to quantify hierarchical cluster
 data(example_scrna, package = "scSimEval")
 calc_intraclass_correlation(example_scrna$ref, example_scrna$sim)
 }
+\keyword{internal}

@@ -22,3 +22,4 @@ ref <- matrix(stats::rnorm(100), 50, 2)
 sim <- matrix(stats::rnorm(100), 50, 2)
 calc_peacock_2d(ref, sim)
 }
+\keyword{internal}

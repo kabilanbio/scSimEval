@@ -17,8 +17,8 @@
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
 <meta property="og:title" content="scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations">
-<meta name="description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Gold-Standard Evaluation Measures.">
-<meta property="og:description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Gold-Standard Evaluation Measures.">
+<meta name="description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Curated Evaluation Measures.">
+<meta property="og:description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Curated Evaluation Measures.">
 <meta property="og:image" content="https://kabilanbio.github.io/scSimEval/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -265,6 +265,7 @@
 <li><a class="dropdown-item" href="articles/demo-scrna.html">1. scRNA-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="articles/demo-scatac.html">2. scATAC-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
+    <li><a class="dropdown-item" href="articles/demo-saved-rds.html">4. Analyzing Pre-Saved Benchmark (.rds)</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
@@ -296,7 +297,7 @@
 <h2 id="workflow-overview">Workflow Overview<a class="anchor" aria-label="anchor" href="#workflow-overview"></a>
 </h2>
 <p align="center">
-<img src="reference/figures/workflow_diagram.png" width="95%" alt="scSimEval Workflow Architecture"></p>
+<img src="articles/figures/workflow_diagram.png" width="95%" alt="scSimEval Workflow Architecture"></p>
 <hr>
 </div>
 <div class="section level2">
@@ -304,7 +305,7 @@
 </h2>
 <ul>
 <li>
-<strong>48 Curated Gold-Standard Evaluation Measures</strong>: Systematically organized into 8 canonical categories (39 for unimodal scRNA-seq / scATAC-seq alone, 48 for paired multiomics):
+<strong>48 Curated Evaluation Measures</strong>: Systematically organized into 8 canonical categories (39 for unimodal scRNA-seq / scATAC-seq alone, 48 for paired multiomics):
 <ol style="list-style-type: decimal">
 <li>
 <em>Distributional Properties</em> (statistical distances on library size, CPM expression, zero fractions, MMD, Fréchet distance)</li>

@@ -44,3 +44,4 @@ across genes (scDesign3; Song et al., 2024).
 \examples{
 calc_marginal_aic_bic(stats::rnorm(50), stats::rnorm(50))
 }
+\keyword{internal}

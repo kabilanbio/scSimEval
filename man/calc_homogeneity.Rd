@@ -22,3 +22,4 @@ pred <- factor(rep(c("A", "B"), each = 20))
 truth <- factor(rep(c("A", "B"), each = 20))
 calc_homogeneity(pred, truth)
 }
+\keyword{internal}

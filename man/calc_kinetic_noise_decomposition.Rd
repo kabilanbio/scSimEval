@@ -24,3 +24,4 @@ into intrinsic transcriptional bursting noise and extrinsic cell-state noise.
 data(example_scrna, package = "scSimEval")
 calc_kinetic_noise_decomposition(example_scrna$ref)
 }
+\keyword{internal}

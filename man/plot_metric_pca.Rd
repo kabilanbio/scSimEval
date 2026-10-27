@@ -49,7 +49,7 @@ Generates a dual-panel PCA dashboard for evaluating single-cell simulation bench
 and methods.
 }
 \details{
-All metrics present in \code{benchmark_data} (e.g. all 48 gold-standard metrics across categories)
+All metrics present in \code{benchmark_data} (e.g. all 48 curated evaluation metrics across categories)
 are mathematically considered in the PCA decomposition. Panel \code{"both"} displays:
 \itemize{
   \item \strong{Panel a (Methods Ordination)}: Simulators mapped into PC1 vs PC2 coordinates with

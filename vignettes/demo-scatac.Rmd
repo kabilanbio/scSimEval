@@ -144,7 +144,7 @@ head(master_atac$metrics_summary_table)
 
 # 7. Conclusion
 
-`scSimEval` effectively benchmarks scATAC-seq simulations, validating peak insertion distributions, extreme sparsity, cell type clustering, batch mixing, and chromatin peak co-accessibility across the 48 Gold-Standard evaluation measures suite.
+`scSimEval` effectively benchmarks scATAC-seq simulations, validating peak insertion distributions, extreme sparsity, cell type clustering, batch mixing, and chromatin peak co-accessibility across the 48 curated evaluation measures suite.
 
 ```{r session-info}
 sessionInfo()

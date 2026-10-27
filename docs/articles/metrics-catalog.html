@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Comprehensive Catalog of the 48 Gold-Standard Evaluation Metrics • scSimEval</title>
+<title>Comprehensive Catalog of the 48 Evaluation Metrics • scSimEval</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -16,7 +16,7 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Comprehensive Catalog of the 48 Gold-Standard Evaluation Metrics">
+<meta property="og:title" content="Comprehensive Catalog of the 48 Evaluation Metrics">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
@@ -285,7 +285,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Comprehensive Catalog of the 48 Gold-Standard Evaluation Metrics</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Comprehensive Catalog of the 48 Evaluation Metrics</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/kabilanbio/scSimEval/blob/HEAD/vignettes/metrics-catalog.Rmd" class="external-link"><code>vignettes/metrics-catalog.Rmd</code></a></small>
@@ -301,8 +301,8 @@
 multiomics simulation methods using an objective, empirical reference
 benchmarking framework. Following systematic sensitivity and
 collinearity audits, <code>scSimEval</code> standardizes on <strong>48
-curated, non-redundant Gold-Standard evaluation metrics</strong>
-organized into <strong>8 canonical biological and computational
+curated, non-redundant evaluation metrics</strong> organized into
+<strong>8 canonical biological and computational
 categories</strong>.</p>
 <p>The suite evaluates <strong>39 metrics for unimodal single-cell
 assays</strong> (scRNA-seq or scATAC-seq) and expands to <strong>48
@@ -902,92 +902,6 @@ during execution</td>
 </tbody>
 </table>
 <hr>
-</div>
-<div class="section level2">
-<h2 id="scientific-justification-elimination-of-collinear-redundancies">Scientific Justification: Elimination of Collinear Redundancies<a class="anchor" aria-label="anchor" href="#scientific-justification-elimination-of-collinear-redundancies"></a>
-</h2>
-<p>In benchmark evaluations, retaining redundant metrics that compute
-mathematically identical concepts introduces <strong>artificial
-collinear weighting</strong>, skewing simulator rankings without
-providing new biological information. During our systematic audit of
-single-cell simulation benchmarking:</p>
-<div class="section level4">
-<h4 id="mathematical-equivalence-ecdf-area-difference-vs--wasserstein-distance-r-1-000">1. Mathematical Equivalence: ECDF Area Difference vs. Wasserstein
-Distance
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>1.000</mn></mrow><annotation encoding="application/x-tex">r = 1.000</annotation></semantics></math>)<a class="anchor" aria-label="anchor" href="#mathematical-equivalence-ecdf-area-difference-vs--wasserstein-distance-r-1-000"></a>
-</h4>
-<p>By the Kantorovich-Rubinstein duality theorem for one-dimensional
-probability measures, the 1st Wasserstein metric
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>W</mi><mn>1</mn></msub><annotation encoding="application/x-tex">W_1</annotation></semantics></math>)
-between cumulative distribution functions
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>F</mi><mtext mathvariant="normal">ref</mtext></msub><annotation encoding="application/x-tex">F_{\text{ref}}</annotation></semantics></math>
-and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>F</mi><mtext mathvariant="normal">sim</mtext></msub><annotation encoding="application/x-tex">F_{\text{sim}}</annotation></semantics></math>
-is defined as:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>W</mi><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>P</mi><mo>,</mo><mi>Q</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mo>∫</mo><mrow><mi>−</mi><mi>∞</mi></mrow><mi>∞</mi></msubsup><mo stretchy="false" form="prefix">|</mo><msub><mi>F</mi><mtext mathvariant="normal">ref</mtext></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><msub><mi>F</mi><mtext mathvariant="normal">sim</mtext></msub><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">|</mo><mspace width="0.167em"></mspace><mi>d</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">W_1(P, Q) = \int_{-\infty}^{\infty} |F_{\text{ref}}(x) - F_{\text{sim}}(x)| \, dx</annotation></semantics></math>
-This definition is <strong>identically equal</strong> to the Empirical
-Cumulative Distribution Function Area Difference
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi mathvariant="normal">Δ</mi><mtext mathvariant="normal">ECDF</mtext></msub><annotation encoding="application/x-tex">\Delta_{\text{ECDF}}</annotation></semantics></math>).
-Empirical evaluation across real single-cell datasets verified an exact
-Pearson correlation of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>1.00000</mn></mrow><annotation encoding="application/x-tex">r = 1.00000</annotation></semantics></math>.
-Retaining both doubled the statistical weight of distribution shape. In
-Option A, <code>Wasserstein</code> is retained as the gold-standard
-optimal transport metric, while <code>ECDF_DiffArea</code> is
-eliminated.</p>
-</div>
-<div class="section level4">
-<h4 id="collinear-error-metrics-mae-and-rmse-r-0-992">2. Collinear Error Metrics: MAE and RMSE
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>&gt;</mo><mn>0.992</mn></mrow><annotation encoding="application/x-tex">r &gt; 0.992</annotation></semantics></math>)<a class="anchor" aria-label="anchor" href="#collinear-error-metrics-mae-and-rmse-r-0-992"></a>
-</h4>
-<p>Mean Absolute Error (MAE) and Root Mean Squared Error (RMSE) on
-summary moments are heavily collinear with Median Absolute Deviation
-(MAD) and Wasserstein distance. Retaining MAD (robust against
-single-cell sequencing outliers) and Wasserstein (integrating the entire
-distribution) provides complete coverage while pruning redundant summary
-moment error scores.</p>
-</div>
-<div class="section level4">
-<h4 id="redundant-partition-concordance-ami-fmi-v-measure-homogeneity-and-completeness-r-0-985">3. Redundant Partition Concordance: AMI, FMI, V-Measure,
-Homogeneity, and Completeness
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>&gt;</mo><mn>0.985</mn></mrow><annotation encoding="application/x-tex">r &gt; 0.985</annotation></semantics></math>)<a class="anchor" aria-label="anchor" href="#redundant-partition-concordance-ami-fmi-v-measure-homogeneity-and-completeness-r-0-985"></a>
-</h4>
-<p>In Category III, clustering concordance was previously evaluated
-across 6 overlapping information-theoretic measures: Adjusted Rand Index
-(ARI), Normalized Mutual Information (NMI), Adjusted Mutual Information
-(AMI), Fowlkes-Mallows Index (FMI), Homogeneity, Completeness, and
-V-Measure. Since
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>V</mi><annotation encoding="application/x-tex">V</annotation></semantics></math>-measure
-is the harmonic mean of homogeneity and completeness, and AMI strongly
-correlates with NMI
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>&gt;</mo><mn>0.985</mn></mrow><annotation encoding="application/x-tex">r &gt; 0.985</annotation></semantics></math>),
-retaining <strong>ARI</strong> (pair-counting corrected for chance) and
-<strong>NMI</strong> (information-theoretic shared entropy) provides
-optimal, non-redundant coverage.</p>
-</div>
-<div class="section level4">
-<h4 id="confounder-diversity-shannon-entropy-vs--cms-and-lisi">4. Confounder Diversity: Shannon Entropy vs. CMS and LISI<a class="anchor" aria-label="anchor" href="#confounder-diversity-shannon-entropy-vs--cms-and-lisi"></a>
-</h4>
-<p>In Category IV, neighborhood batch entropy, Local Inverse Simpson
-Index (LISI/ISI), and CellMixS (CMS) all quantify local batch mixing.
-Shannon entropy provides no directionality beyond LISI (effective number
-of batches). Retaining <strong>LISI</strong> (scale:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>1</mn><mo>,</mo><mi>B</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[1, B]</annotation></semantics></math>)
-and <strong>CMS</strong> (hypothesis-tested mixing score) eliminates
-redundant entropy scores.</p>
-</div>
-<div class="section level4">
-<h4 id="multi-class-performance-accuracy-vs--macro-averaged-f1">5. Multi-Class Performance: Accuracy vs. Macro-Averaged F1<a class="anchor" aria-label="anchor" href="#multi-class-performance-accuracy-vs--macro-averaged-f1"></a>
-</h4>
-<p>In imbalanced single-cell datasets with rare cell types (e.g.,
-dendritic cells at 1% vs. T cells at 60%), raw accuracy is severely
-distorted by majority classes. <strong>Macro-averaged F1 score</strong>
-provides an unweighted harmonic mean across all cell types, penalizing
-models that fail on rare populations. Redundant raw accuracy metrics
-were pruned in favor of <code>predictive_macro_F1</code>,
-<code>cross_batch_F1</code>, and <code>cross_modal_F1</code>.</p>
-<hr>
-</div>
 </div>
 <div class="section level2">
 <h2 id="detailed-mathematical-formulations-by-category">Detailed Mathematical Formulations by Category<a class="anchor" aria-label="anchor" href="#detailed-mathematical-formulations-by-category"></a>

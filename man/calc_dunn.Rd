@@ -23,3 +23,4 @@ cl <- factor(rep(c("A", "B"), each = 10))
 dist_mat <- stats::dist(data)
 calc_dunn(dist_mat, cl)
 }
+\keyword{internal}

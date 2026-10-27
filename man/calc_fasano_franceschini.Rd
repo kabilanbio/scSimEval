@@ -24,3 +24,4 @@ ref <- matrix(stats::rnorm(100), 50, 2)
 sim <- matrix(stats::rnorm(100), 50, 2)
 calc_fasano_franceschini(ref, sim)
 }
+\keyword{internal}

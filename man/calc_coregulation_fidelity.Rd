@@ -34,3 +34,4 @@ modules <- list(Module_1 = rownames(example_scrna$ref)[seq_len(30)],
                 Module_2 = rownames(example_scrna$ref)[31:60])
 calc_coregulation_fidelity(example_scrna$ref, example_scrna$sim, modules)
 }
+\keyword{internal}

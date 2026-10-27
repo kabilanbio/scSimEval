@@ -37,3 +37,4 @@ Vinh, N. X., Epps, J., & Bailey, J. (2010). Information theoretic measures for c
 
 Lan, W., Ling, T., Chen, Q. et al. scMoMtF: An interpretable multitask learning framework for single-cell multi-omics data analysis. PLOS Comput Biol 20(12): e1012679 (2024).
 }
+\keyword{internal}

@@ -257,7 +257,7 @@
     <div class="section level2">
       <h2 id="master-benchmarking-workflows">Master Benchmarking Workflows<a class="anchor" aria-label="anchor" href="#master-benchmarking-workflows"></a></h2>
 
-      <div class="section-desc"><p>Unified end-to-end evaluation pipelines executing the 48 gold-standard metrics across unimodal and multiomics simulations.</p></div>
+      <div class="section-desc"><p>Unified end-to-end evaluation pipelines executing the 48 curated evaluation metrics across unimodal and multiomics simulations.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -631,7 +631,7 @@
           <code><a href="filter_gold_standard_metrics.html">filter_gold_standard_metrics()</a></code>
 
         </dt>
-        <dd>Filter Benchmark Data to the 48 Gold-Standard Metrics</dd>
+        <dd>Filter Benchmark Data to the 48 Curated Evaluation Metrics</dd>
 
         <dt>
 
@@ -691,7 +691,7 @@
       </dl></div><div class="section level2">
       <h2 id="category-global-marginal-distributions">Category 1: Global &amp; Marginal Distributions<a class="anchor" aria-label="anchor" href="#category-global-marginal-distributions"></a></h2>
 
-      <div class="section-desc"><p>Evaluation functions assessing univariate and bivariate distribution divergence.</p></div>
+      <div class="section-desc"><p>Evaluation functions assessing univariate and bivariate distribution divergence across single-cell feature spaces.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -721,38 +721,10 @@
 
         <dt>
 
-          <code><a href="calc_mae.html">calc_mae()</a></code>
-
-        </dt>
-        <dd>Calculate Mean Absolute Error (MAE)</dd>
-
-        <dt>
-
-          <code><a href="calc_rmse.html">calc_rmse()</a></code>
-
-        </dt>
-        <dd>Calculate Root Mean Squared Error (RMSE)</dd>
-
-        <dt>
-
-          <code><a href="calc_overlap.html">calc_overlap()</a></code>
-
-        </dt>
-        <dd>Calculate Distribution Overlapping Index (OV)</dd>
-
-        <dt>
-
           <code><a href="calc_bhattacharyya.html">calc_bhattacharyya()</a></code>
 
         </dt>
         <dd>Calculate Bhattacharyya Distance (BH)</dd>
-
-        <dt>
-
-          <code><a href="calc_ecdf_diffarea.html">calc_ecdf_diffarea()</a></code>
-
-        </dt>
-        <dd>Calculate Area Between Empirical Cumulative Distribution Functions (eCDFs)</dd>
 
         <dt>
 
@@ -774,94 +746,10 @@
 
         </dt>
         <dd>Calculate Between-Dataset Silhouette Width</dd>
-
-        <dt>
-
-          <code><a href="calc_fasano_franceschini.html">calc_fasano_franceschini()</a></code>
-
-        </dt>
-        <dd>Calculate Fasano-Franceschini 2D Kolmogorov-Smirnov Test Statistic</dd>
-
-        <dt>
-
-          <code><a href="calc_peacock_2d.html">calc_peacock_2d()</a></code>
-
-        </dt>
-        <dd>Calculate Peacock 2D Kolmogorov-Smirnov Test Statistic</dd>
-
-        <dt>
-
-          <code><a href="calc_kde_test.html">calc_kde_test()</a></code>
-
-        </dt>
-        <dd>Calculate 2D Bivariate Kernel Density Estimation (KDE) Test Statistic</dd>
-
-        <dt>
-
-          <code><a href="calc_emd_2d.html">calc_emd_2d()</a></code>
-
-        </dt>
-        <dd>Calculate 2D Earth Mover's Distance (2D EMD)</dd>
-
-        <dt>
-
-          <code><a href="calc_mmd.html">calc_mmd()</a></code>
-
-        </dt>
-        <dd>Maximum Mean Discrepancy (MMD) with Gaussian RBF Kernel</dd>
-
-        <dt>
-
-          <code><a href="calc_frechet_singlecell_distance.html">calc_frechet_singlecell_distance()</a></code>
-
-        </dt>
-        <dd>Frechet Single-Cell Distance (FSD)</dd>
-
-        <dt>
-
-          <code><a href="calc_model_aic_bic.html">calc_model_aic_bic()</a></code>
-
-        </dt>
-        <dd>Compute Model Information Criteria (AIC and BIC)</dd>
-
-        <dt>
-
-          <code><a href="calc_marginal_aic_bic.html">calc_marginal_aic_bic()</a></code>
-
-        </dt>
-        <dd>Marginal Model Goodness of Fit and Information Criteria for Single-Cell Simulators</dd>
-
-        <dt>
-
-          <code><a href="calc_likelihood_ratio_test.html">calc_likelihood_ratio_test()</a></code>
-
-        </dt>
-        <dd>Perform Likelihood Ratio Test for Comparing Nested Single-Cell Simulation Models</dd>
-
-        <dt>
-
-          <code><a href="calc_outlier_proportion.html">calc_outlier_proportion()</a></code>
-
-        </dt>
-        <dd>Calculate Proportion of Outliers in a Numeric Vector</dd>
-
-        <dt>
-
-          <code><a href="calc_all_univariate_metrics.html">calc_all_univariate_metrics()</a></code>
-
-        </dt>
-        <dd>Compute All Univariate Distance &amp; Accuracy Metrics for a Feature</dd>
-
-        <dt>
-
-          <code><a href="calc_all_bivariate_metrics.html">calc_all_bivariate_metrics()</a></code>
-
-        </dt>
-        <dd>Compute All Bivariate (2D) Distance &amp; Accuracy Metrics for Joint Distributions</dd>
       </dl></div><div class="section level2">
       <h2 id="category-cellular-feature-level-properties">Category 2: Cellular &amp; Feature-Level Properties<a class="anchor" aria-label="anchor" href="#category-cellular-feature-level-properties"></a></h2>
 
-      <div class="section-desc"><p>Assessment of zero-inflation dynamics, library size distributions, and kinetic noise decomposition.</p></div>
+      <div class="section-desc"><p>Assessment of zero-inflation dynamics, dropout probability curves, and chromatin accessibility sparsity.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -881,13 +769,6 @@
 
         </dt>
         <dd>Calculate Posterior Excess Zero Weights (zingeR &amp; ZINB-WaVE)</dd>
-
-        <dt>
-
-          <code><a href="calc_kinetic_noise_decomposition.html">calc_kinetic_noise_decomposition()</a></code>
-
-        </dt>
-        <dd>Kinetic Noise Decomposition (SymSim &amp; Elowitz et al.)</dd>
 
         <dt>
 
@@ -921,45 +802,10 @@
 
         <dt>
 
-          <code><a href="calc_ami.html">calc_ami()</a></code>
-
-        </dt>
-        <dd>Calculate Adjusted Mutual Information (AMI)</dd>
-
-        <dt>
-
-          <code><a href="calc_clustering_accuracy.html">calc_clustering_accuracy()</a></code>
-
-        </dt>
-        <dd>Calculate Clustering Accuracy (ACC)</dd>
-
-        <dt>
-
-          <code><a href="calc_fmi.html">calc_fmi()</a></code>
-
-        </dt>
-        <dd>Calculate Fowlkes-Mallows Index (FMI)</dd>
-
-        <dt>
-
           <code><a href="calc_silhouette.html">calc_silhouette()</a></code>
 
         </dt>
         <dd>Calculate Average Silhouette Width (ASW)</dd>
-
-        <dt>
-
-          <code><a href="calc_dunn.html">calc_dunn()</a></code>
-
-        </dt>
-        <dd>Calculate Dunn Index</dd>
-
-        <dt>
-
-          <code><a href="calc_connectivity.html">calc_connectivity()</a></code>
-
-        </dt>
-        <dd>Calculate Cluster Connectivity</dd>
 
         <dt>
 
@@ -970,63 +816,28 @@
 
         <dt>
 
-          <code><a href="calc_calinski_harabasz.html">calc_calinski_harabasz()</a></code>
-
-        </dt>
-        <dd>Calculate Calinski-Harabasz Index (CH)</dd>
-
-        <dt>
-
-          <code><a href="calc_homogeneity.html">calc_homogeneity()</a></code>
-
-        </dt>
-        <dd>Calculate Homogeneity Score</dd>
-
-        <dt>
-
-          <code><a href="calc_completeness.html">calc_completeness()</a></code>
-
-        </dt>
-        <dd>Calculate Completeness Score</dd>
-
-        <dt>
-
-          <code><a href="calc_v_measure.html">calc_v_measure()</a></code>
-
-        </dt>
-        <dd>Calculate V-Measure</dd>
-
-        <dt>
-
-          <code><a href="calc_homogeneity_completeness_v_measure.html">calc_homogeneity_completeness_v_measure()</a></code>
-
-        </dt>
-        <dd>Calculate Homogeneity, Completeness, and V-Measure</dd>
-
-        <dt>
-
-          <code><a href="calc_neighborhood_purity.html">calc_neighborhood_purity()</a></code>
-
-        </dt>
-        <dd>Calculate Neighborhood Purity</dd>
-
-        <dt>
-
-          <code><a href="calc_cdi.html">calc_cdi()</a></code>
-
-        </dt>
-        <dd>Compute Clustering Deviation Index (CDI) for Single-Cell Clustering Evaluation</dd>
-
-        <dt>
-
           <code><a href="calc_generative_precision_recall.html">calc_generative_precision_recall()</a></code>
 
         </dt>
         <dd>Generative Precision and Recall for Single-Cell Manifolds</dd>
+
+        <dt>
+
+          <code><a href="calc_mmd.html">calc_mmd()</a></code>
+
+        </dt>
+        <dd>Maximum Mean Discrepancy (MMD) with Gaussian RBF Kernel</dd>
+
+        <dt>
+
+          <code><a href="calc_frechet_singlecell_distance.html">calc_frechet_singlecell_distance()</a></code>
+
+        </dt>
+        <dd>Frechet Single-Cell Distance (FSD)</dd>
       </dl></div><div class="section level2">
       <h2 id="category-batch-effect-confounder-dynamics">Category 4: Batch Effect &amp; Confounder Dynamics<a class="anchor" aria-label="anchor" href="#category-batch-effect-confounder-dynamics"></a></h2>
 
-      <div class="section-desc"><p>Quantification of technical variation, batch mixing, and local density factor conservation.</p></div>
+      <div class="section-desc"><p>Quantification of technical variation, batch mixing, and local neighborhood confounder integration.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -1053,27 +864,6 @@
 
         </dt>
         <dd>Seurat Mixing Metric</dd>
-
-        <dt>
-
-          <code><a href="calc_ldf.html">calc_ldf()</a></code>
-
-        </dt>
-        <dd>Local Density Factor (LDF)</dd>
-
-        <dt>
-
-          <code><a href="calc_ldf_diff.html">calc_ldf_diff()</a></code>
-
-        </dt>
-        <dd>Local Density Differences (ldfDiff)</dd>
-
-        <dt>
-
-          <code><a href="calc_local_structure_metric.html">calc_local_structure_metric()</a></code>
-
-        </dt>
-        <dd>Local Structure Preservation Metric</dd>
       </dl></div><div class="section level2">
       <h2 id="category-differential-expression-signal-preservation">Category 5: Differential Expression &amp; Signal Preservation<a class="anchor" aria-label="anchor" href="#category-differential-expression-signal-preservation"></a></h2>
 
@@ -1132,27 +922,6 @@
 
         </dt>
         <dd>Evaluate Cell-Type Deconvolution &amp; Mixture Proportion Accuracy</dd>
-
-        <dt>
-
-          <code><a href="calc_variance_decomposition.html">calc_variance_decomposition()</a></code>
-
-        </dt>
-        <dd>Variance Component Decomposition (BASiCS &amp; muscat)</dd>
-
-        <dt>
-
-          <code><a href="calc_intraclass_correlation.html">calc_intraclass_correlation()</a></code>
-
-        </dt>
-        <dd>Calculate Intraclass Correlation Coefficient (ICC) (hierarchicell &amp; rescueSim)</dd>
-
-        <dt>
-
-          <code><a href="calc_expected_mi.html">calc_expected_mi()</a></code>
-
-        </dt>
-        <dd>Expected Mutual Information for Cluster Comparison</dd>
       </dl></div><div class="section level2">
       <h2 id="category-trajectory-lineage-dynamics">Category 6: Trajectory &amp; Lineage Dynamics<a class="anchor" aria-label="anchor" href="#category-trajectory-lineage-dynamics"></a></h2>
 
@@ -1255,13 +1024,6 @@
 
         </dt>
         <dd>Chromatin Accessibility to RNA Regulatory Effect Coupling</dd>
-
-        <dt>
-
-          <code><a href="calc_coregulation_fidelity.html">calc_coregulation_fidelity()</a></code>
-
-        </dt>
-        <dd>Multi-Omics Co-Regulation &amp; Modularity Fidelity</dd>
 
         <dt>
 
