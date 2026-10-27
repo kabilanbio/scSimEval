@@ -244,7 +244,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -262,9 +262,10 @@
 <li><a class="dropdown-item" href="../articles/demo-scrna.html">1. scRNA-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-scatac.html">2. scATAC-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
+    <li><a class="dropdown-item" href="../articles/demo-saved-rds.html">4. Analyzing Pre-Saved Benchmark (.rds)</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (62 Metrics)</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -304,8 +305,11 @@ must preserve not only the distinct statistical properties of each
 individual modality, but also the biological coupling and regulatory
 relationships between them.</p>
 <p><code>scSimEval</code> is designed to evaluate simulation fidelity
-across <strong>three distinct multiomics experimental designs</strong>,
-each with a different level of cell-level pairing between modalities.
+across <strong>two primary multiomics experimental designs</strong>,
+each tailored to the level of cell-level pairing between modalities:
+<strong>Paired Multiomics</strong> (co-assay profiling of identical
+individual cells) and <strong>Unpaired Multiomics</strong> (independent
+profiling of separate cells from the same biological system).
 Understanding which design your simulated data belongs to is essential
 for selecting the correct evaluation functions.</p>
 <hr>
@@ -400,47 +404,13 @@ population-level functions listed above, and combine results with
 <hr>
 </div>
 <div class="section level3">
-<h3 id="mosaic-multiomics-partial-co-measurement">1.3 Mosaic Multiomics (Partial co-measurement)<a class="anchor" aria-label="anchor" href="#mosaic-multiomics-partial-co-measurement"></a>
-</h3>
-<p><strong>Definition:</strong> A <strong>subset of cells</strong> has
-measurements in both modalities, while the remaining cells have
-measurements in only one modality. This arises from experimental designs
-that pool paired and unpaired samples, or from modality dropout in
-co-assay experiments.</p>
-<p><strong>Technologies:</strong> DOGMA-seq (DNA + RNA + protein + ATAC,
-but with high dropout), mosaic pooling designs (mixing Multiome cells
-with scRNA-only or scATAC-only cells), partially overlapping patient
-cohorts</p>
-<p><strong>Simulators:</strong> MultiVI (Lopez et al., <em>Nat
-Methods</em> 2023), Cobolt, MOFA+ imputation</p>
-<p><strong>What scSimEval can evaluate:</strong></p>
-<ul>
-<li>✅ Full unimodal evaluation on the <strong>complete</strong>
-single-modality matrices (Categories 1–6, 8)</li>
-<li>✅ Paired Category 7 coupling metrics on the <strong>co-assayed cell
-subset only</strong>
-</li>
-<li>✅ Population-level cross-modal metrics on the full matrices</li>
-<li>⚠️ Recommendation: Extract the co-assayed subset first, then call
-paired metrics on it</li>
-</ul>
-<hr>
-</div>
-<div class="section level3">
-<h3 id="metric-compatibility-summary">1.4 Metric Compatibility Summary<a class="anchor" aria-label="anchor" href="#metric-compatibility-summary"></a>
+<h3 id="metric-compatibility-summary">1.3 Metric Compatibility Summary<a class="anchor" aria-label="anchor" href="#metric-compatibility-summary"></a>
 </h3>
 <table class="table">
-<colgroup>
-<col width="16%">
-<col width="27%">
-<col width="27%">
-<col width="27%">
-</colgroup>
 <thead><tr class="header">
 <th>Metric / Function</th>
 <th align="center">Paired</th>
 <th align="center">Unpaired</th>
-<th align="center">Mosaic (paired subset)</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -448,11 +418,9 @@ paired metrics on it</li>
 <code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code> per modality</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
-<td align="center">✅</td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/evaluate_clustering_metrics.html">evaluate_clustering_metrics()</a></code></td>
-<td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
@@ -460,11 +428,9 @@ paired metrics on it</li>
 <td><code><a href="../reference/evaluate_batch_metrics.html">evaluate_batch_metrics()</a></code></td>
 <td align="center">✅</td>
 <td align="center">✅</td>
-<td align="center">✅</td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/evaluate_deg_fidelity.html">evaluate_deg_fidelity()</a></code></td>
-<td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
@@ -472,11 +438,9 @@ paired metrics on it</li>
 <td><code><a href="../reference/evaluate_trajectory_metrics.html">evaluate_trajectory_metrics()</a></code></td>
 <td align="center">✅</td>
 <td align="center">✅</td>
-<td align="center">✅</td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/calc_coexpression_module_fidelity.html">calc_coexpression_module_fidelity()</a></code></td>
-<td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
@@ -484,11 +448,9 @@ paired metrics on it</li>
 <td><code><a href="../reference/calc_peak_coaccessibility_fidelity.html">calc_peak_coaccessibility_fidelity()</a></code></td>
 <td align="center">✅</td>
 <td align="center">✅</td>
-<td align="center">✅</td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/calc_accessibility_profile_concordance.html">calc_accessibility_profile_concordance()</a></code></td>
-<td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
@@ -496,11 +458,9 @@ paired metrics on it</li>
 <td><code><a href="../reference/calc_network_jaccard.html">calc_network_jaccard()</a></code></td>
 <td align="center">✅</td>
 <td align="center">✅</td>
-<td align="center">✅</td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/evaluate_cross_modal_prediction.html">evaluate_cross_modal_prediction()</a></code></td>
-<td align="center">✅</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
@@ -508,37 +468,31 @@ paired metrics on it</li>
 <td><code><a href="../reference/calc_modality_alignment.html">calc_modality_alignment()</a></code></td>
 <td align="center">✅</td>
 <td align="center">⚠️ needs integration first</td>
-<td align="center">✅ on subset</td>
 </tr>
 <tr class="even">
 <td><strong><code><a href="../reference/calc_foscttm.html">calc_foscttm()</a></code></strong></td>
 <td align="center">✅</td>
 <td align="center">❌</td>
-<td align="center">✅ on subset</td>
 </tr>
 <tr class="odd">
 <td><strong><code><a href="../reference/calc_cross_modal_generation.html">calc_cross_modal_generation()</a></code></strong></td>
 <td align="center">✅</td>
 <td align="center">❌</td>
-<td align="center">✅ on subset</td>
 </tr>
 <tr class="even">
 <td><strong><code><a href="../reference/calc_atac_rna_coupling.html">calc_atac_rna_coupling()</a></code></strong></td>
 <td align="center">✅</td>
 <td align="center">❌</td>
-<td align="center">✅ on subset</td>
 </tr>
 <tr class="odd">
 <td><strong><code><a href="../reference/calc_cross_modality_correlation.html">calc_cross_modality_correlation()</a></code></strong></td>
 <td align="center">✅</td>
 <td align="center">❌</td>
-<td align="center">✅ on subset</td>
 </tr>
 <tr class="even">
 <td><strong><code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code></strong></td>
 <td align="center">✅</td>
 <td align="center">❌ direct use</td>
-<td align="center">✅ on subset</td>
 </tr>
 </tbody>
 </table>
@@ -648,13 +602,13 @@ categories:</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">master_eval</span><span class="op">$</span><span class="va">benchmark_summary_table</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                    Category     Property        Metric        Value Modality</span></span>
-<span><span class="co">#&gt; 1 Distributional Properties library_size           MAD 1.500000e+01      rna</span></span>
-<span><span class="co">#&gt; 2 Distributional Properties library_size            KS 2.125000e-01      rna</span></span>
-<span><span class="co">#&gt; 3 Distributional Properties library_size           MAE 1.506250e+01      rna</span></span>
-<span><span class="co">#&gt; 4 Distributional Properties library_size          RMSE 1.571504e+01      rna</span></span>
-<span><span class="co">#&gt; 5 Distributional Properties library_size            OV 8.370258e-01      rna</span></span>
-<span><span class="co">#&gt; 6 Distributional Properties library_size Bhattacharyya 1.188839e-04      rna</span></span></code></pre></div>
+<span><span class="co">#&gt;                    Category     Property         Metric         Value Modality</span></span>
+<span><span class="co">#&gt; 1 Distributional Properties library_size    Wasserstein 15.0625000000      rna</span></span>
+<span><span class="co">#&gt; 2 Distributional Properties library_size             KS  0.2125000000      rna</span></span>
+<span><span class="co">#&gt; 3 Distributional Properties library_size            MAD 15.0000000000      rna</span></span>
+<span><span class="co">#&gt; 4 Distributional Properties library_size  Bhattacharyya  0.0001188839      rna</span></span>
+<span><span class="co">#&gt; 5 Distributional Properties library_size Runs_Statistic -1.7447479960      rna</span></span>
+<span><span class="co">#&gt; 6 Distributional Properties library_size    NN_Mismatch  0.1750000000      rna</span></span></code></pre></div>
 <blockquote>
 <p><strong>Parallel Multi-Core Acceleration
 (<code>threads</code>):</strong> On multi-core systems or HPC nodes, set
@@ -746,76 +700,11 @@ biologically false for unpaired experiments.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="part-4-evaluating-mosaic-multiomics">Part 4: Evaluating Mosaic Multiomics<a class="anchor" aria-label="anchor" href="#part-4-evaluating-mosaic-multiomics"></a>
-</h2>
-<p>For mosaic data (where only some cells have both modalities), the
-strategy is:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Extract co-assayed cells</strong> — the subset that has
-measurements in both RNA and ATAC.</li>
-<li>
-<strong>Run paired metrics</strong> on this subset using
-<code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code> or individual Category 7
-functions.</li>
-<li>
-<strong>Run unimodal metrics</strong> on the full single-modality
-matrices.</li>
-</ol>
-<div class="section level3">
-<h3 id="step-by-step-workflow-for-mosaic-data">4.1 Step-by-Step Workflow for Mosaic Data<a class="anchor" aria-label="anchor" href="#step-by-step-workflow-for-mosaic-data"></a>
-</h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Suppose your mosaic simulator output looks like this:</span></span>
-<span><span class="co"># - sim_rna_full: RNA matrix for ALL cells (including RNA-only cells)</span></span>
-<span><span class="co"># - sim_atac_full: ATAC matrix for ALL cells (including ATAC-only cells)</span></span>
-<span><span class="co"># - paired_cell_idx: logical or integer index of cells with BOTH modalities</span></span>
-<span></span>
-<span><span class="co"># ── Step 1: Identify co-assayed cell subset ───────────────────────────────────</span></span>
-<span><span class="co"># (This index should come from your simulator's output metadata)</span></span>
-<span><span class="co"># Example: first 200 cells are co-assayed, rest are single-modality</span></span>
-<span><span class="va">paired_idx</span>   <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">200</span></span>
-<span></span>
-<span><span class="va">sim_rna_paired</span>  <span class="op">&lt;-</span> <span class="va">sim_rna_full</span><span class="op">[</span>, <span class="va">paired_idx</span><span class="op">]</span></span>
-<span><span class="va">sim_atac_paired</span> <span class="op">&lt;-</span> <span class="va">sim_atac_full</span><span class="op">[</span>, <span class="va">paired_idx</span><span class="op">]</span></span>
-<span><span class="va">ref_rna_paired</span>  <span class="op">&lt;-</span> <span class="va">ref_rna_full</span><span class="op">[</span>, <span class="va">paired_idx</span><span class="op">]</span></span>
-<span><span class="va">ref_atac_paired</span> <span class="op">&lt;-</span> <span class="va">ref_atac_full</span><span class="op">[</span>, <span class="va">paired_idx</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># ── Step 2: Paired coupling metrics on the co-assayed subset ──────────────────</span></span>
-<span><span class="va">paired_eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy</a></span><span class="op">(</span></span>
-<span>  ref_multi  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>rna <span class="op">=</span> <span class="va">ref_rna_paired</span>, atac <span class="op">=</span> <span class="va">ref_atac_paired</span><span class="op">)</span>,</span>
-<span>  sim_multi  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>rna <span class="op">=</span> <span class="va">sim_rna_paired</span>, atac <span class="op">=</span> <span class="va">sim_atac_paired</span><span class="op">)</span>,</span>
-<span>  cell_types <span class="op">=</span> <span class="va">cell_types_paired</span>,</span>
-<span>  verbose    <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># ── Step 3: Full unimodal evaluation on the complete matrices ─────────────────</span></span>
-<span><span class="va">rna_full_eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy</a></span><span class="op">(</span></span>
-<span>  ref_data <span class="op">=</span> <span class="va">ref_rna_full</span>,</span>
-<span>  sim_data <span class="op">=</span> <span class="va">sim_rna_full</span>,</span>
-<span>  compute_bivariate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">atac_full_eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy</a></span><span class="op">(</span></span>
-<span>  ref_data <span class="op">=</span> <span class="va">ref_atac_full</span>,</span>
-<span>  sim_data <span class="op">=</span> <span class="va">sim_atac_full</span>,</span>
-<span>  compute_bivariate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># ── Step 4: Population-level cross-modal metrics (full matrices) ──────────────</span></span>
-<span><span class="va">module_fid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_coexpression_module_fidelity.html">calc_coexpression_module_fidelity</a></span><span class="op">(</span><span class="va">ref_rna_full</span>, <span class="va">sim_rna_full</span><span class="op">)</span></span>
-<span><span class="va">coaccess</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_peak_coaccessibility_fidelity.html">calc_peak_coaccessibility_fidelity</a></span><span class="op">(</span><span class="va">ref_atac_full</span>, <span class="va">sim_atac_full</span><span class="op">)</span></span></code></pre></div>
-<hr>
-</div>
-</div>
-<div class="section level2">
-<h2 id="part-5-visualization">Part 5: Visualization<a class="anchor" aria-label="anchor" href="#part-5-visualization"></a>
+<h2 id="part-4-visualization">Part 4: Visualization<a class="anchor" aria-label="anchor" href="#part-4-visualization"></a>
 </h2>
 <p><code>scSimEval</code> visualization functions work seamlessly across
 unimodal, paired, and unpaired multiomics configurations:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Multi-dataset consolidated benchmark bubble matrix</span></span>
 <span><span class="fu"><a href="../reference/plot_benchmark_bubble_matrix.html">plot_benchmark_bubble_matrix</a></span><span class="op">(</span></span>
 <span>  data  <span class="op">=</span> <span class="va">consolidated</span>,</span>
@@ -828,13 +717,13 @@ unimodal, paired, and unpaired multiomics configurations:</p>
 <span>  title <span class="op">=</span> <span class="st">"Multiomics Simulator Leaderboard"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="low-dimensional-multiomics-cell-embeddings">5.1 Low-Dimensional Multiomics Cell Embeddings<a class="anchor" aria-label="anchor" href="#low-dimensional-multiomics-cell-embeddings"></a>
+<h3 id="low-dimensional-multiomics-cell-embeddings">4.1 Low-Dimensional Multiomics Cell Embeddings<a class="anchor" aria-label="anchor" href="#low-dimensional-multiomics-cell-embeddings"></a>
 </h3>
 <p>To visually examine whether simulated cells maintain the biological
 manifold of empirical data across modalities, researchers can project
 reference and simulated cells into low-dimensional UMAP, t-SNE, or PCA
 coordinates:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute low-dimensional embeddings for the scRNA-seq modality</span></span>
 <span><span class="va">emb_rna</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_dataset_embeddings.html">compute_dataset_embeddings</a></span><span class="op">(</span></span>
 <span>  reference   <span class="op">=</span> <span class="va">example_multiomics</span><span class="op">$</span><span class="va">ref_multi</span><span class="op">$</span><span class="va">rna</span>,</span>
@@ -852,7 +741,7 @@ coordinates:</p>
 <span>  color_by       <span class="op">=</span> <span class="st">"cell_type"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="demo-multiomics_files/figure-html/multiomics-embeddings-demo-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Quantitative embedding quality metrics</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="../reference/compute_embedding_quality_metrics.html">compute_embedding_quality_metrics</a></span><span class="op">(</span><span class="va">emb_rna</span><span class="op">)</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
@@ -904,7 +793,7 @@ coordinates:</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="part-6-summary">Part 6: Summary<a class="anchor" aria-label="anchor" href="#part-6-summary"></a>
+<h2 id="part-5-summary">Part 5: Summary<a class="anchor" aria-label="anchor" href="#part-5-summary"></a>
 </h2>
 <table class="table">
 <colgroup>
@@ -926,25 +815,19 @@ coordinates:</p>
 <td><strong>Paired</strong></td>
 <td>10x Multiome, SHARE-seq</td>
 <td align="center">✅ Direct</td>
-<td align="center">All 6 metrics</td>
+<td align="center">All Category 7 metrics (FOSCTTM, <a href="mailto:Match@1" class="email">Match@1</a>, Cross-Modal Generation,
+RV coefficient)</td>
 <td><code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code></td>
 </tr>
 <tr class="even">
 <td><strong>Unpaired</strong></td>
 <td>Independent scRNA + scATAC</td>
-<td align="center">❌ Not valid</td>
-<td align="center">Modularity, label transfer, network only</td>
+<td align="center">❌ Not valid (cells differ)</td>
+<td align="center">Population coupling (module fidelity, label transfer,
+peak co-accessibility)</td>
 <td>
 <code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code> × 2 +
 <code><a href="../reference/evaluate_multiple_datasets.html">evaluate_multiple_datasets()</a></code>
-</td>
-</tr>
-<tr class="odd">
-<td><strong>Mosaic</strong></td>
-<td>DOGMA-seq, mosaic pooling</td>
-<td align="center">✅ On paired subset</td>
-<td align="center">All 6 metrics on paired subset</td>
-<td>Subset first, then <code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code>
 </td>
 </tr>
 </tbody>
@@ -952,9 +835,9 @@ coordinates:</p>
 <p>The most important rule: <strong>Cell-pairing metrics (FOSCTTM,
 cross-modal generation, peak-to-gene coupling) are only scientifically
 valid when the RNA and ATAC columns correspond to the same physical
-cells.</strong> For unpaired and mosaic data, rely on population-level
+cells.</strong> For unpaired multiomics data, rely on population-level
 metrics and per-modality unimodal evaluation.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.6.1 (2026-06-24 ucrt)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-w64-mingw32/x64</span></span>
@@ -975,7 +858,7 @@ metrics and per-modality unimodal evaluation.</p>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] scSimEval_0.99.8</span></span>
+<span><span class="co">#&gt; [1] scSimEval_0.99.9</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             </span></span>
@@ -1012,37 +895,38 @@ metrics and per-modality unimodal evaluation.</p>
 <span><span class="co">#&gt;  [63] grid_4.6.1                  waddR_1.27.0               </span></span>
 <span><span class="co">#&gt;  [65] cluster_2.1.8.3             ade4_1.7-24                </span></span>
 <span><span class="co">#&gt;  [67] generics_0.1.4              gtable_0.3.6               </span></span>
-<span><span class="co">#&gt;  [69] class_7.3-24                XVector_0.52.0             </span></span>
-<span><span class="co">#&gt;  [71] flexmix_2.3-21              BiocGenerics_0.59.12       </span></span>
-<span><span class="co">#&gt;  [73] RANN_2.6.3                  pillar_1.11.1              </span></span>
-<span><span class="co">#&gt;  [75] limma_3.99.0                clValid_0.7                </span></span>
-<span><span class="co">#&gt;  [77] robustbase_0.99-7           splines_4.6.1              </span></span>
-<span><span class="co">#&gt;  [79] dplyr_1.2.1                 BiocFileCache_3.3.0        </span></span>
-<span><span class="co">#&gt;  [81] lattice_0.22-9              bit_4.6.0                  </span></span>
-<span><span class="co">#&gt;  [83] tidyselect_1.2.1            SingleCellExperiment_1.35.2</span></span>
-<span><span class="co">#&gt;  [85] locfit_1.5-9.12             clusterSim_0.51-6          </span></span>
-<span><span class="co">#&gt;  [87] knitr_1.52                  reformulas_0.4.4           </span></span>
-<span><span class="co">#&gt;  [89] IRanges_2.47.5              Seqinfo_1.3.2              </span></span>
-<span><span class="co">#&gt;  [91] edgeR_4.99.6                SummarizedExperiment_1.43.0</span></span>
-<span><span class="co">#&gt;  [93] stats4_4.6.1                xfun_0.60                  </span></span>
-<span><span class="co">#&gt;  [95] Biobase_2.73.2              statmod_1.5.2              </span></span>
-<span><span class="co">#&gt;  [97] diptest_0.77-2              randtests_1.0.2            </span></span>
-<span><span class="co">#&gt;  [99] brio_1.1.5                  arm_1.15-3                 </span></span>
-<span><span class="co">#&gt; [101] matrixStats_1.5.0           DEoptimR_1.2-2             </span></span>
-<span><span class="co">#&gt; [103] yaml_2.3.12                 boot_1.3-32                </span></span>
-<span><span class="co">#&gt; [105] eva_0.2.7                   evaluate_1.0.5             </span></span>
-<span><span class="co">#&gt; [107] codetools_0.2-20            MLmetrics_1.1.3            </span></span>
-<span><span class="co">#&gt; [109] kernlab_0.9-33              tibble_3.3.1               </span></span>
-<span><span class="co">#&gt; [111] cli_3.6.6                   RcppParallel_6.2.1         </span></span>
-<span><span class="co">#&gt; [113] systemfonts_1.3.2           Rdpack_2.6.6               </span></span>
-<span><span class="co">#&gt; [115] jquerylib_0.1.4             dichromat_2.0-1            </span></span>
-<span><span class="co">#&gt; [117] Rcpp_1.1.2                  dbplyr_2.6.0               </span></span>
-<span><span class="co">#&gt; [119] coda_0.19-4.1               parallel_4.6.1             </span></span>
-<span><span class="co">#&gt; [121] pkgdown_2.2.1               ggplot2_4.0.3              </span></span>
-<span><span class="co">#&gt; [123] blob_1.3.0                  mclust_6.1.3               </span></span>
-<span><span class="co">#&gt; [125] lme4_2.0-6                  scales_1.4.0               </span></span>
-<span><span class="co">#&gt; [127] e1071_1.7-17                purrr_1.2.2                </span></span>
-<span><span class="co">#&gt; [129] fpc_2.2-15                  rlang_1.3.0</span></span></code></pre></div>
+<span><span class="co">#&gt;  [69] class_7.3-24                data.table_1.18.6.1        </span></span>
+<span><span class="co">#&gt;  [71] XVector_0.52.0              flexmix_2.3-21             </span></span>
+<span><span class="co">#&gt;  [73] BiocGenerics_0.59.12        RANN_2.6.3                 </span></span>
+<span><span class="co">#&gt;  [75] pillar_1.11.1               limma_3.99.0               </span></span>
+<span><span class="co">#&gt;  [77] clValid_0.7                 robustbase_0.99-7          </span></span>
+<span><span class="co">#&gt;  [79] splines_4.6.1               dplyr_1.2.1                </span></span>
+<span><span class="co">#&gt;  [81] BiocFileCache_3.3.0         lattice_0.22-9             </span></span>
+<span><span class="co">#&gt;  [83] bit_4.6.0                   tidyselect_1.2.1           </span></span>
+<span><span class="co">#&gt;  [85] SingleCellExperiment_1.35.2 locfit_1.5-9.12            </span></span>
+<span><span class="co">#&gt;  [87] clusterSim_0.51-6           knitr_1.52                 </span></span>
+<span><span class="co">#&gt;  [89] reformulas_0.4.4            IRanges_2.47.5             </span></span>
+<span><span class="co">#&gt;  [91] Seqinfo_1.3.2               edgeR_4.99.6               </span></span>
+<span><span class="co">#&gt;  [93] SummarizedExperiment_1.43.0 RhpcBLASctl_0.23-42        </span></span>
+<span><span class="co">#&gt;  [95] stats4_4.6.1                xfun_0.60                  </span></span>
+<span><span class="co">#&gt;  [97] Biobase_2.73.2              statmod_1.5.2              </span></span>
+<span><span class="co">#&gt;  [99] diptest_0.77-2              randtests_1.0.2            </span></span>
+<span><span class="co">#&gt; [101] brio_1.1.5                  arm_1.15-3                 </span></span>
+<span><span class="co">#&gt; [103] matrixStats_1.5.0           DEoptimR_1.2-2             </span></span>
+<span><span class="co">#&gt; [105] yaml_2.3.12                 boot_1.3-32                </span></span>
+<span><span class="co">#&gt; [107] eva_0.2.7                   evaluate_1.0.5             </span></span>
+<span><span class="co">#&gt; [109] codetools_0.2-20            MLmetrics_1.1.3            </span></span>
+<span><span class="co">#&gt; [111] kernlab_0.9-33              tibble_3.3.1               </span></span>
+<span><span class="co">#&gt; [113] cli_3.6.6                   RcppParallel_6.2.1         </span></span>
+<span><span class="co">#&gt; [115] systemfonts_1.3.2           Rdpack_2.6.6               </span></span>
+<span><span class="co">#&gt; [117] jquerylib_0.1.4             dichromat_2.0-1            </span></span>
+<span><span class="co">#&gt; [119] Rcpp_1.1.2                  dbplyr_2.6.0               </span></span>
+<span><span class="co">#&gt; [121] coda_0.19-4.1               parallel_4.6.1             </span></span>
+<span><span class="co">#&gt; [123] pkgdown_2.2.1               ggplot2_4.0.3              </span></span>
+<span><span class="co">#&gt; [125] blob_1.3.0                  mclust_6.1.3               </span></span>
+<span><span class="co">#&gt; [127] lme4_2.0-6                  scales_1.4.0               </span></span>
+<span><span class="co">#&gt; [129] e1071_1.7-17                purrr_1.2.2                </span></span>
+<span><span class="co">#&gt; [131] fpc_2.2-15                  rlang_1.3.0</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

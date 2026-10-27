@@ -223,7 +223,7 @@ and after data integration or between reference and simulated datasets."><meta p
 
     <a class="navbar-brand me-2" href="../index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -239,8 +239,9 @@ and after data integration or between reference and simulated datasets."><meta p
   <ul class="dropdown-menu" aria-labelledby="dropdown-demonstrations"><li><a class="dropdown-item" href="../articles/demo-scrna.html">1. scRNA-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-scatac.html">2. scATAC-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
+    <li><a class="dropdown-item" href="../articles/demo-saved-rds.html">4. Analyzing Pre-Saved Benchmark (.rds)</a></li>
   </ul></li>
-<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (62 Metrics)</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -327,24 +328,24 @@ and after data integration or between reference and simulated datasets.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ldf_pre</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.6304210 0.5536720 0.5140292 0.6052923 0.5106538 0.6295239 0.4992143</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8] 0.5272692 0.5573477 0.5094297 0.5364121 0.5009413 0.5191595 0.5228492</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [15] 0.5581926 0.5471400 0.5309170 0.5621214 0.6881166 0.4705998 0.5524502</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [22] 0.5762246 0.6188236 0.5911346 0.5003040 0.4911688 0.5350362 0.8365684</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [29] 0.4755537 0.4997153 0.4904605 0.5220707 0.5018615 0.6858707 0.4716751</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [36] 0.5323691 0.6453296 0.4776717 0.4760221 0.5211208 0.4711035 0.6240535</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [43] 0.6289909 0.4880998 0.5018756 0.4939199 0.5315848 0.5160633 0.4890523</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [50] 0.5411382</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.5584664 0.4882385 0.5484005 0.4851901 0.5130473 0.7360220 0.6200072</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8] 0.4905670 0.5020313 0.5244704 0.6245361 0.5425613 0.5719693 0.5061452</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15] 0.6459696 0.5283880 0.7756749 0.5274256 0.5254505 0.4977375 0.4952705</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [22] 0.6689918 0.5628271 0.4854934 0.5225224 0.5798444 0.4959112 0.5493756</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [29] 0.5380227 0.4843981 0.5780511 0.5991865 0.5305217 0.5335420 0.4880888</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [36] 0.4808848 0.4941464 0.5687223 0.4908002 0.5774380 0.5488743 0.5027382</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [43] 0.6712591 0.4853762 0.5124770 0.4851068 0.5302969 0.4914481 0.5390119</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [50] 0.5912593</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ldf_post</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.6304210 0.5536720 0.5140292 0.6052923 0.5106538 0.6295239 0.4992143</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8] 0.5272692 0.5573477 0.5094297 0.5364121 0.5009413 0.5191595 0.5228492</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [15] 0.5581926 0.5471400 0.5309170 0.5621214 0.6881166 0.4705998 0.5524502</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [22] 0.5762246 0.6188236 0.5911346 0.5003040 0.4911688 0.5350362 0.8365684</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [29] 0.4755537 0.4997153 0.4904605 0.5220707 0.5018615 0.6858707 0.4716751</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [36] 0.5323691 0.6453296 0.4776717 0.4760221 0.5211208 0.4711035 0.6240535</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [43] 0.6289909 0.4880998 0.5018756 0.4939199 0.5315848 0.5160633 0.4890523</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [50] 0.5411382</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.5584664 0.4882385 0.5484005 0.4851901 0.5130473 0.7360220 0.6200072</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8] 0.4905670 0.5020313 0.5244704 0.6245361 0.5425613 0.5719693 0.5061452</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15] 0.6459696 0.5283880 0.7756749 0.5274256 0.5254505 0.4977375 0.4952705</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [22] 0.6689918 0.5628271 0.4854934 0.5225224 0.5798444 0.4959112 0.5493756</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [29] 0.5380227 0.4843981 0.5780511 0.5991865 0.5305217 0.5335420 0.4880888</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [36] 0.4808848 0.4941464 0.5687223 0.4908002 0.5774380 0.5488743 0.5027382</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [43] 0.6712591 0.4853762 0.5124770 0.4851068 0.5302969 0.4914481 0.5390119</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [50] 0.5912593</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>

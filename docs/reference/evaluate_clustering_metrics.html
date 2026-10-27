@@ -225,7 +225,7 @@ Hungarian F1/Precision/Recall, ARI, NMI, AMI, FMI, Homogeneity, Completeness, V-
 
     <a class="navbar-brand me-2" href="../index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -241,8 +241,9 @@ Hungarian F1/Precision/Recall, ARI, NMI, AMI, FMI, Homogeneity, Completeness, V-
   <ul class="dropdown-menu" aria-labelledby="dropdown-demonstrations"><li><a class="dropdown-item" href="../articles/demo-scrna.html">1. scRNA-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-scatac.html">2. scATAC-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
+    <li><a class="dropdown-item" href="../articles/demo-saved-rds.html">4. Analyzing Pre-Saved Benchmark (.rds)</a></li>
   </ul></li>
-<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (62 Metrics)</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -323,16 +324,16 @@ Hungarian F1/Precision/Recall, ARI, NMI, AMI, FMI, Homogeneity, Completeness, V-
 <span class="r-in"><span><span class="fu">evaluate_clustering_metrics</span><span class="op">(</span><span class="va">data</span>, <span class="va">cl</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>NaNs produced</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $silhouette_sim</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.02249665</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.02692252</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $silhouette</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.02249665</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.02692252</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $dunn_sim</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5777598</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.496266</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $dunn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5777598</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.496266</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $connectivity_sim</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] NA</span>
@@ -341,83 +342,83 @@ Hungarian F1/Precision/Recall, ARI, NMI, AMI, FMI, Homogeneity, Completeness, V-
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $davies_bouldin_sim</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3.205025</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3.179638</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $davies_bouldin</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3.205025</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3.179638</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $calinski_harabasz_sim</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7772449</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7910691</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $calinski_harabasz</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7772449</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7910691</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $neighborhood_purity</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.42</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $cdi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -4.441104</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -4.283556</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $CDI_AIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -4.441104</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -4.283556</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $CDI_BIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -4.380587</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -4.223039</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $clustering_accuracy</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $accuracy</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $hungarian_F1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.6969697</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.4949495</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $hungarian_precision</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7083333</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $hungarian_recall</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ari</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.05970149</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.119403</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ARI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.05970149</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.119403</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $nmi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.1263464 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $NMI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.1263464 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ami</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.0403207</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $AMI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.0403207</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $fmi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.48795</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.39036</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $FMI</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.48795</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.39036</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $homogeneity</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1245112</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $completeness</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1282364</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $v_measure</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1263464</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $matched_pairs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   pred truth precision recall        F1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1     A 0.6666667    0.8 0.7272727</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2    2     B 0.7500000    0.6 0.6666667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    2     A       0.5    0.6 0.5454545</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    1     B       0.5    0.4 0.4444444</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>

@@ -267,6 +267,8 @@ navbar:
           href: articles/demo-scatac.html
         - text: "3. Multiomics (RNA + ATAC) Evaluation"
           href: articles/demo-multiomics.html
+        - text: "4. Analyzing Pre-Saved Benchmark (.rds)"
+          href: articles/demo-saved-rds.html
     - text: "Metric Catalog (48 Metrics)"
       href: articles/metrics-catalog.html
     - text: "Reference"
@@ -285,6 +287,7 @@ reference:
       - evaluate_multiomics_accuracy
       - evaluate_multiple_datasets
       - benchmark_simulation_suite
+      - combine_benchmark_results
 
   - title: "High-Resolution Visualization Suite (600 DPI)"
     desc: "Publication-grade visualization functions designed for multi-metric and cross-simulator benchmarking."
@@ -303,6 +306,7 @@ reference:
       - plot_dataset_embeddings
       - compute_embedding_quality_metrics
       - compute_method_leaderboard
+      - zoom_plot
 
   - title: "Interactive Graphical Interface (Shiny App Studio)"
     desc: "Interactive Shiny web application providing point-and-click simulation benchmarking, UMAP/t-SNE embedding explorations, and dynamic data packaging."
@@ -444,6 +448,8 @@ reference:
       - infer_scrna_lineage_tree
       - calc_pseudotime_correlation
       - calc_tree_height_discrepancy
+      - calc_trajectory_graph_alignment
+      - calc_lineage_expression_fidelity
 
   - title: "Category 7: Multiomics Cross-Modality Coupling"
     desc: "Inter-modality regulatory coupling, peak-to-gene linkages, and joint chromatin-expression modularity."
@@ -477,6 +483,7 @@ articles:
       - demo-scrna
       - demo-scatac
       - demo-multiomics
+      - demo-saved-rds
 
   - title: "Reference Materials"
     navbar: "Reference Materials"

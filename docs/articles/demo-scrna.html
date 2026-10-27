@@ -262,6 +262,7 @@
 <li><a class="dropdown-item" href="../articles/demo-scrna.html">1. scRNA-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-scatac.html">2. scATAC-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
+    <li><a class="dropdown-item" href="../articles/demo-saved-rds.html">4. Analyzing Pre-Saved Benchmark (.rds)</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
@@ -354,13 +355,13 @@ match the real reference data using
 <span><span class="co"># Inspect statistical distance metrics for library size</span></span>
 <span><span class="va">lib_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">unimodal_res</span><span class="op">$</span><span class="va">metrics_summary_table</span>, <span class="va">Property</span> <span class="op">==</span> <span class="st">"library_size"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">lib_summary</span>, <span class="fl">6</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                    Category     Property        Metric        Value</span></span>
-<span><span class="co">#&gt; 1 Distributional Properties library_size           MAD 1.500000e+01</span></span>
-<span><span class="co">#&gt; 2 Distributional Properties library_size            KS 2.125000e-01</span></span>
-<span><span class="co">#&gt; 3 Distributional Properties library_size           MAE 1.506250e+01</span></span>
-<span><span class="co">#&gt; 4 Distributional Properties library_size          RMSE 1.571504e+01</span></span>
-<span><span class="co">#&gt; 5 Distributional Properties library_size            OV 8.370258e-01</span></span>
-<span><span class="co">#&gt; 6 Distributional Properties library_size Bhattacharyya 1.188839e-04</span></span></code></pre></div>
+<span><span class="co">#&gt;                    Category     Property         Metric         Value</span></span>
+<span><span class="co">#&gt; 1 Distributional Properties library_size    Wasserstein 15.0625000000</span></span>
+<span><span class="co">#&gt; 2 Distributional Properties library_size             KS  0.2125000000</span></span>
+<span><span class="co">#&gt; 3 Distributional Properties library_size            MAD 15.0000000000</span></span>
+<span><span class="co">#&gt; 4 Distributional Properties library_size  Bhattacharyya  0.0001188839</span></span>
+<span><span class="co">#&gt; 5 Distributional Properties library_size Runs_Statistic -1.7447479960</span></span>
+<span><span class="co">#&gt; 6 Distributional Properties library_size    NN_Mismatch  0.1750000000</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="cell-clustering-and-concordance-category-3">2.2 Cell Clustering and Concordance (Category 3)<a class="anchor" aria-label="anchor" href="#cell-clustering-and-concordance-category-3"></a>
@@ -476,13 +477,13 @@ evaluation suite in a single coordinated command:</p>
 <span></span>
 <span><span class="co"># Preview tidy evaluation summary</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">eval_res</span><span class="op">$</span><span class="va">metrics_summary_table</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                    Category     Property        Metric        Value</span></span>
-<span><span class="co">#&gt; 1 Distributional Properties library_size           MAD 1.500000e+01</span></span>
-<span><span class="co">#&gt; 2 Distributional Properties library_size            KS 2.125000e-01</span></span>
-<span><span class="co">#&gt; 3 Distributional Properties library_size           MAE 1.506250e+01</span></span>
-<span><span class="co">#&gt; 4 Distributional Properties library_size          RMSE 1.571504e+01</span></span>
-<span><span class="co">#&gt; 5 Distributional Properties library_size            OV 8.370258e-01</span></span>
-<span><span class="co">#&gt; 6 Distributional Properties library_size Bhattacharyya 1.188839e-04</span></span></code></pre></div>
+<span><span class="co">#&gt;                    Category     Property         Metric         Value</span></span>
+<span><span class="co">#&gt; 1 Distributional Properties library_size    Wasserstein 15.0625000000</span></span>
+<span><span class="co">#&gt; 2 Distributional Properties library_size             KS  0.2125000000</span></span>
+<span><span class="co">#&gt; 3 Distributional Properties library_size            MAD 15.0000000000</span></span>
+<span><span class="co">#&gt; 4 Distributional Properties library_size  Bhattacharyya  0.0001188839</span></span>
+<span><span class="co">#&gt; 5 Distributional Properties library_size Runs_Statistic -1.7447479960</span></span>
+<span><span class="co">#&gt; 6 Distributional Properties library_size    NN_Mismatch  0.1750000000</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">

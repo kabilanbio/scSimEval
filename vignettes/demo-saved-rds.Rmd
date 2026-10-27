@@ -1,0 +1,195 @@
+---
+title: "Demonstration 4: Analyzing Pre-Saved Benchmark Results (.rds)"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: false
+vignette: >
+  %\VignetteIndexEntry{Demonstration 4: Analyzing Pre-Saved Benchmark Results (.rds)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r knitr-setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+# Introduction
+
+In large-scale benchmarking studies involving multiple simulation methods, diverse biological datasets, or multi-core high-performance computing (HPC) clusters, running the full 48 Gold-Standard metric evaluation can take considerable time. Once an evaluation is complete, researchers typically serialize the output using `saveRDS()` for long-term storage, publication sharing, and reproducible downstream analysis.
+
+**`scSimEval`** is architected to allow instant reloading, re-analysis, leaderboard ranking, and publication-grade visualization of any pre-saved `.rds` benchmark file — **without re-computing a single metric**.
+
+This tutorial demonstrates how to load, inspect, rank, and visualize pre-saved benchmark results in R console sessions and prepare them for interactive exploration.
+
+---
+
+# 1. Loading a Pre-Saved Benchmark Object
+
+`scSimEval` bundles a pre-computed multi-dataset benchmark archive in its package directory. You can load it directly via base R's `readRDS()`:
+
+```{r load-rds}
+library(scSimEval)
+
+# Locate the bundled benchmark file or supply your own path
+rds_path <- system.file("shiny", "scSimEvalApp", "data", "demo_multidataset_benchmark.rds", package = "scSimEval")
+if (rds_path == "") {
+  rds_path <- file.path("..", "inst", "shiny", "scSimEvalApp", "data", "demo_multidataset_benchmark.rds")
+}
+
+# Ingest the serialized benchmark object
+bench_data <- readRDS(rds_path)
+
+# Verify class and contents
+class(bench_data)
+names(bench_data)
+```
+
+The loaded object contains:
+* `benchmark_df`: The complete tidy evaluations table across all simulators and metrics.
+* `benchmark_summary_table`: Formatted scores ready for reporting.
+* `methods`: Character vector of evaluated simulators (e.g., `scDesign3`, `SCRIP`, `dyngen`, `Splatter`, `SymSim`, `simATAC`).
+* `datasets`: Evaluated datasets (e.g., `Rice Bud (Paired)`, `Soybean Root (Unpaired)`).
+
+---
+
+# 2. Inspecting the Benchmark Structure
+
+The core of every `scSimEval` benchmark object is a tidy data frame following standard tidyverse conventions:
+
+```{r inspect-table}
+# Preview top rows of the benchmark scores
+head(bench_data$benchmark_df[, c("Dataset", "Method", "Category", "Metric", "Score_Raw", "Score")], 8)
+```
+
+Each row records:
+* **`Dataset`**: Experimental source or condition.
+* **`Method`**: Simulation algorithm evaluated.
+* **`Category`**: One of the 8 canonical evaluation categories (e.g., `(I) Distributional Properties`, `(V) Biological Signal & Downstream Fidelity`).
+* **`Metric`**: Name of the Gold-Standard metric.
+* **`Score_Raw`**: Unnormalized empirical value in physical units (seconds, peak RAM in MiB, correlation coefficient, Kolmogorov-Smirnov distance).
+* **`Score`**: Standardized direction-aware fidelity score normalized to $[0, 1]$, where $1.0$ represents top fidelity.
+
+---
+
+# 3. Generating Simulator Leaderboards
+
+Use `compute_method_leaderboard()` to compute composite rankings across all 48 Gold-Standard metrics:
+
+```{r default-leaderboard}
+# Compute standard overall composite leaderboard
+leaderboard <- compute_method_leaderboard(bench_data)
+print(leaderboard)
+```
+
+### 3.1 Category-Specific Leaderboards
+
+In addition to the global composite leaderboard, researchers often evaluate simulator rankings within specific biological domains. For example, to assess which method excels at capturing **Category I (Distributional Properties)**:
+
+```{r category-leaderboard}
+# Extract Category I evaluation rows
+cat1_df <- subset(bench_data$benchmark_df, Category == "(I) Distributional Properties")
+
+# Compute Category I leaderboard
+cat1_leaderboard <- compute_method_leaderboard(cat1_df)
+print(cat1_leaderboard)
+```
+
+---
+
+# 4. Generating Publication-Quality Figures
+
+All visualization functions in `scSimEval` accept the loaded `.rds` object directly:
+
+### 4.1 Comparative Bubble Matrix
+
+Generate the flagship multi-dimensional bubble matrix mapping every simulator across all 48 metrics:
+
+```r
+# Multi-simulator comparative bubble matrix
+p_bubble <- plot_benchmark_bubble_matrix(
+  data       = bench_data,
+  title      = "Cross-Dataset Simulation Fidelity Benchmarking",
+  theme_mode = "publication"
+)
+print(p_bubble)
+```
+
+### 4.2 Category Summary Bars
+
+Generate rank-ordered horizontal bar charts comparing simulator performance across each category:
+
+```r
+# Category-wise summary horizontal bar chart
+p_summary <- plot_evaluation_summary(
+  data  = bench_data,
+  title = "Overall Simulation Fidelity by Category"
+)
+print(p_summary)
+```
+
+### 4.3 Interactive Figure Zooming with `zoom_plot()`
+
+When inspecting dense figures with many metrics or simulators, use `zoom_plot()` to focus on specific coordinate windows:
+
+```r
+# Magnify top-left corner of the bubble matrix (first 10 metrics, top 3 simulators)
+zoom_plot(p_bubble, x_range = c(1, 10), y_range = c(4, 6))
+```
+
+---
+
+# 5. Merging Multiple Saved Benchmark Runs
+
+When benchmark evaluations are executed across different computing nodes or datasets at different times, use `combine_benchmark_results()` or `append_benchmark_results()` to merge individual `.rds` objects into a single consolidated benchmark:
+
+```r
+# Load two independently computed benchmark runs
+run1 <- readRDS("benchmark_dataset_A.rds")
+run2 <- readRDS("benchmark_dataset_B.rds")
+
+# Merge into a single cross-dataset benchmark object
+merged_benchmark <- combine_benchmark_results(
+  run1, run2,
+  dataset_names = c("Dataset_A", "Dataset_B")
+)
+
+# Compute unified cross-dataset leaderboard
+compute_method_leaderboard(merged_benchmark)
+```
+
+---
+
+# 6. Instant Exploration in Shiny Studio
+
+Any `.rds` benchmark file saved from `evaluate_simulation_accuracy()`, `evaluate_multiomics_accuracy()`, or `evaluate_multiple_datasets()` can also be loaded into the **scSimEval Shiny Studio** with zero latency:
+
+1. Launch the app in R:
+   ```r
+   launch_scSimEval_app()
+   ```
+2. Navigate to **Data Hub** $\rightarrow$ **Mode 4: Upload Pre-Computed Benchmark Table (.rds / .csv)**.
+3. Select your `.rds` file.
+4. The entire Shiny interface — including the 48-metric Bubble Matrix, Fidelity Leaderboards, and all 8 Visualization Panels — populates instantaneously without re-running any computations.
+
+---
+
+# 7. Summary
+
+Analyzing pre-saved `.rds` benchmark files allows you to:
+* **Avoid redundant computation**: Calculate metrics once on an HPC cluster and re-analyze instantly on a local workstation.
+* **Explore custom biological priorities**: Re-weight categories dynamically using `compute_method_leaderboard()`.
+* **Export publication figures**: Render high-resolution (600 DPI) bubble matrices, heatmaps, and summary bars on demand.
+* **Seamlessly bridge CLI and GUI**: Move effortlessly between R console workflows and the interactive Shiny Studio interface.
+
+```{r session-info}
+sessionInfo()
+```

@@ -31,10 +31,11 @@ cellular features — most commonly gene expression (scRNA-seq) and chromatin ac
 preserve not only the distinct statistical properties of each individual modality, but also
 the biological coupling and regulatory relationships between them.
 
-`scSimEval` is designed to evaluate simulation fidelity across **three distinct multiomics
-experimental designs**, each with a different level of cell-level pairing between modalities.
-Understanding which design your simulated data belongs to is essential for selecting the
-correct evaluation functions.
+`scSimEval` is designed to evaluate simulation fidelity across **two primary multiomics
+experimental designs**, each tailored to the level of cell-level pairing between modalities:
+**Paired Multiomics** (co-assay profiling of identical individual cells) and **Unpaired Multiomics**
+(independent profiling of separate cells from the same biological system). Understanding which design
+your simulated data belongs to is essential for selecting the correct evaluation functions.
 
 ---
 
@@ -96,47 +97,26 @@ the same tissue, sci-ATAC-seq paired with scRNA-seq on sibling aliquots
 
 ---
 
-## 1.3 Mosaic Multiomics (Partial co-measurement)
+## 1.3 Metric Compatibility Summary
 
-**Definition:** A **subset of cells** has measurements in both modalities, while the
-remaining cells have measurements in only one modality. This arises from experimental designs
-that pool paired and unpaired samples, or from modality dropout in co-assay experiments.
-
-**Technologies:** DOGMA-seq (DNA + RNA + protein + ATAC, but with high dropout), mosaic
-pooling designs (mixing Multiome cells with scRNA-only or scATAC-only cells), partially
-overlapping patient cohorts
-
-**Simulators:** MultiVI (Lopez et al., *Nat Methods* 2023), Cobolt, MOFA+ imputation
-
-**What scSimEval can evaluate:**
-
-* ✅ Full unimodal evaluation on the **complete** single-modality matrices (Categories 1–6, 8)
-* ✅ Paired Category 7 coupling metrics on the **co-assayed cell subset only**
-* ✅ Population-level cross-modal metrics on the full matrices
-* ⚠️ Recommendation: Extract the co-assayed subset first, then call paired metrics on it
-
----
-
-## 1.4 Metric Compatibility Summary
-
-| Metric / Function | Paired | Unpaired | Mosaic (paired subset) |
-|---|:---:|:---:|:---:|
-| `evaluate_simulation_accuracy()` per modality | ✅ | ✅ | ✅ |
-| `evaluate_clustering_metrics()` | ✅ | ✅ | ✅ |
-| `evaluate_batch_metrics()` | ✅ | ✅ | ✅ |
-| `evaluate_deg_fidelity()` | ✅ | ✅ | ✅ |
-| `evaluate_trajectory_metrics()` | ✅ | ✅ | ✅ |
-| `calc_coexpression_module_fidelity()` | ✅ | ✅ | ✅ |
-| `calc_peak_coaccessibility_fidelity()` | ✅ | ✅ | ✅ |
-| `calc_accessibility_profile_concordance()` | ✅ | ✅ | ✅ |
-| `calc_network_jaccard()` | ✅ | ✅ | ✅ |
-| `evaluate_cross_modal_prediction()` | ✅ | ✅ | ✅ |
-| `calc_modality_alignment()` | ✅ | ⚠️ needs integration first | ✅ on subset |
-| **`calc_foscttm()`** | ✅ | ❌ | ✅ on subset |
-| **`calc_cross_modal_generation()`** | ✅ | ❌ | ✅ on subset |
-| **`calc_atac_rna_coupling()`** | ✅ | ❌ | ✅ on subset |
-| **`calc_cross_modality_correlation()`** | ✅ | ❌ | ✅ on subset |
-| **`evaluate_multiomics_accuracy()`** | ✅ | ❌ direct use | ✅ on subset |
+| Metric / Function | Paired | Unpaired |
+|---|:---:|:---:|
+| `evaluate_simulation_accuracy()` per modality | ✅ | ✅ |
+| `evaluate_clustering_metrics()` | ✅ | ✅ |
+| `evaluate_batch_metrics()` | ✅ | ✅ |
+| `evaluate_deg_fidelity()` | ✅ | ✅ |
+| `evaluate_trajectory_metrics()` | ✅ | ✅ |
+| `calc_coexpression_module_fidelity()` | ✅ | ✅ |
+| `calc_peak_coaccessibility_fidelity()` | ✅ | ✅ |
+| `calc_accessibility_profile_concordance()` | ✅ | ✅ |
+| `calc_network_jaccard()` | ✅ | ✅ |
+| `evaluate_cross_modal_prediction()` | ✅ | ✅ |
+| `calc_modality_alignment()` | ✅ | ⚠️ needs integration first |
+| **`calc_foscttm()`** | ✅ | ❌ |
+| **`calc_cross_modal_generation()`** | ✅ | ❌ |
+| **`calc_atac_rna_coupling()`** | ✅ | ❌ |
+| **`calc_cross_modality_correlation()`** | ✅ | ❌ |
+| **`evaluate_multiomics_accuracy()`** | ✅ | ❌ direct use |
 
 ---
 
@@ -307,64 +287,7 @@ print(consolidated$dataset_overview)
 
 ---
 
-# Part 4: Evaluating Mosaic Multiomics
-
-For mosaic data (where only some cells have both modalities), the strategy is:
-
-1. **Extract co-assayed cells** — the subset that has measurements in both RNA and ATAC.
-2. **Run paired metrics** on this subset using `evaluate_multiomics_accuracy()` or
-   individual Category 7 functions.
-3. **Run unimodal metrics** on the full single-modality matrices.
-
-## 4.1 Step-by-Step Workflow for Mosaic Data
-
-```r
-# Suppose your mosaic simulator output looks like this:
-# - sim_rna_full: RNA matrix for ALL cells (including RNA-only cells)
-# - sim_atac_full: ATAC matrix for ALL cells (including ATAC-only cells)
-# - paired_cell_idx: logical or integer index of cells with BOTH modalities
-
-# ── Step 1: Identify co-assayed cell subset ───────────────────────────────────
-# (This index should come from your simulator's output metadata)
-# Example: first 200 cells are co-assayed, rest are single-modality
-paired_idx   <- 1:200
-
-sim_rna_paired  <- sim_rna_full[, paired_idx]
-sim_atac_paired <- sim_atac_full[, paired_idx]
-ref_rna_paired  <- ref_rna_full[, paired_idx]
-ref_atac_paired <- ref_atac_full[, paired_idx]
-
-# ── Step 2: Paired coupling metrics on the co-assayed subset ──────────────────
-paired_eval <- evaluate_multiomics_accuracy(
-  ref_multi  = list(rna = ref_rna_paired, atac = ref_atac_paired),
-  sim_multi  = list(rna = sim_rna_paired, atac = sim_atac_paired),
-  cell_types = cell_types_paired,
-  verbose    = FALSE
-)
-
-# ── Step 3: Full unimodal evaluation on the complete matrices ─────────────────
-rna_full_eval <- evaluate_simulation_accuracy(
-  ref_data = ref_rna_full,
-  sim_data = sim_rna_full,
-  compute_bivariate = FALSE,
-  verbose = FALSE
-)
-
-atac_full_eval <- evaluate_simulation_accuracy(
-  ref_data = ref_atac_full,
-  sim_data = sim_atac_full,
-  compute_bivariate = FALSE,
-  verbose = FALSE
-)
-
-# ── Step 4: Population-level cross-modal metrics (full matrices) ──────────────
-module_fid <- calc_coexpression_module_fidelity(ref_rna_full, sim_rna_full)
-coaccess   <- calc_peak_coaccessibility_fidelity(ref_atac_full, sim_atac_full)
-```
-
----
-
-# Part 5: Visualization
+# Part 4: Visualization
 
 `scSimEval` visualization functions work seamlessly across unimodal, paired, and unpaired multiomics configurations:
 
@@ -382,7 +305,7 @@ plot_evaluation_summary(
 )
 ```
 
-## 5.1 Low-Dimensional Multiomics Cell Embeddings
+## 4.1 Low-Dimensional Multiomics Cell Embeddings
 
 To visually examine whether simulated cells maintain the biological manifold of empirical data across modalities, researchers can project reference and simulated cells into low-dimensional UMAP, t-SNE, or PCA coordinates:
 
@@ -410,17 +333,16 @@ knitr::kable(compute_embedding_quality_metrics(emb_rna), digits = 4)
 
 ---
 
-# Part 6: Summary
+# Part 5: Summary
 
 | Data Type | Example Technologies | `evaluate_multiomics_accuracy()` | Category 7 Metrics | Recommended Function |
 |---|---|:---:|:---:|---|
-| **Paired** | 10x Multiome, SHARE-seq | ✅ Direct | All 6 metrics | `evaluate_multiomics_accuracy()` |
-| **Unpaired** | Independent scRNA + scATAC | ❌ Not valid | Modularity, label transfer, network only | `evaluate_simulation_accuracy()` × 2 + `evaluate_multiple_datasets()` |
-| **Mosaic** | DOGMA-seq, mosaic pooling | ✅ On paired subset | All 6 metrics on paired subset | Subset first, then `evaluate_multiomics_accuracy()` |
+| **Paired** | 10x Multiome, SHARE-seq | ✅ Direct | All Category 7 metrics (FOSCTTM, Match@1, Cross-Modal Generation, RV coefficient) | `evaluate_multiomics_accuracy()` |
+| **Unpaired** | Independent scRNA + scATAC | ❌ Not valid (cells differ) | Population coupling (module fidelity, label transfer, peak co-accessibility) | `evaluate_simulation_accuracy()` × 2 + `evaluate_multiple_datasets()` |
 
 The most important rule: **Cell-pairing metrics (FOSCTTM, cross-modal generation,
 peak-to-gene coupling) are only scientifically valid when the RNA and ATAC columns
-correspond to the same physical cells.** For unpaired and mosaic data, rely on
+correspond to the same physical cells.** For unpaired multiomics data, rely on
 population-level metrics and per-modality unimodal evaluation.
 
 ```{r session-info}

@@ -227,7 +227,7 @@ variability than randomly pooled pseudoreplicates."><meta property="og:image" co
 
     <a class="navbar-brand me-2" href="../index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -243,8 +243,9 @@ variability than randomly pooled pseudoreplicates."><meta property="og:image" co
   <ul class="dropdown-menu" aria-labelledby="dropdown-demonstrations"><li><a class="dropdown-item" href="../articles/demo-scrna.html">1. scRNA-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-scatac.html">2. scATAC-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
+    <li><a class="dropdown-item" href="../articles/demo-saved-rds.html">4. Analyzing Pre-Saved Benchmark (.rds)</a></li>
   </ul></li>
-<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (62 Metrics)</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -324,32 +325,32 @@ variability than randomly pooled pseudoreplicates.</p>
 <span class="r-in"><span>                    replicates <span class="op">=</span> <span class="va">example_scrna</span><span class="op">$</span><span class="va">batch_info</span>,</span></span>
 <span class="r-in"><span>                    conditions <span class="op">=</span> <span class="va">example_scrna</span><span class="op">$</span><span class="va">cell_types</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $delta_variance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Gene_01     Gene_02     Gene_03     Gene_04     Gene_05     Gene_06 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -16155008.8  -1636401.7  -3217284.6   1043935.4  28050446.3  -5968890.8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Gene_07     Gene_08     Gene_09     Gene_10     Gene_11     Gene_12 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   3998925.2   7160951.9  33175563.1 -43255329.8  10112846.1 -51418749.5 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Gene_13     Gene_14     Gene_15     Gene_16     Gene_17     Gene_18 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   3400725.0  -7527716.7  -2618645.0 -10938126.4  15667286.3  -1510473.8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Gene_19     Gene_20     Gene_21     Gene_22     Gene_23     Gene_24 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   5355085.9 -31251620.3   7531808.3   2241971.0   7880542.7   9885499.6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Gene_25     Gene_26     Gene_27     Gene_28     Gene_29     Gene_30 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   4264460.2  -1244888.5 -18829827.2   2064205.6   2216219.6  -1199391.8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Gene_31     Gene_32     Gene_33     Gene_34     Gene_35     Gene_36 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  -3482214.5   3366685.3   9441161.7  -4744896.3   9392338.4   3216843.2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Gene_37     Gene_38     Gene_39     Gene_40     Gene_41     Gene_42 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   5197981.1   9263225.1    881787.3   1314003.0 -21746643.5  -8603791.9 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Gene_43     Gene_44     Gene_45     Gene_46     Gene_47     Gene_48 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    722862.9   6673800.6   3324635.1 -31188112.0   1616807.6  -2808888.7 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Gene_49     Gene_50     Gene_51     Gene_52     Gene_53     Gene_54 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -26304833.4  24362120.1   7920296.3 -29113246.0  16549957.5   7563376.2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Gene_55     Gene_56     Gene_57     Gene_58     Gene_59     Gene_60 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   5970251.3 -21632226.4 -25848713.7  -6401459.6    330397.8   3707688.8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Gene_01      Gene_02      Gene_03      Gene_04      Gene_05      Gene_06 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  -8805449.16  -7797415.07  24081491.72   3468783.90   6796240.15   -505415.72 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Gene_07      Gene_08      Gene_09      Gene_10      Gene_11      Gene_12 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   9957176.85   -573202.00  33802655.33 -35716036.40   9079689.30 -31740032.93 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Gene_13      Gene_14      Gene_15      Gene_16      Gene_17      Gene_18 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   5794475.71  -1874128.62   2619460.97 -13741501.18    629707.79  -2719745.01 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Gene_19      Gene_20      Gene_21      Gene_22      Gene_23      Gene_24 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   2169671.29 -13633019.58   9908870.76   1710354.95   1553387.95  15139170.86 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Gene_25      Gene_26      Gene_27      Gene_28      Gene_29      Gene_30 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  17741301.10   4994699.49 -20459354.80   2973031.82  11541643.36   5041622.22 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Gene_31      Gene_32      Gene_33      Gene_34      Gene_35      Gene_36 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   5439507.51   4903711.25   1273624.73  -4282445.81   1198497.09   3200113.73 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Gene_37      Gene_38      Gene_39      Gene_40      Gene_41      Gene_42 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    -65680.85  -1644783.56    101090.29   -138426.52 -19655238.49  -6857433.86 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Gene_43      Gene_44      Gene_45      Gene_46      Gene_47      Gene_48 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   8320601.82   3671546.93   8332198.63 -15149545.82   1658506.61   2254000.39 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Gene_49      Gene_50      Gene_51      Gene_52      Gene_53      Gene_54 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -27358712.06  12013883.94   7991292.66 -37497369.26  -5664444.26  16824197.57 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Gene_55      Gene_56      Gene_57      Gene_58      Gene_59      Gene_60 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   3891178.79 -13662689.35 -43171380.89  -5417150.23    847173.15  16505430.65 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $mean_delta_variance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -1896345</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -845010.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $median_delta_variance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1465405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1605947</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>

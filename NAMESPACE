@@ -135,6 +135,7 @@ export(plot_dataset_embeddings)
 export(compute_embedding_quality_metrics)
 export(compute_method_leaderboard)
 export(standardize_benchmark_categories)
+export(filter_gold_standard_metrics)
 
 # 11_shiny_app
 export(launch_scSimEval_app)

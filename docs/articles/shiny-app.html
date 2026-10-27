@@ -262,6 +262,7 @@
 <li><a class="dropdown-item" href="../articles/demo-scrna.html">1. scRNA-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-scatac.html">2. scATAC-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
+    <li><a class="dropdown-item" href="../articles/demo-saved-rds.html">4. Analyzing Pre-Saved Benchmark (.rds)</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
@@ -310,7 +311,7 @@ code.</p>
 <strong>10 GB</strong> per file, which comfortably handles large-scale
 single-cell and multiomics datasets.</p>
 </blockquote>
-<p>The studio is organized into <strong>seven primary navigation
+<p>The studio is organized into <strong>eight primary navigation
 tabs</strong> in the top navigation bar, plus an <strong>eight-panel
 Visualizations module</strong> inside Tab 4. The top-right corner of the
 navbar features an interactive <strong>Day/Night (Light/Dark mode)
@@ -366,16 +367,17 @@ uploads required.</p>
 <p><strong>Package Example Datasets vs. Shiny App Demo Data:</strong> *
 <strong>R Package Example Datasets (<code>data/</code>):</strong>
 Lightweight, runnable count matrices (<code>example_scrna</code>,
-<code>example_scatac</code>, <code>example_multiomics</code>, 60
-features × 80 cells) designed for rapid command-line testing of
-individual evaluation functions in R console sessions. * <strong>Shiny
-App Demo Data (<code>inst/shiny/scSimEvalApp/data/</code>):</strong> A
-rich pre-computed benchmark results archive (6 simulators × 48 metrics ×
-2 datasets) accompanied by reference and simulated count matrices (100
-genes × 50 cells). This gives web users an immediate, zero-latency tour
-of all tabs, ranking leaderboards, bubble matrices, and 8 visualization
-panels without requiring computationally intensive matrix
-evaluations.</p>
+<code>example_scatac</code>, <code>example_multiomics</code>,
+<code>example_rice_bud</code>, <code>example_soybean_root</code>)
+designed for rapid command-line testing of individual evaluation
+functions in R console sessions. * <strong>Shiny App Demo Data
+(<code>inst/shiny/scSimEvalApp/data/</code>):</strong> Rich pre-computed
+benchmark results archives (<code>demo_benchmark_data.rds</code>,
+<code>demo_multidataset_benchmark.rds</code>) covering multi-simulator
+evaluations across all 48 Gold-Standard metrics. This gives web users an
+immediate, zero-latency tour of all tabs, ranking leaderboards, bubble
+matrices, and 8 visualization panels without requiring computationally
+intensive matrix evaluations.</p>
 </blockquote>
 </div>
 <div class="section level4">
@@ -389,16 +391,19 @@ Matrix:</strong> Real empirical cells. Formats: <code>.rds</code>,
 (1–6):</strong> Generates matching upload cards with simulator name,
 simulated count matrix, runtime (seconds), and peak RAM (MiB). *
 <strong>Cell Type Labels (Optional):</strong> Vector / factor / 2-column
-table (<code>Cell_ID,Cell_Type</code>). Unlocks +12–15 clustering and
-biological signal metrics. * <strong>Batch Annotations
-(Optional):</strong> Vector / factor / 2-column table
-(<code>Cell_ID,Batch</code>). Unlocks +7 batch mixing metrics. *
-<strong>Compute &amp; Parallelization:</strong> Set the number of CPU
-worker threads (auto-detected via <code><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">parallel::detectCores()</a></code>,
-e.g., 4 or 8 threads). The app uses <code>BiocParallel</code> to
-parallelize 2D bivariate tests (Fasano-Franceschini, Peacock, KDE, EMD).
-A live badge (<code>Parallel: X CPU Cores</code>) in the action bar
-confirms the active hardware allocation.</p>
+table (<code>Cell_ID,Cell_Type</code>). Unlocks clustering concordance
+(ARI, NMI, AMI, Silhouette) and biological signal fidelity metrics. *
+<strong>Batch Annotations (Optional):</strong> Vector / factor /
+2-column table (<code>Cell_ID,Batch</code>). Unlocks batch mixing
+metrics (Batch Silhouette, Shannon Entropy, PCR
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>,
+CMS, ISI, Seurat mixing metric). * <strong>Compute &amp;
+Parallelization:</strong> Set the number of CPU worker threads
+(auto-detected via <code><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">parallel::detectCores()</a></code>, e.g., 4 or 8
+threads). The app uses <code>BiocParallel</code> to parallelize 2D
+bivariate tests (Fasano-Franceschini, Peacock, KDE, EMD). A live badge
+(<code>Parallel: X CPU Cores</code>) in the action bar confirms the
+active hardware allocation.</p>
 </div>
 <div class="section level4">
 <h4 id="mode-3-multiomics-evaluation-scrna-seq-scatac-seq">Mode 3 — Multiomics Evaluation (scRNA-seq + scATAC-seq)<a class="anchor" aria-label="anchor" href="#mode-3-multiomics-evaluation-scrna-seq-scatac-seq"></a>
@@ -406,13 +411,16 @@ confirms the active hardware allocation.</p>
 <ul>
 <li>
 <strong>Paired Co-assay:</strong> Same individual cells in both
-modalities (10x Multiome, SHARE-seq). All 48 metrics including FOSCTTM,
-<a href="mailto:Match@1" class="email">Match@1</a>, and peak-to-gene
-linkage.</li>
+modalities (e.g., 10x Multiome, SHARE-seq). All 48 metrics evaluated
+across all 8 canonical categories, including cell-level coupling metrics
+(FOSCTTM, <a href="mailto:Match@1" class="email">Match@1</a>,
+cross-modal Pearson correlation, RV coefficient).</li>
 <li>
 <strong>Unpaired Profiling:</strong> Separate cells from the same
-tissue. Population-level cross-modal metrics evaluated; cell-pairing
-metrics safely skipped.</li>
+biological tissue or condition. Measures 41 metrics across all 8
+categories (population-level coupling, regulatory module correlation,
+cell-type label concordance); cell-level pairing metrics are safely
+skipped.</li>
 <li>
 <strong>Multi-Core Hardware Acceleration:</strong> Configure
 dedicated CPU threads for multiomics benchmarking. Accelerates
@@ -426,136 +434,25 @@ pre-configured with the chosen thread count
 </ul>
 </div>
 <div class="section level4">
-<h4 id="metric-measurement-capacity-by-upload-configuration">Metric Measurement Capacity by Upload Configuration<a class="anchor" aria-label="anchor" href="#metric-measurement-capacity-by-upload-configuration"></a>
-</h4>
-<p>The Shiny app dynamically scales the number of quantitative metrics
-measured based on the uploaded files:</p>
-<table class="table">
-<colgroup>
-<col width="23%">
-<col width="23%">
-<col width="29%">
-<col width="23%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">Experiment Mode</th>
-<th align="left">Uploaded Inputs</th>
-<th align="center">Metrics Measured</th>
-<th align="left">Active Evaluation Categories &amp; Scope</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">
-<strong>Single-Cell</strong> <em>(scRNA /
-scATAC)</em>
-</td>
-<td align="left">Count Matrix alone <em>(no metadata)</em>
-</td>
-<td align="center"><strong>~23 Metrics</strong></td>
-<td align="left">
-<strong>Cat I</strong> (Distributional, 14 metrics),
-<strong>Cat II</strong> (Correlations &amp; Zeroes, 6 metrics),
-<strong>Cat VI</strong> (Trajectory, 2 metrics), <strong>Cat
-VIII</strong> (Scalability, 2 metrics).</td>
-</tr>
-<tr class="even">
-<td align="left">
-<strong>Single-Cell</strong> <em>(scRNA /
-scATAC)</em>
-</td>
-<td align="left">Matrix + Cell Types</td>
-<td align="center"><strong>~35–38 Metrics</strong></td>
-<td align="left">
-<em>Adds +12–15 metrics:</em> Unlocks <strong>Cat
-III</strong> (Cellular Structure / ARI, NMI, AMI, Silhouette) and
-<strong>Cat V</strong> (Biological Signal / SimBench DE, DP, DV, top DEG
-Jaccard).</td>
-</tr>
-<tr class="odd">
-<td align="left">
-<strong>Single-Cell</strong> <em>(scRNA /
-scATAC)</em>
-</td>
-<td align="left">Matrix + Batch Info</td>
-<td align="center"><strong>~30 Metrics</strong></td>
-<td align="left">
-<em>Adds +7 metrics:</em> Unlocks <strong>Cat
-IV</strong> (Batch Mixing / Batch Silhouette, Shannon Entropy, PCR
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>,
-CMS, ISI, Seurat mixing).</td>
-</tr>
-<tr class="even">
-<td align="left">
-<strong>Single-Cell</strong> <em>(scRNA /
-scATAC)</em>
-</td>
-<td align="left">
-<strong>Full Metadata</strong> <em>(Matrix + Cell Types
-+ Batch)</em>
-</td>
-<td align="center"><strong>Up to ~55 Metrics</strong></td>
-<td align="left">Unlocks the complete unimodal suite across
-<strong>Categories I, II, III, IV, V, VI, and VIII</strong>.</td>
-</tr>
-<tr class="odd">
-<td align="left">
-<strong>Paired Multiomics</strong> <em>(scRNA +
-scATAC)</em>
-</td>
-<td align="left">RNA + ATAC Matrices alone</td>
-<td align="center"><strong>~48 Metrics</strong></td>
-<td align="left">Unimodal distributions for both modalities (~40
-metrics) PLUS <strong>Cat VII</strong> (Cross-Modal Coupling: FOSCTTM,
-<a href="mailto:Match@1" class="email">Match@1</a>, generation,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>V</mi></msub><annotation encoding="application/x-tex">R_V</annotation></semantics></math>,
-peak-to-gene linkage).</td>
-</tr>
-<tr class="even">
-<td align="left">
-<strong>Paired Multiomics</strong> <em>(scRNA +
-scATAC)</em>
-</td>
-<td align="left">
-<strong>Full Metadata</strong> <em>(RNA + ATAC + Cell
-Types + Batch)</em>
-</td>
-<td align="center"><strong>All 48 Metrics</strong></td>
-<td align="left">Complete multiomics benchmark suite across all 8
-canonical categories (<strong>Categories I–VIII</strong>).</td>
-</tr>
-<tr class="odd">
-<td align="left">
-<strong>Unpaired Multiomics</strong> <em>(Independent
-cells)</em>
-</td>
-<td align="left">RNA + ATAC Matrices alone</td>
-<td align="center"><strong>~26 Metrics</strong></td>
-<td align="left">Both unimodal distributions plus population coupling
-(co-expression module fidelity, Network Jaccard, cross-modality
-correlation).</td>
-</tr>
-<tr class="even">
-<td align="left">
-<strong>Unpaired Multiomics</strong> <em>(Independent
-cells)</em>
-</td>
-<td align="left"><strong>RNA + ATAC + Cell Types (+ Batch)</strong></td>
-<td align="center"><strong>Up to ~41 Metrics</strong></td>
-<td align="left">
-<em>Essential for unpaired:</em> Unlocks
-cluster-matched label transfer, cell-type regulatory linkage, and
-technical donor integration.</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section level4">
 <h4 id="mode-4-upload-pre-computed-benchmark-table--rds--csv">Mode 4 — Upload Pre-Computed Benchmark Table (.rds / .csv)<a class="anchor" aria-label="anchor" href="#mode-4-upload-pre-computed-benchmark-table--rds--csv"></a>
 </h4>
 <p>Load output previously saved from
 <code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code>,
 <code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code>, or
-<code><a href="../reference/evaluate_multiple_datasets.html">evaluate_multiple_datasets()</a></code>.</p>
+<code><a href="../reference/evaluate_multiple_datasets.html">evaluate_multiple_datasets()</a></code>. * <strong>Add to Current
+Benchmark Results:</strong> Enable the <strong>“Add to current benchmark
+results”</strong> checkbox to merge newly uploaded datasets into your
+active benchmarking session rather than replacing it. * <strong>Custom
+Dataset Label:</strong> Provide an optional descriptive dataset label
+(e.g., <code>Rice Bud (Paired)</code>,
+<code>Soybean Root (Unpaired)</code>, <code>PBMC 10k</code>). *
+<strong>Cross-Dataset Simulator Averaging:</strong> If identical
+simulator names (e.g., <code>scDesign3</code>, <code>scMultiSim</code>)
+exist across multiple datasets, <code>scSimEval</code> preserves both
+individual evaluations and computes their average cross-dataset fidelity
+score across the 48 Gold-Standard metrics, automatically rendering the
+combined cross-dataset comparative bubble matrix and updating the
+leaderboard rankings.</p>
 </div>
 </div>
 <div class="section level3">
@@ -584,6 +481,25 @@ benchmarks offline on compute nodes.</li>
 </div>
 </div>
 <div class="section level2">
+<h2 id="interactive-step-by-step-zoom-controls-across-all-figures">Interactive Step-by-Step Zoom Controls Across All Figures<a class="anchor" aria-label="anchor" href="#interactive-step-by-step-zoom-controls-across-all-figures"></a>
+</h2>
+<p>Every plot figure in Tab 3 and Tab 4, as well as the architectural
+workflow diagrams in Tab 6, is equipped with a client-side
+<strong>Step-by-Step Zoom Toolbar</strong>: * <strong>Step Zoom In
+(<code>+</code>):</strong> Magnifies the figure by +15% per click (up to
+300% magnification). * <strong>Step Zoom Out (<code>-</code>):</strong>
+Reduces magnification by -15% per click (down to 50%). * <strong>1-Click
+Reset (<code>Reset</code>):</strong> Instantly restores default 100%
+scale. * <strong>Live Magnification Badge:</strong> Displays current
+zoom level (e.g., <code>100%</code>, <code>115%</code>,
+<code>130%</code>, <code>200%</code>). * <strong>Pan &amp; Scroll
+Viewport:</strong> When magnified, the container enables smooth
+horizontal and vertical scrolling and panning, allowing high-resolution
+inspection of dense bubble matrices, heatmap cell annotations, and
+complex cell embeddings.</p>
+<hr>
+</div>
+<div class="section level2">
 <h2 id="tab-3-comparative-bubble-matrix-leaderboard">Tab 3 — Comparative Bubble Matrix &amp; Leaderboard<a class="anchor" aria-label="anchor" href="#tab-3-comparative-bubble-matrix-leaderboard"></a>
 </h2>
 <div class="section level3">
@@ -600,12 +516,13 @@ individual datasets (<strong>Dataset 1</strong>, <strong>Dataset
 2</strong>, …, <strong>Dataset N</strong>) separately. *
 <strong>Minimalist vs Publication Matrix:</strong> Toggle between a
 sleek, dot-matrix view and a fully annotated publication matrix. *
-<strong>Confirmation &amp; Plot Action Button:</strong> Click
-<strong>Confirm &amp; Generate Plot</strong> to render with app-wide
-loading indicators. * <strong>High-Resolution Exports &amp; R
-Script:</strong> Download 600 DPI JPEG, vector PDF, or a
-<strong>Download R Script</strong> providing the complete analytical
-workflow with ggplot2 code.</p>
+<strong>Step-by-Step Zoom Toolbar:</strong> Magnify dense metric
+clusters with instant step zoom and panning. * <strong>Confirmation
+&amp; Plot Action Button:</strong> Click <strong>Confirm &amp; Generate
+Plot</strong> to render with app-wide loading indicators. *
+<strong>High-Resolution Exports &amp; R Script:</strong> Download 600
+DPI JPEG, vector PDF, or a <strong>Download R Script</strong> providing
+the complete analytical workflow with ggplot2 code.</p>
 </div>
 <div class="section level3">
 <h3 id="subtab-2-fidelity-leaderboard">Subtab 2: Fidelity Leaderboard<a class="anchor" aria-label="anchor" href="#subtab-2-fidelity-leaderboard"></a>
@@ -631,10 +548,11 @@ table as CSV.</li>
 <p>Eight diagnostic sub-panels accessed via the <strong>pill navigation
 bar</strong>. Every sub-panel is equipped with the <strong>Global
 Multi-Dataset Selector Bar</strong> (allowing inspection of All Datasets
-Average or specific datasets), active dataset badges, <strong>Confirm
-&amp; Generate Plot</strong> buttons, app-wide processing overlays, 600
-DPI JPEG / PDF downloads, and a <strong>Download R Script</strong>
-workflow generator:</p>
+Average or specific datasets), active dataset badges,
+<strong>Step-by-Step Zoom Toolbar</strong>, <strong>Confirm &amp;
+Generate Plot</strong> buttons, app-wide processing overlays, 600 DPI
+JPEG / PDF downloads, and a <strong>Download R Script</strong> workflow
+generator:</p>
 <ul>
 <li>
 <strong>Sub-panel 1 — Evaluation Summary:</strong>
@@ -670,11 +588,12 @@ space with discriminating metric vector loadings.</li>
 <code><a href="../reference/plot_metric_mds.html">plot_metric_mds()</a></code> — Multi-Dimensional Scaling ordination
 mapping simulator algorithmic proximity.</li>
 <li>
-<strong>Sub-panel 8 — Cell Embeddings (UMAP, t-SNE &amp;
-PCA):</strong> <code><a href="../reference/compute_dataset_embeddings.html">compute_dataset_embeddings()</a></code> +
+<strong>Sub-panel 8 — Cell Embeddings (t-SNE &amp; UMAP):</strong>
+<code><a href="../reference/compute_dataset_embeddings.html">compute_dataset_embeddings()</a></code> +
 <code><a href="../reference/plot_dataset_embeddings.html">plot_dataset_embeddings()</a></code> — dimension reduction comparing
 reference cells directly to simulated cells, with cell-type cluster
-fidelity metrics.</li>
+fidelity metrics and
+<code><a href="../reference/compute_embedding_quality_metrics.html">compute_embedding_quality_metrics()</a></code>.</li>
 </ul>
 <hr>
 </div>
@@ -713,7 +632,7 @@ where 1.0 represents top fidelity.</p>
 diagram and multi-dataset processing. 2. <strong>The Eight Evaluation
 Categories</strong> — tabular reference for all 48 metrics, highlighting
 peak RAM in <strong>MiB</strong>. 3. <strong>Metric Measurement Capacity
-by Data &amp; Metadata Mode</strong> — detailed reference table
+by Data &amp; Metadata Mode</strong> — detailed reference guide
 documenting metric numbers and unlocked categories. 4. <strong>Score
 Normalization Pipeline</strong> — direction inversion, min-max scaling,
 and raw vs normalized score reporting. 5. <strong>Comprehensive Guide to
@@ -726,11 +645,21 @@ Local Workstation, and HPC clusters.</p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="tab-7-contact">Tab 7 — Contact<a class="anchor" aria-label="anchor" href="#tab-7-contact"></a>
+<h2 id="tab-7-execution-logs">Tab 7 — Execution Logs<a class="anchor" aria-label="anchor" href="#tab-7-execution-logs"></a>
+</h2>
+<p>The <strong>Logs</strong> tab provides a real-time event monitor
+recording data loading operations, hardware core detection, parallel
+execution milestones, memory allocations, and evaluation status
+messages. It allows users to track long-running benchmarks and diagnose
+matrix formatting anomalies directly within the browser session.</p>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="tab-8-contact">Tab 8 — Contact<a class="anchor" aria-label="anchor" href="#tab-8-contact"></a>
 </h2>
 <p>Information regarding the development team at Division of
-Agricultural Bioinformatics, ICAR-IASRI, maintainer contacts, GitHub
-issues link, and recommended citations.</p>
+Agricultural Bioinformatics, ICAR-IASRI, New Delhi; maintainer contacts,
+GitHub issues link, and recommended citations.</p>
 <hr>
 </div>
 <div class="section level2">

@@ -11,8 +11,8 @@ zoom_plot(p, zoom = 1, step = 0, xlim = NULL, ylim = NULL, center = NULL)
 
 \item{zoom}{Numeric zoom factor (> 1.0 zooms in, < 1.0 zooms out). Default is 1.0 (no change).}
 
-\item{step}{Integer step counter. Each positive step (+1) magnifies by +25% (1.25x),
-while each negative step (-1) demagnifies by -20% (0.8x).}
+\item{step}{Integer step counter. Each positive step (+1) magnifies by +25\% (1.25x),
+while each negative step (-1) demagnifies by -20\% (0.8x).}
 
 \item{xlim}{Optional numeric range \code{c(xmin, xmax)} to set exact horizontal limits.}
 

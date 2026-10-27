@@ -3463,6 +3463,10 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
 # Normalize bubble scores (direction-aware, per-metric across methods)
 # @keywords internal
 .normalize_bubble_scores <- function(df) {
+  if (is.null(df) || nrow(df) == 0) {
+    if (is.data.frame(df)) df$Score_Norm <- numeric(0)
+    return(df)
+  }
   df$Score_Norm <- NA_real_
   metric_key <- if ("Property" %in% colnames(df)) paste0(df$Property, "___", df$Metric) else df$Metric
   for (m_key in unique(metric_key)) {
@@ -4752,8 +4756,8 @@ append_benchmark_results <- combine_benchmark_results
 #'
 #' @param p A \code{ggplot} or \code{patchwork} object to zoom.
 #' @param zoom Numeric zoom factor (> 1.0 zooms in, < 1.0 zooms out). Default is 1.0 (no change).
-#' @param step Integer step counter. Each positive step (+1) magnifies by +25% (1.25x),
-#'   while each negative step (-1) demagnifies by -20% (0.8x).
+#' @param step Integer step counter. Each positive step (+1) magnifies by +25\% (1.25x),
+#'   while each negative step (-1) demagnifies by -20\% (0.8x).
 #' @param xlim Optional numeric range \code{c(xmin, xmax)} to set exact horizontal limits.
 #' @param ylim Optional numeric range \code{c(ymin, ymax)} to set exact vertical limits.
 #' @param center Optional numeric vector \code{c(x_center, y_center)} specifying the focal point of zooming.

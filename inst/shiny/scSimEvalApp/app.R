@@ -63,7 +63,8 @@ for (p in c("09_evaluate_benchmark.R", "R/09_evaluate_benchmark.R", "../../R/09_
 # Standardize Category names to canonical 8 package categories
 standardize_benchmark_categories <- function(df) {
   if (exists("standardize_benchmark_categories", where = asNamespace("scSimEval"), mode = "function")) {
-    return(scSimEval::standardize_benchmark_categories(df))
+    fn <- get0("standardize_benchmark_categories", envir = asNamespace("scSimEval"), mode = "function", inherits = FALSE)
+    if (!is.null(fn)) return(fn(df))
   }
   if (is.null(df) || !is.data.frame(df) || nrow(df) == 0) return(df)
   legacy_map <- c(
@@ -114,7 +115,8 @@ standardize_benchmark_categories <- function(df) {
 
 filter_gold_standard_metrics <- function(df) {
   if (exists("filter_gold_standard_metrics", where = asNamespace("scSimEval"), mode = "function")) {
-    return(scSimEval::filter_gold_standard_metrics(df))
+    fn <- get0("filter_gold_standard_metrics", envir = asNamespace("scSimEval"), mode = "function", inherits = FALSE)
+    if (!is.null(fn)) return(fn(df))
   }
   df <- standardize_benchmark_categories(df)
   if (is.null(df) || !is.data.frame(df) || nrow(df) == 0) return(df)

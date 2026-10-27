@@ -34,7 +34,7 @@ launch_scSimEval_app()          # opens in your default browser
 > **File size limit:** The app accepts uploads up to **10 GB** per file, which comfortably handles
 > large-scale single-cell and multiomics datasets.
 
-The studio is organized into **seven primary navigation tabs** in the top navigation bar, plus an
+The studio is organized into **eight primary navigation tabs** in the top navigation bar, plus an
 **eight-panel Visualizations module** inside Tab 4. The top-right corner of the navbar features an interactive
 **Day/Night (Light/Dark mode) toggle switch** (`bslib::input_dark_mode()`), allowing instantaneous switching between
 light and dark themes across all cards, tables, modal dialogs, and diagnostic containers.
@@ -68,37 +68,22 @@ Choose one of **four evaluation modes** from the radio button panel on the left 
 Click **Load Demo Benchmark** to instantly populate the app with pre-computed multi-dataset results across **Simulator 1 to Simulator 6** across all 48 gold-standard measures. No file uploads required.
 
 > **Package Example Datasets vs. Shiny App Demo Data:**
-> * **R Package Example Datasets (`data/`):** Lightweight, runnable count matrices (`example_scrna`, `example_scatac`, `example_multiomics`, 60 features × 80 cells) designed for rapid command-line testing of individual evaluation functions in R console sessions.
-> * **Shiny App Demo Data (`inst/shiny/scSimEvalApp/data/`):** A rich pre-computed benchmark results archive (6 simulators × 48 metrics × 2 datasets) accompanied by reference and simulated count matrices (100 genes × 50 cells). This gives web users an immediate, zero-latency tour of all tabs, ranking leaderboards, bubble matrices, and 8 visualization panels without requiring computationally intensive matrix evaluations.
+> * **R Package Example Datasets (`data/`):** Lightweight, runnable count matrices (`example_scrna`, `example_scatac`, `example_multiomics`, `example_rice_bud`, `example_soybean_root`) designed for rapid command-line testing of individual evaluation functions in R console sessions.
+> * **Shiny App Demo Data (`inst/shiny/scSimEvalApp/data/`):** Rich pre-computed benchmark results archives (`demo_benchmark_data.rds`, `demo_multidataset_benchmark.rds`) covering multi-simulator evaluations across all 48 Gold-Standard metrics. This gives web users an immediate, zero-latency tour of all tabs, ranking leaderboards, bubble matrices, and 8 visualization panels without requiring computationally intensive matrix evaluations.
 
 #### Mode 2 — Single-Cell Evaluation (scRNA-seq / scATAC-seq)
 Evaluate one or more unimodal count-matrix simulators across single or multiple experimental datasets.
 * **Reference Count Matrix:** Real empirical cells. Formats: `.rds`, `.csv`, `.tsv`, `.txt`, `.xlsx`.
 * **Number of Single-Cell Simulators (1–6):** Generates matching upload cards with simulator name, simulated count matrix, runtime (seconds), and peak RAM (MiB).
-* **Cell Type Labels (Optional):** Vector / factor / 2-column table (`Cell_ID,Cell_Type`). Unlocks +12–15 clustering and biological signal metrics.
-* **Batch Annotations (Optional):** Vector / factor / 2-column table (`Cell_ID,Batch`). Unlocks +7 batch mixing metrics.
+* **Cell Type Labels (Optional):** Vector / factor / 2-column table (`Cell_ID,Cell_Type`). Unlocks clustering concordance (ARI, NMI, AMI, Silhouette) and biological signal fidelity metrics.
+* **Batch Annotations (Optional):** Vector / factor / 2-column table (`Cell_ID,Batch`). Unlocks batch mixing metrics (Batch Silhouette, Shannon Entropy, PCR $R^2$, CMS, ISI, Seurat mixing metric).
 * **Compute & Parallelization:** Set the number of CPU worker threads (auto-detected via `parallel::detectCores()`, e.g., 4 or 8 threads). The app uses `BiocParallel` to parallelize 2D bivariate tests (Fasano-Franceschini, Peacock, KDE, EMD). A live badge (`Parallel: X CPU Cores`) in the action bar confirms the active hardware allocation.
 
 #### Mode 3 — Multiomics Evaluation (scRNA-seq + scATAC-seq)
-* **Paired Co-assay:** Same individual cells in both modalities (10x Multiome, SHARE-seq). All 48 metrics including FOSCTTM, Match@1, and peak-to-gene linkage.
-* **Unpaired Profiling:** Separate cells from the same tissue. Population-level cross-modal metrics evaluated; cell-pairing metrics safely skipped.
+* **Paired Co-assay:** Same individual cells in both modalities (e.g., 10x Multiome, SHARE-seq). All 48 metrics evaluated across all 8 canonical categories, including cell-level coupling metrics (FOSCTTM, Match@1, cross-modal Pearson correlation, RV coefficient).
+* **Unpaired Profiling:** Separate cells from the same biological tissue or condition. Measures 41 metrics across all 8 categories (population-level coupling, regulatory module correlation, cell-type label concordance); cell-level pairing metrics are safely skipped.
 * **Multi-Core Hardware Acceleration:** Configure dedicated CPU threads for multiomics benchmarking. Accelerates dual-modality unimodal layers and Category VII cross-modality correlation calculations in parallel.
 * **Reproducible HPC Script Generation:** Clicking **Download R Script** outputs an executable R script pre-configured with the chosen thread count (`threads = n_cores`) for cluster or server deployment.
-
-#### Metric Measurement Capacity by Upload Configuration
-
-The Shiny app dynamically scales the number of quantitative metrics measured based on the uploaded files:
-
-| Experiment Mode | Uploaded Inputs | Metrics Measured | Active Evaluation Categories & Scope |
-| :--- | :--- | :---: | :--- |
-| **Single-Cell** *(scRNA / scATAC)* | Count Matrix alone *(no metadata)* | **~23 Metrics** | **Cat I** (Distributional, 14 metrics), **Cat II** (Correlations & Zeroes, 6 metrics), **Cat VI** (Trajectory, 2 metrics), **Cat VIII** (Scalability, 2 metrics). |
-| **Single-Cell** *(scRNA / scATAC)* | Matrix + Cell Types | **~35–38 Metrics** | *Adds +12–15 metrics:* Unlocks **Cat III** (Cellular Structure / ARI, NMI, AMI, Silhouette) and **Cat V** (Biological Signal / SimBench DE, DP, DV, top DEG Jaccard). |
-| **Single-Cell** *(scRNA / scATAC)* | Matrix + Batch Info | **~30 Metrics** | *Adds +7 metrics:* Unlocks **Cat IV** (Batch Mixing / Batch Silhouette, Shannon Entropy, PCR $R^2$, CMS, ISI, Seurat mixing). |
-| **Single-Cell** *(scRNA / scATAC)* | **Full Metadata** *(Matrix + Cell Types + Batch)* | **Up to ~55 Metrics** | Unlocks the complete unimodal suite across **Categories I, II, III, IV, V, VI, and VIII**. |
-| **Paired Multiomics** *(scRNA + scATAC)* | RNA + ATAC Matrices alone | **~48 Metrics** | Unimodal distributions for both modalities (~40 metrics) PLUS **Cat VII** (Cross-Modal Coupling: FOSCTTM, Match@1, generation, $R_V$, peak-to-gene linkage). |
-| **Paired Multiomics** *(scRNA + scATAC)* | **Full Metadata** *(RNA + ATAC + Cell Types + Batch)* | **All 48 Metrics** | Complete multiomics benchmark suite across all 8 canonical categories (**Categories I–VIII**). |
-| **Unpaired Multiomics** *(Independent cells)* | RNA + ATAC Matrices alone | **~26 Metrics** | Both unimodal distributions plus population coupling (co-expression module fidelity, Network Jaccard, cross-modality correlation). |
-| **Unpaired Multiomics** *(Independent cells)* | **RNA + ATAC + Cell Types (+ Batch)** | **Up to ~41 Metrics** | *Essential for unpaired:* Unlocks cluster-matched label transfer, cell-type regulatory linkage, and technical donor integration. |
 
 #### Mode 4 — Upload Pre-Computed Benchmark Table (.rds / .csv)
 Load output previously saved from `evaluate_simulation_accuracy()`, `evaluate_multiomics_accuracy()`, or `evaluate_multiple_datasets()`.
@@ -154,7 +139,7 @@ Eight diagnostic sub-panels accessed via the **pill navigation bar**. Every sub-
 * **Sub-panel 5 — Metric Heatmap:** `plot_metric_heatmap()` — method × metric grid with exact scores in bold text, direction-aware fill colours, and unsupervised hierarchical clustering.
 * **Sub-panel 6 — PCA Ordination:** `plot_metric_pca()` — simulators projected into performance space with discriminating metric vector loadings.
 * **Sub-panel 7 — MDS Metric Space:** `plot_metric_mds()` — Multi-Dimensional Scaling ordination mapping simulator algorithmic proximity.
-* **Sub-panel 8 — Cell Embeddings (UMAP, t-SNE & PCA):** `compute_dataset_embeddings()` + `plot_dataset_embeddings()` — dimension reduction comparing reference cells directly to simulated cells, with cell-type cluster fidelity metrics.
+* **Sub-panel 8 — Cell Embeddings (t-SNE & UMAP):** `compute_dataset_embeddings()` + `plot_dataset_embeddings()` — dimension reduction comparing reference cells directly to simulated cells, with cell-type cluster fidelity metrics and `compute_embedding_quality_metrics()`.
 
 ---
 
@@ -178,7 +163,7 @@ Export benchmark results in **Excel Workbook (.xlsx)**, **CSV Table (.csv)**, **
 An in-app reference guide structured into seven sections:
 1. **Workflow Architecture & Pipeline** — 4-step pipeline diagram and multi-dataset processing.
 2. **The Eight Evaluation Categories** — tabular reference for all 48 metrics, highlighting peak RAM in **MiB**.
-3. **Metric Measurement Capacity by Data & Metadata Mode** — detailed reference table documenting metric numbers and unlocked categories.
+3. **Metric Measurement Capacity by Data & Metadata Mode** — detailed reference guide documenting metric numbers and unlocked categories.
 4. **Score Normalization Pipeline** — direction inversion, min-max scaling, and raw vs normalized score reporting.
 5. **Comprehensive Guide to App Tabs** — detailed walkthrough of each application module.
 6. **Input Data Formats & Metadata Templates** — matrix structures (genes × cells), cell-type and batch annotation vectors, and sample CSV downloads.
@@ -186,9 +171,15 @@ An in-app reference guide structured into seven sections:
 
 ---
 
-## Tab 7 — Contact
+## Tab 7 — Execution Logs
 
-Information regarding the development team at Division of Agricultural Bioinformatics, ICAR-IASRI, maintainer contacts, GitHub issues link, and recommended citations.
+The **Logs** tab provides a real-time event monitor recording data loading operations, hardware core detection, parallel execution milestones, memory allocations, and evaluation status messages. It allows users to track long-running benchmarks and diagnose matrix formatting anomalies directly within the browser session.
+
+---
+
+## Tab 8 — Contact
+
+Information regarding the development team at Division of Agricultural Bioinformatics, ICAR-IASRI, New Delhi; maintainer contacts, GitHub issues link, and recommended citations.
 
 ---
 

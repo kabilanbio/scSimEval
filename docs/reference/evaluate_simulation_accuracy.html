@@ -223,7 +223,7 @@ zero-inflation curves, and manifold distances between reference and simulated da
 
     <a class="navbar-brand me-2" href="../index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -239,8 +239,9 @@ zero-inflation curves, and manifold distances between reference and simulated da
   <ul class="dropdown-menu" aria-labelledby="dropdown-demonstrations"><li><a class="dropdown-item" href="../articles/demo-scrna.html">1. scRNA-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-scatac.html">2. scATAC-seq Simulation Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/demo-multiomics.html">3. Multiomics (RNA + ATAC) Evaluation</a></li>
+    <li><a class="dropdown-item" href="../articles/demo-saved-rds.html">4. Analyzing Pre-Saved Benchmark (.rds)</a></li>
   </ul></li>
-<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (62 Metrics)</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -267,6 +268,9 @@ zero-inflation curves, and manifold distances between reference and simulated da
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">evaluate_simulation_accuracy</span><span class="op">(</span></span>
 <span>  <span class="va">ref_data</span>,</span>
 <span>  <span class="va">sim_data</span>,</span>
+<span>  cell_types <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cell_types_ref <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cell_types_sim <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  compute_bivariate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  threads <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  memory_mb <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -320,22 +324,21 @@ zero-inflation curves, and manifold distances between reference and simulated da
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p><img src="figures/workflow_diagram.png" width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"></p>
 
-<p><strong>Metric Measurement Capacity by Data &amp; Metadata Mode:</strong></p><ul><li><p><strong>Count Matrix Alone (No Metadata):</strong> Measures approximately 23 baseline metrics
-    spanning Category I (Distributional Properties: KS, Wasserstein, MAD, MAE, RMSE, OV,
-    Bhattacharyya, ECDF difference, Runs test, 2D Fasano-Franceschini, 2D Peacock, KDE test,
-    MMD, Fréchet distance), Category II (Correlations &amp; Zero-Inflation: BCV discrepancy, dropout
-    curve midpoint/slope, mean-variance R², cell/gene Pearson correlations), and Category VI
-    (Trajectory &amp; Lineage Dynamics: pseudotime correlation, tree height RMSE).</p></li>
-<li><p><strong>+ Cell Types (Optional):</strong> Unlocks 12–15 additional metrics spanning Category III
-    (Cellular Structure &amp; Concordance: ARI, NMI, AMI, Silhouette width, Dunn, Davies-Bouldin,
-    Calinski-Harabasz, V-measure, Neighborhood Purity, Generative Precision/Recall) and Category V
-    (Biological Signal &amp; Downstream Fidelity: SimBench DE/DP/DM/DB/DV signal fidelity, top DEG
-    Jaccard overlap, Log2FC correlation, classifier accuracy and Macro-F1).</p></li>
+<p><strong>Metric Measurement Capacity by Data &amp; Metadata Mode (48 Gold-Standard Suite):</strong></p><ul><li><p><strong>Count Matrix Alone (No Metadata):</strong> Measures 15 baseline metrics spanning
+    Category I (Distributional Properties: Wasserstein, KS, MAD, Bhattacharyya, Runs test,
+    NN mismatch, Inter-dataset silhouette), Category II (Correlations &amp; Zero-Inflation:
+    dropout curve midpoint/slope error, R2 discrepancy, excess zero-inflation weight discrepancy),
+    and Category VI (Trajectory &amp; Lineage Dynamics: pseudotime correlation, tree height RMSE,
+    graph alignment, lineage dynamics).</p></li>
+<li><p><strong>+ Cell Types (Optional):</strong> Unlocks 15 additional metrics spanning Category III
+    (Cellular Structure &amp; Concordance: MMD, Fréchet SC distance, Generative Precision/Recall,
+    Silhouette width, Davies-Bouldin, ARI, NMI) and Category V (Biological Signal Fidelity:
+    SimBench DE/DV/DD/DP/BD signals, predictive cell identity Macro-F1, deconvolution RMSE).</p></li>
 <li><p><strong>+ Batch Annotations (Optional):</strong> Unlocks 7 additional metrics spanning Category IV
-    (Batch Effects &amp; Confounder Mixing: Batch Silhouette width, local neighborhood Shannon Entropy,
-    PCR R², CMS CellMixS, Inverse Simpson Index ISI, Seurat Mixing Metric, LDF difference).</p></li>
+    (Batch Effects &amp; Confounder Mixing: Batch Silhouette, PCR R2, CMS score, LISI/ISI,
+    Seurat mixing metric, cross-batch F1) and biological replicate delta variance MAE.</p></li>
 <li><p><strong>Full Metadata (Count Matrix + Cell Types + Batch):</strong> Unlocks the complete unimodal
-    benchmarking suite of up to 55 metrics.</p></li>
+    benchmarking suite of 39 metrics (or all 48 metrics for paired multiomics).</p></li>
 </ul></div>
 
     <div class="section level2">
@@ -347,6 +350,7 @@ zero-inflation curves, and manifold distances between reference and simulated da
 <span class="r-msg co"><span class="r-pr">#&gt;</span> [3/5] Computing univariate accuracy metrics...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> [4/5] Computing bivariate metrics (Fasano-Franceschini, Peacock, KDE zstat, 2D EMD)...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> [5/5] Computing zero-probability and manifold distances...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> [6/7] Evaluating trajectory and lineage dynamics...</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Unimodal accuracy evaluation complete.</span>
 </code></pre></div>
     </div>
