@@ -4,12 +4,21 @@
 \alias{extract_feature_properties}
 \title{Extract Comprehensive Feature-Level (Gene / Peak) Properties}
 \usage{
-extract_feature_properties(data, n_top_cor = 500, verbose = FALSE)
+extract_feature_properties(
+  data,
+  n_top_cor = 500,
+  modality = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{data}{Count matrix (features x cells).}
+\item{data}{Count matrix (features x cells), SingleCellExperiment, or Seurat object.}
 
 \item{n_top_cor}{Number of top HVGs/HVPs to use for correlation matrix (default 500, matching SimBench).}
+
+\item{modality}{Optional modality string (e.g. \code{"scRNA-seq"}, \code{"scATAC-seq"}). When ATAC/peaks
+are provided or auto-detected, feature summaries and pairwise peak-peak correlations are computed
+after Signac/simPIC TF-IDF transformation instead of \code{log2(CPM + 1)}.}
 
 \item{verbose}{Logical, whether to print progress messages.}
 }

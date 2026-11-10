@@ -4,7 +4,7 @@
 utils::globalVariables(c(
   ".data", "Dataset", "Data_Name", "Modality", "Category", "Property",
   "Metric", "Value", "Property_Clean", "Method", "Score", "Score_Norm",
-  "Method_Class", "Is_Top", "Display_Metric", "Display_Category", "Score_Raw",
+  "Method_Class", "Is_Top", "Display_Metric", "Display_Category", "Metric_Key", "Score_Raw", "Modality_Scope",
   "Feature_Pair", "Correlation", "Simulator", "Ref_Quantile", "Sim_Quantile",
   "ZeroFrac", "Mean", "label_txt", "x_pos", "y_pos",
   "MDS1", "MDS2", "PC1", "PC2", "PC1_scaled", "PC2_scaled", "mag",
@@ -31,18 +31,23 @@ utils::globalVariables(c(
   "Runs_Statistic"                   = "Runs Statistic",
   "NN_Mismatch"                      = "NN Mismatch",
   "Between_Dataset_Silh_Global"      = "Inter-Dataset Silhouette",
-  # Legacy / collinear Category I aliases:
+  # Legacy / collinear / 2D Category I aliases:
   "MAE"                              = "MAE",
   "RMSE"                             = "RMSE",
+  "KDE_ISE"                          = "KDE ISE",
   "ECDF_DiffArea"                    = "ECDF Diff. Area",
   "Runs_PValue"                      = "Runs P-Value",
   "Fasano_Franceschini_2D_KS"        = "Fasano-Franceschini 2D",
+  "EMD_2D"                           = "2D EMD",
+  "NN_Mismatch_2D"                   = "2D NN Mismatch",
+  "Between_Dataset_Silh_2D_Global"   = "2D Inter-Dataset Silhouette",
   "Peacock_2D_KS"                    = "Peacock 2D",
 
-  # (II) Correlations & Zero-Inflation (4 Gold-Standard + legacy aliases)
+  # (II) Sparsity & Zero-Inflation Dynamics (#15-#19 + legacy aliases)
   "midpoint_error"                   = "Dropout Midpoint Error",
   "slope_error"                      = "Dropout Slope Error",
-  "r2_discrepancy"                   = "Dropout R2 Discrepancy",
+  "r2_discrepancy"                   = "Sparsity R2 Discrepancy",
+  "curve_rmse"                       = "Accessibility Sparsity RMSE",
   "excess_zero_weight_discrepancy"   = "Excess Zero Weight Discrepancy",
   # Legacy aliases:
   "dropout_curve_midpoint_x0"        = "Dropout Midpoint (x0)",
@@ -52,18 +57,20 @@ utils::globalVariables(c(
   "cell_pearson_cor"                 = "Cell Pearson Corr.",
   "feature_pearson_cor"              = "Feature Pearson Corr.",
 
-  # (III) Cellular Structure & Concordance (8 Gold-Standard + legacy aliases)
+  # (III) Cellular Manifold & Clustering Concordance (#20-#27 + davies_bouldin & legacy)
   "MMD"                              = "MMD",
   "Frechet_SingleCell_Distance"      = "Frechet SC Dist.",
   "Generative_Precision"             = "Generative Precision",
   "Generative_Recall"                = "Generative Recall",
   "silhouette_sim"                   = "Silhouette ASW",
+  "cdi"                              = "Clustering Deviation Index",
   "ari"                              = "ARI",
   "nmi"                              = "NMI",
-  # Legacy / collinear Category III aliases:
+  # Auxiliary & legacy Category III aliases:
   "dunn_sim"                         = "Dunn Index",
+  "davies_bouldin"                   = "Davies-Bouldin Index",
+  "davies_bouldin_sim"               = "Davies-Bouldin Index",
   "calinski_harabasz_sim"            = "Calinski-Harabasz",
-  "cdi"                              = "Cluster Density Index",
   "ami"                              = "AMI",
   "fmi"                              = "Fowlkes-Mallows (FMI)",
   "homogeneity"                      = "Homogeneity",
@@ -86,7 +93,13 @@ utils::globalVariables(c(
   "local_structure"                  = "Local Structure",
   "cross_batch_accuracy"             = "Cross-Batch Accuracy",
 
-  # (V) Biological Signal & Downstream Fidelity (8 Gold-Standard + legacy aliases)
+  # (V) Biological Signal & Differential Fidelity (#33-#44 + legacy aliases)
+  "pval_dist_score"                  = "Null P-Value Uniformity",
+  "accuracy"                         = "DE/DA Accuracy",
+  "precision"                        = "DE/DA Precision",
+  "recall"                           = "DE/DA Recall",
+  "f1_score"                         = "DE/DA F1-Score",
+  "auc"                              = "DE/DA ROC-AUC",
   "DE (Mean Shift)_abs_error"        = "DE (Mean Shift) Error",
   "DV (Variability)_abs_error"       = "DV (Variability) Error",
   "DD (Distribution)_abs_error"      = "DD (Distribution) Error",
@@ -120,6 +133,13 @@ utils::globalVariables(c(
   "graph_connectivity"               = "Graph Connectivity",
   "integration_ari"                  = "Integration ARI",
   "integration_nmi"                  = "Integration NMI",
+  "cell_pearson_cor"                 = "Cell Pearson Corr.",
+  "rv_coefficient"                   = "RV Coefficient",
+  "cross_modal_F1"                   = "Cross-Modal F1",
+  "FOSCTTM"                          = "FOSCTTM",
+  "match_at_1"                       = "Match@1",
+  "mean_coupling_cor"                = "Mean Coupling Corr.",
+  "module_correlation_r"             = "Module Corr. (r)",
 
   # (VII) Trajectory & Lineage Topology (4 Gold-Standard)
   "pseudotime_correlation"           = "Pseudotime Corr. (rho)",
@@ -144,79 +164,92 @@ utils::globalVariables(c(
   "Between_Dataset_Silh_Global"      = "(I) Distributional Properties",
   "MAE"                              = "(I) Distributional Properties",
   "RMSE"                             = "(I) Distributional Properties",
+  "KDE_ISE"                          = "(I) Distributional Properties",
   "ECDF_DiffArea"                    = "(I) Distributional Properties",
   "Runs_PValue"                      = "(I) Distributional Properties",
   "Fasano_Franceschini_2D_KS"        = "(I) Distributional Properties",
+  "EMD_2D"                           = "(I) Distributional Properties",
+  "NN_Mismatch_2D"                   = "(I) Distributional Properties",
+  "Between_Dataset_Silh_2D_Global"   = "(I) Distributional Properties",
   "Peacock_2D_KS"                    = "(I) Distributional Properties",
 
-  # (II) Correlations & Zero-Inflation
-  "midpoint_error"                   = "(II) Correlations & Zero-Inflation",
-  "slope_error"                      = "(II) Correlations & Zero-Inflation",
-  "r2_discrepancy"                   = "(II) Correlations & Zero-Inflation",
-  "excess_zero_weight_discrepancy"   = "(II) Correlations & Zero-Inflation",
-  "dropout_curve_midpoint_x0"        = "(II) Correlations & Zero-Inflation",
-  "dropout_curve_slope_k"            = "(II) Correlations & Zero-Inflation",
-  "mean_variance_r2"                 = "(II) Correlations & Zero-Inflation",
-  "bcv_discrepancy"                  = "(II) Correlations & Zero-Inflation",
+  # (II) Sparsity & Zero-Inflation Dynamics
+  "midpoint_error"                   = "(II) Sparsity & Zero-Inflation Dynamics",
+  "slope_error"                      = "(II) Sparsity & Zero-Inflation Dynamics",
+  "r2_discrepancy"                   = "(II) Sparsity & Zero-Inflation Dynamics",
+  "curve_rmse"                       = "(II) Sparsity & Zero-Inflation Dynamics",
+  "excess_zero_weight_discrepancy"   = "(II) Sparsity & Zero-Inflation Dynamics",
+  "dropout_curve_midpoint_x0"        = "(II) Sparsity & Zero-Inflation Dynamics",
+  "dropout_curve_slope_k"            = "(II) Sparsity & Zero-Inflation Dynamics",
+  "mean_variance_r2"                 = "(II) Sparsity & Zero-Inflation Dynamics",
+  "bcv_discrepancy"                  = "(II) Sparsity & Zero-Inflation Dynamics",
 
-  # (III) Cellular Structure & Concordance
-  "MMD"                              = "(III) Cellular Structure & Concordance",
-  "Frechet_SingleCell_Distance"      = "(III) Cellular Structure & Concordance",
-  "Generative_Precision"             = "(III) Cellular Structure & Concordance",
-  "Generative_Recall"                = "(III) Cellular Structure & Concordance",
-  "silhouette_sim"                   = "(III) Cellular Structure & Concordance",
-  "ari"                              = "(III) Cellular Structure & Concordance",
-  "nmi"                              = "(III) Cellular Structure & Concordance",
-  "dunn_sim"                         = "(III) Cellular Structure & Concordance",
-  "calinski_harabasz_sim"            = "(III) Cellular Structure & Concordance",
-  "cdi"                              = "(III) Cellular Structure & Concordance",
-  "ami"                              = "(III) Cellular Structure & Concordance",
-  "fmi"                              = "(III) Cellular Structure & Concordance",
-  "homogeneity"                      = "(III) Cellular Structure & Concordance",
-  "completeness"                     = "(III) Cellular Structure & Concordance",
-  "v_measure"                        = "(III) Cellular Structure & Concordance",
-  "clustering_accuracy"              = "(III) Cellular Structure & Concordance",
-  "neighborhood_purity"              = "(III) Cellular Structure & Concordance",
-  "silhouette_ref"                   = "(III) Cellular Structure & Concordance",
+  # (III) Cellular Manifold & Clustering Concordance
+  "MMD"                              = "(III) Cellular Manifold & Clustering Concordance",
+  "Frechet_SingleCell_Distance"      = "(III) Cellular Manifold & Clustering Concordance",
+  "Generative_Precision"             = "(III) Cellular Manifold & Clustering Concordance",
+  "Generative_Recall"                = "(III) Cellular Manifold & Clustering Concordance",
+  "silhouette_sim"                   = "(III) Cellular Manifold & Clustering Concordance",
+  "ari"                              = "(III) Cellular Manifold & Clustering Concordance",
+  "nmi"                              = "(III) Cellular Manifold & Clustering Concordance",
+  "dunn_sim"                         = "(III) Cellular Manifold & Clustering Concordance",
+  "davies_bouldin"                   = "(III) Cellular Manifold & Clustering Concordance",
+  "davies_bouldin_sim"               = "(III) Cellular Manifold & Clustering Concordance",
+  "calinski_harabasz_sim"            = "(III) Cellular Manifold & Clustering Concordance",
+  "cdi"                              = "(III) Cellular Manifold & Clustering Concordance",
+  "ami"                              = "(III) Cellular Manifold & Clustering Concordance",
+  "fmi"                              = "(III) Cellular Manifold & Clustering Concordance",
+  "homogeneity"                      = "(III) Cellular Manifold & Clustering Concordance",
+  "completeness"                     = "(III) Cellular Manifold & Clustering Concordance",
+  "v_measure"                        = "(III) Cellular Manifold & Clustering Concordance",
+  "clustering_accuracy"              = "(III) Cellular Manifold & Clustering Concordance",
+  "neighborhood_purity"              = "(III) Cellular Manifold & Clustering Concordance",
+  "silhouette_ref"                   = "(III) Cellular Manifold & Clustering Concordance",
 
-  # (IV) Batch Effects & Confounder Mixing
-  "batch_silhouette"                 = "(IV) Batch Effects & Confounder Mixing",
-  "pcr_r2"                           = "(IV) Batch Effects & Confounder Mixing",
-  "cms"                              = "(IV) Batch Effects & Confounder Mixing",
-  "isi"                              = "(IV) Batch Effects & Confounder Mixing",
-  "seurat_mixing_metric"             = "(IV) Batch Effects & Confounder Mixing",
-  "cross_batch_F1"                   = "(IV) Batch Effects & Confounder Mixing",
-  "shannon_entropy"                  = "(IV) Batch Effects & Confounder Mixing",
-  "ldf_diff"                         = "(IV) Batch Effects & Confounder Mixing",
-  "local_structure"                  = "(IV) Batch Effects & Confounder Mixing",
-  "cross_batch_accuracy"             = "(IV) Batch Effects & Confounder Mixing",
+  # (IV) Technical Variation & Batch Mixing Dynamics
+  "batch_silhouette"                 = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "pcr_r2"                           = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "cms"                              = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "isi"                              = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "seurat_mixing_metric"             = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "cross_batch_F1"                   = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "shannon_entropy"                  = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "ldf_diff"                         = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "local_structure"                  = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "cross_batch_accuracy"             = "(IV) Technical Variation & Batch Mixing Dynamics",
 
-  # (V) Biological Signal & Downstream Fidelity
-  "DE (Mean Shift)_abs_error"        = "(V) Biological Signal & Downstream Fidelity",
-  "DV (Variability)_abs_error"       = "(V) Biological Signal & Downstream Fidelity",
-  "DD (Distribution)_abs_error"      = "(V) Biological Signal & Downstream Fidelity",
-  "DP (Proportion/Dropout)_abs_error"= "(V) Biological Signal & Downstream Fidelity",
-  "BD (Bimodal Index)_abs_error"     = "(V) Biological Signal & Downstream Fidelity",
-  "predictive_macro_F1"              = "(V) Biological Signal & Downstream Fidelity",
-  "deconvolution_RMSE"               = "(V) Biological Signal & Downstream Fidelity",
-  "delta_variance_MAE"               = "(V) Biological Signal & Downstream Fidelity",
-  "predictive_accuracy"              = "(V) Biological Signal & Downstream Fidelity",
-  "deconvolution_JSD"                = "(V) Biological Signal & Downstream Fidelity",
-  "SimBench_SMAPE"                   = "(V) Biological Signal & Downstream Fidelity",
-  "SimBench_DE_Fidelity_Score"       = "(V) Biological Signal & Downstream Fidelity",
-  "Log2FC_Pearson_Corr"              = "(V) Biological Signal & Downstream Fidelity",
-  "Log2FC_Spearman_Corr"             = "(V) Biological Signal & Downstream Fidelity",
-  "Top_DEG_Jaccard_Overlap"          = "(V) Biological Signal & Downstream Fidelity",
-  "DEG_Ratio"                        = "(V) Biological Signal & Downstream Fidelity",
-  "PValue_Uniformity_Chisq"          = "(V) Biological Signal & Downstream Fidelity",
-  "Distribution_Score"               = "(V) Biological Signal & Downstream Fidelity",
-  "Classifier_Accuracy"              = "(V) Biological Signal & Downstream Fidelity",
-  "Classifier_Macro_F1"              = "(V) Biological Signal & Downstream Fidelity",
-  "Classifier_Macro_Recall"          = "(V) Biological Signal & Downstream Fidelity",
-  "Silhouette_Sim"                   = "(V) Biological Signal & Downstream Fidelity",
-  "Silhouette_Discrepancy"           = "(V) Biological Signal & Downstream Fidelity",
-  "PVE_Group_Sim"                    = "(V) Biological Signal & Downstream Fidelity",
-  "PVE_Discrepancy"                  = "(V) Biological Signal & Downstream Fidelity",
+  # (V) Biological Signal & Differential Fidelity
+  "pval_dist_score"                  = "(V) Biological Signal & Differential Fidelity",
+  "accuracy"                         = "(V) Biological Signal & Differential Fidelity",
+  "precision"                        = "(V) Biological Signal & Differential Fidelity",
+  "recall"                           = "(V) Biological Signal & Differential Fidelity",
+  "f1_score"                         = "(V) Biological Signal & Differential Fidelity",
+  "auc"                              = "(V) Biological Signal & Differential Fidelity",
+  "DE (Mean Shift)_abs_error"        = "(V) Biological Signal & Differential Fidelity",
+  "DV (Variability)_abs_error"       = "(V) Biological Signal & Differential Fidelity",
+  "DD (Distribution)_abs_error"      = "(V) Biological Signal & Differential Fidelity",
+  "DP (Proportion/Dropout)_abs_error"= "(V) Biological Signal & Differential Fidelity",
+  "BD (Bimodal Index)_abs_error"     = "(V) Biological Signal & Differential Fidelity",
+  "predictive_macro_F1"              = "(V) Biological Signal & Differential Fidelity",
+  "deconvolution_RMSE"               = "(V) Biological Signal & Differential Fidelity",
+  "delta_variance_MAE"               = "(V) Biological Signal & Differential Fidelity",
+  "predictive_accuracy"              = "(V) Biological Signal & Differential Fidelity",
+  "deconvolution_JSD"                = "(V) Biological Signal & Differential Fidelity",
+  "SimBench_SMAPE"                   = "(V) Biological Signal & Differential Fidelity",
+  "SimBench_DE_Fidelity_Score"       = "(V) Biological Signal & Differential Fidelity",
+  "Log2FC_Pearson_Corr"              = "(V) Biological Signal & Differential Fidelity",
+  "Log2FC_Spearman_Corr"             = "(V) Biological Signal & Differential Fidelity",
+  "Top_DEG_Jaccard_Overlap"          = "(V) Biological Signal & Differential Fidelity",
+  "DEG_Ratio"                        = "(V) Biological Signal & Differential Fidelity",
+  "PValue_Uniformity_Chisq"          = "(V) Biological Signal & Differential Fidelity",
+  "Distribution_Score"               = "(V) Biological Signal & Differential Fidelity",
+  "Classifier_Accuracy"              = "(V) Biological Signal & Differential Fidelity",
+  "Classifier_Macro_F1"              = "(V) Biological Signal & Differential Fidelity",
+  "Classifier_Macro_Recall"          = "(V) Biological Signal & Differential Fidelity",
+  "Silhouette_Sim"                   = "(V) Biological Signal & Differential Fidelity",
+  "Silhouette_Discrepancy"           = "(V) Biological Signal & Differential Fidelity",
+  "PVE_Group_Sim"                    = "(V) Biological Signal & Differential Fidelity",
+  "PVE_Discrepancy"                  = "(V) Biological Signal & Differential Fidelity",
 
   # (VI) Multiomics Integration & Alignment (scib, scMultiSim, scCross, Matilda, scMoMtF)
   "batch_asw"                        = "(VI) Multiomics Integration & Alignment",
@@ -224,6 +257,13 @@ utils::globalVariables(c(
   "graph_connectivity"               = "(VI) Multiomics Integration & Alignment",
   "integration_ari"                  = "(VI) Multiomics Integration & Alignment",
   "integration_nmi"                  = "(VI) Multiomics Integration & Alignment",
+  "cell_pearson_cor"                 = "(VI) Multiomics Integration & Alignment",
+  "rv_coefficient"                   = "(VI) Multiomics Integration & Alignment",
+  "cross_modal_F1"                   = "(VI) Multiomics Integration & Alignment",
+  "FOSCTTM"                          = "(VI) Multiomics Integration & Alignment",
+  "match_at_1"                       = "(VI) Multiomics Integration & Alignment",
+  "mean_coupling_cor"                = "(VI) Multiomics Integration & Alignment",
+  "module_correlation_r"             = "(VI) Multiomics Integration & Alignment",
 
   # (VII) Trajectory & Lineage Topology
   "pseudotime_correlation"           = "(VII) Trajectory & Lineage Topology",
@@ -236,37 +276,51 @@ utils::globalVariables(c(
   "peak_memory_mb"                   = "(VIII) Computational Scalability & Efficiency"
 )
 
-#' Canonical 48 Gold-Standard Evaluation Metrics Specification
+#' Canonical 55 Curated Evaluation Measures Specification (with Legacy Compatibility)
 #' @keywords internal
 .GOLD_STANDARD_48_SPEC <- list(
   "(I) Distributional Properties" = list(
-    props = c("library_size", "zero_fraction_cell", "cell_cor",
-              "mean_expression", "variance", "cv", "zero_fraction_feature", "dispersion", "gene_cor"),
-    metrics = c("Wasserstein", "KS", "MAD", "Bhattacharyya", "Runs_Statistic", "NN_Mismatch", "Between_Dataset_Silh_Global")
+    props = c("library_size", "log_library_size", "tmm_factor", "zero_fraction_cell", "detection_freq_cell",
+              "cell_cor", "pca_dist",
+              "mean_expression", "variance", "scaled_variance", "cv", "zero_fraction_feature",
+              "dispersion", "gene_cor",
+              "lib_vs_cellzero", "mean_vs_sd", "mean_vs_featzero", "mean_vs_dispersion"),
+    metrics = c("Wasserstein", "KS", "MAD", "MAE", "RMSE", "Bhattacharyya", "KDE_ISE",
+                "Runs_Statistic", "NN_Mismatch", "Between_Dataset_Silh_Global",
+                "Fasano_Franceschini_2D_KS", "EMD_2D", "NN_Mismatch_2D", "Between_Dataset_Silh_2D_Global")
   ),
-  "(II) Correlations & Zero-Inflation" = list(
-    props = c("dropout_curve", "excess_zero_weights"),
-    metrics = c("midpoint_error", "slope_error", "r2_discrepancy", "excess_zero_weight_discrepancy",
+  "(II) Sparsity & Zero-Inflation Dynamics" = list(
+    props = c("dropout_curve", "accessibility_sparsity_curve", "excess_zero_weights"),
+    metrics = c("midpoint_error", "slope_error", "r2_discrepancy", "curve_rmse",
+                "excess_zero_weight_discrepancy",
                 "dropout_curve_midpoint_x0", "dropout_curve_slope_k", "mean_variance_r2", "bcv_discrepancy")
   ),
-  "(III) Cellular Structure & Concordance" = list(
+  "(III) Cellular Manifold & Clustering Concordance" = list(
     props = c("manifold", "clustering"),
     metrics = c("MMD", "Frechet_SingleCell_Distance", "Generative_Precision", "Generative_Recall",
-                "silhouette_sim", "cdi", "neighborhood_purity", "ari", "nmi")
+                "silhouette_sim", "davies_bouldin", "davies_bouldin_sim", "cdi", "neighborhood_purity", "ari", "nmi")
   ),
-  "(IV) Batch Effects & Confounder Mixing" = list(
+  "(IV) Technical Variation & Batch Mixing Dynamics" = list(
     props = c("batch_mixing"),
     metrics = c("batch_silhouette", "pcr_r2", "cms", "isi", "seurat_mixing_metric", "cross_batch_F1")
   ),
-  "(V) Biological Signal & Downstream Fidelity" = list(
-    props = c("simbench_signal", "cell_identity_prediction", "cell_mixture", "pseudoreplication"),
-    metrics = c("DE (Mean Shift)_abs_error", "DV (Variability)_abs_error", "DD (Distribution)_abs_error",
+  "(V) Biological Signal & Differential Fidelity" = list(
+    props = c("simbench_signal", "cell_identity_prediction", "cell_mixture", "pseudoreplication",
+              "scRNA_differential_expression", "scATAC_differential_accessibility"),
+    metrics = c("pval_dist_score", "accuracy", "precision", "recall", "f1_score", "auc",
+                "DE (Mean Shift)_abs_error", "DV (Variability)_abs_error", "DD (Distribution)_abs_error",
                 "DP (Proportion/Dropout)_abs_error", "BD (Bimodal Index)_abs_error",
                 "predictive_macro_F1", "deconvolution_RMSE", "delta_variance_MAE")
   ),
   "(VI) Multiomics Integration & Alignment" = list(
-    props = c("multiomics_integration", "cross_modal_integration", "cross_modality"),
-    metrics = c("batch_asw", "cell_type_asw", "graph_connectivity", "ari", "integration_ari", "nmi", "integration_nmi")
+    props = c("multiomics_integration", "cross_modal_integration", "cross_modality",
+              "in_silico_generation", "label_transfer", "cell_alignment",
+              "cross_feature_correlation", "regulatory_coupling",
+              "coexpression_modularity", "chromatin_coaccessibility"),
+    metrics = c("batch_asw", "cell_type_asw", "graph_connectivity", "ari", "integration_ari",
+                "nmi", "integration_nmi", "cell_pearson_cor", "rv_coefficient",
+                "module_correlation_r", "cross_modal_F1", "FOSCTTM",
+                "match_at_1", "mean_coupling_cor", "KS", "Wasserstein")
   ),
   "(VII) Trajectory & Lineage Topology" = list(
     props = c("pseudotime", "lineage_tree", "trajectory_graph", "lineage_dynamics"),
@@ -278,15 +332,15 @@ utils::globalVariables(c(
   )
 )
 
-#' Filter Benchmark Data to the 48 Gold-Standard Metrics
+#' Filter Benchmark Data to the Curated Evaluation Measures Suite
 #'
-#' Filters any benchmark results table (whether containing 72, 62, or 48 metrics)
-#' to the curated, non-redundant 48 Gold-Standard evaluation metrics, eliminating
-#' collinear duplicate metrics ($r = 1.000$) to prevent distortion of overall
+#' Filters any benchmark results table to the curated 55 evaluation measures across
+#' all 8 canonical categories (while preserving legacy benchmark table compatibility),
+#' eliminating unrequested or collinear duplicate metrics to prevent distortion of
 #' simulator fidelity leaderboards.
 #'
 #' @param df A data.frame of benchmark metrics or a scSimEval benchmark session object.
-#' @return Cleaned data.frame containing strictly the 48 Gold-Standard metrics.
+#' @return Cleaned data.frame containing the curated evaluation measures.
 #' @examples
 #' data(example_scrna, package = "scSimEval")
 #' @export
@@ -326,10 +380,10 @@ filter_gold_standard_metrics <- function(df) {
 
 .CANONICAL_CATEGORY_ORDER <- c(
   "(I) Distributional Properties",
-  "(II) Correlations & Zero-Inflation",
-  "(III) Cellular Structure & Concordance",
-  "(IV) Batch Effects & Confounder Mixing",
-  "(V) Biological Signal & Downstream Fidelity",
+  "(II) Sparsity & Zero-Inflation Dynamics",
+  "(III) Cellular Manifold & Clustering Concordance",
+  "(IV) Technical Variation & Batch Mixing Dynamics",
+  "(V) Biological Signal & Differential Fidelity",
   "(VI) Multiomics Integration & Alignment",
   "(VII) Trajectory & Lineage Topology",
   "(VIII) Computational Scalability & Efficiency"
@@ -337,38 +391,38 @@ filter_gold_standard_metrics <- function(df) {
 
 #' @keywords internal
 .CATEGORY_TWO_LINE_MAP <- c(
-  "(I) Distributional Properties"              = "(I) Distributional\nProperties",
-  "(II) Correlations & Zero-Inflation"         = "(II) Correlations &\nZero-Inflation",
-  "(III) Cellular Structure & Concordance"     = "(III) Cellular Structure\n& Concordance",
-  "(IV) Batch Effects & Confounder Mixing"     = "(IV) Batch Effects &\nConfounder Mixing",
-  "(V) Biological Signal & Differential Fidelity" = "(V) Biological Signal &\nDifferential Fidelity",
-  "(VI) Multiomics Integration & Alignment"        = "(VI) Cross-Modal\nCoupling & Modularity",
-  "(VII) Trajectory & Lineage Topology"           = "(VII) Trajectory &\nLineage Topology",
-  "(VIII) Computational Scalability & Efficiency" = "(VIII) Computational\nScalability & Efficiency"
+  "(I) Distributional Properties"                    = "(I) Distributional\nProperties",
+  "(II) Sparsity & Zero-Inflation Dynamics"         = "(II) Sparsity &\nZero-Inflation Dynamics",
+  "(III) Cellular Manifold & Clustering Concordance"= "(III) Cellular Manifold &\nClustering Concordance",
+  "(IV) Technical Variation & Batch Mixing Dynamics"= "(IV) Technical Variation &\nBatch Mixing Dynamics",
+  "(V) Biological Signal & Differential Fidelity"   = "(V) Biological Signal &\nDifferential Fidelity",
+  "(VI) Multiomics Integration & Alignment"         = "(VI) Multiomics Integration\n& Alignment",
+  "(VII) Trajectory & Lineage Topology"             = "(VII) Trajectory &\nLineage Topology",
+  "(VIII) Computational Scalability & Efficiency"   = "(VIII) Computational\nScalability & Efficiency"
 )
 
 #' @keywords internal
 .COMPACT_CATEGORY_STRIPS <- c(
-  "(I) Distributional Properties"              = "(I)\nDistribution",
-  "(II) Correlations & Zero-Inflation"         = "(II)\nCorrelation",
-  "(III) Cellular Structure & Concordance"     = "(III)\nCell Structure",
-  "(IV) Batch Effects & Confounder Mixing"     = "(IV)\nBatch Mixing",
-  "(V) Biological Signal & Differential Fidelity" = "(V)\nBio-Signal & DE",
-  "(VI) Multiomics Integration & Alignment"        = "(VI)\nCross-Modal",
-  "(VII) Trajectory & Lineage Topology"           = "(VII)\nTraj.",
-  "(VIII) Computational Scalability & Efficiency" = "(VIII)\nScalability"
+  "(I) Distributional Properties"                    = "(I)\nDistribution",
+  "(II) Sparsity & Zero-Inflation Dynamics"         = "(II)\nSparsity & Zero",
+  "(III) Cellular Manifold & Clustering Concordance"= "(III)\nCell Manifold",
+  "(IV) Technical Variation & Batch Mixing Dynamics"= "(IV)\nBatch Mixing",
+  "(V) Biological Signal & Differential Fidelity"   = "(V)\nBio-Signal & DE",
+  "(VI) Multiomics Integration & Alignment"         = "(VI)\nMultiomics",
+  "(VII) Trajectory & Lineage Topology"             = "(VII)\nTrajectory",
+  "(VIII) Computational Scalability & Efficiency"   = "(VIII)\nScalability"
 )
 
 #' @keywords internal
 .CANONICAL_CATEGORY_COLORS <- c(
-  "(I) Distributional Properties"              = "#2E86AB",
-  "(II) Correlations & Zero-Inflation"         = "#17A589",
-  "(III) Cellular Structure & Concordance"     = "#C0392B",
-  "(IV) Batch Effects & Confounder Mixing"     = "#D4AC0D",
-  "(V) Biological Signal & Differential Fidelity" = "#CA6F1E",
-  "(VI) Multiomics Integration & Alignment"        = "#2E4057",
-  "(VII) Trajectory & Lineage Topology"           = "#7D3C98",
-  "(VIII) Computational Scalability & Efficiency" = "#1E8449"
+  "(I) Distributional Properties"                    = "#2E86AB",
+  "(II) Sparsity & Zero-Inflation Dynamics"         = "#17A589",
+  "(III) Cellular Manifold & Clustering Concordance"= "#C0392B",
+  "(IV) Technical Variation & Batch Mixing Dynamics"= "#D4AC0D",
+  "(V) Biological Signal & Differential Fidelity"   = "#CA6F1E",
+  "(VI) Multiomics Integration & Alignment"         = "#2E4057",
+  "(VII) Trajectory & Lineage Topology"             = "#7D3C98",
+  "(VIII) Computational Scalability & Efficiency"   = "#1E8449"
 )
 
 #' @keywords internal
@@ -508,42 +562,54 @@ filter_gold_standard_metrics <- function(df) {
 
 #' @keywords internal
 .LEGACY_CATEGORY_MAP <- c(
-  "Distributional Properties"               = "(I) Distributional Properties",
-  "Distribution"                            = "(I) Distributional Properties",
-  "Correlation & Dependencies"              = "(II) Correlations & Zero-Inflation",
-  "Correlations & Zero-Inflation"           = "(II) Correlations & Zero-Inflation",
-  "Correlation"                             = "(II) Correlations & Zero-Inflation",
-  "Cellular Structure & Mixing"             = "(III) Cellular Structure & Concordance",
-  "Cellular Structure & Concordance"        = "(III) Cellular Structure & Concordance",
-  "Cell Structure"                          = "(III) Cellular Structure & Concordance",
-  "Batch Effects & Confounder Mixing"       = "(IV) Batch Effects & Confounder Mixing",
-  "Batch Mixing"                            = "(IV) Batch Effects & Confounder Mixing",
-  "Biological Signal & Downstream"          = "(V) Biological Signal & Differential Fidelity",
-  "Biological Signal & Downstream Fidelity" = "(V) Biological Signal & Differential Fidelity",
-  "Biological Signal & Differential"        = "(V) Biological Signal & Differential Fidelity",
-  "Biological Signal & Differential Fidelity" = "(V) Biological Signal & Differential Fidelity",
-  "Bio-Signal & DE"                         = "(V) Biological Signal & Differential Fidelity",
-  "Cross-Modal Relationships"               = "(VI) Multiomics Integration & Alignment",
-  "Cross-Modal Coupling & Modularity"       = "(VI) Multiomics Integration & Alignment",
-  "(VI) Multiomics Integration & Alignment"  = "(VI) Multiomics Integration & Alignment",
-  "(VII) Cross-Modal Coupling & Modularity" = "(VI) Multiomics Integration & Alignment",
-  "Cross-Modal"                             = "(VI) Multiomics Integration & Alignment",
-  "Multiomics Integration & Alignment"      = "(VI) Multiomics Integration & Alignment",
-  "(VI) Multiomics Integration & Alignment" = "(VI) Multiomics Integration & Alignment",
-  "Multiomics Integration"                  = "(VI) Multiomics Integration & Alignment",
-  "Integration & Alignment"                 = "(VI) Multiomics Integration & Alignment",
-  "Trajectory Dynamics"                     = "(VII) Trajectory & Lineage Topology",
-  "Trajectory & Lineage Dynamics"           = "(VII) Trajectory & Lineage Topology",
-  "Trajectory & Lineage Topology"           = "(VII) Trajectory & Lineage Topology",
-  "(VI) Trajectory & Lineage Dynamics"      = "(VII) Trajectory & Lineage Topology",
-  "(VII) Trajectory & Lineage Dynamics"     = "(VII) Trajectory & Lineage Topology",
-  "(VII) Trajectory & Lineage Topology"     = "(VII) Trajectory & Lineage Topology",
-  "Trajectory"                              = "(VII) Trajectory & Lineage Topology",
-  "Traj."                                   = "(VII) Trajectory & Lineage Topology",
-  "Computational Scalability"               = "(VIII) Computational Scalability & Efficiency",
-  "Computational Scalability & Efficiency"  = "(VIII) Computational Scalability & Efficiency",
-  "(VIII) Computational Scalability"        = "(VIII) Computational Scalability & Efficiency",
-  "(VIII) Computational Scalability & Efficiency" = "(VIII) Computational Scalability & Efficiency"
+  "Distributional Properties"                        = "(I) Distributional Properties",
+  "Distribution"                                     = "(I) Distributional Properties",
+  "Sparsity & Zero-Inflation Dynamics"               = "(II) Sparsity & Zero-Inflation Dynamics",
+  "(II) Sparsity & Zero-Inflation Dynamics"          = "(II) Sparsity & Zero-Inflation Dynamics",
+  "Sparsity & Zero"                                  = "(II) Sparsity & Zero-Inflation Dynamics",
+  "Correlation & Dependencies"                       = "(II) Sparsity & Zero-Inflation Dynamics",
+  "Correlations & Zero-Inflation"                    = "(II) Sparsity & Zero-Inflation Dynamics",
+  "(II) Correlations & Zero-Inflation"               = "(II) Sparsity & Zero-Inflation Dynamics",
+  "Correlation"                                      = "(II) Sparsity & Zero-Inflation Dynamics",
+  "Cellular Manifold & Clustering Concordance"       = "(III) Cellular Manifold & Clustering Concordance",
+  "(III) Cellular Manifold & Clustering Concordance" = "(III) Cellular Manifold & Clustering Concordance",
+  "Cellular Structure & Mixing"                      = "(III) Cellular Manifold & Clustering Concordance",
+  "Cellular Structure & Concordance"                 = "(III) Cellular Manifold & Clustering Concordance",
+  "(III) Cellular Structure & Concordance"           = "(III) Cellular Manifold & Clustering Concordance",
+  "Cell Structure"                                   = "(III) Cellular Manifold & Clustering Concordance",
+  "Cell Manifold"                                    = "(III) Cellular Manifold & Clustering Concordance",
+  "Technical Variation & Batch Mixing Dynamics"      = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "(IV) Technical Variation & Batch Mixing Dynamics" = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "Batch Effects & Confounder Mixing"                = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "(IV) Batch Effects & Confounder Mixing"           = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "Batch Mixing"                                     = "(IV) Technical Variation & Batch Mixing Dynamics",
+  "Biological Signal & Downstream"                   = "(V) Biological Signal & Differential Fidelity",
+  "Biological Signal & Downstream Fidelity"          = "(V) Biological Signal & Differential Fidelity",
+  "(V) Biological Signal & Downstream Fidelity"      = "(V) Biological Signal & Differential Fidelity",
+  "Biological Signal & Differential"                 = "(V) Biological Signal & Differential Fidelity",
+  "Biological Signal & Differential Fidelity"        = "(V) Biological Signal & Differential Fidelity",
+  "Bio-Signal & DE"                                  = "(V) Biological Signal & Differential Fidelity",
+  "Cross-Modal Relationships"                        = "(VI) Multiomics Integration & Alignment",
+  "Cross-Modal Coupling & Modularity"                = "(VI) Multiomics Integration & Alignment",
+  "(VI) Multiomics Integration & Alignment"          = "(VI) Multiomics Integration & Alignment",
+  "(VII) Cross-Modal Coupling & Modularity"          = "(VI) Multiomics Integration & Alignment",
+  "Cross-Modal"                                      = "(VI) Multiomics Integration & Alignment",
+  "Multiomics Integration & Alignment"               = "(VI) Multiomics Integration & Alignment",
+  "Multiomics Integration"                           = "(VI) Multiomics Integration & Alignment",
+  "Multiomics"                                       = "(VI) Multiomics Integration & Alignment",
+  "Integration & Alignment"                          = "(VI) Multiomics Integration & Alignment",
+  "Trajectory Dynamics"                              = "(VII) Trajectory & Lineage Topology",
+  "Trajectory & Lineage Dynamics"                    = "(VII) Trajectory & Lineage Topology",
+  "Trajectory & Lineage Topology"                    = "(VII) Trajectory & Lineage Topology",
+  "(VI) Trajectory & Lineage Dynamics"               = "(VII) Trajectory & Lineage Topology",
+  "(VII) Trajectory & Lineage Dynamics"              = "(VII) Trajectory & Lineage Topology",
+  "(VII) Trajectory & Lineage Topology"              = "(VII) Trajectory & Lineage Topology",
+  "Trajectory"                                       = "(VII) Trajectory & Lineage Topology",
+  "Traj."                                            = "(VII) Trajectory & Lineage Topology",
+  "Computational Scalability"                        = "(VIII) Computational Scalability & Efficiency",
+  "Computational Scalability & Efficiency"           = "(VIII) Computational Scalability & Efficiency",
+  "(VIII) Computational Scalability"                 = "(VIII) Computational Scalability & Efficiency",
+  "(VIII) Computational Scalability & Efficiency"    = "(VIII) Computational Scalability & Efficiency"
 )
 
 #' Standardize Category Names in Benchmark Tables
@@ -567,12 +633,12 @@ standardize_benchmark_categories <- function(df) {
   if ("Metric" %in% colnames(df)) {
     mc <- .METRIC_CATEGORY_MAP[df$Metric]
     batch_metrics <- c("batch_silhouette", "shannon_entropy", "pcr_r2", "cms", "isi", "seurat_mixing_metric", "ldf_diff", "cross_batch_F1", "cross_batch_accuracy")
-    zero_metrics  <- c("midpoint_error", "slope_error", "r2_discrepancy", "excess_zero_weight_discrepancy", "dropout_curve_midpoint_x0", "dropout_curve_slope_k", "mean_variance_r2", "bcv_discrepancy")
+    zero_metrics  <- c("midpoint_error", "slope_error", "r2_discrepancy", "curve_rmse", "excess_zero_weight_discrepancy", "dropout_curve_midpoint_x0", "dropout_curve_slope_k", "mean_variance_r2", "bcv_discrepancy")
     
     needs_reassign <- !is.na(mc) & (
       is.na(df$Category) | df$Category == "" | df$Category == "Uncategorized" |
-      (!is.na(df$Category) & df$Metric %in% batch_metrics & df$Category != "(IV) Batch Effects & Confounder Mixing") |
-      (!is.na(df$Category) & df$Metric %in% zero_metrics & df$Category != "(II) Correlations & Zero-Inflation")
+      (!is.na(df$Category) & df$Metric %in% batch_metrics & df$Category != "(IV) Technical Variation & Batch Mixing Dynamics") |
+      (!is.na(df$Category) & df$Metric %in% zero_metrics & df$Category != "(II) Sparsity & Zero-Inflation Dynamics")
     )
     needs_reassign[is.na(needs_reassign)] <- FALSE
     if (any(needs_reassign)) {
@@ -587,12 +653,14 @@ standardize_benchmark_categories <- function(df) {
   "mean_variance_r2", "cell_pearson_cor", "feature_pearson_cor",
   "silhouette_sim", "dunn_sim", "calinski_harabasz_sim", "ari", "nmi", "ami", "v_measure", "neighborhood_purity",
   "Generative_Precision", "Generative_Recall",
-  "cms", "isi", "shannon_entropy",
+  "cms", "isi", "shannon_entropy", "cross_batch_F1", "cross_batch_accuracy",
+  "pval_dist_score", "accuracy", "precision", "recall", "f1_score", "auc",
   "SimBench_DE_Fidelity_Score", "Log2FC_Pearson_Corr", "Log2FC_Spearman_Corr", "Top_DEG_Jaccard_Overlap",
   "Distribution_Score", "Classifier_Accuracy", "Classifier_Macro_F1", "Classifier_Macro_Recall",
   "predictive_macro_F1",
   "Silhouette_Sim", "PVE_Group_Sim",
   "batch_asw", "cell_type_asw", "graph_connectivity", "integration_ari", "integration_nmi",
+  "cross_modal_F1", "match_at_1", "rv_coefficient", "module_correlation_r", "mean_coupling_cor",
   "pseudotime_correlation", "graph_alignment", "lineage_expression_fidelity"
 )
 
@@ -626,34 +694,566 @@ standardize_benchmark_categories <- function(df) {
 }
 
 
+# Internal Helper: Canonical 18-Property Catalog for Distribution QC
+# (7 univariate cell-level, 7 univariate feature-level, 4 bivariate property pairs)
+.dist_qc_catalog <- function() {
+  cell_keys <- c(
+    "library_size", "log_library_size", "tmm_factor",
+    "zero_fraction_cell", "detection_freq_cell", "cell_cor", "pca_dist"
+  )
+  feat_keys <- c(
+    "mean_expression", "variance", "scaled_variance", "cv",
+    "zero_fraction_feature", "dispersion", "gene_cor"
+  )
+  biv_keys <- c(
+    "lib_vs_cellzero", "mean_vs_sd", "mean_vs_featzero", "mean_vs_dispersion"
+  )
+  stat_meta <- list(
+    # 7 Univariate Cell-Level Properties
+    library_size        = list(title = "Library Size",              xlab = "Real library size",       ylab = "Simulated library size",       d_xlab = "library size"),
+    log_library_size    = list(title = "Log Library Size",          xlab = "Real log(lib. size + 1)", ylab = "Simulated log(lib. size + 1)", d_xlab = "log(library size + 1)"),
+    tmm_factor          = list(title = "TMM Normalization Factor",  xlab = "Real TMM factor",         ylab = "Simulated TMM factor",         d_xlab = "TMM factor"),
+    zero_fraction_cell  = list(title = "Cell Zero Fraction",        xlab = "Real zero frac. / cell",  ylab = "Simulated zero frac. / cell",  d_xlab = "zero fraction / cell"),
+    detection_freq_cell = list(title = "Cell Detection Frequency",  xlab = "Real detect. freq./cell", ylab = "Simulated detect. freq./cell", d_xlab = "detection freq. / cell"),
+    cell_cor            = list(title = "Cell-Cell Correlation",     xlab = "Real cell corr.",         ylab = "Simulated cell corr.",         d_xlab = "cell-cell correlation"),
+    pca_dist            = list(title = "Cell PCA Distance",         xlab = "Real PCA distance",       ylab = "Simulated PCA distance",       d_xlab = "PCA pairwise distance"),
+    # 7 Univariate Feature-Level Properties
+    mean_expression       = list(title = "Mean Expression",           xlab = "Real log2(CPM+1) mean",    ylab = "Simulated log2(CPM+1) mean",    d_xlab = "mean log2(CPM + 1)"),
+    variance              = list(title = "Feature Variance",          xlab = "Real log2(CPM+1) var.",    ylab = "Simulated log2(CPM+1) var.",    d_xlab = "variance log2(CPM + 1)"),
+    scaled_variance       = list(title = "Scaled Feature Variance",   xlab = "Real z-scaled variance",   ylab = "Simulated z-scaled variance",   d_xlab = "z-scaled variance"),
+    cv                    = list(title = "Coefficient of Variation",  xlab = "Real CV (%)",              ylab = "Simulated CV (%)",              d_xlab = "CV (%)"),
+    zero_fraction_feature = list(title = "Feature Zero Fraction",     xlab = "Real zero frac. / feat.",  ylab = "Simulated zero frac. / feat.",  d_xlab = "zero fraction / feature"),
+    dispersion            = list(title = "Feature Dispersion",        xlab = "Real dispersion",          ylab = "Simulated dispersion",          d_xlab = "dispersion (var / mean)"),
+    gene_cor              = list(title = "Feature-Feature Corr.",     xlab = "Real feature corr.",       ylab = "Simulated feature corr.",       d_xlab = "feature-feature correlation"),
+    # 4 Bivariate Property Pairs
+    lib_vs_cellzero       = list(title = "Lib. Size vs. Cell Zero",   xlab = "Real 2D Mahalanobis d",    ylab = "Simulated 2D Mahalanobis d",    b_xlab = "log10(library size + 1)", b_ylab = "zero fraction / cell"),
+    mean_vs_sd            = list(title = "Mean Expr. vs. Feature SD", xlab = "Real 2D Mahalanobis d",    ylab = "Simulated 2D Mahalanobis d",    b_xlab = "mean log2(CPM + 1)",      b_ylab = "feature SD"),
+    mean_vs_featzero      = list(title = "Mean Expr. vs. Feat. Zero", xlab = "Real 2D Mahalanobis d",    ylab = "Simulated 2D Mahalanobis d",    b_xlab = "mean log2(CPM + 1)",      b_ylab = "zero fraction / feature"),
+    mean_vs_dispersion    = list(title = "Mean Expr. vs. Dispersion", xlab = "Real 2D Mahalanobis d",    ylab = "Simulated 2D Mahalanobis d",    b_xlab = "mean log2(CPM + 1)",      b_ylab = "feature dispersion")
+  )
+  list(cell_keys = cell_keys, feat_keys = feat_keys, biv_keys = biv_keys, stat_meta = stat_meta)
+}
+
+.resolve_dist_qc_keys <- function(properties, cat_info) {
+  selected_keys <- names(cat_info$stat_meta)
+  if (!is.null(properties) && length(properties) > 0) {
+    req_props <- as.character(properties)
+    expanded <- unlist(lapply(req_props, function(pk) {
+      if (pk %in% c("all", "all_18")) return(names(cat_info$stat_meta))
+      if (pk %in% c("cell", "cell_level")) return(cat_info$cell_keys)
+      if (pk %in% c("feature", "feature_level")) return(cat_info$feat_keys)
+      if (pk %in% c("bivariate", "bivariate_pairs")) return(cat_info$biv_keys)
+      pk
+    }))
+    matched <- intersect(unique(expanded), names(cat_info$stat_meta))
+    if (length(matched) > 0) selected_keys <- matched
+  }
+  selected_keys
+}
+
+.extract_dist_qc_props <- function(mat, modality = NULL) {
+  if (exists("extract_cell_properties", mode = "function") &&
+      exists("extract_feature_properties", mode = "function")) {
+    cp <- tryCatch(extract_cell_properties(mat, max_cells_cor = 300L, n_top_hvgs = 250L, modality = modality, verbose = FALSE),
+                   error = function(e) NULL)
+    fp <- tryCatch(extract_feature_properties(mat, n_top_cor = 250L, modality = modality, verbose = FALSE),
+                   error = function(e) NULL)
+    if (!is.null(cp) && !is.null(fp)) {
+      return(list(cell = cp, feat = fp))
+    }
+  }
+
+  # Standalone fallback mirroring extract_cell_properties / extract_feature_properties
+  n_cells <- ncol(mat)
+  lib_size <- as.numeric(colSums(mat))
+  log_lib_size <- log1p(lib_size)
+  zero_fraction_cell <- as.numeric(colMeans(mat == 0))
+  detection_freq_cell <- 1 - zero_fraction_cell
+
+  tmm_factors <- rep(1, n_cells)
+  if (requireNamespace("edgeR", quietly = TRUE)) {
+    tryCatch({
+      sub_d <- mat
+      if (nrow(sub_d) > 2000L) {
+        top_i <- order(rowMeans(sub_d), decreasing = TRUE)[seq_len(2000L)]
+        sub_d <- sub_d[top_i, , drop = FALSE]
+      }
+      dge <- suppressMessages(suppressWarnings(edgeR::DGEList(counts = as.matrix(sub_d))))
+      dge <- suppressMessages(suppressWarnings(edgeR::calcNormFactors(dge, method = "TMM")))
+      nf <- as.numeric(dge$samples$norm.factors)
+      if (length(nf) == n_cells && !any(is.na(nf)) && !all(nf == 1)) {
+        tmm_factors <- nf
+      } else {
+        med_cs <- stats::median(lib_size[lib_size > 0])
+        if (!is.na(med_cs) && med_cs > 0) tmm_factors <- lib_size / med_cs
+      }
+    }, error = function(e) {
+      med_cs <- stats::median(lib_size[lib_size > 0])
+      if (!is.na(med_cs) && med_cs > 0) tmm_factors <- lib_size / med_cs
+    })
+  } else {
+    med_cs <- stats::median(lib_size[lib_size > 0])
+    if (!is.na(med_cs) && med_cs > 0) tmm_factors <- lib_size / med_cs
+  }
+
+  raw_mean <- as.numeric(rowMeans(mat))
+  raw_var  <- apply(mat, 1, stats::var)
+  raw_sd   <- sqrt(pmax(0, raw_var))
+  cv_val   <- ifelse(raw_mean > 0, (raw_sd / raw_mean) * 100, 0)
+  disp_val <- ifelse(raw_mean > 0, raw_var / raw_mean, 0)
+  zero_fraction_feature <- as.numeric(rowMeans(mat == 0))
+
+  lib_adj <- lib_size
+  lib_adj[lib_adj == 0] <- 1
+  is_atac_fb <- if (!is.null(modality) && grepl("atac|peak|chromatin", tolower(modality))) {
+    TRUE
+  } else if (!is.null(rownames(mat)) && length(rownames(mat)) > 0) {
+    mean(grepl("^(peak|chr[0-9xyXYM]+[:-]|[A-Za-z0-9_.-]+[:-][0-9]+-[0-9]+)", rownames(mat), ignore.case = TRUE)) > 0.5
+  } else FALSE
+  norm_mat <- if (is_atac_fb) {
+    rs_fb <- as.numeric(rowSums(mat))
+    idf_fb <- ifelse(rs_fb > 0, ncol(mat) / rs_fb, 0)
+    log1p(sweep(t(t(mat) / lib_adj), 1L, idf_fb, `*`) * 1e4)
+  } else {
+    log2(t(t(mat) / lib_adj) * 1e6 + 1)
+  }
+  mean_val <- as.numeric(rowMeans(norm_mat))
+  var_val  <- apply(norm_mat, 1, stats::var)
+  sd_val   <- sqrt(pmax(0, var_val))
+  sd_v     <- stats::sd(var_val, na.rm = TRUE)
+  scaled_var_val <- if (!is.na(sd_v) && sd_v > 0) as.numeric((var_val - mean(var_val, na.rm = TRUE)) / sd_v) else rep(0, length(var_val))
+
+  pos_g <- which(is.finite(raw_var) & raw_var > 0)
+  top_n <- min(250L, length(pos_g))
+  rank_v <- if (is_atac_fb) var_val else raw_var
+  top_g_idx <- if (top_n > 0L) pos_g[order(rank_v[pos_g], decreasing = TRUE)[seq_len(top_n)]] else seq_len(min(250L, nrow(mat)))
+  sub_norm <- norm_mat[top_g_idx, , drop = FALSE]
+
+  cell_idx <- if (n_cells > 250L) round(seq(1, n_cells, length.out = 250L)) else seq_len(n_cells)
+  cell_cor <- if (length(cell_idx) >= 2L && nrow(sub_norm) >= 2L) {
+    cm <- suppressWarnings(stats::cor(sub_norm[, cell_idx, drop = FALSE], method = "spearman"))
+    cm[upper.tri(cm)]
+  } else numeric(0)
+
+  gene_cor <- if (nrow(sub_norm) >= 2L && length(cell_idx) >= 2L) {
+    gm <- suppressWarnings(stats::cor(t(sub_norm[, cell_idx, drop = FALSE]), method = "spearman"))
+    gm[upper.tri(gm)]
+  } else numeric(0)
+
+  pca_dist <- numeric(0)
+  if (n_cells >= 3L && nrow(sub_norm) >= 2L) {
+    rv_s <- apply(sub_norm, 1, stats::var)
+    kr <- which(is.finite(rv_s) & rv_s > 0)
+    if (length(kr) >= 2L) {
+      sub_p <- sub_norm[kr, , drop = FALSE]
+      n_pcs <- min(20L, nrow(sub_p) - 1L, n_cells - 1L)
+      if (n_pcs >= 1L) {
+        pca_pts <- tryCatch({
+          if (exists("fast_pca", mode = "function")) fast_pca(t(sub_p), n_pcs = n_pcs)
+          else stats::prcomp(t(sub_p), center = TRUE, scale. = FALSE, rank. = n_pcs)$x
+        }, error = function(e) NULL)
+        if (!is.null(pca_pts) && nrow(pca_pts) >= 2L) {
+          if (n_cells > 200L) {
+            d_idx <- round(seq(1, n_cells, length.out = 200L))
+            pca_dist <- as.numeric(stats::dist(pca_pts[d_idx, , drop = FALSE]))
+          } else {
+            pca_dist <- as.numeric(stats::dist(pca_pts))
+          }
+        }
+      }
+    }
+  }
+
+  list(
+    cell = list(
+      library_size        = lib_size,
+      log_library_size    = log_lib_size,
+      tmm_factor          = tmm_factors,
+      zero_fraction_cell  = zero_fraction_cell,
+      detection_freq_cell = detection_freq_cell,
+      cell_cor            = cell_cor,
+      pca_dist            = pca_dist
+    ),
+    feat = list(
+      mean_expression       = mean_val,
+      variance              = var_val,
+      scaled_variance       = scaled_var_val,
+      sd                    = sd_val,
+      cv                    = cv_val,
+      zero_fraction_feature = zero_fraction_feature,
+      dispersion            = disp_val,
+      gene_cor              = gene_cor
+    )
+  )
+}
+
+.dist_qc_biv_xy <- function(props, key) {
+  if (key == "lib_vs_cellzero") {
+    return(cbind(x = log10(props$cell$library_size + 1), y = props$cell$zero_fraction_cell))
+  }
+  if (key == "mean_vs_sd") {
+    return(cbind(x = props$feat$mean_expression, y = props$feat$sd))
+  }
+  if (key == "mean_vs_featzero") {
+    return(cbind(x = props$feat$mean_expression, y = props$feat$zero_fraction_feature))
+  }
+  if (key == "mean_vs_dispersion") {
+    return(cbind(x = props$feat$mean_expression, y = props$feat$dispersion))
+  }
+  cbind(x = numeric(0), y = numeric(0))
+}
+
+.assemble_dist_qc_grid <- function(panels, title, subtitle = NULL, base_size = 9) {
+  ncol_grid <- if (length(panels) <= 4L) {
+    length(panels)
+  } else if (length(panels) <= 8L) {
+    4L
+  } else {
+    5L
+  }
+  p_grid <- patchwork::wrap_plots(panels, ncol = ncol_grid) +
+    patchwork::plot_layout(guides = "collect") &
+    ggplot2::theme(legend.position = "bottom")
+  if (!is.null(title) && nzchar(title)) {
+    p_grid <- p_grid + patchwork::plot_annotation(
+      title = title,
+      subtitle = subtitle,
+      theme = ggplot2::theme(
+        plot.title = ggplot2::element_text(face = "bold", size = base_size * 1.15, hjust = 0.5, margin = ggplot2::margin(b = 3)),
+        plot.subtitle = ggplot2::element_text(size = base_size * 0.88, color = "#475569", hjust = 0.5, margin = ggplot2::margin(b = 6))
+      )
+    )
+  }
+  p_grid
+}
+
+# Internal Helper: Build Quantile-Quantile (Q-Q) Diagnostic Plots across
+# 7 cell-level properties, 7 feature-level properties, and 4 bivariate pairs.
+.build_distribution_qq_plot <- function(
+  ref_mat,
+  sims,
+  sim_names,
+  pal,
+  theme_human,
+  properties = NULL,
+  title = "Real vs. Simulated Q-Q Plots",
+  base_size = 9,
+  n_quantiles = 1024L
+) {
+  cat_info <- .dist_qc_catalog()
+  selected_keys <- .resolve_dist_qc_keys(properties, cat_info)
+  ref_props <- .extract_dist_qc_props(ref_mat)
+  sim_props_list <- lapply(sims, .extract_dist_qc_props)
+
+  biv_mahalanobis_pair <- function(ref_xy, sim_xy) {
+    ref_xy <- ref_xy[is.finite(rowSums(ref_xy)), , drop = FALSE]
+    sim_xy <- sim_xy[is.finite(rowSums(sim_xy)), , drop = FALSE]
+    if (nrow(ref_xy) < 3L || nrow(sim_xy) < 2L) return(list(ref = numeric(0), sim = numeric(0)))
+    mu_x <- mean(ref_xy[, 1]); sd_x <- stats::sd(ref_xy[, 1]); if (!is.finite(sd_x) || sd_x <= 0) sd_x <- 1
+    mu_y <- mean(ref_xy[, 2]); sd_y <- stats::sd(ref_xy[, 2]); if (!is.finite(sd_y) || sd_y <= 0) sd_y <- 1
+    z_ref <- cbind((ref_xy[, 1] - mu_x) / sd_x, (ref_xy[, 2] - mu_y) / sd_y)
+    z_sim <- cbind((sim_xy[, 1] - mu_x) / sd_x, (sim_xy[, 2] - mu_y) / sd_y)
+    cov_r <- stats::cov(z_ref) + diag(1e-4, 2L)
+    s_inv <- tryCatch(solve(cov_r), error = function(e) diag(1, 2L))
+    list(
+      ref = sqrt(pmax(0, rowSums((z_ref %*% s_inv) * z_ref))),
+      sim = sqrt(pmax(0, rowSums((z_sim %*% s_inv) * z_sim)))
+    )
+  }
+
+  get_pair_vectors <- function(key, sn) {
+    sp <- sim_props_list[[sn]]
+    if (key %in% cat_info$cell_keys) {
+      return(list(ref = as.numeric(ref_props$cell[[key]]), sim = as.numeric(sp$cell[[key]])))
+    }
+    if (key %in% cat_info$feat_keys) {
+      return(list(ref = as.numeric(ref_props$feat[[key]]), sim = as.numeric(sp$feat[[key]])))
+    }
+    biv_mahalanobis_pair(.dist_qc_biv_xy(ref_props, key), .dist_qc_biv_xy(sp, key))
+  }
+
+  probs <- seq(0, 1, length.out = n_quantiles)
+  marker_idx <- unique(round(seq(1, n_quantiles, length.out = 35L)))
+
+  build_single_qq <- function(key, standalone = FALSE) {
+    meta <- cat_info$stat_meta[[key]]
+    qq_rows <- list(); pt_rows <- list(); stat_rows <- list()
+
+    for (sn in sim_names) {
+      vecs <- get_pair_vectors(key, sn)
+      x_raw <- vecs$ref[is.finite(vecs$ref)]
+      y_raw <- vecs$sim[is.finite(vecs$sim)]
+      if (length(x_raw) < 2L || length(y_raw) < 2L) next
+
+      qx <- stats::quantile(x_raw, probs = probs, names = FALSE, type = 8, na.rm = TRUE)
+      qy <- stats::quantile(y_raw, probs = probs, names = FALSE, type = 8, na.rm = TRUE)
+
+      mad_v  <- stats::median(abs(qy - qx), na.rm = TRUE)
+      mae_v  <- mean(abs(qy - qx), na.rm = TRUE)
+      rmse_v <- sqrt(mean((qy - qx)^2, na.rm = TRUE))
+      pcc_v  <- if (stats::sd(qx) > 0 && stats::sd(qy) > 0) suppressWarnings(stats::cor(qx, qy, method = "pearson")) else NA_real_
+      ks_v   <- suppressWarnings(as.numeric(stats::ks.test(x_raw, y_raw)$statistic))
+
+      qq_rows[[sn]] <- data.frame(ref_q = qx, sim_q = qy, Simulator = sn, stringsAsFactors = FALSE)
+      pt_rows[[sn]] <- data.frame(ref_q = qx[marker_idx], sim_q = qy[marker_idx], Simulator = sn, stringsAsFactors = FALSE)
+      stat_rows[[sn]] <- data.frame(Simulator = sn, KS = ks_v, MAD = mad_v, MAE = mae_v, RMSE = rmse_v, PCC = pcc_v, stringsAsFactors = FALSE)
+    }
+
+    if (length(qq_rows) == 0L) {
+      return(
+        ggplot2::ggplot() +
+          ggplot2::annotate("text", x = 0.5, y = 0.5, label = "Insufficient finite values", size = base_size * 0.32) +
+          ggplot2::labs(title = meta$title) +
+          theme_human()
+      )
+    }
+
+    df_qq <- do.call(rbind, qq_rows)
+    df_pt <- do.call(rbind, pt_rows)
+    df_st <- do.call(rbind, stat_rows)
+    df_qq$Simulator <- factor(df_qq$Simulator, levels = sim_names)
+    df_pt$Simulator <- factor(df_pt$Simulator, levels = sim_names)
+
+    lims <- range(c(df_qq$ref_q, df_qq$sim_q), na.rm = TRUE)
+    span <- diff(lims)
+    if (!is.finite(span) || span <= 0) span <- 1
+    lims_pad <- c(lims[1] - 0.04 * span, lims[2] + 0.04 * span)
+
+    bs_panel <- if (standalone) max(base_size, 11) else base_size
+    p <- ggplot2::ggplot(df_qq, ggplot2::aes(x = .data$ref_q, y = .data$sim_q, color = .data$Simulator)) +
+      ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "#b23939", linewidth = 0.65) +
+      ggplot2::geom_line(linewidth = if (standalone) 1.0 else 0.78, alpha = 0.9) +
+      ggplot2::geom_point(data = df_pt, size = if (standalone) 2.0 else 1.2, alpha = 0.9) +
+      ggplot2::scale_color_manual(values = pal[sim_names], name = "Simulator") +
+      ggplot2::coord_cartesian(xlim = lims_pad, ylim = lims_pad) +
+      ggplot2::labs(
+        title = if (standalone) paste0(meta$title, " Q-Q Plot") else meta$title,
+        subtitle = if (standalone) sprintf("Quantile-quantile comparison (n = %d quantiles) | Dashed red line: y = x", n_quantiles) else NULL,
+        x = meta$xlab,
+        y = meta$ylab
+      ) +
+      theme_human(bs_panel)
+
+    if (nrow(df_st) == 1L) {
+      lbl <- sprintf(
+        "KS=%.3f | PCC=%s\nMAD=%.3f | MAE=%.3f\nRMSE=%.3f",
+        df_st$KS[1],
+        ifelse(is.na(df_st$PCC[1]), "NA", sprintf("%.3f", df_st$PCC[1])),
+        df_st$MAD[1], df_st$MAE[1], df_st$RMSE[1]
+      )
+      p <- p + ggplot2::annotate(
+        "label",
+        x = lims_pad[1] + 0.02 * diff(lims_pad),
+        y = lims_pad[2] - 0.02 * diff(lims_pad),
+        label = lbl, hjust = 0, vjust = 1,
+        size = bs_panel * (if (standalone) 0.27 else 0.22),
+        color = "#0f172a", fill = ggplot2::alpha("#ffffff", 0.85),
+        label.padding = ggplot2::unit(0.16, "lines")
+      )
+    } else if (nrow(df_st) <= 4L) {
+      lbl <- paste(sprintf("%s: KS=%.2f, RMSE=%.2f", df_st$Simulator, df_st$KS, df_st$RMSE), collapse = "\n")
+      p <- p + ggplot2::annotate(
+        "label",
+        x = lims_pad[1] + 0.02 * diff(lims_pad),
+        y = lims_pad[2] - 0.02 * diff(lims_pad),
+        label = lbl, hjust = 0, vjust = 1,
+        size = bs_panel * (if (standalone) 0.24 else 0.20),
+        color = "#0f172a", fill = ggplot2::alpha("#ffffff", 0.85),
+        label.padding = ggplot2::unit(0.14, "lines")
+      )
+    }
+
+    if (standalone) {
+      p <- p + ggplot2::theme(
+        legend.position = "bottom",
+        plot.title = ggplot2::element_text(face = "bold", size = bs_panel * 1.15, hjust = 0.5, margin = ggplot2::margin(b = 4)),
+        plot.subtitle = ggplot2::element_text(size = bs_panel * 0.88, color = "#475569", hjust = 0.5, margin = ggplot2::margin(b = 8))
+      )
+    }
+    p
+  }
+
+  if (length(selected_keys) == 1L) {
+    p_single <- build_single_qq(selected_keys[1L], standalone = TRUE)
+    if (!is.null(title) && nzchar(title) && !identical(title, "Real vs. Simulated Q-Q Plots")) {
+      p_single <- p_single + ggplot2::labs(title = title)
+    }
+    return(p_single)
+  }
+
+  panels <- lapply(selected_keys, build_single_qq, standalone = FALSE)
+  sub_txt <- sprintf("Quantile-quantile comparison (n = %d quantiles) | Dashed red line: y = x", n_quantiles)
+
+  if (requireNamespace("patchwork", quietly = TRUE)) {
+    return(.assemble_dist_qc_grid(panels, title = title, subtitle = sub_txt, base_size = base_size))
+  }
+
+  # Fallback without patchwork: faceted single ggplot across properties
+  all_qq <- do.call(rbind, lapply(selected_keys, function(key) {
+    do.call(rbind, lapply(sim_names, function(sn) {
+      vecs <- get_pair_vectors(key, sn)
+      x_raw <- vecs$ref[is.finite(vecs$ref)]
+      y_raw <- vecs$sim[is.finite(vecs$sim)]
+      if (length(x_raw) < 2L || length(y_raw) < 2L) return(NULL)
+      data.frame(
+        ref_q = stats::quantile(x_raw, probs = probs, names = FALSE, type = 8, na.rm = TRUE),
+        sim_q = stats::quantile(y_raw, probs = probs, names = FALSE, type = 8, na.rm = TRUE),
+        Simulator = sn,
+        Statistic = cat_info$stat_meta[[key]]$title,
+        stringsAsFactors = FALSE
+      )
+    }))
+  }))
+  all_qq$Simulator <- factor(all_qq$Simulator, levels = sim_names)
+  ggplot2::ggplot(all_qq, ggplot2::aes(x = .data$ref_q, y = .data$sim_q, color = .data$Simulator)) +
+    ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "#b23939", linewidth = 0.65) +
+    ggplot2::geom_line(linewidth = 0.8) +
+    ggplot2::facet_wrap(~ Statistic, scales = "free", ncol = 4) +
+    ggplot2::scale_color_manual(values = pal[sim_names], name = "Simulator") +
+    ggplot2::labs(title = title, subtitle = sub_txt, x = "Real data quantiles", y = "Simulated data quantiles") +
+    theme_human() +
+    ggplot2::theme(legend.position = "bottom")
+}
+
+# Internal Helper: Build Empirical & Joint Density Plots across all 18 properties
+.build_distribution_density_plot <- function(
+  ref_mat,
+  sims,
+  ref_name,
+  sim_names,
+  all_datasets,
+  pal,
+  theme_human,
+  properties = NULL,
+  title = "Real vs. Simulated Empirical & Joint Density Plots",
+  base_size = 9
+) {
+  cat_info <- .dist_qc_catalog()
+  selected_keys <- .resolve_dist_qc_keys(properties, cat_info)
+  ref_props <- .extract_dist_qc_props(ref_mat)
+  sim_props_list <- lapply(sims, .extract_dist_qc_props)
+
+  build_single_panel <- function(key, standalone = FALSE) {
+    meta <- cat_info$stat_meta[[key]]
+    bs_panel <- if (standalone) max(base_size, 11) else base_size
+
+    if (key %in% cat_info$biv_keys) {
+      cap_pts <- function(mat, max_n = 2500L) {
+        mat <- mat[is.finite(rowSums(mat)), , drop = FALSE]
+        if (nrow(mat) > max_n) mat <- mat[round(seq(1, nrow(mat), length.out = max_n)), , drop = FALSE]
+        mat
+      }
+      r_xy <- cap_pts(.dist_qc_biv_xy(ref_props, key))
+      df_list <- list()
+      if (nrow(r_xy) > 0L) df_list[[ref_name]] <- data.frame(x = r_xy[, 1], y = r_xy[, 2], Dataset = ref_name)
+      for (sn in sim_names) {
+        s_xy <- cap_pts(.dist_qc_biv_xy(sim_props_list[[sn]], key))
+        if (nrow(s_xy) > 0L) df_list[[sn]] <- data.frame(x = s_xy[, 1], y = s_xy[, 2], Dataset = sn)
+      }
+      if (length(df_list) == 0L) {
+        return(ggplot2::ggplot() + ggplot2::annotate("text", x = 0.5, y = 0.5, label = "Insufficient finite values", size = bs_panel * 0.32) + ggplot2::labs(title = meta$title) + theme_human(bs_panel))
+      }
+      df_biv <- do.call(rbind, df_list)
+      df_biv$Dataset <- factor(df_biv$Dataset, levels = all_datasets)
+      has_univ <- any(!(selected_keys %in% cat_info$biv_keys))
+      p <- ggplot2::ggplot(df_biv, ggplot2::aes(x = .data$x, y = .data$y, color = .data$Dataset)) +
+        ggplot2::geom_point(alpha = 0.58, size = if (standalone) 1.6 else 1.1, stroke = 0, show.legend = !has_univ) +
+        ggplot2::scale_color_manual(values = pal, name = "Dataset") +
+        ggplot2::labs(
+          title = if (standalone) paste0(meta$title, " Joint Distribution") else meta$title,
+          x = meta$b_xlab,
+          y = meta$b_ylab
+        ) +
+        theme_human(bs_panel)
+      if (!has_univ) {
+        p <- p + ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(alpha = 1, size = 2.6)))
+      }
+      p
+    } else {
+      extract_u <- function(props) {
+        v <- if (key %in% cat_info$cell_keys) props$cell[[key]] else props$feat[[key]]
+        v <- as.numeric(v)
+        v[is.finite(v)]
+      }
+      df_list <- list()
+      rv <- extract_u(ref_props)
+      if (length(rv) >= 2L) df_list[[ref_name]] <- data.frame(val = rv, Dataset = ref_name)
+      for (sn in sim_names) {
+        sv <- extract_u(sim_props_list[[sn]])
+        if (length(sv) >= 2L) df_list[[sn]] <- data.frame(val = sv, Dataset = sn)
+      }
+      if (length(df_list) == 0L) {
+        return(ggplot2::ggplot() + ggplot2::annotate("text", x = 0.5, y = 0.5, label = "Insufficient finite values", size = bs_panel * 0.32) + ggplot2::labs(title = meta$title) + theme_human(bs_panel))
+      }
+      df_u <- do.call(rbind, df_list)
+      df_u$Dataset <- factor(df_u$Dataset, levels = all_datasets)
+      p <- ggplot2::ggplot(df_u, ggplot2::aes(x = .data$val, fill = .data$Dataset, color = .data$Dataset)) +
+        ggplot2::geom_density(alpha = 0.45, linewidth = if (standalone) 0.85 else 0.62, adjust = 1.1) +
+        ggplot2::scale_fill_manual(values = pal, name = "Dataset") +
+        ggplot2::scale_color_manual(values = pal, name = "Dataset") +
+        ggplot2::labs(
+          title = if (standalone) paste0(meta$title, " Density") else meta$title,
+          x = meta$d_xlab,
+          y = "density"
+        ) +
+        theme_human(bs_panel)
+    }
+
+    if (standalone) {
+      p <- p + ggplot2::theme(
+        legend.position = "bottom",
+        plot.title = ggplot2::element_text(face = "bold", size = bs_panel * 1.15, hjust = 0.5, margin = ggplot2::margin(b = 6))
+      )
+    }
+    p
+  }
+
+  if (length(selected_keys) == 1L) {
+    p_single <- build_single_panel(selected_keys[1L], standalone = TRUE)
+    if (!is.null(title) && nzchar(title) && !identical(title, "Real vs. Simulated Empirical & Joint Density Plots")) {
+      p_single <- p_single + ggplot2::labs(title = title)
+    }
+    return(p_single)
+  }
+
+  panels <- lapply(selected_keys, build_single_panel, standalone = FALSE)
+  sub_txt <- "Univariate empirical density curves (14 properties) & bivariate joint distributions (4 pairs)"
+  if (requireNamespace("patchwork", quietly = TRUE)) {
+    return(.assemble_dist_qc_grid(panels, title = title, subtitle = sub_txt, base_size = base_size))
+  }
+  panels[[1L]]
+}
+
 # ============================================================================
 # 1. plot_distribution_qc()
 # ============================================================================
 
 #' Plot Single-Cell Summary Distribution Quality (Comparative Overlays)
 #'
-#' Compares empirical reference and simulated datasets across canonical single-cell
-#' summary properties: library size, TMM, effective library size, mean expression,
-#' feature variance, scaled variance, fraction zero per cell, fraction zero per gene,
-#' cell-cell correlation, gene-gene correlation, and bivariate relationships (mean vs. variance,
-#' mean vs. zero fraction, library size vs. zero fraction, and biological signals).
-#' Designed after landmark benchmarking studies (countsimQC / Duo et al.) with a clean,
-#' human-crafted scientific layout featuring solid visible contour lines, semi-transparent
-#' color-filled density curves, and simple understated titles.
+#' Compares empirical reference and simulated datasets across 18 distributional
+#' properties: 7 univariate cell-level properties, 7 univariate feature-level
+#' properties, and 4 bivariate property pairs, either as empirical & joint
+#' density overlays or as quantile-quantile (Q-Q) concordance plots.
 #'
 #' \if{html}{\figure{comparative_distribution_qc.png}{options: width="800" alt="Comparative Single-Cell Distribution QC"}}
 #'
 #' @param ref_data Numeric count matrix for empirical reference (features x cells).
 #' @param sim_data Numeric count matrix for simulated data (features x cells), or a named list
 #'   of simulated count matrices representing multiple simulators (e.g. \code{list("scDesign3" = m1, "Splatter" = m2)}).
-#' @param layout Character. Visualization layout: \code{"comprehensive"} (default 14-panel benchmarking grid
-#'   matching canonical single-cell papers) or \code{"density"} (faceted density curves only).
-#' @param properties Optional character vector of specific properties to include if custom selection is desired.
-#' @param title Character. Main plot title. Default \code{"Data properties"}. Set to \code{NULL} for no title.
+#' @param layout Character. Visualization layout: \code{"qq"} (18-panel quantile-quantile diagnostic
+#'   plots comparing real vs. simulated quantiles on a common \code{n = 1024} grid with KS, MAD, MAE,
+#'   RMSE, and PCC annotations) or \code{"density"} / \code{"comprehensive"} (18-panel empirical
+#'   univariate density curves and bivariate joint distributions across the exact same 18 properties).
+#' @param properties Optional character vector of specific properties or group keywords
+#'   (\code{"all"}, \code{"cell"}, \code{"feature"}, \code{"bivariate"}, or a single property key) to include.
+#' @param title Character. Main plot title. Default \code{"Data properties"} (uses
+#'   \code{"Real vs. Simulated Q-Q Plots"} for \code{layout = "qq"} and
+#'   \code{"Real vs. Simulated Empirical & Joint Density Plots"} for density layout when left at default).
+#'   Set to \code{NULL} for no title.
 #' @param ref_name Character. Label for the empirical reference in the legend. Default \code{"Original"}.
 #' @param sim_name Character. Label for the simulation if a single matrix is provided. Default \code{"Simulation"}.
 #' @param palette Optional named character vector of colors. Default uses warm red for reference and classic steel blue for simulation.
-#' @param cell_types Optional factor or character vector of cell identities for computing biological signal proportions.
+#' @param cell_types Optional factor or character vector (retained for backward compatibility).
 #' @param base_size Numeric. Base font size. Default \code{9}.
 #'
 #' @return A \code{ggplot} or \code{patchwork} composite object containing the comparative panels.
@@ -668,7 +1268,7 @@ standardize_benchmark_categories <- function(df) {
 plot_distribution_qc <- function(
   ref_data,
   sim_data,
-  layout        = c("comprehensive", "density"),
+  layout        = c("density", "qq", "comprehensive"),
   properties    = NULL,
   title         = "Data properties",
   ref_name      = "Original",
@@ -678,26 +1278,33 @@ plot_distribution_qc <- function(
   base_size     = 9
 ) {
   if (is.null(layout) || length(layout) == 0) {
-    layout <- "full"
+    layout <- "density"
   } else {
     lay_val <- tolower(as.character(layout[1]))
-    if (lay_val %in% c("full", "comprehensive")) {
-      layout <- "full"
-    } else if (lay_val %in% c("density_only", "density")) {
-      layout <- "density_only"
-    } else if (lay_val %in% c("grid_compact", "compact")) {
-      layout <- "grid_compact"
+    if (lay_val %in% c("qq", "qq_plot", "qqplot")) {
+      layout <- "qq"
+    } else if (lay_val %in% c("density", "density_only", "comprehensive", "full")) {
+      layout <- "density"
     } else {
-      layout <- match.arg(layout, c("full", "density_only", "grid_compact"))
+      layout <- match.arg(lay_val, c("qq", "density"))
     }
   }
-  ref_mat <- as.matrix(ref_data)
+  as_matrix_safe <- function(x) {
+    if (inherits(x, "SingleCellExperiment")) {
+      as.matrix(SummarizedExperiment::assay(x, "counts"))
+    } else if (inherits(x, "Seurat")) {
+      as.matrix(tryCatch(x[["RNA"]]$counts, error = function(e) Seurat::GetAssayData(x, slot = "counts")))
+    } else {
+      as.matrix(x)
+    }
+  }
+  ref_mat <- as_matrix_safe(ref_data)
 
-  if (!is.list(sim_data) || is.data.frame(sim_data)) {
+  if (!is.list(sim_data) || is.data.frame(sim_data) || inherits(sim_data, "SingleCellExperiment") || inherits(sim_data, "Seurat")) {
     sims <- list()
-    sims[[sim_name]] <- as.matrix(sim_data)
+    sims[[sim_name]] <- as_matrix_safe(sim_data)
   } else {
-    sims <- lapply(sim_data, as.matrix)
+    sims <- lapply(sim_data, as_matrix_safe)
   }
 
   sim_names <- names(sims)
@@ -730,318 +1337,45 @@ plot_distribution_qc <- function(
       )
   }
 
-  # 1. Library size
-  lib_r <- colSums(ref_mat)
-  df_lib_list <- list(data.frame(val = lib_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    df_lib_list[[sn]] <- data.frame(val = colSums(sims[[sn]]), Dataset = sn)
+  if (layout == "qq") {
+    qq_title <- if (identical(title, "Data properties")) {
+      "Real vs. Simulated Q-Q Plots"
+    } else {
+      title
+    }
+    return(.build_distribution_qq_plot(
+      ref_mat     = ref_mat,
+      sims        = sims,
+      sim_names   = sim_names,
+      pal         = pal,
+      theme_human = theme_human,
+      properties  = properties,
+      title       = qq_title,
+      base_size   = base_size
+    ))
   }
-  df_lib <- do.call(rbind, df_lib_list)
-  df_lib$Dataset <- factor(df_lib$Dataset, levels = all_datasets)
-  p_lib <- ggplot2::ggplot(df_lib, ggplot2::aes(x = .data$val, fill = .data$Dataset, color = .data$Dataset)) +
-    ggplot2::geom_density(alpha = 0.55, linewidth = 0.65, adjust = 1.1) +
-    ggplot2::scale_fill_manual(values = pal) + ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Library size", x = "library size", y = "density") +
-    theme_human()
 
-  # 2. TMM Normalization Factor
-  if (requireNamespace("edgeR", quietly = TRUE)) {
-    tmm_r <- edgeR::normLibSizes(ref_mat)
-    tmm_sims <- lapply(sims, edgeR::normLibSizes)
+
+
+
+
+  dens_title <- if (identical(title, "Data properties")) {
+    "Real vs. Simulated Empirical & Joint Density Plots"
   } else {
-    tmm_r <- colSums(ref_mat) / stats::median(colSums(ref_mat))
-    tmm_sims <- lapply(sims, function(m) colSums(m) / stats::median(colSums(m)))
+    title
   }
-  df_tmm_list <- list(data.frame(val = tmm_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    df_tmm_list[[sn]] <- data.frame(val = tmm_sims[[sn]], Dataset = sn)
-  }
-  df_tmm <- do.call(rbind, df_tmm_list)
-  df_tmm$Dataset <- factor(df_tmm$Dataset, levels = all_datasets)
-  p_tmm <- ggplot2::ggplot(df_tmm, ggplot2::aes(x = .data$val, fill = .data$Dataset, color = .data$Dataset)) +
-    ggplot2::geom_density(alpha = 0.55, linewidth = 0.65, adjust = 1.1) +
-    ggplot2::scale_fill_manual(values = pal) + ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "TMM", x = "TMM", y = "density") +
-    theme_human()
-
-  # 3. Effective library size
-  df_eff_list <- list(data.frame(val = lib_r * tmm_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    df_eff_list[[sn]] <- data.frame(val = colSums(sims[[sn]]) * tmm_sims[[sn]], Dataset = sn)
-  }
-  df_eff <- do.call(rbind, df_eff_list)
-  df_eff$Dataset <- factor(df_eff$Dataset, levels = all_datasets)
-  p_eff <- ggplot2::ggplot(df_eff, ggplot2::aes(x = .data$val, fill = .data$Dataset, color = .data$Dataset)) +
-    ggplot2::geom_density(alpha = 0.55, linewidth = 0.65, adjust = 1.1) +
-    ggplot2::scale_fill_manual(values = pal) + ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Effective library size", x = "effective library size", y = "density") +
-    theme_human()
-
-  # 4. Mean expression
-  m_r <- rowMeans(ref_mat)
-  df_mean_list <- list(data.frame(val = m_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    df_mean_list[[sn]] <- data.frame(val = rowMeans(sims[[sn]]), Dataset = sn)
-  }
-  df_mean <- do.call(rbind, df_mean_list)
-  df_mean$Dataset <- factor(df_mean$Dataset, levels = all_datasets)
-  p_mean <- ggplot2::ggplot(df_mean, ggplot2::aes(x = .data$val, fill = .data$Dataset, color = .data$Dataset)) +
-    ggplot2::geom_density(alpha = 0.55, linewidth = 0.65, adjust = 1.1) +
-    ggplot2::scale_fill_manual(values = pal) + ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Mean expression", x = "mean expression", y = "density") +
-    theme_human()
-
-  # 5. Variance
-  v_r <- apply(ref_mat, 1, stats::var)
-  df_var_list <- list(data.frame(val = v_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    df_var_list[[sn]] <- data.frame(val = apply(sims[[sn]], 1, stats::var), Dataset = sn)
-  }
-  df_var <- do.call(rbind, df_var_list)
-  df_var$Dataset <- factor(df_var$Dataset, levels = all_datasets)
-  p_var <- ggplot2::ggplot(df_var, ggplot2::aes(x = .data$val, fill = .data$Dataset, color = .data$Dataset)) +
-    ggplot2::geom_density(alpha = 0.55, linewidth = 0.65, adjust = 1.1) +
-    ggplot2::scale_fill_manual(values = pal) + ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Variance", x = "variance", y = "density") +
-    theme_human()
-
-  # 6. Scaled variance (dispersion)
-  df_svar_list <- list(data.frame(val = v_r / (m_r + 1e-4), Dataset = ref_name))
-  for (sn in sim_names) {
-    m_s <- rowMeans(sims[[sn]])
-    v_s <- apply(sims[[sn]], 1, stats::var)
-    df_svar_list[[sn]] <- data.frame(val = v_s / (m_s + 1e-4), Dataset = sn)
-  }
-  df_svar <- do.call(rbind, df_svar_list)
-  df_svar$Dataset <- factor(df_svar$Dataset, levels = all_datasets)
-  p_svar <- ggplot2::ggplot(df_svar, ggplot2::aes(x = .data$val, fill = .data$Dataset, color = .data$Dataset)) +
-    ggplot2::geom_density(alpha = 0.55, linewidth = 0.65, adjust = 1.1) +
-    ggplot2::scale_fill_manual(values = pal) + ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Scaled variance", x = "scaled variance", y = "density") +
-    theme_human()
-
-  # 7. Fraction zero cell
-  zc_r <- colMeans(ref_mat == 0)
-  df_zeroc_list <- list(data.frame(val = zc_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    df_zeroc_list[[sn]] <- data.frame(val = colMeans(sims[[sn]] == 0), Dataset = sn)
-  }
-  df_zeroc <- do.call(rbind, df_zeroc_list)
-  df_zeroc$Dataset <- factor(df_zeroc$Dataset, levels = all_datasets)
-  p_zeroc <- ggplot2::ggplot(df_zeroc, ggplot2::aes(x = .data$val, fill = .data$Dataset, color = .data$Dataset)) +
-    ggplot2::geom_density(alpha = 0.55, linewidth = 0.65, adjust = 1.1) +
-    ggplot2::scale_fill_manual(values = pal) + ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Fraction zero cell", x = "fraction zeros per cell", y = "density") +
-    theme_human()
-
-  # 8. Fraction zero gene
-  zg_r <- rowMeans(ref_mat == 0)
-  df_zerog_list <- list(data.frame(val = zg_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    df_zerog_list[[sn]] <- data.frame(val = rowMeans(sims[[sn]] == 0), Dataset = sn)
-  }
-  df_zerog <- do.call(rbind, df_zerog_list)
-  df_zerog$Dataset <- factor(df_zerog$Dataset, levels = all_datasets)
-  p_zerog <- ggplot2::ggplot(df_zerog, ggplot2::aes(x = .data$val, fill = .data$Dataset, color = .data$Dataset)) +
-    ggplot2::geom_density(alpha = 0.55, linewidth = 0.65, adjust = 1.1) +
-    ggplot2::scale_fill_manual(values = pal) + ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Fraction zero gene", x = "fraction zeros per gene", y = "density") +
-    theme_human()
-
-  # 9. Cell correlation
-  n_c <- min(ncol(ref_mat), 100)
-  c_idx <- seq_len(n_c)
-  cc_r <- stats::cor(ref_mat[, c_idx])[upper.tri(diag(n_c))]
-  df_ccor_list <- list(data.frame(val = cc_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    cc_s <- stats::cor(sims[[sn]][, c_idx])[upper.tri(diag(n_c))]
-    df_ccor_list[[sn]] <- data.frame(val = cc_s, Dataset = sn)
-  }
-  df_ccor <- do.call(rbind, df_ccor_list)
-  df_ccor$Dataset <- factor(df_ccor$Dataset, levels = all_datasets)
-  p_ccor <- ggplot2::ggplot(df_ccor, ggplot2::aes(x = .data$val, fill = .data$Dataset, color = .data$Dataset)) +
-    ggplot2::geom_density(alpha = 0.55, linewidth = 0.65, adjust = 1.1) +
-    ggplot2::scale_fill_manual(values = pal) + ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Cell correlation", x = "cell correlation", y = "density") +
-    theme_human()
-
-  # 10. Gene correlation
-  top_g <- order(v_r, decreasing = TRUE)[seq_len(min(nrow(ref_mat), 100))]
-  gc_r <- stats::cor(t(ref_mat[top_g, , drop = FALSE]))[upper.tri(diag(length(top_g)))]
-  df_gcor_list <- list(data.frame(val = gc_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    s_mat <- sims[[sn]]
-    r_names <- rownames(ref_mat[top_g, , drop = FALSE])
-    if (!is.null(r_names) && !is.null(rownames(s_mat)) && all(r_names %in% rownames(s_mat))) {
-      gc_s <- stats::cor(t(s_mat[r_names, , drop = FALSE]))[upper.tri(diag(length(r_names)))]
-    } else {
-      v_s <- fast_row_vars(s_mat)
-      top_g_s <- order(v_s, decreasing = TRUE)[seq_len(min(nrow(s_mat), 100))]
-      gc_s <- stats::cor(t(s_mat[top_g_s, , drop = FALSE]))[upper.tri(diag(length(top_g_s)))]
-    }
-    df_gcor_list[[sn]] <- data.frame(val = gc_s, Dataset = sn)
-  }
-  df_gcor <- do.call(rbind, df_gcor_list)
-  df_gcor$Dataset <- factor(df_gcor$Dataset, levels = all_datasets)
-  p_gcor <- ggplot2::ggplot(df_gcor, ggplot2::aes(x = .data$val, fill = .data$Dataset, color = .data$Dataset)) +
-    ggplot2::geom_density(alpha = 0.55, linewidth = 0.65, adjust = 1.1) +
-    ggplot2::scale_fill_manual(values = pal) + ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Gene correlation", x = "gene correlation", y = "density") +
-    theme_human()
-
-  # Return density grid if layout == "density" or patchwork not available
-  if (layout == "density" || !requireNamespace("patchwork", quietly = TRUE)) {
-    if (requireNamespace("patchwork", quietly = TRUE)) {
-      p_density_grid <- (p_lib | p_mean | p_var | p_svar) /
-                        (p_zeroc | p_zerog | p_ccor | p_gcor) +
-        patchwork::plot_layout(guides = "collect") &
-        ggplot2::theme(legend.position = "bottom")
-      if (!is.null(title) && nzchar(title)) {
-        p_density_grid <- p_density_grid + patchwork::plot_annotation(
-          title = title,
-          theme = ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", size = base_size * 1.15, hjust = 0.5))
-        )
-      }
-      return(p_density_grid)
-    } else {
-      return(p_lib)
-    }
-  }
-
-  # 11. Mean vs variance (scatter)
-  df_mv_list <- list(data.frame(m = m_r, v = v_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    df_mv_list[[sn]] <- data.frame(m = rowMeans(sims[[sn]]), v = apply(sims[[sn]], 1, stats::var), Dataset = sn)
-  }
-  df_mv <- do.call(rbind, df_mv_list)
-  df_mv$Dataset <- factor(df_mv$Dataset, levels = all_datasets)
-  p_mv <- ggplot2::ggplot(df_mv, ggplot2::aes(x = .data$m, y = .data$v, color = .data$Dataset)) +
-    ggplot2::geom_point(alpha = 0.35, size = 0.75, stroke = 0) +
-    ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Mean vs variance", x = "mean expression", y = "variance of gene expression") +
-    theme_human()
-
-  # 12. Mean vs fraction zero (scatter)
-  df_mz_list <- list(data.frame(m = m_r, z = zg_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    df_mz_list[[sn]] <- data.frame(m = rowMeans(sims[[sn]]), z = rowMeans(sims[[sn]] == 0), Dataset = sn)
-  }
-  df_mz <- do.call(rbind, df_mz_list)
-  df_mz$Dataset <- factor(df_mz$Dataset, levels = all_datasets)
-  p_mz <- ggplot2::ggplot(df_mz, ggplot2::aes(x = .data$m, y = .data$z, color = .data$Dataset)) +
-    ggplot2::geom_point(alpha = 0.35, size = 0.75, stroke = 0) +
-    ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Mean vs fraction zero", x = "mean expression", y = "fraction zero per gene") +
-    theme_human()
-
-  # 13. Library size vs fraction zero (scatter)
-  df_lz_list <- list(data.frame(lib = lib_r, z = zc_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    df_lz_list[[sn]] <- data.frame(lib = colSums(sims[[sn]]), z = colMeans(sims[[sn]] == 0), Dataset = sn)
-  }
-  df_lz <- do.call(rbind, df_lz_list)
-  df_lz$Dataset <- factor(df_lz$Dataset, levels = all_datasets)
-  p_lz <- ggplot2::ggplot(df_lz, ggplot2::aes(x = .data$lib, y = .data$z, color = .data$Dataset)) +
-    ggplot2::geom_point(alpha = 0.35, size = 0.75, stroke = 0) +
-    ggplot2::scale_color_manual(values = pal) +
-    ggplot2::labs(title = "Library size vs fraction zero", x = "library size", y = "fraction zero per cell") +
-    theme_human()
-
-  # 14. Biological signals barplot
-  calc_signals <- function(mat, groups = NULL) {
-    if (is.null(groups) || length(unique(groups)) < 2) {
-      lib <- colSums(mat)
-      groups <- factor(ifelse(lib >= stats::median(lib), "High", "Low"))
-    }
-    lvls <- levels(factor(groups))
-    g1 <- which(groups == lvls[1])
-    g2 <- which(groups == lvls[2])
-    if (length(g1) < 3 || length(g2) < 3) return(c(DE = 0.1, DV = 0.1, DD = 0.1, DP = 0.1, BD = 0.1))
-
-    de_cnt <- 0; dv_cnt <- 0; dd_cnt <- 0; dp_cnt <- 0; bd_cnt <- 0
-    n_genes <- min(nrow(mat), 300)
-    for (i in seq_len(n_genes)) {
-      x <- mat[i, g1]; y <- mat[i, g2]
-      p_mean <- tryCatch(stats::t.test(x, y)$p.value, error = function(e) 1)
-      p_var  <- tryCatch(stats::var.test(x, y)$p.value, error = function(e) 1)
-      p_ks   <- tryCatch(suppressWarnings(stats::ks.test(x, y)$p.value), error = function(e) 1)
-      z_tab  <- matrix(c(sum(x == 0), sum(x > 0), sum(y == 0), sum(y > 0)), nrow = 2)
-      p_dp   <- tryCatch(suppressWarnings(stats::chisq.test(z_tab)$p.value), error = function(e) 1)
-
-      is_mean <- !is.na(p_mean) && p_mean < 0.05
-      is_var  <- !is.na(p_var)  && p_var < 0.05
-      is_dp   <- !is.na(p_dp)   && p_dp < 0.05
-      is_ks   <- !is.na(p_ks)   && p_ks < 0.05
-
-      if (is_mean && is_var) {
-        bd_cnt <- bd_cnt + 1
-      } else if (is_mean) {
-        de_cnt <- de_cnt + 1
-      } else if (is_var) {
-        dv_cnt <- dv_cnt + 1
-      } else if (is_dp) {
-        dp_cnt <- dp_cnt + 1
-      } else if (is_ks) {
-        dd_cnt <- dd_cnt + 1
-      }
-    }
-    c(DE = de_cnt, DV = dv_cnt, DD = dd_cnt, DP = dp_cnt, BD = bd_cnt) / n_genes
-  }
-
-  sig_r <- calc_signals(ref_mat, cell_types)
-  types <- c("DE", "DV", "DD", "DP", "BD")
-  df_bio_list <- list(data.frame(Signal = factor(types, levels = types), Proportion = sig_r, Dataset = ref_name))
-  for (sn in sim_names) {
-    sig_s <- calc_signals(sims[[sn]], cell_types)
-    df_bio_list[[sn]] <- data.frame(Signal = factor(types, levels = types), Proportion = sig_s, Dataset = sn)
-  }
-  df_bio <- do.call(rbind, df_bio_list)
-  df_bio$Dataset <- factor(df_bio$Dataset, levels = all_datasets)
-  p_bio <- ggplot2::ggplot(df_bio, ggplot2::aes(x = .data$Signal, y = .data$Proportion, fill = .data$Dataset)) +
-    ggplot2::geom_col(position = ggplot2::position_dodge(width = 0.8), width = 0.7) +
-    ggplot2::scale_fill_manual(values = pal) +
-    ggplot2::labs(title = "Biological signals", x = "types of differentially present genes", y = "proportion") +
-    theme_human() +
-    ggplot2::scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25))
-
-  # 15. Clean Standalone Dataset Legend
-  df_leg <- data.frame(
-    Dataset = factor(all_datasets, levels = all_datasets),
-    y = rev(seq_along(all_datasets))
+  .build_distribution_density_plot(
+    ref_mat      = ref_mat,
+    sims         = sims,
+    ref_name     = ref_name,
+    sim_names    = sim_names,
+    all_datasets = all_datasets,
+    pal          = pal,
+    theme_human  = theme_human,
+    properties   = properties,
+    title        = dens_title,
+    base_size    = base_size
   )
-  p_legend <- ggplot2::ggplot(df_leg, ggplot2::aes(y = .data$y)) +
-    ggplot2::geom_rect(ggplot2::aes(xmin = 0.15, xmax = 0.50, ymin = .data$y - 0.28, ymax = .data$y + 0.28, fill = .data$Dataset), color = NA) +
-    ggplot2::geom_text(ggplot2::aes(x = 0.65, label = .data$Dataset), hjust = 0, size = base_size * 0.38, color = "black") +
-    ggplot2::scale_fill_manual(values = pal, guide = "none") +
-    ggplot2::scale_x_continuous(limits = c(0, 2.5), expand = c(0, 0)) +
-    ggplot2::scale_y_continuous(limits = c(0.3, length(all_datasets) + 0.9), expand = c(0, 0)) +
-    ggplot2::labs(title = "Dataset") +
-    ggplot2::theme_void(base_size = base_size) +
-    ggplot2::theme(
-      plot.title = ggplot2::element_text(face = "bold", size = base_size * 0.95, hjust = 0.12, margin = ggplot2::margin(b = 6)),
-      plot.margin = ggplot2::margin(l = 15, t = 8)
-    )
-
-  # Assemble 4x4 layout matching canonical single-cell benchmark publication
-  composite <- p_lib + p_tmm + p_eff + p_mean +
-    p_var + p_svar + p_zeroc + p_zerog +
-    p_ccor + p_gcor + p_mv + p_mz +
-    p_lz + p_bio + p_legend +
-    patchwork::plot_layout(design = "
-ABCD
-EFGH
-IJKL
-MNO#
-")
-
-  if (!is.null(title) && nzchar(title)) {
-    composite <- composite + patchwork::plot_annotation(
-      title = title,
-      theme = ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", size = base_size * 1.15, hjust = 0.5, margin = ggplot2::margin(b = 6)))
-    )
-  }
-
-  composite
 }
 
 
@@ -1936,7 +2270,7 @@ plot_benchmark_summary <- function(
 #' and evaluated biological/computational measures on the y-axis, grouped by the 8 canonical
 #' evaluation categories. Displays the exact original raw evaluation score in text inside every cell,
 #' with cell fill colors scaled by relative fidelity (direction-aware, ensuring balanced visual contrast
-#' across all 48 gold-standard measures without scale distortion from high-magnitude metrics like RAM or runtime).
+#' across all 48 curated evaluation measures without scale distortion from high-magnitude metrics like RAM or runtime).
 #'
 #' \if{html}{\figure{metric_heatmap.png}{options: width="800" alt="Cross-Metric Z-Scored Heatmap"}}
 #'
@@ -1945,7 +2279,7 @@ plot_benchmark_summary <- function(
 #' @param metrics Optional character vector of specific metrics to include. Default \code{NULL} (all).
 #' @param scale_fill Character. Cell color fill scaling: \code{"relative"} (default; direction-aware
 #'   min-max normalized fidelity in [0, 1] across methods per metric, ensuring balanced color contrast
-#'   across all 48 gold-standard measures while cell text displays exact raw numbers) or \code{"raw"} (direct numeric values).
+#'   across all 48 curated evaluation measures while cell text displays exact raw numbers) or \code{"raw"} (direct numeric values).
 #' @param top_n_properties Optional integer. If specified, restricts to top N most variable metrics. Default \code{NULL} (all metrics).
 #' @param facet_by_category Logical. Whether to group rows into vertical category banner panels across all 8 categories. Default \code{TRUE}.
 #' @param cluster_rows Logical. Hierarchically cluster measures along y-axis. Default \code{FALSE}.
@@ -2517,7 +2851,7 @@ plot_metric_mds <- function(
 #' Generates a dual-panel PCA dashboard for evaluating single-cell simulation benchmark metrics
 #' and methods.
 #'
-#' All metrics present in \code{benchmark_data} (e.g. all 48 gold-standard metrics across categories)
+#' All metrics present in \code{benchmark_data} (e.g. all 48 curated evaluation metrics across categories)
 #' are mathematically considered in the PCA decomposition. Panel \code{"both"} displays:
 #' \itemize{
 #'   \item \strong{Panel a (Methods Ordination)}: Simulators mapped into PC1 vs PC2 coordinates with
@@ -3013,37 +3347,82 @@ plot_benchmark_bubble_matrix <- function(
     if ("Category" %in% colnames(df)) df <- df[!is.na(df$Category) & df$Category != "" & df$Category != "NA", , drop = FALSE]
   }
 
-  # --- Multi-Dataset Cross-Dataset Averaging ---
-  # If data contains multiple datasets per simulator (e.g. 16 datasets x 6 simulators),
-  # average metrics across all datasets so each simulator is represented cleanly.
+  # --- 2. Category remapping (before modality-aware aggregation) ----------
+  if ("Category" %in% colnames(df)) {
+    df$Display_Category <- ifelse(df$Category %in% names(.LEGACY_CATEGORY_MAP),
+                                   .LEGACY_CATEGORY_MAP[df$Category], df$Category)
+  } else {
+    df$Display_Category <- "(I) Distributional Properties"
+  }
+
+  # Metric-level category override (skip overwriting explicit Cross-Modal rows)
+  if ("Metric" %in% colnames(df)) {
+    mc_override <- .METRIC_CATEGORY_MAP[df$Metric]
+    is_cross_modal_row <- grepl("Cross-Modal|Multiomics", df$Display_Category) |
+      (if ("Modality" %in% colnames(df)) grepl("Joint|Cross", as.character(df$Modality), ignore.case = TRUE) else FALSE)
+    idx <- !is.na(mc_override) & !is_cross_modal_row
+    df$Display_Category[idx] <- mc_override[idx]
+  }
+
+  # --- 2b. Modality scope detection (distinguish scRNA vs scATAC metrics) -
+  has_multi_modality <- FALSE
+  df$Modality_Scope <- "Shared (RNA + ATAC)"
+  if ("Modality" %in% colnames(df)) {
+    mod_chr <- as.character(df$Modality)
+    mod_norm <- rep(NA_character_, length(mod_chr))
+    mod_norm[grepl("RNA", mod_chr, ignore.case = TRUE)] <- "RNA"
+    mod_norm[grepl("ATAC", mod_chr, ignore.case = TRUE)] <- "ATAC"
+    mod_norm[grepl("Joint|Cross", mod_chr, ignore.case = TRUE)] <- "Joint"
+    mod_norm[grepl("Comp|Total|Comb", mod_chr, ignore.case = TRUE)] <- "Computation"
+
+    omics_present <- setdiff(unique(mod_norm), c("Computation", NA_character_))
+    has_multi_modality <- length(omics_present) >= 2L
+
+    if (has_multi_modality) {
+      pair_key <- paste0(df$Display_Category, "___", df$Metric)
+      for (pk in unique(pair_key)) {
+        idx_p <- pair_key == pk
+        m_vals <- setdiff(unique(mod_norm[idx_p]), c("Computation", NA_character_))
+        scope_val <- if (identical(m_vals, "RNA")) {
+          "scRNA-seq"
+        } else if (identical(m_vals, "ATAC")) {
+          "scATAC-seq"
+        } else if (identical(m_vals, "Joint")) {
+          "Multiomics"
+        } else {
+          "Shared (RNA + ATAC)"
+        }
+        df$Modality_Scope[idx_p] <- scope_val
+      }
+    }
+  }
+
+  # --- Multi-Dataset & Modality Aggregation ------------------------------
   n_datasets_detected <- 1
   if ("Dataset" %in% colnames(df)) {
     n_datasets_detected <- length(unique(df$Dataset))
-  } else if (anyDuplicated(df[, c("Method", "Metric")])) {
-    n_datasets_detected <- max(2, round(nrow(df) / length(unique(paste(df$Method, df$Metric)))))
+  } else if (anyDuplicated(df[, c("Method", "Display_Category", "Metric")])) {
+    n_datasets_detected <- max(2, round(nrow(df) / length(unique(paste(df$Method, df$Display_Category, df$Metric)))))
   }
 
-  if (n_datasets_detected > 1 || anyDuplicated(df[, c("Method", "Metric")])) {
+  if (n_datasets_detected > 1 || anyDuplicated(df[, c("Method", "Display_Category", "Metric")])) {
     has_norm <- "Score_Norm" %in% colnames(df)
     has_raw  <- "Score_Raw" %in% colnames(df)
     score_col <- if (has_raw) "Score_Raw" else if ("Score" %in% colnames(df)) "Score" else "Value"
 
-    agg_raw <- stats::aggregate(
-      df[[score_col]],
-      by = list(Method = df$Method, Category = df$Category, Metric = df$Metric),
-      FUN = mean,
-      na.rm = TRUE
+    grp_cols <- list(
+      Method           = df$Method,
+      Display_Category = df$Display_Category,
+      Metric           = df$Metric,
+      Modality_Scope   = df$Modality_Scope
     )
-    colnames(agg_raw)[4] <- "Score_Raw"
+    agg_raw <- stats::aggregate(df[[score_col]], by = grp_cols, FUN = mean, na.rm = TRUE)
+    colnames(agg_raw)[5] <- "Score_Raw"
+    agg_raw$Category <- agg_raw$Display_Category
 
     if (has_norm) {
-      agg_norm <- stats::aggregate(
-        df[["Score_Norm"]],
-        by = list(Method = df$Method, Category = df$Category, Metric = df$Metric),
-        FUN = mean,
-        na.rm = TRUE
-      )
-      agg_raw$Score_Norm <- agg_norm[[4]]
+      agg_norm <- stats::aggregate(df[["Score_Norm"]], by = grp_cols, FUN = mean, na.rm = TRUE)
+      agg_raw$Score_Norm <- agg_norm[[5]]
     }
     df <- agg_raw
   }
@@ -3058,25 +3437,13 @@ plot_benchmark_bubble_matrix <- function(
     subtitle <- NULL
   }
 
-  # --- 2. Category remapping ---------------------------------------------
-  if ("Category" %in% colnames(df)) {
-    df$Display_Category <- ifelse(df$Category %in% names(.LEGACY_CATEGORY_MAP),
-                                   .LEGACY_CATEGORY_MAP[df$Category], df$Category)
-  } else {
-    df$Display_Category <- "(I) Distributional Properties"
-  }
-
-  # Metric-level category override (highest priority)
-  if ("Metric" %in% colnames(df)) {
-    mc_override <- .METRIC_CATEGORY_MAP[df$Metric]
-    idx         <- !is.na(mc_override)
-    df$Display_Category[idx] <- mc_override[idx]
-  }
-
-  # --- 3. Display metric labels ------------------------------------------
+  # --- 3. Display metric labels (clean names; modality via axis color) ---
   if ("Metric" %in% colnames(df)) {
     lbl_map <- .METRIC_DISPLAY_LABELS[df$Metric]
     df$Display_Metric <- ifelse(!is.na(lbl_map), lbl_map, df$Metric)
+    is_cat6 <- grepl("^\\(VI\\)|Multiomics Integration", as.character(df$Display_Category))
+    df$Display_Metric[is_cat6 & df$Metric == "ari"] <- "Integration ARI"
+    df$Display_Metric[is_cat6 & df$Metric == "nmi"] <- "Integration NMI"
   } else {
     df$Display_Metric <- as.character(df$Metric)
   }
@@ -3110,7 +3477,8 @@ plot_benchmark_bubble_matrix <- function(
     ordered_m <- all_methods
   }
   # rev(ordered_m) places the top-performing / first simulator at the top of the Y-axis
-  df$Method <- factor(df$Method, levels = rev(ordered_m))
+  y_levels <- rev(ordered_m)
+  df$Method <- factor(df$Method, levels = y_levels)
 
   all_cats_present <- unique(as.character(df$Display_Category))
   all_cats_present <- all_cats_present[!is.na(all_cats_present) & all_cats_present != "NA"]
@@ -3134,21 +3502,34 @@ plot_benchmark_bubble_matrix <- function(
     df$Display_Category <- factor(df$Display_Category, levels = cat_order)
   }
 
-  # Metric ordering: custom or alphabetical within category
+  # Metric ordering keyed per (Category, Display_Metric) so identical display names in
+  # different categories (e.g. KS Distance in (I) vs (VI)) keep distinct normalization & colors
+  df$Metric_Key <- paste0(as.character(df$Display_Category), "|||", as.character(df$Display_Metric))
   if (!is.null(metrics_order)) {
-    all_mets <- unique(df$Display_Metric)
-    all_mets <- all_mets[!is.na(all_mets) & all_mets != "NA"]
-    ord_mets <- c(metrics_order[metrics_order %in% all_mets], setdiff(all_mets, metrics_order))
-    df$Display_Metric <- factor(df$Display_Metric, levels = ord_mets)
-  } else {
-    category_metric_order <- character(0)
-    for (ct in levels(df$Display_Category)) {
-      mets_in <- sort(unique(df$Display_Metric[df$Display_Category == ct]))
-      mets_in <- mets_in[!is.na(mets_in) & mets_in != "NA"]
-      category_metric_order <- c(category_metric_order, mets_in)
+    key_pairs <- unique(df[!is.na(df$Metric_Key) & !is.na(df$Display_Metric),
+                           c("Metric_Key", "Display_Metric"), drop = FALSE])
+    ord_keys <- character(0)
+    for (mo in metrics_order) {
+      hits <- key_pairs$Metric_Key[key_pairs$Metric_Key == mo | key_pairs$Display_Metric == mo]
+      ord_keys <- c(ord_keys, setdiff(hits, ord_keys))
     }
-    df$Display_Metric <- factor(df$Display_Metric, levels = category_metric_order)
+    ord_keys <- c(ord_keys, setdiff(key_pairs$Metric_Key, ord_keys))
+  } else {
+    ord_keys <- character(0)
+    for (ct in levels(df$Display_Category)) {
+      sub_km <- unique(df[df$Display_Category == ct & !is.na(df$Display_Metric) & df$Display_Metric != "NA",
+                          c("Metric_Key", "Display_Metric"), drop = FALSE])
+      if (nrow(sub_km) > 0) {
+        sub_km <- sub_km[order(sub_km$Display_Metric), , drop = FALSE]
+        ord_keys <- c(ord_keys, sub_km$Metric_Key)
+      }
+    }
   }
+  df$Metric_Key <- factor(df$Metric_Key, levels = unique(ord_keys))
+  df$Display_Metric <- factor(
+    df$Display_Metric,
+    levels = unique(as.character(df$Display_Metric[match(levels(df$Metric_Key), df$Metric_Key)]))
+  )
 
   if (!is.null(method_classes)) {
     cls_lvls <- names(method_classes)
@@ -3161,9 +3542,9 @@ plot_benchmark_bubble_matrix <- function(
   # Identify top-performing simulator for each evaluation metric
   df$Is_Top <- FALSE
   if (nrow(df) > 0) {
-    top_per_metric <- stats::aggregate(Score_Norm ~ Display_Metric, data = df, FUN = max, na.rm = TRUE)
+    top_per_metric <- stats::aggregate(Score_Norm ~ Metric_Key, data = df, FUN = max, na.rm = TRUE)
     colnames(top_per_metric)[2] <- "Score_Top"
-    df <- merge(df, top_per_metric, by = "Display_Metric", all.x = TRUE)
+    df <- merge(df, top_per_metric, by = "Metric_Key", all.x = TRUE)
     df$Is_Top <- !is.na(df$Score_Norm) & !is.na(df$Score_Top) &
                  (df$Score_Norm >= df$Score_Top - 1e-5) & (df$Score_Norm > 0)
     df$Score_Top <- NULL
@@ -3195,26 +3576,75 @@ plot_benchmark_bubble_matrix <- function(
   }
 
   # --- 8. Build ggplot ---------------------------------------------------
-  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$Display_Metric, y = .data$Method))
+  p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$Metric_Key, y = .data$Method))
 
-  # Subtle horizontal row guides
+  # Subtle horizontal row guides for simulator rows
+  sim_y_idx <- seq_along(ordered_m)
   p <- p + ggplot2::geom_hline(
-    yintercept = seq_along(levels(df$Method)),
+    yintercept = sim_y_idx,
     color = "#F1F5F9", linewidth = 0.5
   )
 
   # Background grey grid dots for missing metric combinations
   if (show_missing_dots) {
-    grid_df <- expand.grid(Method = levels(df$Method), Display_Metric = levels(df$Display_Metric),
+    grid_df <- expand.grid(Method = ordered_m, Metric_Key = levels(df$Metric_Key),
                             stringsAsFactors = FALSE)
-    mc_map  <- unique(df[!is.na(df$Display_Metric) & !is.na(df$Display_Category), c("Display_Metric", "Display_Category")])
-    grid_df <- merge(grid_df, mc_map, by = "Display_Metric", all.x = TRUE)
+    mc_map  <- unique(df[!is.na(df$Metric_Key) & !is.na(df$Display_Category), c("Metric_Key", "Display_Category")])
+    grid_df <- merge(grid_df, mc_map, by = "Metric_Key", all.x = TRUE)
     grid_df <- grid_df[!is.na(grid_df$Display_Category) & grid_df$Display_Category != "NA", , drop = FALSE]
+    grid_df$Method <- factor(grid_df$Method, levels = y_levels)
     p <- p + ggplot2::geom_point(
-      data = grid_df, ggplot2::aes(x = .data$Display_Metric, y = .data$Method),
+      data = grid_df, ggplot2::aes(x = .data$Metric_Key, y = .data$Method),
       shape = 16, size = 0.85, color = "#D5D8DC", alpha = 0.60, inherit.aes = FALSE
     )
   }
+
+  # Color-code X-axis metric names by modality scope (with legend) when multi-modality
+  if (has_multi_modality) {
+    modality_scope_pal <- c(
+      "scRNA-seq"           = "#1D4ED8",
+      "scATAC-seq"          = "#C2410C",
+      "Shared (RNA + ATAC)" = "#475569",
+      "Multiomics"          = "#7E22CE"
+    )
+    scope_lvls <- names(modality_scope_pal)
+    key_scope_df <- unique(df[, c("Metric_Key", "Modality_Scope"), drop = FALSE])
+    key_label_colors <- stats::setNames(
+      unname(modality_scope_pal[as.character(key_scope_df$Modality_Scope)]),
+      as.character(key_scope_df$Metric_Key)
+    )
+    present_scopes <- scope_lvls[scope_lvls %in% unique(as.character(df$Modality_Scope))]
+    mod_leg_df <- data.frame(
+      Metric_Key       = df$Metric_Key[1L],
+      Method           = df$Method[1L],
+      Display_Category = df$Display_Category[1L],
+      Modality_Scope   = factor(present_scopes, levels = scope_lvls)
+    )
+    if ("Method_Class" %in% colnames(df)) {
+      mod_leg_df$Method_Class <- df$Method_Class[1L]
+    }
+    p <- p +
+      ggplot2::geom_point(
+        data = mod_leg_df,
+        ggplot2::aes(x = .data$Metric_Key, y = .data$Method, color = .data$Modality_Scope),
+        shape = 15, size = 0, alpha = 0, inherit.aes = FALSE
+      ) +
+      ggplot2::scale_color_manual(
+        values = modality_scope_pal,
+        name   = "Metric Name Color (Modality Scope)",
+        drop   = TRUE,
+        guide  = ggplot2::guide_legend(
+          nrow = 1, title.position = "top", order = 3,
+          override.aes = list(shape = 15, size = 4.2, alpha = 1)
+        )
+      ) +
+      ggplot2::guides(x = .guide_axis_colored(label_colors = key_label_colors))
+  }
+
+  x_label_map <- stats::setNames(as.character(df$Display_Metric), as.character(df$Metric_Key))
+  p <- p + ggplot2::scale_x_discrete(
+    labels = function(k) ifelse(k %in% names(x_label_map), unname(x_label_map[k]), k)
+  )
 
   # Regular bubbles (circles with standard outline) - safe against NA
   df_reg <- df[!is.na(df$Score_Norm) & !df$Is_Top, , drop = FALSE]
@@ -3265,6 +3695,9 @@ plot_benchmark_bubble_matrix <- function(
   # --- 10. Faceting ------------------------------------------------------
   has_multi_class <- length(unique(df$Method_Class)) > 1
   has_cats        <- length(levels(df$Display_Category)) >= 1
+  if (!has_multi_class) {
+    p <- p + ggplot2::scale_y_discrete(limits = y_levels, drop = FALSE)
+  }
 
   if (has_multi_class && has_cats) {
     p <- p + ggplot2::facet_grid(Method_Class ~ Display_Category,
@@ -3295,7 +3728,7 @@ plot_benchmark_bubble_matrix <- function(
         "Circle: standard performance  |  Bold circle outline: top-performing simulator for the metric",
         if (show_missing_dots) "  |  Grey dot: metric not computed." else ".\n",
         if (show_missing_dots) "\n" else "",
-        "All ", length(unique(df$Display_Metric)), " metrics direction-normalized: for error/distance metrics, scores are inverted as 1 - norm(x) so 1.0 always indicates closest agreement to empirical reference."
+        "All ", length(levels(df$Metric_Key)), " metrics direction-normalized: for error/distance metrics, scores are inverted as 1 - norm(x) so 1.0 always indicates closest agreement to empirical reference."
       )
     ) +
     ggplot2::theme_bw(base_size = base_size) +
@@ -3376,6 +3809,7 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
       stringsAsFactors = FALSE
     )
     if ("Dataset" %in% colnames(tbl)) res_df$Dataset <- tbl$Dataset
+    if ("Modality" %in% colnames(tbl)) res_df$Modality <- tbl$Modality
     return(res_df)
   }
 
@@ -3421,6 +3855,7 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
         rows[[nm]] <- data.frame(Method = mth, Category = cat_col,
                                   Metric = tbl$Metric, Score_Raw = val,
                                   stringsAsFactors = FALSE)
+        if ("Modality" %in% colnames(tbl)) rows[[nm]]$Modality <- tbl$Modality
       }
     }
     if (length(rows) == 0) stop("No valid benchmark tables found in the named list.")
@@ -3456,12 +3891,25 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
 # Normalize bubble scores (direction-aware, per-metric across methods)
 # @keywords internal
 .normalize_bubble_scores <- function(df) {
+  if (is.null(df) || nrow(df) == 0) {
+    if (is.data.frame(df)) df$Score_Norm <- numeric(0)
+    return(df)
+  }
   df$Score_Norm <- NA_real_
-  metric_key <- if ("Property" %in% colnames(df)) paste0(df$Property, "___", df$Metric) else df$Metric
+  metric_key <- if ("Property" %in% colnames(df)) {
+    paste0(df$Property, "___", df$Metric)
+  } else if ("Display_Category" %in% colnames(df)) {
+    paste0(df$Display_Category, "___", df$Metric)
+  } else {
+    df$Metric
+  }
   for (m_key in unique(metric_key)) {
     idx     <- metric_key == m_key
     met     <- df$Metric[idx][1]
     raw_val <- df$Score_Raw[idx]
+    if (met %in% c("Runs_Statistic", "Between_Dataset_Silh_Global", "Between_Dataset_Silh_2D_Global")) {
+      raw_val <- abs(raw_val)
+    }
     non_na  <- raw_val[!is.na(raw_val) & is.finite(raw_val)]
     if (length(non_na) == 0) {
       df$Score_Norm[idx] <- NA_real_
@@ -3473,7 +3921,7 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
     rng     <- max_v - min_v
     if (is.na(rng) || !is.finite(rng)) rng <- 0
 
-    is_naturally_01 <- isTRUE(grepl("^(KS|OV|ari|nmi|ami|v_measure|ECDF_DiffArea|Fasano|Peacock|accuracy|F1|Top_DEG_Jaccard)", met, ignore.case = TRUE)) ||
+    is_naturally_01 <- isTRUE(grepl("^(KS|OV|ari|nmi|ami|v_measure|ECDF_DiffArea|Fasano|Peacock|accuracy|precision|recall|f1_score|auc|pval_dist_score|F1|Top_DEG_Jaccard)", met, ignore.case = TRUE)) ||
                        isTRUE(min_v >= 0 && max_v <= 1 && rng <= 1)
     if (is_naturally_01) {
       if (is_hib) {
@@ -3498,6 +3946,39 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
   if (any(still_na))
     df$Score_Norm[still_na] <- pmax(0, pmin(1, df$Score_Raw[still_na]))
   df
+}
+
+# Color-coded discrete axis guide (supports per-facet independent label coloring)
+# @keywords internal
+.guide_axis_colored <- function(label_colors = NULL, ...) {
+  base_guide <- ggplot2::guide_axis(...)
+  axis_proto <- ggplot2::ggproto(
+    "GuideAxisColored",
+    ggplot2::GuideAxis,
+    params = c(ggplot2::GuideAxis$params, list(label_colors = NULL)),
+    build_labels = function(self, key, elements, params) {
+      lbl_cols <- params$label_colors
+      if (!is.null(lbl_cols) && !inherits(elements$text, "element_blank")) {
+        k_sub <- if (".type" %in% names(key)) key[key$.type == "major", , drop = FALSE] else key
+        val_chr <- if (".value" %in% names(k_sub)) as.character(k_sub$.value) else as.character(k_sub$.label)
+        cols <- unname(lbl_cols[val_chr])
+        miss <- is.na(cols)
+        if (any(miss) && ".label" %in% names(k_sub)) {
+          lbl_chr <- as.character(k_sub$.label)
+          cols[miss] <- unname(lbl_cols[lbl_chr[miss]])
+        }
+        fallback <- if (!is.null(elements$text$colour) && length(elements$text$colour) > 0) {
+          elements$text$colour[1L]
+        } else {
+          "#1E293B"
+        }
+        cols[is.na(cols)] <- fallback
+        elements$text$colour <- cols
+      }
+      ggplot2::ggproto_parent(ggplot2::GuideAxis, self)$build_labels(key, elements, params)
+    }
+  )
+  ggplot2::ggproto(NULL, axis_proto, params = c(base_guide$params, list(label_colors = label_colors)))
 }
 
 
@@ -3589,43 +4070,54 @@ plot_evaluation_summary <- function(
   }
 
   strip_map <- c(
-    "(I) Distributional Properties"              = "(I)\nDistribution",
-    "Distributional Properties"                  = "(I)\nDistribution",
-    "Distribution"                               = "(I)\nDistribution",
-    "(II) Correlations & Zero-Inflation"         = "(II)\nCorrelation",
-    "Correlations & Zero-Inflation"              = "(II)\nCorrelation",
-    "Correlation & Dependencies"                 = "(II)\nCorrelation",
-    "Correlation"                                = "(II)\nCorrelation",
-    "(III) Cellular Structure & Concordance"     = "(III)\nCell Structure",
-    "Cellular Structure & Concordance"           = "(III)\nCell Structure",
-    "Cellular Structure & Mixing"                = "(III)\nCell Structure",
-    "Cell Structure"                             = "(III)\nCell Structure",
-    "(IV) Batch Effects & Confounder Mixing"     = "(IV)\nBatch Mixing",
-    "Batch Effects & Confounder Mixing"          = "(IV)\nBatch Mixing",
-    "Batch Mixing"                               = "(IV)\nBatch Mixing",
-    "(V) Biological Signal & Downstream Fidelity"= "(V)\nBio-Signal & DE",
-    "Biological Signal & Downstream Fidelity"    = "(V)\nBio-Signal & DE",
-    "Biological Signal & Downstream"             = "(V)\nBio-Signal & DE",
-    "Bio-Signal & DE"                            = "(V)\nBio-Signal & DE",
-    "(VII) Trajectory & Lineage Topology"        = "(VII)\nTraj.",
-    "(VII) Trajectory & Lineage Dynamics"        = "(VII)\nTraj.",
-    "(VI) Trajectory & Lineage Dynamics"         = "(VII)\nTraj.",
-    "Trajectory & Lineage Topology"              = "(VII)\nTraj.",
-    "Trajectory & Lineage Dynamics"              = "(VII)\nTraj.",
-    "Trajectory Dynamics"                        = "(VII)\nTraj.",
-    "Trajectory"                                 = "(VII)\nTraj.",
-    "Traj."                                      = "(VII)\nTraj.",
-    "(VI) Multiomics Integration & Alignment"    = "(VI)\nMultiomics",
-    "(VI) Cross-Modal Coupling & Modularity"     = "(VI)\nMultiomics",
-    "Multiomics Integration & Alignment"         = "(VI)\nMultiomics",
-    "Cross-Modal Coupling & Modularity"          = "(VI)\nMultiomics",
-    "Cross-Modal Relationships"                  = "(VI)\nMultiomics",
-    "Cross-Modal"                                = "(VI)\nMultiomics",
-    "(VIII) Computational Scalability & Efficiency" = "(VIII)\nScalability",
-    "(VIII) Computational Scalability"             = "(VIII)\nScalability",
-    "Computational Scalability & Efficiency"       = "(VIII)\nScalability",
-    "Computational Scalability"                    = "(VIII)\nScalability",
-    "Scalability"                                = "(VIII)\nScalability"
+    "(I) Distributional Properties"                    = "(I)\nDistribution",
+    "Distributional Properties"                        = "(I)\nDistribution",
+    "Distribution"                                     = "(I)\nDistribution",
+    "(II) Sparsity & Zero-Inflation Dynamics"          = "(II)\nSparsity & Zero",
+    "Sparsity & Zero-Inflation Dynamics"               = "(II)\nSparsity & Zero",
+    "Sparsity & Zero"                                  = "(II)\nSparsity & Zero",
+    "(II) Correlations & Zero-Inflation"               = "(II)\nSparsity & Zero",
+    "Correlations & Zero-Inflation"                    = "(II)\nSparsity & Zero",
+    "Correlation & Dependencies"                       = "(II)\nSparsity & Zero",
+    "Correlation"                                      = "(II)\nSparsity & Zero",
+    "(III) Cellular Manifold & Clustering Concordance" = "(III)\nCell Manifold",
+    "Cellular Manifold & Clustering Concordance"       = "(III)\nCell Manifold",
+    "Cell Manifold"                                    = "(III)\nCell Manifold",
+    "(III) Cellular Structure & Concordance"           = "(III)\nCell Manifold",
+    "Cellular Structure & Concordance"                 = "(III)\nCell Manifold",
+    "Cellular Structure & Mixing"                      = "(III)\nCell Manifold",
+    "Cell Structure"                                   = "(III)\nCell Manifold",
+    "(IV) Technical Variation & Batch Mixing Dynamics" = "(IV)\nBatch Mixing",
+    "Technical Variation & Batch Mixing Dynamics"      = "(IV)\nBatch Mixing",
+    "(IV) Batch Effects & Confounder Mixing"           = "(IV)\nBatch Mixing",
+    "Batch Effects & Confounder Mixing"                = "(IV)\nBatch Mixing",
+    "Batch Mixing"                                     = "(IV)\nBatch Mixing",
+    "(V) Biological Signal & Differential Fidelity"    = "(V)\nBio-Signal & DE",
+    "Biological Signal & Differential Fidelity"        = "(V)\nBio-Signal & DE",
+    "(V) Biological Signal & Downstream Fidelity"      = "(V)\nBio-Signal & DE",
+    "Biological Signal & Downstream Fidelity"          = "(V)\nBio-Signal & DE",
+    "Biological Signal & Downstream"                   = "(V)\nBio-Signal & DE",
+    "Bio-Signal & DE"                                  = "(V)\nBio-Signal & DE",
+    "(VII) Trajectory & Lineage Topology"              = "(VII)\nTrajectory",
+    "(VII) Trajectory & Lineage Dynamics"              = "(VII)\nTrajectory",
+    "(VI) Trajectory & Lineage Dynamics"               = "(VII)\nTrajectory",
+    "Trajectory & Lineage Topology"                    = "(VII)\nTrajectory",
+    "Trajectory & Lineage Dynamics"                    = "(VII)\nTrajectory",
+    "Trajectory Dynamics"                              = "(VII)\nTrajectory",
+    "Trajectory"                                       = "(VII)\nTrajectory",
+    "Traj."                                            = "(VII)\nTrajectory",
+    "(VI) Multiomics Integration & Alignment"          = "(VI)\nMultiomics",
+    "(VI) Cross-Modal Coupling & Modularity"           = "(VI)\nMultiomics",
+    "Multiomics Integration & Alignment"               = "(VI)\nMultiomics",
+    "Cross-Modal Coupling & Modularity"                = "(VI)\nMultiomics",
+    "Cross-Modal Relationships"                        = "(VI)\nMultiomics",
+    "Cross-Modal"                                      = "(VI)\nMultiomics",
+    "Multiomics"                                       = "(VI)\nMultiomics",
+    "(VIII) Computational Scalability & Efficiency"    = "(VIII)\nScalability",
+    "(VIII) Computational Scalability"                 = "(VIII)\nScalability",
+    "Computational Scalability & Efficiency"           = "(VIII)\nScalability",
+    "Computational Scalability"                        = "(VIII)\nScalability",
+    "Scalability"                                      = "(VIII)\nScalability"
   )
 
   df$Display_Category <- as.character(df$Display_Category)
@@ -3635,11 +4127,11 @@ plot_evaluation_summary <- function(
     for (u_i in which(unmatched)) {
       dc <- df$Display_Category[u_i]
       if (grepl("Distribut", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(I)\nDistribution"
-      else if (grepl("Correlat|Zero", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(II)\nCorrelation"
-      else if (grepl("Cell|Cluster|Concord", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(III)\nCell Structure"
-      else if (grepl("Batch|Confound", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(IV)\nBatch Mixing"
-      else if (grepl("Bio|Signal|DE|Downstream", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(V)\nBio-Signal & DE"
-      else if (grepl("Traj|Lineage", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(VI)\nTraj."
+      else if (grepl("Sparsit|Correlat|Zero", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(II)\nSparsity & Zero"
+      else if (grepl("Manifold|Cell|Cluster|Concord", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(III)\nCell Manifold"
+      else if (grepl("Technical|Batch|Confound", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(IV)\nBatch Mixing"
+      else if (grepl("Bio|Signal|DE|Downstream|Differential", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(V)\nBio-Signal & DE"
+      else if (grepl("Traj|Lineage", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(VII)\nTrajectory"
       else if (grepl("Cross|Modal|Multiomics|Integration", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(VI)\nMultiomics"
       else if (grepl("Scalab|Comput", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(VIII)\nScalability"
       else df$Short_Category[u_i] <- "(I)\nDistribution"
@@ -4464,8 +4956,8 @@ compute_method_leaderboard <- function(benchmark_data) {
 #'
 #' When the same simulator (e.g., \code{"scDesign3"} or \code{"scMultiSim"}) is evaluated across
 #' multiple empirical datasets, \code{combine_benchmark_results} maintains each distinct dataset
-#' evaluation and provides cross-dataset aggregate fidelity scores across the 48 Gold-Standard
-#' curated metrics. This enables rigorous comparative evaluation and bubble matrix visualization
+#' evaluation and provides cross-dataset aggregate fidelity scores across the 48 curated
+#' evaluation metrics. This enables rigorous comparative evaluation and bubble matrix visualization
 #' of average simulator performance across diverse biological contexts.
 #'
 #' @param ... One or more benchmark evaluation objects, tidy data frames, or file paths
@@ -4475,7 +4967,7 @@ compute_method_leaderboard <- function(benchmark_data) {
 #'   being combined. If \code{NULL}, dataset names are automatically extracted from
 #'   the input objects or generated cleanly (e.g., \code{"Dataset 1"}, \code{"Dataset 2"}).
 #' @param filter_gold_standard Logical. If \code{TRUE} (default), filters all combined datasets
-#'   to the 48 Gold-Standard curated evaluation metrics.
+#'   to the 48 curated evaluation metrics.
 #' @param recompute_normalized Logical. If \code{TRUE} (default), re-normalizes raw metric
 #'   scores across all evaluated simulators and datasets using direction-aware scaling.
 #'
@@ -4752,8 +5244,8 @@ append_benchmark_results <- combine_benchmark_results
 #'
 #' @param p A \code{ggplot} or \code{patchwork} object to zoom.
 #' @param zoom Numeric zoom factor (> 1.0 zooms in, < 1.0 zooms out). Default is 1.0 (no change).
-#' @param step Integer step counter. Each positive step (+1) magnifies by +25% (1.25x),
-#'   while each negative step (-1) demagnifies by -20% (0.8x).
+#' @param step Integer step counter. Each positive step (+1) magnifies by +25\% (1.25x),
+#'   while each negative step (-1) demagnifies by -20\% (0.8x).
 #' @param xlim Optional numeric range \code{c(xmin, xmax)} to set exact horizontal limits.
 #' @param ylim Optional numeric range \code{c(ymin, ymax)} to set exact vertical limits.
 #' @param center Optional numeric vector \code{c(x_center, y_center)} specifying the focal point of zooming.

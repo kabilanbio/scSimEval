@@ -8,9 +8,12 @@
 #' pairwise cell correlation (on top HVGs), cell k-NN hubness, pairwise PCA distance,
 #' and outlier proportions.
 #'
-#' @param data Count matrix (features x cells).
+#' @param data Count matrix (features x cells), SingleCellExperiment, or Seurat object.
 #' @param max_cells_cor Maximum number of cells for computing pairwise correlation (default 1000).
-#' @param n_top_hvgs Number of highly variable genes to use for correlation and PCA (default 500).
+#' @param n_top_hvgs Number of highly variable genes/peaks to use for correlation and PCA (default 500).
+#' @param modality Optional modality string (e.g. \code{"scRNA-seq"}, \code{"scATAC-seq"}). When ATAC/peaks
+#'   are provided or auto-detected, cell correlations and PCA use Signac/simPIC TF-IDF normalization
+#'   instead of \code{log2(CPM + 1)}.
 #' @param verbose Logical, whether to print progress messages.
 #'
 #' @return A named list of cell-level summary vectors.
@@ -18,11 +21,16 @@
 #' data(example_scrna, package = "scSimEval")
 #' extract_cell_properties(example_scrna$ref)
 #' @export
-extract_cell_properties <- function(data, max_cells_cor = 1000, n_top_hvgs = 500, verbose = FALSE) {
+extract_cell_properties <- function(data, max_cells_cor = 1000, n_top_hvgs = 500,
+                                    modality = NULL, verbose = FALSE) {
+  is_atac <- .is_atac_modality(data, modality)
   if (inherits(data, "SingleCellExperiment")) {
     data <- SummarizedExperiment::assay(data, "counts")
   } else if (inherits(data, "Seurat")) {
-    data <- Seurat::GetAssayData(data, slot = "counts")
+    data <- tryCatch(
+      Seurat::GetAssayData(data, slot = "counts"),
+      error = function(e) Seurat::GetAssayData(data, layer = "counts")
+    )
   }
   
   if (verbose) message("Extracting cell library size & log-library size...")
@@ -33,22 +41,21 @@ extract_cell_properties <- function(data, max_cells_cor = 1000, n_top_hvgs = 500
   zero_fraction_cell <- fast_sparse_zero_fraction_cell(data)
   detection_freq_cell <- 1 - zero_fraction_cell
   
-  # Normalize to log2(CPM+1) for correlation and PCA using top HVGs directly
-  if (verbose) message("Extracting cell-cell correlations on top HVGs...")
-  lib_adj <- lib_size
-  lib_adj[lib_adj == 0] <- 1
-  
-  # Select top variable genes directly from sparse matrix (excluding zero-variance genes)
-  gene_vars <- fast_row_vars(data)
-  pos_gene_idx <- which(gene_vars > 0)
+  # Normalize counts: TF-IDF for scATAC-seq (simPIC/Signac), log2(CPM+1) for scRNA-seq
+  if (verbose) message("Extracting cell-cell correlations on top variable features...")
+  norm_mat <- normalize_counts(data, method = if (is_atac) "tfidf" else "lognorm")
+
+  # Select top variable genes/peaks directly from sparse matrix (excluding zero-variance features)
+  raw_vars <- fast_row_vars(data)
+  pos_gene_idx <- which(raw_vars > 0)
   n_hvg <- min(n_top_hvgs, length(pos_gene_idx))
+  rank_vars <- if (is_atac) fast_row_vars(norm_mat) else raw_vars
   top_hvg_idx <- if (length(pos_gene_idx) > 0) {
-    pos_gene_idx[order(gene_vars[pos_gene_idx], decreasing = TRUE)[seq_len(n_hvg)]]
+    pos_gene_idx[order(rank_vars[pos_gene_idx], decreasing = TRUE)[seq_len(n_hvg)]]
   } else {
-    order(gene_vars, decreasing = TRUE)[seq_len(min(n_top_hvgs, length(gene_vars)))]
+    order(rank_vars, decreasing = TRUE)[seq_len(min(n_top_hvgs, length(rank_vars)))]
   }
-  sub_counts <- as.matrix(data[top_hvg_idx, , drop = FALSE])
-  sub_cpm <- log2(t(t(sub_counts) / lib_adj) * 1e6 + 1)
+  sub_cpm <- as.matrix(norm_mat[top_hvg_idx, , drop = FALSE])
   
   n_cells <- ncol(data)
   max_cor_cells <- min(n_cells, min(max_cells_cor, 500))
@@ -140,8 +147,11 @@ extract_cell_properties <- function(data, max_cells_cor = 1000, n_top_hvgs = 500
 #' coefficient of variation (CV), feature dropout (zero fraction), dispersion,
 #' Biological Coefficient of Variation (BCV), gene-gene correlations, and outlier proportions.
 #'
-#' @param data Count matrix (features x cells).
+#' @param data Count matrix (features x cells), SingleCellExperiment, or Seurat object.
 #' @param n_top_cor Number of top HVGs/HVPs to use for correlation matrix (default 500, matching SimBench).
+#' @param modality Optional modality string (e.g. \code{"scRNA-seq"}, \code{"scATAC-seq"}). When ATAC/peaks
+#'   are provided or auto-detected, feature summaries and pairwise peak-peak correlations are computed
+#'   after Signac/simPIC TF-IDF transformation instead of \code{log2(CPM + 1)}.
 #' @param verbose Logical, whether to print progress messages.
 #'
 #' @return A named list of feature-level summary vectors.
@@ -149,21 +159,20 @@ extract_cell_properties <- function(data, max_cells_cor = 1000, n_top_hvgs = 500
 #' data(example_scrna, package = "scSimEval")
 #' extract_feature_properties(example_scrna$ref)
 #' @export
-extract_feature_properties <- function(data, n_top_cor = 500, verbose = FALSE) {
+extract_feature_properties <- function(data, n_top_cor = 500, modality = NULL, verbose = FALSE) {
+  is_atac <- .is_atac_modality(data, modality)
   if (inherits(data, "SingleCellExperiment")) {
     data <- SummarizedExperiment::assay(data, "counts")
   } else if (inherits(data, "Seurat")) {
-    data <- Seurat::GetAssayData(data, slot = "counts")
+    data <- tryCatch(
+      Seurat::GetAssayData(data, slot = "counts"),
+      error = function(e) Seurat::GetAssayData(data, layer = "counts")
+    )
   }
-  
-  raw_mat <- as.matrix(data)
   
   if (verbose) message("Extracting feature zero fraction...")
   zero_fraction_feature <- fast_sparse_zero_fraction_feature(data)
   detection_freq_feature <- 1 - zero_fraction_feature
-  
-  lib_sizes <- as.numeric(Matrix::colSums(data))
-  lib_sizes[lib_sizes == 0] <- 1
   
   if (verbose) message("Extracting mean, variance, and SD...")
   raw_mean <- as.numeric(Matrix::rowMeans(data))
@@ -173,36 +182,24 @@ extract_feature_properties <- function(data, n_top_cor = 500, verbose = FALSE) {
   cv_val <- ifelse(raw_mean > 0, (raw_sd / raw_mean) * 100, 0)
   dispersion_val <- ifelse(raw_mean > 0, (raw_var) / raw_mean, 0)
   
-  # Log-normalized mean and variance (computed without full dense matrix conversion)
-  # Filter positive variance features as per SimBench framework before selecting top HVGs/HVPs
+  # Normalize counts: TF-IDF for scATAC-seq (simPIC/Signac standard), log2(CPM+1) for scRNA-seq
+  norm_mat <- normalize_counts(data, method = if (is_atac) "tfidf" else "lognorm")
+  mean_val <- as.numeric(Matrix::rowMeans(norm_mat))
+  var_val <- fast_row_vars(norm_mat)
+  sd_val <- sqrt(var_val)
+
+  # Select top variable features (ranking by TF-IDF variance for ATAC peaks, raw variance for RNA genes)
   pos_var_idx <- which(raw_var > 0)
   n_genes_cor <- min(n_top_cor, length(pos_var_idx))
+  rank_vars <- if (is_atac) var_val else raw_var
   top_g_idx <- if (length(pos_var_idx) > 0) {
-    pos_var_idx[order(raw_var[pos_var_idx], decreasing = TRUE)[seq_len(n_genes_cor)]]
+    pos_var_idx[order(rank_vars[pos_var_idx], decreasing = TRUE)[seq_len(n_genes_cor)]]
   } else {
-    order(raw_var, decreasing = TRUE)[seq_len(min(n_top_cor, length(raw_var)))]
+    order(rank_vars, decreasing = TRUE)[seq_len(min(n_top_cor, length(rank_vars)))]
   }
+  sub_g_mat <- as.matrix(norm_mat[top_g_idx, , drop = FALSE])
   
-  if (inherits(data, "dgCMatrix")) {
-    norm_sparse <- data
-    cell_factors <- 1e6 / lib_sizes
-    col_idx <- rep(seq_len(ncol(data)), diff(data@p))
-    norm_sparse@x <- log2(norm_sparse@x * cell_factors[col_idx] + 1)
-    mean_val <- as.numeric(Matrix::rowMeans(norm_sparse))
-    var_val <- fast_row_vars(norm_sparse)
-    sd_val <- sqrt(var_val)
-    sub_g_mat <- as.matrix(norm_sparse[top_g_idx, , drop = FALSE])
-  } else {
-    raw_mat <- as.matrix(data)
-    cpm <- t(t(raw_mat) / lib_sizes) * 1e6
-    norm_mat <- log2(cpm + 1)
-    mean_val <- as.numeric(rowMeans(norm_mat))
-    var_val <- fast_row_vars(norm_mat)
-    sd_val <- sqrt(var_val)
-    sub_g_mat <- norm_mat[top_g_idx, , drop = FALSE]
-  }
-  
-  # Scaled variance (z-score standardized variance of log2(CPM+1), following SimBench)
+  # Scaled variance (z-score standardized variance of normalized expression/TF-IDF)
   sd_var_val <- stats::sd(var_val, na.rm = TRUE)
   scaled_var_val <- if (!is.na(sd_var_val) && sd_var_val > 0) {
     as.numeric((var_val - mean(var_val, na.rm = TRUE)) / sd_var_val)

@@ -622,9 +622,17 @@ evaluate_clustering_metrics <- function(
     dist_mat <- if (!is.null(pca_coords)) stats::dist(pca_coords) else stats::dist(t(as.matrix(d_use)))
   }
   
+  db_sim <- if (length(unique(stats::na.omit(cluster_info))) > 1) {
+    tryCatch(calc_davies_bouldin(if (!is.null(pca_coords)) t(pca_coords) else d_use, cluster_info), error = function(e) NA_real_)
+  } else {
+    NA_real_
+  }
+
   res <- list(
     silhouette_sim = calc_silhouette(dist_mat, cluster_info),
     silhouette = calc_silhouette(dist_mat, cluster_info),
+    davies_bouldin = db_sim,
+    davies_bouldin_sim = db_sim,
     neighborhood_purity = mean(calc_neighborhood_purity(dist_mat, cluster_info, is_distance = TRUE), na.rm = TRUE)
   )
   

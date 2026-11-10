@@ -43,7 +43,7 @@ run_edger_qlf_detrate <- function(
   if (inherits(counts, "SingleCellExperiment")) {
     counts <- SummarizedExperiment::assay(counts, "counts")
   } else if (inherits(counts, "Seurat")) {
-    counts <- Seurat::GetAssayData(counts, slot = "counts")
+    counts <- .get_seurat_counts(counts)
   }
   
   group <- droplevels(as.factor(group))
@@ -740,12 +740,12 @@ evaluate_deg_fidelity <- function(
   if (inherits(ref_data, "SingleCellExperiment")) {
     ref_data <- SummarizedExperiment::assay(ref_data, "counts")
   } else if (inherits(ref_data, "Seurat")) {
-    ref_data <- Seurat::GetAssayData(ref_data, slot = "counts")
+    ref_data <- .get_seurat_counts(ref_data)
   }
   if (inherits(sim_data, "SingleCellExperiment")) {
     sim_data <- SummarizedExperiment::assay(sim_data, "counts")
   } else if (inherits(sim_data, "Seurat")) {
-    sim_data <- Seurat::GetAssayData(sim_data, slot = "counts")
+    sim_data <- .get_seurat_counts(sim_data)
   }
   
   ref_celltypes <- as.character(ref_celltypes)
@@ -998,7 +998,7 @@ binarize_matrix <- function(mat) {
   if (inherits(mat, "SingleCellExperiment")) {
     mat <- SummarizedExperiment::assay(mat, "counts")
   } else if (inherits(mat, "Seurat")) {
-    mat <- Seurat::GetAssayData(mat, slot = "counts")
+    mat <- .get_seurat_counts(mat)
   }
   
   if (inherits(mat, "dgCMatrix")) {
@@ -1054,7 +1054,7 @@ to_pseudobulk <- function(
   if (inherits(input, "SingleCellExperiment")) {
     input <- SummarizedExperiment::assay(input, "counts")
   } else if (inherits(input, "Seurat")) {
-    input <- Seurat::GetAssayData(input, slot = "counts")
+    input <- .get_seurat_counts(input)
   }
   
   if (isTRUE(binarize)) {
@@ -1340,12 +1340,12 @@ evaluate_atac_da_fidelity <- function(
   if (inherits(ref_data, "SingleCellExperiment")) {
     ref_data <- SummarizedExperiment::assay(ref_data, "counts")
   } else if (inherits(ref_data, "Seurat")) {
-    ref_data <- Seurat::GetAssayData(ref_data, slot = "counts")
+    ref_data <- .get_seurat_counts(ref_data)
   }
   if (inherits(sim_data, "SingleCellExperiment")) {
     sim_data <- SummarizedExperiment::assay(sim_data, "counts")
   } else if (inherits(sim_data, "Seurat")) {
-    sim_data <- Seurat::GetAssayData(sim_data, slot = "counts")
+    sim_data <- .get_seurat_counts(sim_data)
   }
   
   ref_celltypes <- as.character(ref_celltypes)

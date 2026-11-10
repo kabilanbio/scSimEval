@@ -7,7 +7,7 @@
 plot_distribution_qc(
   ref_data,
   sim_data,
-  layout = c("comprehensive", "density"),
+  layout = c("density", "qq", "comprehensive"),
   properties = NULL,
   title = "Data properties",
   ref_name = "Original",
@@ -23,12 +23,18 @@ plot_distribution_qc(
 \item{sim_data}{Numeric count matrix for simulated data (features x cells), or a named list
 of simulated count matrices representing multiple simulators (e.g. \code{list("scDesign3" = m1, "Splatter" = m2)}).}
 
-\item{layout}{Character. Visualization layout: \code{"comprehensive"} (default 14-panel benchmarking grid
-matching canonical single-cell papers) or \code{"density"} (faceted density curves only).}
+\item{layout}{Character. Visualization layout: \code{"qq"} (18-panel quantile-quantile diagnostic
+plots comparing real vs. simulated quantiles on a common \code{n = 1024} grid with KS, MAD, MAE,
+RMSE, and PCC annotations) or \code{"density"} / \code{"comprehensive"} (18-panel empirical
+univariate density curves and bivariate joint distributions across the exact same 18 properties).}
 
-\item{properties}{Optional character vector of specific properties to include if custom selection is desired.}
+\item{properties}{Optional character vector of specific properties or group keywords
+(\code{"all"}, \code{"cell"}, \code{"feature"}, \code{"bivariate"}, or a single property key) to include.}
 
-\item{title}{Character. Main plot title. Default \code{"Data properties"}. Set to \code{NULL} for no title.}
+\item{title}{Character. Main plot title. Default \code{"Data properties"} (uses
+\code{"Real vs. Simulated Q-Q Plots"} for \code{layout = "qq"} and
+\code{"Real vs. Simulated Empirical & Joint Density Plots"} for density layout when left at default).
+Set to \code{NULL} for no title.}
 
 \item{ref_name}{Character. Label for the empirical reference in the legend. Default \code{"Original"}.}
 
@@ -36,7 +42,7 @@ matching canonical single-cell papers) or \code{"density"} (faceted density curv
 
 \item{palette}{Optional named character vector of colors. Default uses warm red for reference and classic steel blue for simulation.}
 
-\item{cell_types}{Optional factor or character vector of cell identities for computing biological signal proportions.}
+\item{cell_types}{Optional factor or character vector (retained for backward compatibility).}
 
 \item{base_size}{Numeric. Base font size. Default \code{9}.}
 }
@@ -44,14 +50,10 @@ matching canonical single-cell papers) or \code{"density"} (faceted density curv
 A \code{ggplot} or \code{patchwork} composite object containing the comparative panels.
 }
 \description{
-Compares empirical reference and simulated datasets across canonical single-cell
-summary properties: library size, TMM, effective library size, mean expression,
-feature variance, scaled variance, fraction zero per cell, fraction zero per gene,
-cell-cell correlation, gene-gene correlation, and bivariate relationships (mean vs. variance,
-mean vs. zero fraction, library size vs. zero fraction, and biological signals).
-Designed after landmark benchmarking studies (countsimQC / Duo et al.) with a clean,
-human-crafted scientific layout featuring solid visible contour lines, semi-transparent
-color-filled density curves, and simple understated titles.
+Compares empirical reference and simulated datasets across 18 distributional
+properties: 7 univariate cell-level properties, 7 univariate feature-level
+properties, and 4 bivariate property pairs, either as empirical & joint
+density overlays or as quantile-quantile (Q-Q) concordance plots.
 }
 \details{
 \if{html}{\figure{comparative_distribution_qc.png}{options: width="800" alt="Comparative Single-Cell Distribution QC"}}

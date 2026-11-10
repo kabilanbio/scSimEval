@@ -24,15 +24,15 @@ The package supports:
 
 ## Key Features
 
-- **48 Curated Evaluation Measures**: Systematically organized into 8 canonical categories (39 for unimodal scRNA-seq / scATAC-seq alone, 48 for paired multiomics):
-  1. *Distributional Properties* (statistical distances on library size, CPM expression, zero fractions, MMD, Fréchet distance)
-  2. *Correlations & Zero-Inflation* (logistic dropout curves, mean-variance fit, excess zero weights)
-  3. *Cellular Structure & Concordance* (unsupervised clustering fidelity, ARI, NMI, Silhouette, Davies-Bouldin, Generative Precision/Recall)
-  4. *Batch & Technical Confounders* (batch ASW, PCR $R^2$, CMS, LISI, Seurat mixing, cross-batch F1)
-  5. *Biological Signal & Differential Fidelity* (Simpipe / Libra dual sub-categories for scRNA-seq DEGs and scATAC-seq DARs: DE/DA score, p-value distribution score, true proportion, accuracy, precision, recall, F1, AUC)
-  6. *Cross-Modal Coupling & Modularity* (FOSCTTM alignment, Match@1, joint cell correlation, peak-to-gene $R_V$ linkage, co-regulatory modules)
-  7. *Trajectory & Lineage Topology* (pseudotime rank correlation, tree height RMSE, graph alignment, lineage expression fidelity)
-  8. *Computational Scalability & Efficiency* (execution runtime in seconds and peak RAM in MiB)
+- **55 Curated Evaluation Measures Across 8 Canonical Categories**:
+  1. *Distributional Properties* (14 metrics: 10 univariate---Wasserstein, KS, MAD, MAE, RMSE, Bhattacharyya, KDE-ISE, Runs statistic, NN mismatch, Inter-dataset silhouette---and 4 bivariate---Fasano-Franceschini 2D KS, 2D EMD, 2D NN mismatch, 2D Inter-dataset silhouette---across 7 cell-level, 7 feature-level, and 4 bivariate property pairs)
+  2. *Sparsity & Zero-Inflation Dynamics* (5 metrics: logistic dropout midpoint/slope/R² for scRNA-seq, quadratic accessibility-sparsity curve RMSE/R² for scATAC-seq, and posterior excess zero weight discrepancy)
+  3. *Cellular Manifold & Clustering Concordance* (8 primary metrics: MMD, Generative Precision, Generative Recall, Silhouette ASW, Clustering Deviation Index [CDI], Neighborhood Purity, ARI, NMI, plus auxiliary Davies-Bouldin Index)
+  4. *Technical Variation & Batch Mixing Dynamics* (5 metrics: Batch Silhouette, PCR $R^2$, CMS, Inverse Simpson Index [ISI], Cross-Batch F1)
+  5. *Biological Signal & Differential Fidelity* (12 metrics: parallel scRNA-seq DE and scATAC-seq DA suites assessing null P-value uniformity, accuracy, precision, recall, F1-score, and ROC-AUC via pseudobulk edgeR-QLF)
+  6. *Multiomics Integration & Alignment* (5 metrics: joint-embedding Batch ASW, Cell-Type ASW, Graph Connectivity, Integration ARI, and Integration NMI)
+  7. *Trajectory & Lineage Topology* (4 metrics: pseudotime correlation, lineage tree branch height RMSE, trajectory graph alignment, lineage gene expression fidelity)
+  8. *Computational Scalability & Efficiency* (2 metrics: elapsed execution time in seconds and peak memory allocation in MB/MiB)
 - **Robust Normalization Engine**: Automated library-size scaling, $\log_2(\text{CPM}+1)$ transformation, and joint low-dimensional latent projections prevent technical sequencing-depth artifacts from confounding evaluations.
 - **Low-Dimensional Cell Embeddings**: Multi-simulator UMAP, t-SNE, and PCA projections comparing reference and simulated cells in grid or 1-to-1 layouts, accompanied by quantitative clustering and manifold quality metrics.
 - **Publication-Ready Figures & Reproducible R Scripts**: Generates 600 DPI vector graphics and 100% procedural, self-contained R workflow scripts (free of hardcoded `dput` dumps) equipped with dedicated file path configuration blocks for local or HPC cluster execution.
@@ -78,14 +78,14 @@ head(res_uni$metrics_summary_table)
 ### 2. Multiomics Accuracy Evaluation (Paired / Unpaired)
 
 ```R
-# Load packaged real paired multiomics dataset (Rice Bud)
+# Load packaged Option B Seurat v5 paired multiomics dataset (Rice Bud)
 data(example_rice_bud)
 
-# Benchmark scMultiSim against empirical reference
+# Benchmark scMultiSim against empirical reference (cell_type, batch, and reductions are auto-extracted)
 res_multi <- evaluate_multiomics_accuracy(
-  ref_multi  = example_rice_bud$reference,
-  sim_multi  = example_rice_bud$simulated$scMultiSim,
-  cell_types = example_rice_bud$reference$cell_types,
+  ref_multi  = example_rice_bud$reference$combined,
+  sim_multi  = example_rice_bud$simulated$scMultiSim$combined,
+  pairing    = "paired",
   verbose    = FALSE
 )
 
@@ -116,12 +116,12 @@ launch_scSimEval_app()
 
 ---
 
-## Built-in Real Biological Datasets
+## Built-in Real Biological Datasets (Option B Standardized `Seurat` v5)
 
-`scSimEval` includes standardized empirical benchmarks extracted from published studies:
+`scSimEval` includes standardized empirical benchmarks extracted from published studies, complete with raw integer `counts`, harmonized `cell_type` and `batch` metadata, and dimensional reductions (`integrated`, `pca`):
 
-- **`example_rice_bud`**: Real paired single-cell multiomics dataset from rice (*Oryza sativa*) bud tissue (100 cells, 200 genes, 200 peaks, 8 cell types, 2 batches) evaluated across 6 simulators (`scMultiSim`, `scDesign3`, `MOSim`, `scCross`, `scMoMtF`, `Matilda`).
-- **`example_soybean_root`**: Real unpaired single-cell multiomics dataset from soybean (*Glycine max*) root tissue (100 RNA cells, 100 ATAC cells, 200 genes, 200 peaks) evaluated across 3 simulators (`scMultiSim`, `scDesign3`, `scCross`).
+- **`example_rice_bud`**: Real paired single-cell multiomics dataset from rice (*Oryza sativa*) bud tissue (100 paired cells, 200 genes, 200 peaks, 4 cell types, 2 batches) evaluated across 6 simulators (`scMultiSim`, `scDesign3`, `MOSim`, `scCross`, `scMoMtF`, `Matilda`). Includes `$combined`, `$rna`, and `$atac` `Seurat` objects.
+- **`example_soybean_root`**: Real unpaired single-cell multiomics dataset from soybean (*Glycine max*) root tissue (100 RNA cells, 100 ATAC cells, 200 genes, 200 peaks, 4 cell types, 2 batches) evaluated across 3 simulators (`scMultiSim`, `scDesign3`, `scCross`). Includes `$combined`, `$rna`, and `$atac` `Seurat` objects.
 - **`example_scrna`** & **`example_scatac`**: Lightweight unimodal benchmarks for rapid exploratory prototyping.
 
 ---

@@ -22,7 +22,7 @@ evaluate_multiomics_accuracy(
 \arguments{
 \item{ref_multi}{Named list of reference matrices for Modality 1 and 2.}
 
-\item{sim_multi}{Simulated matrices for Modality 1 and 2.}
+\item{sim_multi}{Named list of simulated matrices for Modality 1 and 2.}
 
 \item{cell_types}{Optional factor or vector of cell type labels for cells.}
 

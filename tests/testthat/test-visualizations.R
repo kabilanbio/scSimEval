@@ -10,6 +10,33 @@ test_that("plot_distribution_qc returns valid ggplot with single and multiple si
   )
   p2 <- plot_distribution_qc(example_scrna$ref, sim_list)
   expect_s3_class(p2, "ggplot")
+
+  p_qq <- plot_distribution_qc(example_scrna$ref, example_scrna$sim, layout = "qq")
+  expect_s3_class(p_qq, "ggplot")
+
+  p_qq_multi <- plot_distribution_qc(example_scrna$ref, sim_list, layout = "qq")
+  expect_s3_class(p_qq_multi, "ggplot")
+
+  p_qq_cell <- plot_distribution_qc(example_scrna$ref, example_scrna$sim, layout = "qq", properties = "cell")
+  expect_s3_class(p_qq_cell, "ggplot")
+
+  p_qq_feat <- plot_distribution_qc(example_scrna$ref, example_scrna$sim, layout = "qq", properties = "feature")
+  expect_s3_class(p_qq_feat, "ggplot")
+
+  p_qq_biv <- plot_distribution_qc(example_scrna$ref, example_scrna$sim, layout = "qq", properties = "bivariate")
+  expect_s3_class(p_qq_biv, "ggplot")
+
+  p_qq_single_prop <- plot_distribution_qc(example_scrna$ref, example_scrna$sim, layout = "qq", properties = "mean_vs_dispersion")
+  expect_s3_class(p_qq_single_prop, "ggplot")
+
+  p_dens_multi_prop <- plot_distribution_qc(example_scrna$ref, example_scrna$sim, layout = "density", properties = "mean_vs_dispersion")
+  expect_s3_class(p_dens_multi_prop, "ggplot")
+
+  p_dens <- plot_distribution_qc(example_scrna$ref, example_scrna$sim, layout = "density")
+  expect_s3_class(p_dens, "ggplot")
+
+  p_dens_cell <- plot_distribution_qc(example_scrna$ref, sim_list, layout = "density", properties = "cell")
+  expect_s3_class(p_dens_cell, "ggplot")
 })
 
 test_that("plot_metric_boxplots returns a valid ggplot object", {
@@ -132,6 +159,87 @@ test_that("plot_benchmark_bubble_matrix returns a valid ggplot object with data.
   
   p2 <- plot_bubble_matrix(demo_df)
   expect_s3_class(p2, "ggplot")
+
+  bm_mod <- data.frame(
+    Method = rep(c("SimA", "SimB"), each = 5),
+    Category = rep(c("(I) Distributional Properties", "(I) Distributional Properties", "(III) Cellular Structure & Concordance", "(III) Cellular Structure & Concordance", "(VI) Multiomics Integration & Alignment"), 2),
+    Metric = rep(c("KS", "KS", "ari", "davies_bouldin_sim", "FOSCTTM"), 2),
+    Modality = rep(c("RNA", "ATAC", "RNA", "ATAC", "Joint (Cross-Modal)"), 2),
+    Score = c(0.1, 0.2, 0.8, 0.5, 0.15, 0.3, 0.1, 0.6, 0.4, 0.25)
+  )
+  p_mod <- plot_benchmark_bubble_matrix(bm_mod)
+  expect_s3_class(p_mod, "ggplot")
+  expect_false(any(grepl("\\[(scRNA|scATAC|Joint)\\]", levels(p_mod$data$Display_Metric))))
+  expect_false("Modality Scope" %in% levels(p_mod$data$Method))
+  expect_true(all(c("scRNA-seq", "scATAC-seq", "Shared (RNA + ATAC)", "Multiomics") %in% as.character(p_mod$data$Modality_Scope)))
+  expect_s3_class(ggplot2::ggplotGrob(p_mod), "gtable")
+
+  bm_filt_in <- data.frame(
+    Method = "SimA",
+    Category = c(
+      "(III) Cellular Structure & Concordance",
+      "(V) Biological Signal & Downstream Fidelity",
+      "(VII) Cross-Modal Coupling & Modularity",
+      "(VII) Cross-Modal Coupling & Modularity",
+      "(VII) Cross-Modal Coupling & Modularity"
+    ),
+    Property = c("clustering", "simbench_signal", "cell_alignment", "chromatin_coaccessibility", "coexpression_modularity"),
+    Metric = c("davies_bouldin_sim", "DE (Mean Shift)_abs_error", "FOSCTTM", "rv_coefficient", "module_correlation_r"),
+    Modality = c("RNA", "RNA", "Joint (Cross-Modal)", "ATAC", "RNA"),
+    Score = c(0.6, 0.7, 0.2, 0.8, 0.9),
+    stringsAsFactors = FALSE
+  )
+  bm_filt_out <- filter_gold_standard_metrics(bm_filt_in)
+  expect_equal(nrow(bm_filt_out), 5L)
+  expect_true("(III) Cellular Manifold & Clustering Concordance" %in% bm_filt_out$Category)
+  expect_true("(V) Biological Signal & Differential Fidelity" %in% bm_filt_out$Category)
+  expect_true("(VI) Multiomics Integration & Alignment" %in% bm_filt_out$Category)
+
+  # Additional file 1 complete 55-measure alignment check
+  af1_df <- data.frame(
+    Method = rep(c("SimA", "SimB"), each = 10),
+    Category = rep(c(
+      "(I) Distributional Properties", "(I) Distributional Properties", "(I) Distributional Properties",
+      "(II) Sparsity & Zero-Inflation Dynamics",
+      "(III) Cellular Manifold & Clustering Concordance",
+      "(V) Biological Signal & Differential Fidelity", "(V) Biological Signal & Differential Fidelity",
+      "(VI) Multiomics Integration & Alignment", "(VI) Multiomics Integration & Alignment",
+      "(VI) Multiomics Integration & Alignment"
+    ), 2),
+    Property = rep(c(
+      "pca_dist", "lib_vs_cellzero", "scaled_variance",
+      "accessibility_sparsity_curve",
+      "clustering",
+      "scRNA_differential_expression", "scATAC_differential_accessibility",
+      "multiomics_integration", "multiomics_integration", "multiomics_integration"
+    ), 2),
+    Metric = rep(c(
+      "KDE_ISE", "EMD_2D", "Runs_Statistic",
+      "curve_rmse",
+      "davies_bouldin",
+      "pval_dist_score", "auc",
+      "batch_asw", "ari", "nmi"
+    ), 2),
+    Modality = rep(c("RNA", "ATAC", "RNA", "ATAC", "RNA", "RNA", "ATAC", "Joint (Cross-Modal)", "Joint (Cross-Modal)", "Joint (Cross-Modal)"), 2),
+    Score = c(
+      0.05, 0.2, -0.5, 0.04, 0.9, 0.92, 0.88, 0.91, 0.85, 0.82,
+      0.40, 1.5, -25.0, 0.25, 2.1, 0.45, 0.55, 0.60, 0.40, 0.35
+    ),
+    stringsAsFactors = FALSE
+  )
+  af1_filt <- filter_gold_standard_metrics(af1_df)
+  expect_equal(nrow(af1_filt), 20L)
+  p_af1 <- plot_benchmark_bubble_matrix(af1_filt)
+  expect_s3_class(p_af1, "ggplot")
+  expect_true(all(c("KDE ISE", "2D EMD", "Runs Statistic", "Accessibility Sparsity RMSE",
+                    "Null P-Value Uniformity", "DE/DA ROC-AUC", "Batch ASW",
+                    "Integration ARI", "Integration NMI") %in% as.character(p_af1$data$Display_Metric)))
+  runs_a <- p_af1$data$Score_Norm[p_af1$data$Metric == "Runs_Statistic" & p_af1$data$Method == "SimA"]
+  runs_b <- p_af1$data$Score_Norm[p_af1$data$Metric == "Runs_Statistic" & p_af1$data$Method == "SimB"]
+  expect_gt(runs_a, runs_b)
+  auc_a <- p_af1$data$Score_Norm[p_af1$data$Metric == "auc" & p_af1$data$Method == "SimA"]
+  auc_b <- p_af1$data$Score_Norm[p_af1$data$Metric == "auc" & p_af1$data$Method == "SimB"]
+  expect_gt(auc_a, auc_b)
 })
 
 test_that("compute_dataset_embeddings, plot_dataset_embeddings and compute_embedding_quality_metrics execute properly", {

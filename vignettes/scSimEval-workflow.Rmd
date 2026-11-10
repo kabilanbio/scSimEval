@@ -143,8 +143,8 @@ library(scSimEval)
 `scSimEval` provides built-in reference datasets for instant testing:
 * **`example_scrna`**: Empirical reference and simulated scRNA-seq count matrices ($60\text{ genes} \times 80\text{ cells}$) with cell types and batch annotations.
 * **`example_scatac`**: Empirical reference and simulated scATAC-seq peak matrices ($60\text{ peaks} \times 80\text{ cells}$).
-* **`example_rice_bud`**: Paired single-cell multiomics benchmark dataset of rice bud tissue (scRNA-seq + scATAC-seq from identical cells).
-* **`example_soybean_root`**: Unpaired single-cell multiomics benchmark dataset of soybean root tissue (independent scRNA and scATAC cells).
+* **`example_rice_bud`**: Option B standardized `Seurat` v5 paired single-cell multiomics benchmark dataset of rice bud tissue (100 cells, 200 genes, 200 peaks, 4 cell types, 2 batches across 6 simulators).
+* **`example_soybean_root`**: Option B standardized `Seurat` v5 unpaired single-cell multiomics benchmark dataset of soybean root tissue (100 RNA cells, 100 ATAC cells, 200 genes, 200 peaks, 4 cell types, 2 batches across 3 simulators).
 
 ```{r load-data}
 data(example_scrna, package = "scSimEval")
@@ -290,15 +290,14 @@ The flagship pipeline function `evaluate_multiomics_accuracy()` executes the com
 ```r
 data(example_rice_bud, package = "scSimEval")
 
+# Option B Seurat v5 objects embed counts, cell_type, batch, and integrated reductions
 master_eval <- evaluate_multiomics_accuracy(
-  ref_multi = list(rna = example_rice_bud$reference$rna, atac = example_rice_bud$reference$atac),
-  sim_multi = list(rna = example_rice_bud$simulated$scMultiSim$rna, atac = example_rice_bud$simulated$scMultiSim$atac),
-  cell_types = example_rice_bud$reference$cell_types,
-  batch_info = example_rice_bud$reference$batches,
-  pairing = "paired",
+  ref_multi    = example_rice_bud$reference$combined,
+  sim_multi    = example_rice_bud$simulated$scMultiSim$combined,
+  pairing      = "paired",
   elapsed_time = 12.4,
-  memory_mb = 248,
-  verbose = FALSE
+  memory_mb    = 248,
+  verbose      = FALSE
 )
 
 # Tidy summary table containing all 48 curated evaluation metrics

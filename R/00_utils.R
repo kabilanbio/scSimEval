@@ -327,20 +327,128 @@ subsample_dist_vector <- function(x, max_n = 10000) {
 #' as established across benchmark literature (SimCH, scDesign3, SPsimSeq, GDSim, SymBench, cfDiffusion, scCross).
 #'
 #' @param mat Expression or count matrix (features x cells), dgCMatrix, SingleCellExperiment, or Seurat object.
-#' @param scale_factor Numeric scaling factor for counts per cell. Default is 1e6 (CPM); can use 1e4.
-#' @param log_base Numeric base for the logarithm: 2 (default, for log2(CPM+1)) or natural log \code{exp(1)}.
-#' @param pseudo_count Numeric pseudo-count added before logarithm. Default is 1.
-#' @return Normalized matrix of log-transformed expression values.
+#' Detect Whether Single-Cell Input Represents Chromatin Accessibility (scATAC-seq)
+#'
+#' Checks explicit modality strings, Seurat default assay names, SingleCellExperiment
+#' experiment names, or peak coordinate feature names (e.g., \code{Peak_01},
+#' \code{chr1:100-200}).
+#'
+#' @param data Matrix, dgCMatrix, SingleCellExperiment, or Seurat object.
+#' @param modality Optional character modality hint.
+#' @return Logical scalar (\code{TRUE} for scATAC-seq, \code{FALSE} otherwise).
+#' @keywords internal
+#' @noRd
+.is_atac_modality <- function(data = NULL, modality = NULL) {
+  if (!is.null(modality) && length(modality) > 0 && !is.na(modality[1]) && nzchar(as.character(modality[1]))) {
+    m_low <- tolower(as.character(modality[1]))
+    if (grepl("atac|peak|chromatin", m_low)) return(TRUE)
+    if (grepl("rna|gene|transcript", m_low)) return(FALSE)
+  }
+
+  if (is.null(data)) return(FALSE)
+
+  if (inherits(data, "Seurat") && requireNamespace("SeuratObject", quietly = TRUE)) {
+    def_assay <- tryCatch(SeuratObject::DefaultAssay(data), error = function(e) NULL)
+    if (!is.null(def_assay) && grepl("atac|peak|chromatin", tolower(def_assay))) {
+      return(TRUE)
+    }
+  } else if (inherits(data, "SingleCellExperiment") && requireNamespace("SingleCellExperiment", quietly = TRUE)) {
+    exp_nm <- tryCatch(SingleCellExperiment::mainExpName(data), error = function(e) NULL)
+    if (!is.null(exp_nm) && grepl("atac|peak|chromatin", tolower(exp_nm))) {
+      return(TRUE)
+    }
+  }
+
+  rn <- tryCatch(rownames(data), error = function(e) NULL)
+  if (!is.null(rn) && length(rn) > 0) {
+    is_peak_name <- grepl("^(peak|chr[0-9xyXYM]+[:-]|[A-Za-z0-9_.-]+[:-][0-9]+-[0-9]+)", rn, ignore.case = TRUE)
+    if (mean(is_peak_name) > 0.5) return(TRUE)
+  }
+
+  FALSE
+}
+
+#' Perform TF-IDF Normalization for scATAC-seq Peak Matrices
+#'
+#' Computes Term Frequency–Inverse Document Frequency (TF-IDF) normalization
+#' following the Signac (\code{RunTFIDF(..., method = 1)}) and simPIC
+#' (Chugh et al., 2024) standard for scATAC-seq chromatin accessibility matrices:
+#' \deqn{\text{TF-IDF}_{i,j} = \log\left(1 + \frac{X_{i,j}}{N_j} \cdot \frac{N_{\text{cells}}}{\sum_k X_{i,k}} \cdot \text{scale\_factor}\right)}
+#'
+#' @param mat A peak-by-cell count matrix, sparse \code{dgCMatrix}, \code{SingleCellExperiment}, or \code{Seurat} object.
+#' @param scale_factor Numeric scaling factor applied prior to \code{log1p}. Default is \code{1e4} (10,000).
+#' @return TF-IDF transformed matrix (preserving \code{dgCMatrix} sparsity when sparse input is supplied).
 #' @examples
-#' data(example_scrna, package = "scSimEval")
-#' norm_mat <- normalize_counts(example_scrna$ref)
+#' set.seed(42)
+#' m <- matrix(rpois(100, 0.5), nrow = 10)
+#' tfidf_mat <- tfidf_transform(m)
 #' @export
-normalize_counts <- function(mat, scale_factor = 1e6, log_base = 2, pseudo_count = 1) {
+tfidf_transform <- function(mat, scale_factor = 1e4) {
   if (is.null(mat)) return(NULL)
   if (inherits(mat, "SingleCellExperiment")) {
     mat <- SummarizedExperiment::assay(mat, "counts")
   } else if (inherits(mat, "Seurat")) {
-    mat <- Seurat::GetAssayData(mat, slot = "counts")
+    mat <- tryCatch(
+      Seurat::GetAssayData(mat, slot = "counts"),
+      error = function(e) Seurat::GetAssayData(mat, layer = "counts")
+    )
+  }
+
+  libs <- as.numeric(Matrix::colSums(mat))
+  libs[libs == 0] <- 1
+
+  rs <- as.numeric(Matrix::rowSums(mat))
+  idf <- ifelse(rs > 0, ncol(mat) / rs, 0)
+
+  if (inherits(mat, "dgCMatrix")) {
+    norm_mat <- mat
+    col_idx <- rep(seq_len(ncol(mat)), diff(mat@p))
+    row_idx <- mat@i + 1L
+    norm_mat@x <- log1p((norm_mat@x / libs[col_idx]) * idf[row_idx] * scale_factor)
+    return(norm_mat)
+  } else {
+    mat <- as.matrix(mat)
+    tf <- t(t(mat) / libs)
+    scaled <- sweep(tf, 1L, idf, `*`) * scale_factor
+    return(log1p(scaled))
+  }
+}
+
+.get_seurat_counts <- function(obj) {
+  tryCatch(
+    Seurat::GetAssayData(obj, layer = "counts"),
+    error = function(e) Seurat::GetAssayData(obj, slot = "counts")
+  )
+}
+
+#' Fast Count Normalization (Log2-CPM or TF-IDF)
+#'
+#' Converts raw single-cell count matrices into log-normalized CPM (\code{"lognorm"})
+#' for scRNA-seq or TF-IDF (\code{"tfidf"}) for scATAC-seq, preserving
+#' \code{dgCMatrix} sparsity.
+#'
+#' @param mat A count matrix (genes/features x cells), \code{dgCMatrix}, \code{SingleCellExperiment}, or \code{Seurat} object.
+#' @param scale_factor Numeric scaling factor for counts per cell. Default is 1e6 (CPM) for \code{"lognorm"}, or 1e4 for \code{"tfidf"}.
+#' @param log_base Numeric base for the logarithm in \code{"lognorm"} mode: 2 (default, for log2(CPM+1)) or natural log \code{exp(1)}.
+#' @param pseudo_count Numeric pseudo-count added before logarithm in \code{"lognorm"} mode. Default is 1.
+#' @param method Normalization method: \code{"lognorm"} (default) or \code{"tfidf"} (Signac/simPIC scATAC-seq standard).
+#' @return Normalized matrix of transformed values.
+#' @examples
+#' data(example_scrna, package = "scSimEval")
+#' norm_mat <- normalize_counts(example_scrna$ref)
+#' @export
+normalize_counts <- function(mat, scale_factor = 1e6, log_base = 2, pseudo_count = 1,
+                             method = c("lognorm", "tfidf")) {
+  method <- match.arg(method)
+  if (is.null(mat)) return(NULL)
+  if (method == "tfidf") {
+    sf <- if (missing(scale_factor)) 1e4 else scale_factor
+    return(tfidf_transform(mat, scale_factor = sf))
+  }
+  if (inherits(mat, "SingleCellExperiment")) {
+    mat <- SummarizedExperiment::assay(mat, "counts")
+  } else if (inherits(mat, "Seurat")) {
+    mat <- .get_seurat_counts(mat)
   }
   
   # Check if matrix is already log-normalized (max < 35 and has fractional values)
@@ -531,15 +639,15 @@ validate_sc_object <- function(obj, arg_name = "data", reduction_name = NULL) {
       embed_mat <- as.matrix(SingleCellExperiment::reducedDim(obj, target_rd))
     }
   } else if (is_seurat) {
-    # 1. Counts
+    # 1. Counts (respect DefaultAssay first so ATAC/secondary assays work cleanly)
     counts_mat <- tryCatch(
-      obj[["RNA"]]$counts,
+      Seurat::GetAssayData(obj, slot = "counts"),
       error = function(e) {
         tryCatch(
-          Seurat::GetAssayData(obj, slot = "counts"),
+          Seurat::GetAssayData(obj, layer = "counts"),
           error = function(e2) {
             tryCatch(
-              Seurat::GetAssayData(obj, layer = "counts"),
+              obj[["RNA"]]$counts,
               error = function(e3) obj@assays[[1]]@counts
             )
           }
@@ -632,12 +740,20 @@ validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_na
       a2_name <- assay_names[2]
       m1 <- tryCatch(obj[[a1_name]]$counts, error = function(e) Seurat::GetAssayData(obj, assay = a1_name, slot = "counts"))
       m2 <- tryCatch(obj[[a2_name]]$counts, error = function(e) Seurat::GetAssayData(obj, assay = a2_name, slot = "counts"))
+      m1_obj <- obj
+      m2_obj <- obj
+      if (requireNamespace("SeuratObject", quietly = TRUE)) {
+        try({ SeuratObject::DefaultAssay(m1_obj) <- a1_name }, silent = TRUE)
+        try({ SeuratObject::DefaultAssay(m2_obj) <- a2_name }, silent = TRUE)
+      }
       v <- validate_sc_object(obj, arg_name, reduction_name = reduction_name)
       return(list(
         m1 = m1,
         m2 = m2,
-        m1_obj = obj,
-        m2_obj = obj,
+        m1_obj = m1_obj,
+        m2_obj = m2_obj,
+        m1_name = a1_name,
+        m2_name = a2_name,
         cell_types = v$cell_types,
         batch_info = v$batch_info,
         embedding = v$embedding
@@ -654,12 +770,16 @@ validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_na
       m1 <- SummarizedExperiment::assay(obj, "counts")
       a2 <- SingleCellExperiment::altExp(obj, alt_names[1])
       m2 <- SummarizedExperiment::assay(a2, "counts")
+      m1_nm <- SingleCellExperiment::mainExpName(obj)
+      if (is.null(m1_nm) || !nzchar(m1_nm)) m1_nm <- "RNA"
       v <- validate_sc_object(obj, arg_name, reduction_name = reduction_name)
       return(list(
         m1 = m1,
         m2 = m2,
         m1_obj = obj,
         m2_obj = a2,
+        m1_name = m1_nm,
+        m2_name = alt_names[1],
         cell_types = v$cell_types,
         batch_info = v$batch_info,
         embedding = v$embedding

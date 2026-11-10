@@ -24,16 +24,15 @@ Description: A simple and unified evaluation toolkit for benchmarking single-cel
     subset of cells has both modalities, e.g. DOGMA-seq or mosaic pooling designs),
     handled by subsetting the paired cell fraction for coupling metrics and evaluating
     each modality independently otherwise. The toolkit quantifies simulation realism
-    using 48 curated, non-redundant evaluation metrics (39 unimodal, 48 multiomics)
-    organized into 8 canonical categories:
-    (1) Distribution Differences: Statistical distances between real and simulated values (such as KS, Wasserstein, and MAD),
-    (2) Summary Properties: Gene correlations, zero counts, and dropout patterns,
-    (3) Cell Structure and Clustering: How well distinct cell types and clusters are preserved (such as Silhouette width, ARI, and NMI),
-    (4) Technical Variation & Batch Mixing Dynamics: How well technical batch variations are captured or mixed,
-    (5) Biological Signals and Marker Genes: Preservation of differentially expressed genes (DEGs) across Simpipe, SimBench, and Shaky Foundations frameworks,
-    (6) Cell Lineage and Trajectories: Preservation of continuous developmental pathways (inferred directly from scRNA-seq counts),
-    (7) Multiomics Relationships: Connections between different layers (such as gene expression and chromatin accessibility) — fully active for paired data; population-level metrics available for unpaired and mosaic data,
-    (8) Computational Resources: Speed (runtime in seconds) and memory usage (peak RAM in MiB).
+    using 55 evaluation measures organized into 8 canonical categories:
+    (1) Distributional Properties: 10 univariate metrics (Wasserstein, KS, MAD, MAE, RMSE, Bhattacharyya, KDE-ISE, Runs statistic, NN mismatch, Inter-dataset silhouette) and 4 bivariate metrics (Fasano-Franceschini 2D KS, 2D EMD, 2D NN mismatch, 2D Inter-dataset silhouette) evaluated across 7 cell-level, 7 feature-level, and 4 bivariate property pairs,
+    (2) Sparsity & Zero-Inflation Dynamics: logistic dropout curve midpoint/slope/R2 (scRNA-seq), quadratic accessibility-sparsity curve RMSE/R2 (scATAC-seq), and posterior excess zero weight discrepancy,
+    (3) Cellular Manifold & Clustering Concordance: MMD, Generative Precision/Recall, Silhouette ASW, Clustering Deviation Index (CDI), Neighborhood Purity, ARI, and NMI (with auxiliary Davies-Bouldin Index),
+    (4) Technical Variation & Batch Mixing Dynamics: Batch Silhouette, PCR R2, CMS, Inverse Simpson Index (ISI), and Cross-Batch F1,
+    (5) Biological Signal & Differential Fidelity: pseudobulk edgeR-QLF null P-value uniformity, accuracy, precision, recall, F1-score, and ROC-AUC across parallel scRNA-seq DE and scATAC-seq DA sub-categories,
+    (6) Multiomics Integration & Alignment: joint-embedding Batch ASW, Cell-Type ASW, Graph Connectivity, Integration ARI, and Integration NMI,
+    (7) Trajectory & Lineage Topology: pseudotime correlation, lineage tree RMSE, trajectory graph alignment, and lineage gene expression fidelity,
+    (8) Computational Scalability & Efficiency: elapsed runtime (seconds) and peak RAM allocation (MiB).
     Includes non-linear low-dimensional cell embedding projections (UMAP, t-SNE, PCA) with quantitative cluster separability (Silhouette) and fidelity (ARI) metrics, automated score normalization, leaderboards, 600 DPI bubble plots, and an interactive Shiny app studio.
 License: MIT + file LICENSE
 URL: https://kabilanbio.github.io/scSimEval/, https://github.com/kabilanbio/scSimEval

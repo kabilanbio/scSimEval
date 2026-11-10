@@ -7,24 +7,26 @@
 #' \if{html}{\figure{workflow_diagram.png}{options: width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 #'
 #' @details
-#' \strong{Metric Measurement Capacity by Data & Metadata Mode (48 Curated Evaluation Measures Suite):}
+#' \strong{Metric Measurement Capacity by Data & Metadata Mode (55 Evaluation Measures Suite):}
 #' \itemize{
-#'   \item \strong{Count Matrix Alone (No Metadata):} Measures 15 baseline metrics spanning
-#'     Category I (Distributional Properties: Wasserstein, KS, MAD, Bhattacharyya, Runs test,
-#'     NN mismatch, Inter-dataset silhouette), Category II (Sparsity & Zero-Inflation Dynamics:
-#'     dropout curve midpoint/slope error, accessibility-sparsity curve RMSE, R2 discrepancy,
-#'     excess zero-inflation weight discrepancy),
-#'     and Category VII (Trajectory & Lineage Topology: pseudotime correlation, tree height RMSE,
-#'     graph alignment, lineage dynamics).
-#'   \item \strong{+ Cell Types (Optional):} Unlocks 16 additional metrics spanning Category III
-#'     (Cellular Manifold & Clustering Concordance: MMD, Generative Precision/Recall,
-#'     Silhouette width, Davies-Bouldin, CDI, Neighborhood Purity, ARI, NMI) and Category V (Biological Signal Fidelity:
-#'     SimBench DE/DV/DD/DP/BD signals, predictive cell identity Macro-F1, deconvolution RMSE).
-#'   \item \strong{+ Batch Annotations (Optional):} Unlocks 6 additional metrics spanning Category IV
-#'     (Technical Variation & Batch Mixing Dynamics: Batch Silhouette, PCR R2, CMS score, LISI/ISI,
-#'     cross-batch F1) and biological replicate delta variance MAE.
-#'   \item \strong{Full Metadata (Count Matrix + Cell Types + Batch):} Unlocks the complete unimodal
-#'     benchmarking suite of 38 metrics (or all 47 metrics for paired multiomics).
+#'   \item \strong{Count Matrix Alone (No Metadata):} Evaluates Category I (Distributional
+#'     Properties: 10 univariate metrics---Wasserstein, KS, MAD, MAE, RMSE, Bhattacharyya,
+#'     KDE-ISE, Runs statistic, NN mismatch, Inter-dataset silhouette---and 4 bivariate metrics---
+#'     Fasano-Franceschini 2D KS, 2D EMD, 2D NN mismatch, 2D Inter-dataset silhouette),
+#'     Category II (Sparsity & Zero-Inflation Dynamics: logistic dropout curve midpoint/slope/R2
+#'     or accessibility-sparsity curve RMSE/R2, and excess zero-inflation weight discrepancy),
+#'     Category III manifold metrics (MMD, Generative Precision/Recall), and Category VII
+#'     (Trajectory & Lineage Topology inferred from expression: pseudotime correlation, tree
+#'     height RMSE, graph alignment, lineage gene expression fidelity).
+#'   \item \strong{+ Cell Types (Optional):} Unlocks Category III subpopulation metrics
+#'     (Silhouette ASW, CDI, Neighborhood Purity, ARI, NMI, and auxiliary Davies-Bouldin Index).
+#'   \item \strong{+ Batch / Biological Replicate Annotations (Optional):} Unlocks Category IV
+#'     (Technical Variation & Batch Mixing Dynamics: Batch Silhouette, PCR R2, CMS score,
+#'     LISI/ISI, Cross-Batch F1) and Category V (Biological Signal & Differential Fidelity:
+#'     Libra pseudobulk edgeR-QLF null P-value uniformity, accuracy, precision, recall,
+#'     F1-score, and ROC-AUC for scRNA-seq DE or scATAC-seq DA).
+#'   \item \strong{Full Metadata (+ Runtime & Memory):} Unlocks Category VIII scalability tracking
+#'     (\code{elapsed_time_seconds}, \code{peak_memory_mb}) for the complete 55-measure suite.
 #' }
 #'
 #' @param ref_data Reference count matrix (features x cells).
@@ -117,26 +119,23 @@ evaluate_simulation_accuracy <- function(
     try(data.table::setDTthreads(threads), silent = TRUE)
   }
 
+  # Resolve modality early so ATAC uses TF-IDF transformation (simPIC/Signac standard)
+  is_atac <- .is_atac_modality(val_ref$object, modality) || .is_atac_modality(val_sim$object, modality)
+  modality_resolved <- if (is_atac) "scATAC-seq" else "scRNA-seq"
+
   # Step 1: Extract properties
   if (verbose) message("[1/5] Extracting cell-level properties...")
-  ref_cell <- extract_cell_properties(ref_data, verbose = FALSE)
-  sim_cell <- extract_cell_properties(sim_data, verbose = FALSE)
+  ref_cell <- extract_cell_properties(ref_data, modality = modality_resolved, verbose = FALSE)
+  sim_cell <- extract_cell_properties(sim_data, modality = modality_resolved, verbose = FALSE)
   
   if (verbose) message("[2/5] Extracting feature-level properties...")
-  ref_feat <- extract_feature_properties(ref_data, verbose = FALSE)
-  sim_feat <- extract_feature_properties(sim_data, verbose = FALSE)
+  ref_feat <- extract_feature_properties(ref_data, modality = modality_resolved, verbose = FALSE)
+  sim_feat <- extract_feature_properties(sim_data, modality = modality_resolved, verbose = FALSE)
   
   # Step 2: Compute Univariate Accuracy Metrics (Cell & Feature Level) in Parallel
   if (verbose) message("[3/5] Computing univariate accuracy metrics...")
   
   # For scRNA-seq, include tmm_factor if available (skip for ATAC or if tmm is empty)
-  is_atac <- if (!is.null(modality)) {
-    grepl("atac|peak|chromatin", tolower(modality))
-  } else if (!is.null(rownames(ref_data)) && length(rownames(ref_data)) > 0) {
-    mean(grepl("^(peak|chr[0-9xyXYM]+[:-])", rownames(ref_data), ignore.case = TRUE)) > 0.5
-  } else {
-    FALSE
-  }
   has_tmm <- !is_atac && !is.null(ref_cell$tmm_factor) && length(ref_cell$tmm_factor) > 0 &&
              !all(is.na(ref_cell$tmm_factor))
   
@@ -588,38 +587,34 @@ evaluate_simulation_accuracy <- function(
 
 #' Master Multiomics Simulation Benchmarking Pipeline
 #'
-#' Orchestrates comprehensive benchmarking across all 7 evaluation categories
+#' Orchestrates comprehensive benchmarking across all 8 evaluation categories
 #' using strictly the user's provided inputs:
 #' \itemize{
-#'   \item \code{ref_multi}: List of reference omics matrices (e.g. \code{list(rna = ..., atac = ...)}).
-#'   \item \code{sim_multi}: List of simulated omics matrices (e.g. \code{list(rna = ..., atac = ...)}).
+#'   \item \code{ref_multi}: List of reference omics objects/matrices (e.g. \code{list(RNA = ..., ATAC = ...)}).
+#'   \item \code{sim_multi}: List of simulated omics objects/matrices (e.g. \code{list(RNA = ..., ATAC = ...)}).
 #'   \item \code{cell_types}: Vector/factor of cell-type identities.
-#'   \item \code{batch_info}: Vector/factor of batch or donor annotations.
-#'   \item Computational resource usage: \code{cpu_time}, \code{memory_mb}, \code{system_time}.
+#'   \item \code{batch_info}: Vector/factor of batch or biological replicate annotations.
+#'   \item Computational resource usage: \code{elapsed_time}, \code{memory_mb}.
 #'   \item Trajectory features inferred directly from scRNA-seq counts.
 #' }
 #'
 #' \if{html}{\figure{workflow_diagram.png}{options: width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 #'
 #' @details
-#' \strong{Multiomics Metric Measurement Capacity by Experimental Design & Metadata (48 Metrics):}
+#' \strong{Multiomics Metric Measurement Capacity Across the 55 Evaluation Measures:}
 #' \itemize{
-#'   \item \strong{Paired Multiomics (e.g. 10x Chromium Multiome, SHARE-seq, SNARE-seq):}
-#'     \itemize{
-#'       \item \emph{Count Matrices Alone (RNA + ATAC):} Measures unimodal distribution layers
-#'         plus Category VI Cross-Modal Coupling (Wasserstein, KS, FOSCTTM cell alignment score, Match@1,
-#'         cross-modal generation PCC, RV coefficient, and peak-to-gene regulatory coupling).
-#'       \item \emph{+ Cell Types:} Unlocks cross-modal label transfer F1, cell-type clustering concordance,
-#'         and SimBench biological signal fidelity.
-#'       \item \emph{+ Batch Info:} Unlocks batch confounder integration across both RNA and ATAC modalities.
-#'       \item \emph{+ Both (Full Metadata):} Unlocks the complete multiomics suite of all 48 curated evaluation metrics
-#'         across all 8 canonical categories.
-#'     }
-#'   \item \strong{Unpaired Multiomics (independent scRNA and scATAC from separate cells):}
-#'     \itemize{
-#'       \item Evaluates unimodal distributions for both layers plus population-level modularity metrics
-#'         (co-expression module fidelity, peak co-accessibility, cross-modal label transfer), totaling up to 43 metrics.
-#'     }
+#'   \item \strong{Paired or Unpaired Count Data Alone:} Evaluates unimodal Category I (10 univariate
+#'     + 4 bivariate metrics when \code{compute_bivariate = TRUE}), Category II (5 sparsity/zero-inflation
+#'     metrics across RNA & ATAC), Category III manifold metrics (MMD, Generative Precision/Recall),
+#'     and Category VII trajectory metrics inferred from scRNA-seq.
+#'   \item \strong{+ Cell Types:} Unlocks Category III supervised clustering concordance (Silhouette ASW,
+#'     CDI, Neighborhood Purity, ARI, NMI) and Category VI (Multiomics Integration & Alignment:
+#'     Batch ASW, Cell-Type ASW, Graph Connectivity, Integration ARI, Integration NMI).
+#'   \item \strong{+ Batch / Biological Replicate Annotations:} Unlocks Category IV batch mixing across
+#'     both layers and Category V (12 differential fidelity metrics: null P-value uniformity, accuracy,
+#'     precision, recall, F1-score, ROC-AUC across both scRNA-seq DE and scATAC-seq DA).
+#'   \item \strong{+ Runtime & Memory:} Logs Category VIII (\code{elapsed_time_seconds}, \code{peak_memory_mb})
+#'     to complete the full 55-measure evaluation suite across all 8 canonical categories.
 #' }
 #'
 #' @param ref_multi Named list of reference matrices for Modality 1 and 2.
@@ -681,7 +676,11 @@ evaluate_multiomics_accuracy <- function(
 
   mod_names <- names(ref_multi_orig)
   if (is.null(mod_names) || length(mod_names) < 2 || any(mod_names == "")) {
-    mod_names <- c("Modality_1", "Modality_2")
+    if (!is.null(val_ref$m1_name) && !is.null(val_ref$m2_name)) {
+      mod_names <- c(val_ref$m1_name, val_ref$m2_name)
+    } else {
+      mod_names <- c("Modality_1", "Modality_2")
+    }
   }
   m1_name <- mod_names[1]
   m2_name <- mod_names[2]

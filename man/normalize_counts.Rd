@@ -2,27 +2,34 @@
 % Please edit documentation in R/00_utils.R
 \name{normalize_counts}
 \alias{normalize_counts}
-\title{Normalize Single-Cell Count Matrix (Library Size + Log Transformation)}
+\title{Fast Count Normalization (Log2-CPM or TF-IDF)}
 \usage{
-normalize_counts(mat, scale_factor = 1e+06, log_base = 2, pseudo_count = 1)
+normalize_counts(
+  mat,
+  scale_factor = 1e+06,
+  log_base = 2,
+  pseudo_count = 1,
+  method = c("lognorm", "tfidf")
+)
 }
 \arguments{
-\item{mat}{Expression or count matrix (features x cells), dgCMatrix, SingleCellExperiment, or Seurat object.}
+\item{mat}{A count matrix (genes/features x cells), \code{dgCMatrix}, \code{SingleCellExperiment}, or \code{Seurat} object.}
 
-\item{scale_factor}{Numeric scaling factor for counts per cell. Default is 1e6 (CPM); can use 1e4.}
+\item{scale_factor}{Numeric scaling factor for counts per cell. Default is 1e6 (CPM) for \code{"lognorm"}, or 1e4 for \code{"tfidf"}.}
 
-\item{log_base}{Numeric base for the logarithm: 2 (default, for log2(CPM+1)) or natural log \code{exp(1)}.}
+\item{log_base}{Numeric base for the logarithm in \code{"lognorm"} mode: 2 (default, for log2(CPM+1)) or natural log \code{exp(1)}.}
 
-\item{pseudo_count}{Numeric pseudo-count added before logarithm. Default is 1.}
+\item{pseudo_count}{Numeric pseudo-count added before logarithm in \code{"lognorm"} mode. Default is 1.}
+
+\item{method}{Normalization method: \code{"lognorm"} (default) or \code{"tfidf"} (Signac/simPIC scATAC-seq standard).}
 }
 \value{
-Normalized matrix of log-transformed expression values.
+Normalized matrix of transformed values.
 }
 \description{
-Converts raw single-cell sequencing count matrices to library-size normalized,
-log-transformed values (e.g. log2(CPM + 1) or log(normalized counts + 1)),
-mitigating library size confounding across distance, correlation, and manifold metrics
-as established across benchmark literature (SimCH, scDesign3, SPsimSeq, GDSim, SymBench, cfDiffusion, scCross).
+Converts raw single-cell count matrices into log-normalized CPM (\code{"lognorm"})
+for scRNA-seq or TF-IDF (\code{"tfidf"}) for scATAC-seq, preserving
+\code{dgCMatrix} sparsity.
 }
 \examples{
 data(example_scrna, package = "scSimEval")

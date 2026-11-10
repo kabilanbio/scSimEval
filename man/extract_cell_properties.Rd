@@ -8,15 +8,20 @@ extract_cell_properties(
   data,
   max_cells_cor = 1000,
   n_top_hvgs = 500,
+  modality = NULL,
   verbose = FALSE
 )
 }
 \arguments{
-\item{data}{Count matrix (features x cells).}
+\item{data}{Count matrix (features x cells), SingleCellExperiment, or Seurat object.}
 
 \item{max_cells_cor}{Maximum number of cells for computing pairwise correlation (default 1000).}
 
-\item{n_top_hvgs}{Number of highly variable genes to use for correlation and PCA (default 500).}
+\item{n_top_hvgs}{Number of highly variable genes/peaks to use for correlation and PCA (default 500).}
+
+\item{modality}{Optional modality string (e.g. \code{"scRNA-seq"}, \code{"scATAC-seq"}). When ATAC/peaks
+are provided or auto-detected, cell correlations and PCA use Signac/simPIC TF-IDF normalization
+instead of \code{log2(CPM + 1)}.}
 
 \item{verbose}{Logical, whether to print progress messages.}
 }

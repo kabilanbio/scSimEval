@@ -3,13 +3,16 @@
 \docType{data}
 \name{example_rice_bud}
 \alias{example_rice_bud}
-\title{Real Paired Single-Cell Multiomics Benchmark Dataset (Rice Bud)}
+\title{Real Paired Single-Cell Multiomics Benchmark Dataset (Rice Bud, Seurat v5 Option B)}
 \format{
 A list with 4 elements:
 \describe{
   \item{metadata}{List containing organism, tissue, GEO accession (GSE232863), data type (Paired), and description.}
-  \item{reference}{List containing empirical reference sparse matrices \code{rna} (200 x 100) and \code{atac} (200 x 100), \code{cell_types} (8 cell types), and \code{batches} (2 batches).}
-  \item{simulated}{Named list of simulated outputs for 6 simulators: \code{scMultiSim}, \code{scDesign3}, \code{MOSim}, \code{scCross}, \code{scMoMtF}, and \code{Matilda}, each with \code{rna} and \code{atac} count matrices.}
+  \item{reference}{List containing Option B standardized \code{Seurat} v5 objects:
+    \code{combined} (multi-modal \code{Seurat} with \code{RNA} 200 x 100, \code{ATAC} 200 x 100, \code{cell_type}, \code{batch}, and \code{integrated}/\code{pca} reductions),
+    \code{rna} (unimodal \code{Seurat} object for scRNA-seq / Shiny upload), and
+    \code{atac} (unimodal \code{Seurat} object for scATAC-seq / Shiny upload).}
+  \item{simulated}{Named list of simulated outputs for 6 simulators: \code{scMultiSim}, \code{scDesign3}, \code{MOSim}, \code{scCross}, \code{scMoMtF}, and \code{Matilda}. Each simulator entry contains \code{combined}, \code{rna}, and \code{atac} \code{Seurat} objects matching the reference structure.}
   \item{scalability_benchmarks}{A data.frame with benchmarked \code{Method}, \code{Runtime_Seconds}, and \code{PeakRAM_MiB}.}
 }
 }
@@ -21,17 +24,28 @@ data(example_rice_bud)
 }
 \description{
 A real, pre-processed paired single-cell RNA-seq and ATAC-seq benchmark dataset of
-rice bud tissue (\emph{Oryza sativa}, GEO accession GSE232863). Contains paired
-empirical reference profiles (200 genes x 100 cells for RNA, 200 peaks x 100 cells for ATAC)
-across 8 biological cell types and 2 batches, alongside simulated outputs from 6 major
+rice bud tissue (\emph{Oryza sativa}, GEO accession GSE232863), packaged in
+\strong{Option B (Strict S4 Standardization)} using \code{Seurat} v5 objects.
+Contains paired empirical reference profiles (200 shared top-expressed genes x 100 cells for RNA,
+200 shared top-accessible peaks x 100 cells for ATAC) across 4 major biological cell types
+(\code{Bud_primordium}, \code{Epidermis}, \code{Parenchyma_cell}, \code{Root_meristem}, 25 cells each)
+and 2 biological batches (\code{Bud_21}, \code{Bud_22}), alongside simulated outputs from 6 major
 single-cell multiomics simulators (\code{scMultiSim}, \code{scDesign3}, \code{MOSim},
 \code{scCross}, \code{scMoMtF}, and \code{Matilda}) and observed scalability benchmarks
 (runtime in seconds and peak RAM in MiB).
 }
 \examples{
 data(example_rice_bud)
+example_rice_bud$reference$combined
 dim(example_rice_bud$reference$rna)
 dim(example_rice_bud$reference$atac)
 names(example_rice_bud$simulated)
+\donttest{
+evaluate_multiomics_accuracy(
+  ref_multi = example_rice_bud$reference$combined,
+  sim_multi = example_rice_bud$simulated$scMultiSim$combined,
+  pairing   = "paired"
+)
+}
 }
 \keyword{datasets}
