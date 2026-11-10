@@ -2,77 +2,88 @@
 % Please edit documentation in R/05_metrics_de_signal.R
 \name{evaluate_deg_fidelity}
 \alias{evaluate_deg_fidelity}
-\title{Evaluate Differentially Expressed Gene (DEG) Fidelity}
+\alias{evaluate_rna_de_fidelity}
+\title{Evaluate scRNA-seq Differential Expression (DE) Fidelity (Sub-category V-A)}
 \usage{
 evaluate_deg_fidelity(
   ref_data,
   sim_data,
   ref_celltypes,
   sim_celltypes,
-  group1 = NULL,
-  group2 = NULL,
+  batch_ref = NULL,
+  batch_sim = NULL,
   fdr_cutoff = 0.05,
-  logfc_cutoff = 0.5,
-  top_n_de = 100,
-  classifier = c("knn", "svm", "rf"),
-  run_pvalue_uniformity = TRUE
+  logfc_cutoff = 0,
+  classifier = c("svm", "knn", "rf"),
+  min_cells = 3,
+  min_reps = 2
+)
+
+evaluate_rna_de_fidelity(
+  ref_data,
+  sim_data,
+  ref_celltypes,
+  sim_celltypes,
+  batch_ref = NULL,
+  batch_sim = NULL,
+  fdr_cutoff = 0.05,
+  logfc_cutoff = 0,
+  classifier = c("svm", "knn", "rf"),
+  min_cells = 3,
+  min_reps = 2
 )
 }
 \arguments{
-\item{ref_data}{Reference single-cell expression or count matrix (features x cells).}
+\item{ref_data}{Reference scRNA-seq count matrix (genes x cells).}
 
-\item{sim_data}{Simulated single-cell expression or count matrix (features x cells).}
+\item{sim_data}{Simulated scRNA-seq count matrix (genes x cells).}
 
-\item{ref_celltypes}{Factor or character vector of cell types for reference cells.}
+\item{ref_celltypes}{Factor or character vector of reference cell types.}
 
-\item{sim_celltypes}{Factor or character vector of cell types for simulated cells.}
+\item{sim_celltypes}{Factor or character vector of simulated cell types.}
 
-\item{group1}{Optional character string specifying group 1 name. Default NULL (auto-selects top abundant type).}
+\item{batch_ref}{Factor or character vector of biological replicate / batch labels for reference cells. Required.}
 
-\item{group2}{Optional character string specifying group 2 name. Default NULL (auto-selects second most abundant type).}
+\item{batch_sim}{Factor or character vector of biological replicate / batch labels for simulated cells. Required.}
 
-\item{fdr_cutoff}{Adjusted p-value significance threshold. Default is 0.05.}
+\item{fdr_cutoff}{Adjusted p-value significance threshold for DEGs (default 0.05).}
 
-\item{logfc_cutoff}{Absolute log2 fold-change cutoff. Default is 0.5.}
+\item{logfc_cutoff}{Absolute log2 fold-change cutoff (default 0).}
 
-\item{top_n_de}{Number of top ranked DEGs to evaluate for Jaccard overlap and classification. Default is 100.}
+\item{classifier}{Classifier algorithm for marker gene predictability: "svm" (default), "knn", or "rf".}
 
-\item{classifier}{Supervised classifier: "knn" (default), "svm", or "rf".}
+\item{min_cells}{Minimum number of cells per cell type (default 3).}
 
-\item{run_pvalue_uniformity}{Logical, whether to run Simpipe's Chi-square p-value uniformity test. Default is TRUE.}
+\item{min_reps}{Minimum number of replicates per group (default 2).}
 }
 \value{
 A list containing:
-\itemize{
-  \item \code{deg_summary_table}: Comprehensive data.frame uniting all 15 metrics across Simpipe, SimBench, and Shaky Foundations.
-  \item \code{deg_genes_ref}: Character vector of significant DEGs in reference.
-  \item \code{deg_genes_sim}: Character vector of significant DEGs in simulation.
-  \item \code{contrast}: String describing the evaluated group contrast.
-  \item \code{logfc_ref}: Named numeric vector of reference log2 fold-changes.
-  \item \code{logfc_sim}: Named numeric vector of simulated log2 fold-changes.
-  \item \code{ml_classification}: Detailed classifier performance metrics.
-  \item \code{pvalue_uniformity}: Chi-square goodness-of-fit test results.
-}
+  \item{deg_summary_table}{Tidy summary data.frame with 6 scRNA-seq DE metrics: \code{de_score}, \code{pval_dist_score}, \code{true_proportion}, \code{accuracy}, \code{precision}, \code{recall}, \code{f1_score}, and \code{auc}}
+  \item{pairwise_results}{Detailed contrast-level data.frame with per-contrast metrics and confusion matrix counts}
+  \item{pseudobulks_ref}{List of reference pseudobulk matrices per cell type}
+  \item{pseudobulks_sim}{List of simulated pseudobulk matrices per cell type}
+  \item{de_results_ref}{List of edgeR-QLF DE results for reference}
+  \item{de_results_sim}{List of edgeR-QLF DE results for simulation}
+  \item{ml_classification}{Detailed classification results using simulated pseudobulk DEGs}
 }
 \description{
-Evaluates the preservation of differentially expressed genes (DEGs) and biological
-signal between empirical reference and simulated datasets across three landmark single-cell
-benchmarking frameworks:
+Evaluates the preservation of Differentially Expressed Genes (DEGs) between reference
+and simulated scRNA-seq datasets using biological replicate pseudobulks and edgeR-QLF
+(Squair et al., Nature Communications 2021 / Libra) across standard benchmarking metrics
+(Duo et al., Genome Biology 2024 / Simpipe).
+}
+\details{
+Category V is divided into two distinct sub-categories:
 \itemize{
-  \item \strong{Simpipe (Duo et al., 2024):} True DEG ratio, Distribution score (p-value
-        uniformity via Pearson Chi-Square goodness-of-fit test on remaining genes after DEG removal),
-        and supervised machine learning classification (Accuracy, Precision, Recall, F1) using
-        simulated DEGs to predict cell identity.
-  \item \strong{SimBench (Cao et al., 2021):} Symmetric Mean Absolute Percentage Error (SMAPE)
-        on DEG proportions, SimBench DE fidelity score, log2 fold-change effect size Pearson
-        and Spearman correlation, and top-N DEG Jaccard overlap.
-  \item \strong{Shaky Foundations (Crowell et al., 2023):} Group silhouette separation width,
-        silhouette discrepancy, and Percent Variance Explained (PVE) by group assignment.
+  \item \strong{Sub-category V-A (scRNA-seq Differential Expression)}: Computes 8 metrics:
+    \code{de_score}, \code{pval_dist_score}, \code{true_proportion}, \code{accuracy},
+    \code{precision}, \code{recall}, \code{f1_score}, and \code{auc}.
+  \item \strong{Sub-category V-B (scATAC-seq Differential Accessibility)}: Computes 8 metrics:
+    \code{da_score}, \code{pval_dist_score}, \code{true_proportion}, \code{accuracy},
+    \code{precision}, \code{recall}, \code{f1_score}, and \code{auc}.
 }
-}
-\examples{
-data(example_scrna, package = "scSimEval")
-evaluate_deg_fidelity(example_scrna$ref, example_scrna$sim,
-                      ref_celltypes = example_scrna$cell_types,
-                      sim_celltypes = example_scrna$cell_types)
+
+If \code{batch_ref} or \code{batch_sim} is NULL, the analysis is gracefully skipped,
+adhering to the strict rule that single-cell biological signal evaluation requires
+genuine biological replicates to prevent false positive inflation and pseudoreplication bias.
 }

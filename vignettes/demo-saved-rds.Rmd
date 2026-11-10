@@ -73,7 +73,7 @@ head(bench_data$benchmark_df[, c("Dataset", "Method", "Category", "Metric", "Sco
 Each row records:
 * **`Dataset`**: Experimental source or condition.
 * **`Method`**: Simulation algorithm evaluated.
-* **`Category`**: One of the 8 canonical evaluation categories (e.g., `(I) Distributional Properties`, `(V) Biological Signal & Downstream Fidelity`).
+* **`Category`**: One of the 8 canonical evaluation categories (e.g., `(I) Distributional Properties`, `(V) Biological Signal & Differential Fidelity`).
 * **`Metric`**: Name of the curated evaluation metric.
 * **`Score_Raw`**: Unnormalized empirical value in physical units (seconds, peak RAM in MiB, correlation coefficient, Kolmogorov-Smirnov distance).
 * **`Score`**: Standardized direction-aware fidelity score normalized to $[0, 1]$, where $1.0$ represents top fidelity.

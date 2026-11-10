@@ -2,7 +2,7 @@
 % Please edit documentation in R/04_metrics_batch.R
 \name{evaluate_cross_batch_prediction}
 \alias{evaluate_cross_batch_prediction}
-\title{Evaluate Cross-Batch Cell Classification Transfer Accuracy}
+\title{Evaluate Cross-Batch Cell Classification Transfer F1}
 \usage{
 evaluate_cross_batch_prediction(coords, cell_types, batch_info, k = 5)
 }
@@ -17,14 +17,13 @@ evaluate_cross_batch_prediction(coords, cell_types, batch_info, k = 5)
 }
 \value{
 A list containing:
-  \item{mean_cross_batch_accuracy}{Overall mean classification accuracy across all directed batch pairs}
   \item{mean_cross_batch_F1}{Overall mean macro-averaged F1 score across all directed batch pairs}
 }
 \description{
 Evaluates whether simulated or integrated multi-batch single-cell data preserve
 cell-type identity across distinct experimental batches or donors.
-Trains a k-NN classifier on each individual batch and tests prediction accuracy 
-and macro F1 score on all other remaining batches.
+Trains a k-NN classifier on each individual batch and tests the macro F1 score
+of predictions on all other remaining batches.
 }
 \examples{
 coords <- matrix(stats::rnorm(100), 50, 2)

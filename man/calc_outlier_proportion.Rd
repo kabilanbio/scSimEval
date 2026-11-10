@@ -20,4 +20,3 @@ ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_outlier_proportion(ref)
 }
-\keyword{internal}

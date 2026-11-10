@@ -1,252 +1,549 @@
+# =============================================================================
+# Category V: Biological Signal & Differential Fidelity (Simpipe DEG Evaluation Framework)
+# Duo et al., Genome Biology (2024)
+# =============================================================================
 
-# -----------------------------------------------------------------------------
-# SimBench 5 Biological Signal Types: DE, DV, DD, DP, BD
-# -----------------------------------------------------------------------------
-
-#' Detect Differential Expression (DE) Genes (Mean Shift via Limma or T-Test)
-#' @param exprs_mat Log-normalized matrix (genes x cells).
-#' @param cell_types Factor or binary vector of 2 cell types.
-#' @param p_sig Significance threshold (default 0.05).
-#' @return Vector of adjusted p-values.
+#' Run edgeR QLF Differential Expression with Cellular Detection Rate (edgeRQLFDetRate)
+#'
+#' Implements the benchmark-optimal \code{edgeRQLFDetRate} algorithm (Soneson & Robinson, 2018;
+#' Duo et al., 2024 / Simpipe) for single-cell differential expression analysis.
+#' Fits a quasi-likelihood negative binomial generalized linear model including
+#' the cellular detection rate (DetRate: fraction of expressed genes per cell) as a covariate.
+#'
+#' @param counts Single-cell count matrix (genes x cells), or SingleCellExperiment / Seurat object.
+#' @param group Factor or vector specifying the comparison cell groups (must contain exactly 2 levels for pairwise DE).
+#' @param cdr Optional numeric vector of cellular detection rates per cell. If NULL, computed automatically as fraction of non-zero genes.
+#' @param fdr_cutoff FDR / adjusted p-value threshold for significance (default 0.05).
+#' @param logfc_cutoff Absolute log2 fold-change threshold (default 0).
+#' @param min_cells Minimum number of cells expressing a gene to test (default 3).
+#'
+#' @return A data.frame with columns:
+#'   \item{gene}{Gene identifier}
+#'   \item{logFC}{log2 fold change}
+#'   \item{logCPM}{log2 counts per million}
+#'   \item{F_stat}{Quasi-likelihood F-statistic (or t-statistic in fallback)}
+#'   \item{PValue}{Raw p-value}
+#'   \item{FDR}{Benjamini-Hochberg adjusted p-value}
+#'   \item{is_deg}{Logical flag indicating whether the gene meets the significance threshold}
 #' @examples
 #' data(example_scrna, package = "scSimEval")
-#' calc_signal_de(example_scrna$ref, example_scrna$cell_types)
+#' top2 <- names(sort(table(example_scrna$cell_types), decreasing = TRUE))[1:2]
+#' idx <- which(example_scrna$cell_types %in% top2)
+#' res <- run_edger_qlf_detrate(example_scrna$ref[, idx], example_scrna$cell_types[idx])
+#' head(res)
 #' @export
-calc_signal_de <- function(exprs_mat, cell_types, p_sig = 0.05) {
-  cell_types <- droplevels(as.factor(cell_types))
-  if (nlevels(cell_types) != 2) stop("Requires exactly 2 cell types for pairwise DE.")
+run_edger_qlf_detrate <- function(
+  counts,
+  group,
+  cdr = NULL,
+  fdr_cutoff = 0.05,
+  logfc_cutoff = 0,
+  min_cells = 3
+) {
+  if (inherits(counts, "SingleCellExperiment")) {
+    counts <- SummarizedExperiment::assay(counts, "counts")
+  } else if (inherits(counts, "Seurat")) {
+    counts <- Seurat::GetAssayData(counts, slot = "counts")
+  }
   
-  fit <- NULL
-  if (requireNamespace("limma", quietly = TRUE)) {
-    design <- stats::model.matrix(~ cell_types)
-    fit <- tryCatch({
-      f <- limma::lmFit(as.matrix(exprs_mat), design)
-      limma::eBayes(f, trend = TRUE)
-    }, error = function(e) NULL)
-    if (!is.null(fit)) {
-      tt <- limma::topTable(fit, coef = 2, number = Inf, sort.by = "none")
-      p_adj <- stats::p.adjust(tt$P.Value, method = "BH")
-      return(p_adj)
+  group <- droplevels(as.factor(group))
+  if (nlevels(group) != 2) {
+    stop("run_edger_qlf_detrate requires exactly 2 comparison cell groups.")
+  }
+  
+  if (is.null(rownames(counts))) {
+    rownames(counts) <- paste0("Gene_", seq_len(nrow(counts)))
+  }
+  if (is.null(colnames(counts))) {
+    colnames(counts) <- paste0("Cell_", seq_len(ncol(counts)))
+  }
+  
+  # Cellular detection rate (fraction of non-zero genes per cell)
+  if (is.null(cdr)) {
+    cdr <- Matrix::colMeans(counts > 0)
+  }
+  cdr_scaled <- as.numeric(scale(cdr))
+  if (all(is.na(cdr_scaled)) || stats::sd(cdr) == 0) {
+    cdr_scaled <- rep(0, length(cdr))
+  }
+  
+  # Filter genes expressed in at least min_cells
+  n_expr <- Matrix::rowSums(counts > 0)
+  keep_idx <- which(n_expr >= min_cells)
+  
+  if (length(keep_idx) < 2) {
+    # If not enough genes meet threshold, test all non-zero genes
+    keep_idx <- which(n_expr > 0)
+    if (length(keep_idx) < 2) {
+      return(data.frame(
+        gene = rownames(counts),
+        logFC = 0,
+        logCPM = 0,
+        F_stat = 0,
+        PValue = 1,
+        FDR = 1,
+        is_deg = FALSE,
+        stringsAsFactors = FALSE
+      ))
     }
   }
-  # Vectorized Welch two-sample t-test fallback
-  idx1 <- which(cell_types == levels(cell_types)[1])
-    idx2 <- which(cell_types == levels(cell_types)[2])
-    n1 <- length(idx1)
-    n2 <- length(idx2)
-    m1 <- as.numeric(Matrix::rowMeans(exprs_mat[, idx1, drop = FALSE]))
-    m2 <- as.numeric(Matrix::rowMeans(exprs_mat[, idx2, drop = FALSE]))
-    v1 <- fast_row_vars(exprs_mat[, idx1, drop = FALSE])
-    v2 <- fast_row_vars(exprs_mat[, idx2, drop = FALSE])
-    se <- sqrt(v1 / max(1, n1) + v2 / max(1, n2))
-    se[se == 0] <- 1e-10
-    t_stat <- (m1 - m2) / se
-    df_welch <- (v1 / n1 + v2 / n2)^2 / ((v1 / n1)^2 / max(1, n1 - 1) + (v2 / n2)^2 / max(1, n2 - 1))
-    df_welch[is.na(df_welch) | df_welch < 1] <- 1
-    p_vals <- 2 * stats::pt(-abs(t_stat), df = df_welch)
-    p_adj <- stats::p.adjust(p_vals, method = "BH")
-    return(p_adj)
-}
-
-#' Detect Differential Variability (DV) Genes (Bartlett Test)
-#' @param exprs_mat Log-normalized matrix (genes x cells).
-#' @param cell_types Factor of 2 cell types.
-#' @return Vector of adjusted p-values.
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' calc_signal_dv(example_scrna$ref, example_scrna$cell_types)
-#' @export
-calc_signal_dv <- function(exprs_mat, cell_types) {
-  cell_types <- droplevels(as.factor(cell_types))
-  idx1 <- which(cell_types == levels(cell_types)[1])
-  idx2 <- which(cell_types == levels(cell_types)[2])
-  v1 <- fast_row_vars(exprs_mat[, idx1, drop = FALSE])
-  v2 <- fast_row_vars(exprs_mat[, idx2, drop = FALSE])
-  v2_safe <- pmax(1e-10, v2)
-  f_stat <- v1 / v2_safe
-  df1 <- max(1, length(idx1) - 1)
-  df2 <- max(1, length(idx2) - 1)
-  p_f <- stats::pf(f_stat, df1 = df1, df2 = df2)
-  p_vals <- 2 * pmin(p_f, 1 - p_f)
-  stats::p.adjust(p_vals, method = "BH")
-}
-
-#' Detect Differential Distribution (DD) Genes (Kolmogorov-Smirnov Test)
-#' @param exprs_mat Log-normalized matrix (genes x cells).
-#' @param cell_types Factor of 2 cell types.
-#' @return Vector of adjusted p-values.
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' calc_signal_dd(example_scrna$ref, example_scrna$cell_types)
-#' @export
-calc_signal_dd <- function(exprs_mat, cell_types) {
-  cell_types <- droplevels(as.factor(cell_types))
-  exprs_mat <- as.matrix(exprs_mat)
-  idx1 <- which(cell_types == levels(cell_types)[1])
-  idx2 <- which(cell_types == levels(cell_types)[2])
   
-  # For high dimensions (> 2000 genes), test top variable genes to avoid slow interpreted loops
-  n_genes <- nrow(exprs_mat)
-  if (n_genes > 2000) {
-    g_vars <- fast_row_vars(exprs_mat)
-    test_idx <- order(g_vars, decreasing = TRUE)[seq_len(2000)]
-  } else {
-    test_idx <- seq_len(n_genes)
+  sub_counts <- as.matrix(counts[keep_idx, , drop = FALSE])
+  gene_names <- rownames(sub_counts)
+  
+  design <- stats::model.matrix(~ cdr_scaled + group)
+  
+  res_df <- NULL
+  if (requireNamespace("edgeR", quietly = TRUE)) {
+    res_df <- tryCatch({
+      dge <- edgeR::DGEList(counts = sub_counts, group = group)
+      dge <- edgeR::calcNormFactors(dge)
+      dge <- edgeR::estimateDisp(dge, design = design)
+      fit <- edgeR::glmQLFit(dge, design = design)
+      qlf <- edgeR::glmQLFTest(fit, coef = ncol(design))
+      tt <- edgeR::topTags(qlf, n = Inf, sort.by = "none")$table
+      data.frame(
+        gene = rownames(tt),
+        logFC = tt$logFC,
+        logCPM = tt$logCPM,
+        F_stat = tt$F,
+        PValue = tt$PValue,
+        FDR = tt$FDR,
+        stringsAsFactors = FALSE
+      )
+    }, error = function(e) NULL)
   }
   
-  p_vals <- rep(1.0, n_genes)
-  p_vals[test_idx] <- apply(exprs_mat[test_idx, , drop = FALSE], 1, function(x) {
-    res <- tryCatch(
-      suppressWarnings(stats::ks.test(x[idx1], x[idx2])$p.value),
-      error = function(e) 1
+  # Fallback via limma with cdr covariate if edgeR is unavailable or encounters numerical issue
+  if (is.null(res_df) && requireNamespace("limma", quietly = TRUE)) {
+    res_df <- tryCatch({
+      lib_sz <- colSums(sub_counts)
+      lib_sz[lib_sz == 0] <- 1
+      log_cpm <- log2(t(t(sub_counts) / lib_sz) * 1e6 + 1)
+      fit <- limma::lmFit(log_cpm, design)
+      fit <- limma::eBayes(fit, trend = TRUE)
+      tt <- limma::topTable(fit, coef = ncol(design), number = Inf, sort.by = "none")
+      data.frame(
+        gene = rownames(tt),
+        logFC = tt$logFC,
+        logCPM = tt$AveExpr,
+        F_stat = tt$t^2,
+        PValue = tt$P.Value,
+        FDR = tt$adj.P.Val,
+        stringsAsFactors = FALSE
+      )
+    }, error = function(e) NULL)
+  }
+  
+  # Final fallback: vectorized Welch t-test
+  if (is.null(res_df)) {
+    g1_idx <- which(group == levels(group)[1])
+    g2_idx <- which(group == levels(group)[2])
+    n1 <- length(g1_idx); n2 <- length(g2_idx)
+    m1 <- rowMeans(sub_counts[, g1_idx, drop = FALSE])
+    m2 <- rowMeans(sub_counts[, g2_idx, drop = FALSE])
+    v1 <- apply(sub_counts[, g1_idx, drop = FALSE], 1, stats::var)
+    v2 <- apply(sub_counts[, g2_idx, drop = FALSE], 1, stats::var)
+    se <- sqrt(v1 / max(1, n1) + v2 / max(1, n2))
+    se[se == 0] <- 1e-10
+    t_stat <- (m2 - m1) / se
+    df_w <- (v1 / n1 + v2 / n2)^2 / ((v1 / n1)^2 / max(1, n1 - 1) + (v2 / n2)^2 / max(1, n2 - 1))
+    df_w[is.na(df_w) | df_w < 1] <- 1
+    p_vals <- 2 * stats::pt(-abs(t_stat), df = df_w)
+    p_adj <- stats::p.adjust(p_vals, method = "BH")
+    res_df <- data.frame(
+      gene = gene_names,
+      logFC = log2((m2 + 1) / (m1 + 1)),
+      logCPM = log2(rowMeans(sub_counts) + 1),
+      F_stat = t_stat^2,
+      PValue = p_vals,
+      FDR = p_adj,
+      stringsAsFactors = FALSE
     )
-    if (is.nan(res)) 1 else res
-  })
-  stats::p.adjust(p_vals, method = "BH")
+  }
+  
+  # Ensure all original genes are present in output
+  if (nrow(res_df) < nrow(counts)) {
+    missing_genes <- setdiff(rownames(counts), res_df$gene)
+    if (length(missing_genes) > 0) {
+      missing_df <- data.frame(
+        gene = missing_genes,
+        logFC = 0,
+        logCPM = 0,
+        F_stat = 0,
+        PValue = 1,
+        FDR = 1,
+        stringsAsFactors = FALSE
+      )
+      res_df <- rbind(res_df, missing_df)
+    }
+  }
+  
+  res_df$is_deg <- (!is.na(res_df$FDR) & res_df$FDR <= fdr_cutoff) & (abs(res_df$logFC) >= logfc_cutoff)
+  rownames(res_df) <- res_df$gene
+  res_df
 }
 
-#' Detect Differential Proportion / Zero-Inflation (DP) Genes (Chisq Test)
-#' @param exprs_mat Count or expression matrix (genes x cells).
-#' @param cell_types Factor of 2 cell types.
-#' @param threshold Value threshold for zero/detection status (default 0).
-#' @return Vector of adjusted p-values.
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' calc_signal_dp(example_scrna$ref, example_scrna$cell_types)
-#' @export
-calc_signal_dp <- function(exprs_mat, cell_types, threshold = 0) {
-  cell_types <- droplevels(as.factor(cell_types))
-  exprs_mat <- as.matrix(exprs_mat)
-  bin_mat <- ifelse(exprs_mat > threshold, 1, 0)
-  
-  p_vals <- apply(bin_mat, 1, function(x) {
-    tab <- table(factor(x, levels = c(0, 1)), cell_types)
-    res <- tryCatch(
-      suppressWarnings(stats::chisq.test(tab)$p.value),
-      error = function(e) 1
-    )
-    if (is.nan(res)) 1 else res
-  })
-  stats::p.adjust(p_vals, method = "BH")
-}
 
-#' Detect Bimodal Distribution (BD) Genes (Bimodal Separation Index)
-#' @param exprs_mat Matrix (genes x cells).
-#' @param cell_types Factor of 2 cell types.
-#' @return Numeric vector of Bimodality Index values.
+#' Calculate Simpipe Simulated DEG Ratio and True DEG Recovery (Approach 1)
+#'
+#' Evaluates the ability of simulation methods to simulate Differentially Expressed Genes (DEGs)
+#' according to the Simpipe benchmarking framework (Duo et al., Genome Biology 2024).
+#' Uses \code{edgeRQLFDetRate} on reference data as ground truth, and compares candidate DEGs
+#' returned by the simulation method.
+#'
+#' For 2 groups (\eqn{n = 2}):
+#' \deqn{P = P_{\text{true}}}
+#' For 3 or more groups (\eqn{n > 2}):
+#' \deqn{P = \sum_{i=1}^M P_{\text{true}, i} \cdot \frac{N_{\text{given}, i}}{N_{\text{given}}}}
+#' where \eqn{P_{\text{true}, i}} is the proportion of true DEGs identified from two cell groups
+#' through \code{edgeRQLFDetRate}, \eqn{N_{\text{given}, i}} denotes the DEG number returned
+#' by the simulation method from the \eqn{i}-th group pair, and \eqn{N_{\text{given}}} denotes
+#' the total DEG number across all group pairs.
+#'
+#' Also calculates the candidate-to-true DEG ratio:
+#' \deqn{\text{DEG Ratio} = \frac{N_{\text{given}}}{N_{\text{true}}}}
+#'
+#' @param ref_data Reference count matrix (genes x cells).
+#' @param sim_data Simulated count matrix (genes x cells).
+#' @param ref_celltypes Factor or character vector of reference cell groups.
+#' @param sim_celltypes Factor or character vector of simulated cell groups.
+#' @param sim_degs Optional list of character vectors containing candidate DEGs already returned by the simulation method for each pairwise group contrast. If NULL, edgeRQLFDetRate is executed on sim_data to detect candidate DEGs.
+#' @param fdr_cutoff FDR threshold for true and candidate DEGs (default 0.05).
+#' @param logfc_cutoff Absolute log2 fold change threshold (default 0).
+#' @param min_cells Minimum number of cells per group to perform DE (default 5).
+#'
+#' @return A list containing:
+#'   \item{P}{Overall weighted Simpipe true DEG recovery proportion (P)}
+#'   \item{deg_ratio}{Overall ratio of candidate/simulated DEGs to true DEGs (N_given / N_true)}
+#'   \item{pairwise_results}{Data frame with per-pair details: Group1, Group2, N_true, N_given, N_overlap, P_true, DEG_ratio, Weight}
+#'   \item{true_degs}{Named list of true DEG gene vectors per pair}
+#'   \item{candidate_degs}{Named list of candidate/simulated DEG gene vectors per pair}
 #' @examples
 #' data(example_scrna, package = "scSimEval")
-#' calc_signal_bd(example_scrna$ref, example_scrna$cell_types)
+#' res <- calc_simpipe_deg_ratio(
+#'   ref_data = example_scrna$ref,
+#'   sim_data = example_scrna$sim,
+#'   ref_celltypes = example_scrna$cell_types,
+#'   sim_celltypes = example_scrna$cell_types
+#' )
+#' res$P
+#' res$deg_ratio
 #' @export
-calc_signal_bd <- function(exprs_mat, cell_types) {
-  cell_types <- droplevels(as.factor(cell_types))
-  exprs_mat <- as.matrix(exprs_mat)
-  idx1 <- which(cell_types == levels(cell_types)[1])
-  idx2 <- which(cell_types == levels(cell_types)[2])
-  
-  pi1 <- length(idx1) / ncol(exprs_mat)
-  pi2 <- length(idx2) / ncol(exprs_mat)
-  
-  m1 <- rowMeans(exprs_mat[, idx1, drop = FALSE])
-  m2 <- rowMeans(exprs_mat[, idx2, drop = FALSE])
-  v1 <- apply(exprs_mat[, idx1, drop = FALSE], 1, stats::var)
-  v2 <- apply(exprs_mat[, idx2, drop = FALSE], 1, stats::var)
-  
-  denom <- sqrt(pi1 * v1 + pi2 * v2)
-  bi <- ifelse(denom > 0, abs(m1 - m2) / denom, 0)
-  return(bi)
-}
-
-#' Evaluate the 5 SimBench Biological Signal Proportions
-#'
-#' Compares proportions of genes exhibiting DE, DV, DD, DP, and BD between
-#' empirical reference and simulated datasets.
-#'
-#' @param ref_mat Reference matrix.
-#' @param sim_mat Simulated matrix.
-#' @param ref_celltypes Reference cell type labels (subsets to top 2 abundant types).
-#' @param sim_celltypes Simulated cell type labels.
-#' @param p_sig Significance cutoff (default 0.05).
-#' @param bi_cutoff Bimodal index cutoff (default 0.3).
-#'
-#' @return A tidy data.frame comparing biological signal proportions.
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' evaluate_simbench_signals(example_scrna$ref, example_scrna$sim,
-#'                           ref_celltypes = example_scrna$cell_types,
-#'                           sim_celltypes = example_scrna$cell_types)
-#' @export
-evaluate_simbench_signals <- function(
-  ref_mat,
-  sim_mat,
+calc_simpipe_deg_ratio <- function(
+  ref_data,
+  sim_data,
   ref_celltypes,
   sim_celltypes,
-  p_sig = 0.05,
-  bi_cutoff = 0.3
+  sim_degs = NULL,
+  fdr_cutoff = 0.05,
+  logfc_cutoff = 0,
+  min_cells = 5
 ) {
   ref_celltypes <- as.character(ref_celltypes)
   sim_celltypes <- as.character(sim_celltypes)
-  if (length(ref_celltypes) != ncol(ref_mat)) ref_celltypes <- rep(ref_celltypes, length.out = ncol(ref_mat))
-  if (length(sim_celltypes) != ncol(sim_mat)) sim_celltypes <- rep(sim_celltypes, length.out = ncol(sim_mat))
   
-  # Subset to the 2 most abundant cell types in reference
-  u_types <- unique(stats::na.omit(ref_celltypes))
-  if (length(u_types) < 2) return(data.frame())
-  top2 <- names(sort(table(ref_celltypes), decreasing = TRUE))[seq_len(2)]
+  if (length(ref_celltypes) != ncol(ref_data)) ref_celltypes <- rep(ref_celltypes, length.out = ncol(ref_data))
+  if (length(sim_celltypes) != ncol(sim_data)) sim_celltypes <- rep(sim_celltypes, length.out = ncol(sim_data))
   
-  idx_ref <- which(ref_celltypes %in% top2)
-  idx_sim <- which(sim_celltypes %in% top2)
-  idx_ref <- idx_ref[idx_ref <= ncol(ref_mat)]
-  idx_sim <- idx_sim[idx_sim <= ncol(sim_mat)]
-  if (length(idx_ref) < 4 || length(idx_sim) < 4) return(data.frame())
+  # Identify common cell types meeting min_cells
+  tab_ref <- table(ref_celltypes)
+  tab_sim <- table(sim_celltypes)
+  valid_groups <- intersect(names(tab_ref)[tab_ref >= min_cells], names(tab_sim)[tab_sim >= min_cells])
   
-  r_sub <- normalize_counts(ref_mat[, idx_ref, drop = FALSE])
-  s_sub <- normalize_counts(sim_mat[, idx_sim, drop = FALSE])
-  r_ct <- ref_celltypes[idx_ref]
-  s_ct <- sim_celltypes[idx_sim]
+  if (length(valid_groups) < 2) {
+    return(list(
+      P = NA_real_,
+      deg_ratio = NA_real_,
+      pairwise_results = data.frame(),
+      true_degs = list(),
+      candidate_degs = list()
+    ))
+  }
   
-  # Calculate for reference
-  n_genes_r <- nrow(r_sub)
-  prop_de_r <- sum(calc_signal_de(r_sub, r_ct) < p_sig) / n_genes_r
-  prop_dv_r <- sum(calc_signal_dv(r_sub, r_ct) < p_sig) / n_genes_r
-  prop_dd_r <- sum(calc_signal_dd(r_sub, r_ct) < p_sig) / n_genes_r
-  prop_dp_r <- sum(calc_signal_dp(r_sub, r_ct) < p_sig) / n_genes_r
-  prop_bd_r <- sum(calc_signal_bd(r_sub, r_ct) > bi_cutoff) / n_genes_r
+  pairs <- utils::combn(valid_groups, 2, simplify = FALSE)
+  n_pairs <- length(pairs)
   
-  # Calculate for simulation
-  n_genes_s <- nrow(s_sub)
-  prop_de_s <- sum(calc_signal_de(s_sub, s_ct) < p_sig) / n_genes_s
-  prop_dv_s <- sum(calc_signal_dv(s_sub, s_ct) < p_sig) / n_genes_s
-  prop_dd_s <- sum(calc_signal_dd(s_sub, s_ct) < p_sig) / n_genes_s
-  prop_dp_s <- sum(calc_signal_dp(s_sub, s_ct) < p_sig) / n_genes_s
-  prop_bd_s <- sum(calc_signal_bd(s_sub, s_ct) > bi_cutoff) / n_genes_s
+  pair_rows <- list()
+  true_degs_list <- list()
+  cand_degs_list <- list()
   
-  signals <- c("DE (Mean Shift)", "DV (Variability)", "DD (Distribution)",
-               "DP (Proportion/Dropout)", "BD (Bimodal Index)")
+  for (i in seq_along(pairs)) {
+    g1 <- pairs[[i]][1]
+    g2 <- pairs[[i]][2]
+    pair_name <- paste0(g1, "_vs_", g2)
+    
+    idx_ref <- which(ref_celltypes %in% c(g1, g2))
+    idx_sim <- which(sim_celltypes %in% c(g1, g2))
+    
+    # 1. Ground truth DEGs via edgeRQLFDetRate on reference
+    de_ref <- run_edger_qlf_detrate(
+      counts = ref_data[, idx_ref, drop = FALSE],
+      group = ref_celltypes[idx_ref],
+      fdr_cutoff = fdr_cutoff,
+      logfc_cutoff = logfc_cutoff
+    )
+    true_deg_i <- de_ref$gene[de_ref$is_deg]
+    true_degs_list[[pair_name]] <- true_deg_i
+    n_true_i <- length(true_deg_i)
+    
+    # 2. Candidate DEGs returned by simulation
+    if (!is.null(sim_degs) && (pair_name %in% names(sim_degs) || i <= length(sim_degs))) {
+      cand_deg_i <- if (pair_name %in% names(sim_degs)) sim_degs[[pair_name]] else sim_degs[[i]]
+    } else {
+      de_sim <- run_edger_qlf_detrate(
+        counts = sim_data[, idx_sim, drop = FALSE],
+        group = sim_celltypes[idx_sim],
+        fdr_cutoff = fdr_cutoff,
+        logfc_cutoff = logfc_cutoff
+      )
+      cand_deg_i <- de_sim$gene[de_sim$is_deg]
+    }
+    cand_degs_list[[pair_name]] <- cand_deg_i
+    n_given_i <- length(cand_deg_i)
+    
+    # Overlap and P_true
+    n_overlap_i <- length(intersect(true_deg_i, cand_deg_i))
+    p_true_i <- if (n_true_i > 0) {
+      n_overlap_i / n_true_i
+    } else {
+      if (n_given_i == 0) 1.0 else 0.0
+    }
+    deg_ratio_i <- if (n_true_i > 0) {
+      n_given_i / n_true_i
+    } else {
+      if (n_given_i == 0) 1.0 else 0.0
+    }
+    
+    pair_rows[[i]] <- data.frame(
+      Group1 = g1,
+      Group2 = g2,
+      Pair = pair_name,
+      N_true = n_true_i,
+      N_given = n_given_i,
+      N_overlap = n_overlap_i,
+      P_true = p_true_i,
+      DEG_ratio = deg_ratio_i,
+      stringsAsFactors = FALSE
+    )
+  }
   
-  data.frame(
-    Signal_Type = signals,
-    Reference_Prop = c(prop_de_r, prop_dv_r, prop_dd_r, prop_dp_r, prop_bd_r),
-    Simulation_Prop = c(prop_de_s, prop_dv_s, prop_dd_s, prop_dp_s, prop_bd_s),
-    Absolute_Error = abs(c(prop_de_r, prop_dv_r, prop_dd_r, prop_dp_r, prop_bd_r) -
-                         c(prop_de_s, prop_dv_s, prop_dd_s, prop_dp_s, prop_bd_s)),
-    stringsAsFactors = FALSE
+  pair_df <- do.call(rbind, pair_rows)
+  total_n_given <- sum(pair_df$N_given)
+  total_n_true <- sum(pair_df$N_true)
+  
+  # Weights: N_given_i / N_given
+  if (total_n_given > 0) {
+    pair_df$Weight <- pair_df$N_given / total_n_given
+  } else {
+    pair_df$Weight <- 1 / n_pairs
+  }
+  
+  # Formula:
+  # P = P_true for n = 2; sum(P_true_i * (N_given_i / N_given)) for n > 2
+  overall_p <- if (length(valid_groups) == 2) {
+    pair_df$P_true[1]
+  } else {
+    sum(pair_df$P_true * pair_df$Weight)
+  }
+  
+  overall_deg_ratio <- if (total_n_true > 0) {
+    total_n_given / total_n_true
+  } else {
+    if (total_n_given == 0) 1.0 else 0.0
+  }
+  
+  list(
+    P = as.numeric(overall_p),
+    deg_ratio = as.numeric(overall_deg_ratio),
+    pairwise_results = pair_df,
+    true_degs = true_degs_list,
+    candidate_degs = cand_degs_list
   )
 }
 
-#' Predictive Cell Identity Classification Using DE / Top Variable Features
+
+#' Calculate Simpipe P-value Uniformity Distribution Score (Approach 2)
 #'
-#' Trains a classifier on simulated features (80\% train / 20\% test) to verify
-#' whether the simulated biological signals are sufficiently predictive of cell identities.
-#' If \code{de_features} is NULL, the top variable features are automatically selected.
+#' Evaluates the reliability of candidate DEGs returned by simulation methods
+#' according to the Simpipe benchmarking framework (Duo et al., Genome Biology 2024).
 #'
-#' @param data Matrix (features x cells).
-#' @param group Cell type labels.
-#' @param de_features Optional character vector of selected DE feature names.
-#' @param n_top Number of top features to auto-select if \code{de_features} is NULL (default 50).
-#' @param method Classifier: "knn" (default), "rf", or "svm".
+#' The hypothesis is that if there are no DEGs between two sample groups, the false
+#' positive rate of detected DEGs should be approximately 0.05 and P-values should follow
+#' a uniform distribution \eqn{U(0, 1)}. Candidate DEGs returned by the simulation method
+#' are directly removed from the simulated gene expression matrix, and differential
+#' expression analysis is performed on the remaining genes using \code{edgeRQLFDetRate}.
 #'
-#' @return A list containing Accuracy, Macro Precision, Macro Recall, and Macro F1 score.
+#' The Pearson chi-squared goodness-of-fit test is performed on the remaining P-values
+#' under the null hypothesis of uniformity across 10 equal bins. If the null hypothesis
+#' is accepted (\eqn{P > 0.05}), \eqn{S_i = 1}; otherwise \eqn{S_i = 0}.
+#'
+#' For 2 groups (\eqn{n = 2}):
+#' \deqn{\text{distribution score} = 0 \text{ or } 1}
+#' For 3 or more groups (\eqn{n > 2}):
+#' \deqn{\text{distribution score} = \frac{1}{N} \sum_{i=1}^N S_i}
+#' where \eqn{N = \binom{n}{2}} is the number of paired groups.
+#'
+#' @param sim_data Simulated count matrix (genes x cells).
+#' @param sim_celltypes Factor or character vector of simulated cell groups.
+#' @param candidate_degs Optional list of character vectors of candidate DEGs per pair to remove. If NULL, edgeRQLFDetRate is first run on sim_data to identify candidate DEGs for removal.
+#' @param n_bins Number of histogram bins for the Pearson chi-squared goodness-of-fit test (default 10).
+#' @param alpha Significance threshold for accepting the uniform null hypothesis (default 0.05). If test p-value > alpha, null is accepted (S = 1).
+#' @param min_cells Minimum number of cells per group (default 5).
+#'
+#' @return A list containing:
+#'   \item{distribution_score}{Overall Simpipe distribution score (0 to 1)}
+#'   \item{pairwise_results}{Data frame with per-pair details: Group1, Group2, N_removed, N_remaining, Chisq_Stat, Chisq_Pval, Accepted_Null, S_i}
+#'   \item{pvalues_remaining}{Named list of P-value vectors for the remaining genes per pair}
+#' @examples
+#' data(example_scrna, package = "scSimEval")
+#' res <- calc_simpipe_distribution_score(
+#'   sim_data = example_scrna$sim,
+#'   sim_celltypes = example_scrna$cell_types
+#' )
+#' res$distribution_score
+#' @export
+calc_simpipe_distribution_score <- function(
+  sim_data,
+  sim_celltypes,
+  candidate_degs = NULL,
+  n_bins = 10,
+  alpha = 0.05,
+  min_cells = 5
+) {
+  sim_celltypes <- as.character(sim_celltypes)
+  if (length(sim_celltypes) != ncol(sim_data)) sim_celltypes <- rep(sim_celltypes, length.out = ncol(sim_data))
+  
+  tab_sim <- table(sim_celltypes)
+  valid_groups <- names(tab_sim)[tab_sim >= min_cells]
+  
+  if (length(valid_groups) < 2) {
+    return(list(
+      distribution_score = NA_real_,
+      pairwise_results = data.frame(),
+      pvalues_remaining = list()
+    ))
+  }
+  
+  if (is.null(rownames(sim_data))) {
+    rownames(sim_data) <- paste0("Gene_", seq_len(nrow(sim_data)))
+  }
+  
+  pairs <- utils::combn(valid_groups, 2, simplify = FALSE)
+  n_pairs <- length(pairs)
+  
+  pair_rows <- list()
+  pvals_list <- list()
+  
+  for (i in seq_along(pairs)) {
+    g1 <- pairs[[i]][1]
+    g2 <- pairs[[i]][2]
+    pair_name <- paste0(g1, "_vs_", g2)
+    
+    idx_sim <- which(sim_celltypes %in% c(g1, g2))
+    
+    # 1. Identify candidate DEGs to remove
+    cand_deg_i <- NULL
+    if (!is.null(candidate_degs) && (pair_name %in% names(candidate_degs) || i <= length(candidate_degs))) {
+      cand_deg_i <- if (pair_name %in% names(candidate_degs)) candidate_degs[[pair_name]] else candidate_degs[[i]]
+    }
+    if (is.null(cand_deg_i)) {
+      de_sim <- run_edger_qlf_detrate(
+        counts = sim_data[, idx_sim, drop = FALSE],
+        group = sim_celltypes[idx_sim]
+      )
+      cand_deg_i <- de_sim$gene[de_sim$is_deg]
+    }
+    
+    n_removed <- length(cand_deg_i)
+    all_genes <- rownames(sim_data)
+    rem_genes <- setdiff(all_genes, cand_deg_i)
+    n_remaining <- length(rem_genes)
+    
+    chisq_stat <- NA_real_
+    chisq_pval <- NA_real_
+    accepted <- FALSE
+    s_i <- 0
+    rem_pvals <- numeric(0)
+    
+    if (n_remaining >= n_bins) {
+      # Perform DE on remaining genes using edgeRQLFDetRate
+      de_rem <- run_edger_qlf_detrate(
+        counts = sim_data[rem_genes, idx_sim, drop = FALSE],
+        group = sim_celltypes[idx_sim]
+      )
+      rem_pvals <- stats::na.omit(de_rem$PValue)
+      pvals_list[[pair_name]] <- rem_pvals
+      
+      if (length(rem_pvals) >= n_bins) {
+        # Pearson chi-squared goodness-of-fit test for Uniform(0, 1) across 10 bins
+        breaks <- seq(0, 1, length.out = n_bins + 1)
+        bins <- cut(rem_pvals, breaks = breaks, include.lowest = TRUE, right = FALSE)
+        obs_counts <- as.numeric(table(factor(bins, levels = levels(bins))))
+        
+        chi_res <- tryCatch(
+          stats::chisq.test(obs_counts, p = rep(1 / n_bins, n_bins)),
+          error = function(e) NULL
+        )
+        if (!is.null(chi_res)) {
+          chisq_stat <- as.numeric(chi_res$statistic)
+          chisq_pval <- as.numeric(chi_res$p.value)
+          # Null hypothesis: p-values follow uniform distribution.
+          # If p-value > alpha (0.05), we fail to reject the null (null accepted) -> S_i = 1
+          accepted <- (chisq_pval > alpha)
+          s_i <- if (accepted) 1 else 0
+        }
+      }
+    }
+    
+    pair_rows[[i]] <- data.frame(
+      Group1 = g1,
+      Group2 = g2,
+      Pair = pair_name,
+      N_removed = n_removed,
+      N_remaining = n_remaining,
+      Chisq_Stat = chisq_stat,
+      Chisq_Pval = chisq_pval,
+      Accepted_Null = accepted,
+      S_i = s_i,
+      stringsAsFactors = FALSE
+    )
+  }
+  
+  pair_df <- do.call(rbind, pair_rows)
+  
+  # Overall Distribution Score:
+  # S_1 for n = 2; (1/N) * sum(S_i) for n > 2
+  overall_score <- if (length(valid_groups) == 2) {
+    pair_df$S_i[1]
+  } else {
+    mean(pair_df$S_i, na.rm = TRUE)
+  }
+  
+  list(
+    distribution_score = as.numeric(overall_score),
+    pairwise_results = pair_df,
+    pvalues_remaining = pvals_list
+  )
+}
+
+
+#' Predictive Cell Identity Classification Using Simulated DEGs (Simpipe Approach 3)
+#'
+#' Constructs classification models (Support Vector Machine with radial kernel,
+#' Random Forest, or k-NN) using simulated gene expression matrices and candidate DEGs
+#' (Duo et al., Genome Biology 2024 / Simpipe).
+#' Genes with zero variance are filtered out, and DEGs are used to train
+#' on 80\% of cells and evaluate on 20\% test cells (or cross-validation).
+#' Computes Accuracy, Macro-Precision, Macro-Recall, and Macro-F1 score.
+#'
+#' @param data Matrix of counts or normalized expressions (genes x cells).
+#' @param group Cell type / cluster labels.
+#' @param de_features Optional character vector of candidate DEG feature names. If NULL, top variable features are used.
+#' @param n_top Number of top features to select if de_features is NULL (default 50).
+#' @param method Classifier algorithm: "svm" (default in Simpipe), "knn", or "rf".
+#'
+#' @return A list containing accuracy, precision, recall, and F1 score.
 #' @examples
 #' data(example_scrna, package = "scSimEval")
 #' evaluate_predictive_de_model(example_scrna$ref, group = example_scrna$cell_types)
@@ -256,7 +553,7 @@ evaluate_predictive_de_model <- function(
   group,
   de_features = NULL,
   n_top = 50,
-  method = c("knn", "rf", "svm")
+  method = c("svm", "knn", "rf")
 ) {
   method <- match.arg(method)
   group <- as.factor(group)
@@ -276,18 +573,41 @@ evaluate_predictive_de_model <- function(
   
   sub_data <- as.data.frame(t(data_mat[de_features, , drop = FALSE]))
   n_cells <- nrow(sub_data)
-  train_idx <- sample(seq_len(n_cells), round(0.8 * n_cells))
+  
+  set.seed(42)
+  train_idx <- sample(seq_len(n_cells), max(2, round(0.8 * n_cells)))
   
   train_x <- sub_data[train_idx, , drop = FALSE]
   test_x <- sub_data[-train_idx, , drop = FALSE]
   train_y <- group[train_idx]
   test_y <- group[-train_idx]
   
-  # Prediction via k-NN fallback (universal in base R class package)
-  pred_y <- class::knn(train = train_x, test = test_x, cl = train_y, k = min(5, nrow(train_x)))
+  if (nrow(test_x) == 0) {
+    test_x <- train_x
+    test_y <- train_y
+  }
+  
+  pred_y <- NULL
+  if (method == "svm" && requireNamespace("e1071", quietly = TRUE)) {
+    svm_fit <- tryCatch({
+      e1071::svm(x = train_x, y = train_y, kernel = "radial")
+    }, error = function(e) NULL)
+    if (!is.null(svm_fit)) {
+      pred_y <- tryCatch(predict(svm_fit, test_x), error = function(e) NULL)
+    }
+  }
+  
+  # k-NN fallback if SVM unavailable or errors
+  if (is.null(pred_y)) {
+    pred_y <- tryCatch({
+      class::knn(train = train_x, test = test_x, cl = train_y, k = min(5, nrow(train_x)))
+    }, error = function(e) {
+      sample(levels(group), nrow(test_x), replace = TRUE)
+    })
+  }
   
   # Confusion matrix & macro metrics
-  cm <- table(Predicted = pred_y, Actual = test_y)
+  cm <- table(Predicted = factor(pred_y, levels = levels(group)), Actual = factor(test_y, levels = levels(group)))
   acc <- sum(diag(cm)) / max(1, sum(cm))
   
   cls <- levels(group)
@@ -311,551 +631,927 @@ evaluate_predictive_de_model <- function(
   )
 }
 
-# -----------------------------------------------------------------------------
-# Libra Benchmark Measures (Squair et al., Nature Communications 2021)
-# -----------------------------------------------------------------------------
 
-#' Convert Single-Cell Counts to Replicate Pseudobulks
-#'
-#' Converts a single-cell expression matrix into pseudobulk matrices per cell type
-#' by summarizing counts across biological replicates and experimental conditions
-#' (adapted from Squair et al. Libra).
-#'
-#' @param counts Single-cell count matrix (features x cells).
-#' @param cell_types Factor or character vector of cell types.
-#' @param replicates Factor or character vector of biological replicate IDs.
-#' @param conditions Factor or character vector of experimental condition / treatment labels.
-#' @param min_cells Minimum number of cells required per cell type to retain. Default is 3.
-#'
-#' @return Named list of pseudobulk count matrices (features x sample_replicates), one per cell type.
+#' Compute ROC-AUC from continuous ranking scores and binary labels
 #' @keywords internal
 #' @noRd
-to_pseudobulk <- function(
-  counts,
-  cell_types,
-  replicates,
-  conditions,
-  min_cells = 3
-) {
-  counts <- as.matrix(counts)
-  cell_types <- as.factor(cell_types)
-  replicates <- as.factor(replicates)
-  conditions <- as.factor(conditions)
+.calc_roc_auc <- function(scores, labels) {
+  labels <- as.integer(as.logical(labels))
+  valid <- !is.na(scores) & !is.na(labels)
+  scores <- scores[valid]
+  labels <- labels[valid]
   
-  meta <- data.frame(
-    cell = colnames(counts),
-    cell_type = cell_types,
-    replicate = replicates,
-    condition = conditions,
-    stringsAsFactors = FALSE
-  )
+  n_pos <- sum(labels == 1)
+  n_neg <- sum(labels == 0)
+  if (n_pos == 0 || n_neg == 0) return(1.0)
   
-  unique_types <- levels(cell_types)
-  pb_list <- list()
-  
-  for (ct in unique_types) {
-    sub_idx <- which(meta$cell_type == ct)
-    if (length(sub_idx) < min_cells) next
-    
-    sub_meta <- meta[sub_idx, ]
-    sub_counts <- counts[, sub_idx, drop = FALSE]
-    
-    sample_id <- factor(paste0(sub_meta$replicate, ":", sub_meta$condition))
-    mm <- stats::model.matrix(~ 0 + sample_id)
-    colnames(mm) <- levels(sample_id)
-    
-    pb_mat <- as.matrix(sub_counts %*% mm)
-    pb_list[[ct]] <- pb_mat
-  }
-  pb_list
+  r <- rank(scores, ties.method = "average")
+  u <- sum(r[labels == 1]) - (n_pos * (n_pos + 1)) / 2
+  auc <- u / (n_pos * n_neg)
+  as.numeric(max(0.0, min(1.0, auc)))
 }
 
-#' Calculate Delta Variance (Pseudoreplication Bias Metric)
-#'
-#' Measures the difference in gene expression variance between true biological
-#' replicates and cell-shuffled pseudoreplicates (Squair et al., Nature Communications 2021).
-#' Positive delta variance indicates that biological replicates have higher inter-individual
-#' variability than randomly pooled pseudoreplicates.
-#'
-#' @param counts Count matrix (features x cells).
-#' @param replicates Factor of biological replicate / batch assignments for each cell.
-#' @param conditions Factor of condition or cell-type labels.
-#' @param cell_types Optional cell type vector to evaluate per cell type or overall.
-#' @param n_perm Number of permutation shuffles to compute mean pseudoreplicate variance. Default is 3.
-#'
-#' @return A named list:
-#'   \item{delta_variance}{Numeric vector of gene-level delta variance values}
-#'   \item{mean_delta_variance}{Mean delta variance across all genes}
-#'   \item{median_delta_variance}{Median delta variance across all genes}
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' calc_delta_variance(example_scrna$ref,
-#'                     replicates = example_scrna$batch_info,
-#'                     conditions = example_scrna$cell_types)
-#' @export
-calc_delta_variance <- function(
-  counts,
-  replicates,
-  conditions,
-  cell_types = NULL,
-  n_perm = 3
-) {
-  counts <- as.matrix(counts)
-  replicates <- as.factor(replicates)
-  conditions <- as.factor(conditions)
+#' Compute P-value Distribution Uniformity Score under null
+#' @keywords internal
+#' @noRd
+.calc_pval_distribution_score <- function(pvals) {
+  pvals <- pvals[!is.na(pvals) & !is.nan(pvals)]
+  if (length(pvals) < 5) return(1.0)
   
-  # True biological replicates CPM
-  samp_fac <- factor(paste0(replicates, "_", conditions))
-  mm1 <- stats::model.matrix(~ 0 + samp_fac)
-  pb_true <- counts %*% mm1
-  cpm_true <- t(t(pb_true) / (colSums(pb_true) + 1e-12)) * 1e6
-  var_true <- apply(cpm_true, 1, stats::var)
+  ks_stat <- tryCatch({
+    suppressWarnings(stats::ks.test(pvals, "punif", 0, 1)$statistic)
+  }, error = function(e) 0.0)
   
-  # Shuffled pseudoreplicates within each condition
-  shuffled_dvs <- replicate(n_perm, {
-    shuff_rep <- replicates
-    for (cond in levels(conditions)) {
-      c_idx <- which(conditions == cond)
-      shuff_rep[c_idx] <- sample(shuff_rep[c_idx])
-    }
-    samp_shuff <- factor(paste0(shuff_rep, "_", conditions))
-    mm2 <- stats::model.matrix(~ 0 + samp_shuff)
-    pb_shuff <- counts %*% mm2
-    cpm_shuff <- t(t(pb_shuff) / (colSums(pb_shuff) + 1e-12)) * 1e6
-    var_shuff <- apply(cpm_shuff, 1, stats::var)
-    var_shuff - var_true
-  })
-  
-  mean_dv <- if (n_perm == 1) as.numeric(shuffled_dvs) else rowMeans(shuffled_dvs)
-  
-  list(
-    delta_variance = mean_dv,
-    mean_delta_variance = mean(mean_dv, na.rm = TRUE),
-    median_delta_variance = stats::median(mean_dv, na.rm = TRUE)
-  )
-}
-
-# -----------------------------------------------------------------------------
-# Single-Cell Mixture & Deconvolution Accuracy
-# -----------------------------------------------------------------------------
-
-#' Evaluate Cell-Type Deconvolution & Mixture Proportion Accuracy
-#'
-#' Evaluates the accuracy of cell-type mixture proportion estimation / deconvolution
-#' methods between empirical reference and simulated cell populations (Chen et al., Bioinformatics 2021).
-#' Can accept precomputed proportion matrices OR cell-type vectors (and optional batch labels)
-#' to calculate proportion preservation across batches.
-#'
-#' @param true_proportions Vector, matrix, or data.frame of reference cell-type proportions,
-#'   or factor/vector of reference cell types.
-#' @param estimated_proportions Vector, matrix, or data.frame of estimated / simulated cell-type proportions,
-#'   or factor/vector of simulated cell types.
-#' @param batch_ref Optional batch labels for reference cells (if true_proportions is a cell-type vector).
-#' @param batch_sim Optional batch labels for simulated cells (if estimated_proportions is a cell-type vector).
-#'
-#' @return A list containing RMSE, MAE, Pearson correlation (r), Spearman correlation (rho),
-#'   Jensen-Shannon Divergence (JSD), and Total Variation Distance (TVD).
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' calc_deconvolution_accuracy(example_scrna$ref, example_scrna$sim)
-#' @export
-calc_deconvolution_accuracy <- function(
-  true_proportions,
-  estimated_proportions,
-  batch_ref = NULL,
-  batch_sim = NULL
-) {
-  # If character/factor vectors supplied, convert to batch-by-celltype or 1-by-celltype proportion matrices
-  if ((is.character(true_proportions) || is.factor(true_proportions)) &&
-      (is.character(estimated_proportions) || is.factor(estimated_proportions))) {
-    all_cts <- union(as.character(true_proportions), as.character(estimated_proportions))
-    
-    if (!is.null(batch_ref) && !is.null(batch_sim)) {
-      tab_ref <- prop.table(table(batch_ref, factor(true_proportions, levels = all_cts)), margin = 1)
-      tab_sim <- prop.table(table(batch_sim, factor(estimated_proportions, levels = all_cts)), margin = 1)
-      t_mat <- as.matrix(tab_ref)
-      e_mat <- as.matrix(tab_sim)
-    } else {
-      p_ref <- as.numeric(prop.table(table(factor(true_proportions, levels = all_cts))))
-      p_sim <- as.numeric(prop.table(table(factor(estimated_proportions, levels = all_cts))))
-      t_mat <- matrix(p_ref, nrow = 1, dimnames = list("sample_1", all_cts))
-      e_mat <- matrix(p_sim, nrow = 1, dimnames = list("sample_1", all_cts))
-    }
-  } else {
-    t_mat <- as.matrix(true_proportions)
-    e_mat <- as.matrix(estimated_proportions)
-  }
-  
-  if (nrow(t_mat) != nrow(e_mat) || ncol(t_mat) != ncol(e_mat)) {
-    if (nrow(t_mat) == ncol(e_mat) && ncol(t_mat) == nrow(e_mat)) {
-      e_mat <- t(e_mat)
-    } else {
-      common_cts <- intersect(colnames(t_mat), colnames(e_mat))
-      if (length(common_cts) >= 2) {
-        t_mat <- t_mat[, common_cts, drop = FALSE]
-        e_mat <- e_mat[, common_cts, drop = FALSE]
-      } else {
-        # Align rows and cols to min
-        min_r <- min(nrow(t_mat), nrow(e_mat))
-        min_c <- min(ncol(t_mat), ncol(e_mat))
-        t_mat <- t_mat[seq_len(min_r), seq_len(min_c), drop = FALSE]
-        e_mat <- e_mat[seq_len(min_r), seq_len(min_c), drop = FALSE]
-      }
-    }
-  }
-  
-  # Row-normalize to valid probability simplices
-  t_mat <- pmax(t_mat, 0)
-  e_mat <- pmax(e_mat, 0)
-  
-  t_sums <- rowSums(t_mat)
-  e_sums <- rowSums(e_mat)
-  t_mat <- t_mat / ifelse(t_sums > 0, t_sums, 1)
-  e_mat <- e_mat / ifelse(e_sums > 0, e_sums, 1)
-  
-  n_samples <- nrow(t_mat)
-  
-  sample_rmse <- numeric(n_samples)
-  sample_mae <- numeric(n_samples)
-  sample_r <- numeric(n_samples)
-  sample_rho <- numeric(n_samples)
-  sample_jsd <- numeric(n_samples)
-  sample_tvd <- numeric(n_samples)
-  
-  for (i in seq_len(n_samples)) {
-    p <- t_mat[i, ]
-    q <- e_mat[i, ]
-    
-    sample_rmse[i] <- sqrt(mean((p - q)^2))
-    sample_mae[i] <- mean(abs(p - q))
-    sample_tvd[i] <- 0.5 * sum(abs(p - q))
-    
-    if (stats::sd(p) > 1e-6 && stats::sd(q) > 1e-6) {
-      sample_r[i] <- stats::cor(p, q, method = "pearson")
-      sample_rho[i] <- stats::cor(p, q, method = "spearman")
-    } else {
-      sample_r[i] <- NA_real_
-      sample_rho[i] <- NA_real_
-    }
-    
-    # Jensen-Shannon Divergence
-    m <- 0.5 * (p + q)
-    kl_pm <- sum(ifelse(p > 0 & m > 0, p * log2(p / m), 0))
-    kl_qm <- sum(ifelse(q > 0 & m > 0, q * log2(q / m), 0))
-    sample_jsd[i] <- max(0, 0.5 * (kl_pm + kl_qm))
-  }
-  
-  overall_rmse <- sqrt(mean((t_mat - e_mat)^2))
-  overall_mae <- mean(abs(t_mat - e_mat))
-  overall_r <- mean(sample_r, na.rm = TRUE)
-  overall_rho <- mean(sample_rho, na.rm = TRUE)
-  overall_jsd <- mean(sample_jsd, na.rm = TRUE)
-  overall_tvd <- mean(sample_tvd, na.rm = TRUE)
-  
-  list(
-    deconvolution_rmse = as.numeric(overall_rmse),
-    deconvolution_mae = as.numeric(overall_mae),
-    deconvolution_r = as.numeric(overall_r),
-    deconvolution_rho = as.numeric(overall_rho),
-    deconvolution_jsd = as.numeric(overall_jsd),
-    deconvolution_tvd = as.numeric(overall_tvd),
-    sample_metrics = data.frame(
-      sample = seq_len(n_samples),
-      RMSE = sample_rmse,
-      MAE = sample_mae,
-      Pearson_r = sample_r,
-      Spearman_rho = sample_rho,
-      JSD = sample_jsd,
-      TVD = sample_tvd
-    )
-  )
+  as.numeric(max(0.0, min(1.0, 1.0 - as.numeric(ks_stat))))
 }
 
 
-#' Evaluate Differentially Expressed Gene (DEG) Fidelity
+#' Evaluate scRNA-seq Differential Expression (DE) Fidelity (Sub-category V-A)
 #'
-#' Evaluates the preservation of differentially expressed genes (DEGs) and biological
-#' signal between empirical reference and simulated datasets across three landmark single-cell
-#' benchmarking frameworks:
+#' Evaluates the preservation of Differentially Expressed Genes (DEGs) between reference
+#' and simulated scRNA-seq datasets using biological replicate pseudobulks and edgeR-QLF
+#' (Squair et al., Nature Communications 2021 / Libra) across standard benchmarking metrics
+#' (Duo et al., Genome Biology 2024 / Simpipe).
+#'
+#' Category V is divided into two distinct sub-categories:
 #' \itemize{
-#'   \item \strong{Simpipe (Duo et al., 2024):} True DEG ratio, Distribution score (p-value
-#'         uniformity via Pearson Chi-Square goodness-of-fit test on remaining genes after DEG removal),
-#'         and supervised machine learning classification (Accuracy, Precision, Recall, F1) using
-#'         simulated DEGs to predict cell identity.
-#'   \item \strong{SimBench (Cao et al., 2021):} Symmetric Mean Absolute Percentage Error (SMAPE)
-#'         on DEG proportions, SimBench DE fidelity score, log2 fold-change effect size Pearson
-#'         and Spearman correlation, and top-N DEG Jaccard overlap.
-#'   \item \strong{Shaky Foundations (Crowell et al., 2023):} Group silhouette separation width,
-#'         silhouette discrepancy, and Percent Variance Explained (PVE) by group assignment.
+#'   \item \strong{Sub-category V-A (scRNA-seq Differential Expression)}: Computes 8 metrics:
+#'     \code{de_score}, \code{pval_dist_score}, \code{true_proportion}, \code{accuracy},
+#'     \code{precision}, \code{recall}, \code{f1_score}, and \code{auc}.
+#'   \item \strong{Sub-category V-B (scATAC-seq Differential Accessibility)}: Computes 8 metrics:
+#'     \code{da_score}, \code{pval_dist_score}, \code{true_proportion}, \code{accuracy},
+#'     \code{precision}, \code{recall}, \code{f1_score}, and \code{auc}.
 #' }
 #'
-#' @param ref_data Reference single-cell expression or count matrix (features x cells).
-#' @param sim_data Simulated single-cell expression or count matrix (features x cells).
-#' @param ref_celltypes Factor or character vector of cell types for reference cells.
-#' @param sim_celltypes Factor or character vector of cell types for simulated cells.
-#' @param group1 Optional character string specifying group 1 name. Default NULL (auto-selects top abundant type).
-#' @param group2 Optional character string specifying group 2 name. Default NULL (auto-selects second most abundant type).
-#' @param fdr_cutoff Adjusted p-value significance threshold. Default is 0.05.
-#' @param logfc_cutoff Absolute log2 fold-change cutoff. Default is 0.5.
-#' @param top_n_de Number of top ranked DEGs to evaluate for Jaccard overlap and classification. Default is 100.
-#' @param classifier Supervised classifier: "knn" (default), "svm", or "rf".
-#' @param run_pvalue_uniformity Logical, whether to run Simpipe's Chi-square p-value uniformity test. Default is TRUE.
+#' If \code{batch_ref} or \code{batch_sim} is NULL, the analysis is gracefully skipped,
+#' adhering to the strict rule that single-cell biological signal evaluation requires
+#' genuine biological replicates to prevent false positive inflation and pseudoreplication bias.
+#'
+#' @param ref_data Reference scRNA-seq count matrix (genes x cells).
+#' @param sim_data Simulated scRNA-seq count matrix (genes x cells).
+#' @param ref_celltypes Factor or character vector of reference cell types.
+#' @param sim_celltypes Factor or character vector of simulated cell types.
+#' @param batch_ref Factor or character vector of biological replicate / batch labels for reference cells. Required.
+#' @param batch_sim Factor or character vector of biological replicate / batch labels for simulated cells. Required.
+#' @param fdr_cutoff Adjusted p-value significance threshold for DEGs (default 0.05).
+#' @param logfc_cutoff Absolute log2 fold-change cutoff (default 0).
+#' @param classifier Classifier algorithm for marker gene predictability: "svm" (default), "knn", or "rf".
+#' @param min_cells Minimum number of cells per cell type (default 3).
+#' @param min_reps Minimum number of replicates per group (default 2).
 #'
 #' @return A list containing:
-#' \itemize{
-#'   \item \code{deg_summary_table}: Comprehensive data.frame uniting all 15 metrics across Simpipe, SimBench, and Shaky Foundations.
-#'   \item \code{deg_genes_ref}: Character vector of significant DEGs in reference.
-#'   \item \code{deg_genes_sim}: Character vector of significant DEGs in simulation.
-#'   \item \code{contrast}: String describing the evaluated group contrast.
-#'   \item \code{logfc_ref}: Named numeric vector of reference log2 fold-changes.
-#'   \item \code{logfc_sim}: Named numeric vector of simulated log2 fold-changes.
-#'   \item \code{ml_classification}: Detailed classifier performance metrics.
-#'   \item \code{pvalue_uniformity}: Chi-square goodness-of-fit test results.
-#' }
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' evaluate_deg_fidelity(example_scrna$ref, example_scrna$sim,
-#'                       ref_celltypes = example_scrna$cell_types,
-#'                       sim_celltypes = example_scrna$cell_types)
+#'   \item{deg_summary_table}{Tidy summary data.frame with 6 scRNA-seq DE metrics: \code{de_score}, \code{pval_dist_score}, \code{true_proportion}, \code{accuracy}, \code{precision}, \code{recall}, \code{f1_score}, and \code{auc}}
+#'   \item{pairwise_results}{Detailed contrast-level data.frame with per-contrast metrics and confusion matrix counts}
+#'   \item{pseudobulks_ref}{List of reference pseudobulk matrices per cell type}
+#'   \item{pseudobulks_sim}{List of simulated pseudobulk matrices per cell type}
+#'   \item{de_results_ref}{List of edgeR-QLF DE results for reference}
+#'   \item{de_results_sim}{List of edgeR-QLF DE results for simulation}
+#'   \item{ml_classification}{Detailed classification results using simulated pseudobulk DEGs}
 #' @export
 evaluate_deg_fidelity <- function(
   ref_data,
   sim_data,
   ref_celltypes,
   sim_celltypes,
-  group1 = NULL,
-  group2 = NULL,
+  batch_ref = NULL,
+  batch_sim = NULL,
   fdr_cutoff = 0.05,
-  logfc_cutoff = 0.5,
-  top_n_de = 100,
-  classifier = c("knn", "svm", "rf"),
-  run_pvalue_uniformity = TRUE
+  logfc_cutoff = 0,
+  classifier = c("svm", "knn", "rf"),
+  min_cells = 3,
+  min_reps = 2
 ) {
   classifier <- match.arg(classifier)
+  
+  # Strict Requirement: biological replicates must be provided for pseudobulk DE analysis
+  if (is.null(batch_ref) || is.null(batch_sim)) {
+    message("Biological replicate annotations ('batch_ref' / 'batch_sim') not provided: skipping scRNA-seq Category V pseudobulk DE analysis.")
+    return(list(
+      deg_summary_table = data.frame(),
+      pairwise_results = data.frame(),
+      pseudobulks_ref = list(),
+      pseudobulks_sim = list(),
+      de_results_ref = list(),
+      de_results_sim = list(),
+      ml_classification = list()
+    ))
+  }
   
   if (inherits(ref_data, "SingleCellExperiment")) {
     ref_data <- SummarizedExperiment::assay(ref_data, "counts")
   } else if (inherits(ref_data, "Seurat")) {
     ref_data <- Seurat::GetAssayData(ref_data, slot = "counts")
   }
-  
   if (inherits(sim_data, "SingleCellExperiment")) {
     sim_data <- SummarizedExperiment::assay(sim_data, "counts")
   } else if (inherits(sim_data, "Seurat")) {
     sim_data <- Seurat::GetAssayData(sim_data, slot = "counts")
   }
   
-  ref_mat <- as.matrix(ref_data)
-  sim_mat <- as.matrix(sim_data)
+  ref_celltypes <- as.character(ref_celltypes)
+  sim_celltypes <- as.character(sim_celltypes)
+  batch_ref <- as.character(batch_ref)
+  batch_sim <- as.character(batch_sim)
   
-  # Determine comparison groups
-  if (is.null(group1) || is.null(group2)) {
-    tab <- sort(table(ref_celltypes), decreasing = TRUE)
-    if (length(tab) < 2) stop("Need at least 2 distinct cell types for differential expression analysis.")
-    group1 <- names(tab)[1]
-    group2 <- names(tab)[2]
+  if (length(ref_celltypes) != ncol(ref_data)) ref_celltypes <- rep(ref_celltypes, length.out = ncol(ref_data))
+  if (length(sim_celltypes) != ncol(sim_data)) sim_celltypes <- rep(sim_celltypes, length.out = ncol(sim_data))
+  if (length(batch_ref) != ncol(ref_data)) batch_ref <- rep(batch_ref, length.out = ncol(ref_data))
+  if (length(batch_sim) != ncol(sim_data)) batch_sim <- rep(batch_sim, length.out = ncol(sim_data))
+  
+  # Step 1: Construct pseudobulk matrices per cell type (unbinarized for scRNA-seq)
+  pb_ref <- to_pseudobulk(
+    input = ref_data,
+    cell_types = ref_celltypes,
+    replicates = batch_ref,
+    binarize = FALSE,
+    min_cells = min_cells,
+    min_reps = min_reps
+  )
+  
+  pb_sim <- to_pseudobulk(
+    input = sim_data,
+    cell_types = sim_celltypes,
+    replicates = batch_sim,
+    binarize = FALSE,
+    min_cells = min_cells,
+    min_reps = min_reps
+  )
+  
+  common_types <- intersect(names(pb_ref), names(pb_sim))
+  if (length(common_types) < 2) {
+    message("Fewer than 2 valid cell types retained across replicates: skipping DE contrast.")
+    return(list(
+      deg_summary_table = data.frame(),
+      pairwise_results = data.frame(),
+      pseudobulks_ref = pb_ref,
+      pseudobulks_sim = pb_sim,
+      de_results_ref = list(),
+      de_results_sim = list(),
+      ml_classification = list()
+    ))
   }
   
-  idx_ref <- which(ref_celltypes %in% c(group1, group2))
-  idx_sim <- which(sim_celltypes %in% c(group1, group2))
+  pairs <- utils::combn(common_types, 2, simplify = FALSE)
+  pair_rows <- list()
+  de_ref_list <- list()
+  de_sim_list <- list()
   
-  if (length(idx_ref) < 4 || length(idx_sim) < 4) {
-    stop("Insufficient cell count in the selected contrast groups.")
-  }
-  
-  r_sub <- ref_mat[, idx_ref, drop = FALSE]
-  s_sub <- sim_mat[, idx_sim, drop = FALSE]
-  r_ct <- droplevels(as.factor(ref_celltypes[idx_ref]))
-  s_ct <- droplevels(as.factor(sim_celltypes[idx_sim]))
-  
-  # Ensure row names exist
-  if (is.null(rownames(r_sub))) rownames(r_sub) <- paste0("Gene_", seq_len(nrow(r_sub)))
-  if (is.null(rownames(s_sub))) rownames(s_sub) <- rownames(r_sub)
-  
-  # CPM normalization
-  lib_r <- colSums(r_sub); lib_r[lib_r == 0] <- 1
-  cpm_r <- log2(t(t(r_sub) / lib_r) * 1e6 + 1)
-  
-  lib_s <- colSums(s_sub); lib_s[lib_s == 0] <- 1
-  cpm_s <- log2(t(t(s_sub) / lib_s) * 1e6 + 1)
-  
-  g1_r <- which(r_ct == group1); g2_r <- which(r_ct == group2)
-  g1_s <- which(s_ct == group1); g2_s <- which(s_ct == group2)
-  
-  m1_r <- rowMeans(cpm_r[, g1_r, drop = FALSE]); m2_r <- rowMeans(cpm_r[, g2_r, drop = FALSE])
-  m1_s <- rowMeans(cpm_s[, g1_s, drop = FALSE]); m2_s <- rowMeans(cpm_s[, g2_s, drop = FALSE])
-  
-  logfc_ref <- m1_r - m2_r
-  logfc_sim <- m1_s - m2_s
-  
-  # Statistical Testing (limma / t-test)
-  padj_ref <- calc_signal_de(cpm_r, r_ct)
-  padj_sim <- calc_signal_de(cpm_s, s_ct)
-  
-  # Identify significant DEGs
-  sig_ref <- which(padj_ref < fdr_cutoff & abs(logfc_ref) >= logfc_cutoff)
-  sig_sim <- which(padj_sim < fdr_cutoff & abs(logfc_sim) >= logfc_cutoff)
-  
-  deg_genes_ref <- rownames(r_sub)[sig_ref]
-  deg_genes_sim <- rownames(s_sub)[sig_sim]
-  
-  n_genes <- nrow(r_sub)
-  prop_ref <- length(sig_ref) / max(1, n_genes)
-  prop_sim <- length(sig_sim) / max(1, n_genes)
-  
-  # --- Simpipe Metrics ---
-  deg_ratio <- length(sig_sim) / max(1, length(sig_ref))
-  
-  # Distribution Score (P-value Uniformity via Pearson Chi-Square test)
-  dist_score <- NA_real_
-  chisq_stat <- NA_real_
-  chisq_pval <- NA_real_
-  if (run_pvalue_uniformity && length(sig_sim) < (n_genes - 10)) {
-    non_deg_idx <- setdiff(seq_len(n_genes), sig_sim)
-    rem_mat <- cpm_s[non_deg_idx, , drop = FALSE]
+  for (i in seq_along(pairs)) {
+    ct1 <- pairs[[i]][1]
+    ct2 <- pairs[[i]][2]
+    pair_name <- paste0(ct1, "_vs_", ct2)
     
-    rem_pvals <- apply(rem_mat, 1, function(x) {
-      if (stats::sd(x[g1_s]) == 0 && stats::sd(x[g2_s]) == 0) return(1)
-      suppressWarnings(stats::t.test(x[g1_s], x[g2_s])$p.value)
-    })
-    rem_pvals <- stats::na.omit(rem_pvals)
+    # Combine pseudobulks for ct1 and ct2 in reference
+    mat_r1 <- pb_ref[[ct1]]; mat_r2 <- pb_ref[[ct2]]
+    common_g_r <- intersect(rownames(mat_r1), rownames(mat_r2))
+    if (length(common_g_r) < 2) next
+    comb_r <- cbind(mat_r1[common_g_r, , drop = FALSE], mat_r2[common_g_r, , drop = FALSE])
+    grp_r <- factor(c(rep(ct1, ncol(mat_r1)), rep(ct2, ncol(mat_r2))))
+    colnames(comb_r) <- paste0(as.character(grp_r), "_", colnames(comb_r), "_", seq_len(ncol(comb_r)))
     
-    if (length(rem_pvals) >= 10) {
-      bins <- cut(rem_pvals, breaks = seq(0, 1, length.out = 11), include.lowest = TRUE)
-      obs_counts <- table(bins)
-      chi_res <- tryCatch(stats::chisq.test(obs_counts), error = function(e) NULL)
-      if (!is.null(chi_res)) {
-        chisq_stat <- as.numeric(chi_res$statistic)
-        chisq_pval <- as.numeric(chi_res$p.value)
-        dist_score <- if (chisq_pval > 0.05) 1.0 else max(0, 1 - (chisq_stat / (length(rem_pvals) + 1)))
-      }
+    # Combine pseudobulks for ct1 and ct2 in simulation
+    mat_s1 <- pb_sim[[ct1]]; mat_s2 <- pb_sim[[ct2]]
+    common_g_s <- intersect(rownames(mat_s1), rownames(mat_s2))
+    if (length(common_g_s) < 2) next
+    comb_s <- cbind(mat_s1[common_g_s, , drop = FALSE], mat_s2[common_g_s, , drop = FALSE])
+    grp_s <- factor(c(rep(ct1, ncol(mat_s1)), rep(ct2, ncol(mat_s2))))
+    colnames(comb_s) <- paste0(as.character(grp_s), "_", colnames(comb_s), "_", seq_len(ncol(comb_s)))
+    
+    # Run edgeR-QLF DE on pseudobulks
+    de_r <- run_edger_qlf_da(comb_r, groups = grp_r, fdr_cutoff = fdr_cutoff, logfc_cutoff = logfc_cutoff, norm_method = "TMM")
+    de_s <- run_edger_qlf_da(comb_s, groups = grp_s, fdr_cutoff = fdr_cutoff, logfc_cutoff = logfc_cutoff, norm_method = "TMM")
+    
+    de_ref_list[[pair_name]] <- de_r
+    de_sim_list[[pair_name]] <- de_s
+    
+    sig_r <- de_r$feature[de_r$is_da]
+    sig_s <- de_s$feature[de_s$is_da]
+    
+    shared_genes <- intersect(de_r$feature, de_s$feature)
+    if (length(shared_genes) < 2) next
+    
+    sub_r <- de_r[shared_genes, , drop = FALSE]
+    sub_s <- de_s[shared_genes, , drop = FALSE]
+    
+    n_total <- length(shared_genes)
+    y_true  <- as.logical(sub_r$is_da)
+    y_pred  <- as.logical(sub_s$is_da)
+    
+    n_r <- sum(y_true, na.rm = TRUE)
+    n_s <- sum(y_pred, na.rm = TRUE)
+    
+    tp <- sum(y_true & y_pred, na.rm = TRUE)
+    fp <- sum(!y_true & y_pred, na.rm = TRUE)
+    fn <- sum(y_true & !y_pred, na.rm = TRUE)
+    tn <- sum(!y_true & !y_pred, na.rm = TRUE)
+    
+    # 8 simpipe / benchmarking metrics for scRNA-seq DE analysis:
+    acc_val <- (tp + tn) / max(1, n_total)
+    prec_val <- if ((tp + fp) > 0) tp / (tp + fp) else (if (n_r == 0) 1.0 else 0.0)
+    rec_val <- if ((tp + fn) > 0) tp / (tp + fn) else (if (n_s == 0) 1.0 else 0.0)
+    f1_val <- if ((prec_val + rec_val) > 0) (2 * prec_val * rec_val) / (prec_val + rec_val) else 0.0
+    # In simutils::true_DEGs_proportion: proportion of true DEGs identified = length(intersect) / length(ground_truth_DEGs)
+    true_prop_val <- if (n_r > 0) tp / n_r else (if (n_s == 0) 1.0 else 0.0)
+    
+    sim_scores <- -log10(pmax(sub_s$PValue, 1e-300))
+    auc_val <- .calc_roc_auc(sim_scores, y_true)
+    
+    null_pvals <- sub_s$PValue[!y_true]
+    if (length(null_pvals) < 5) null_pvals <- sub_s$PValue
+    pval_dist_val <- .calc_pval_distribution_score(null_pvals)
+    
+    # In Simpipe (Duo et al. 2024), the DEG detection evaluation score is formed
+    # directly by the binary-classification metrics (Accuracy, Precision, Recall, F1-Score, and AUC):
+    de_score_val <- mean(c(acc_val, prec_val, rec_val, f1_val, auc_val), na.rm = TRUE)
+    
+    # Gene logFC correlation across shared tested genes
+    pcc_logfc <- NA_real_
+    scc_logfc <- NA_real_
+    if (length(shared_genes) >= 5) {
+      lfc_r <- sub_r$logFC
+      lfc_s <- sub_s$logFC
+      pcc_logfc <- tryCatch(stats::cor(lfc_r, lfc_s, method = "pearson"), error = function(e) NA_real_)
+      scc_logfc <- tryCatch(stats::cor(lfc_r, lfc_s, method = "spearman"), error = function(e) NA_real_)
     }
+    
+    # Top DEG Jaccard overlap (top 100 or all)
+    n_top <- min(100, length(shared_genes))
+    top_r <- sub_r$feature[order(sub_r$PValue)][seq_len(n_top)]
+    top_s <- sub_s$feature[order(sub_s$PValue)][seq_len(n_top)]
+    jaccard_top <- length(intersect(top_r, top_s)) / max(1, length(union(top_r, top_s)))
+    
+    pair_rows[[i]] <- data.frame(
+      Pair = pair_name,
+      SubCategory = "scRNA-seq Differential Expression",
+      N_total = n_total,
+      N_true_DEG = n_r,
+      N_sim_DEG = n_s,
+      TP = tp,
+      FP = fp,
+      FN = fn,
+      TN = tn,
+      pval_dist_score = pval_dist_val,
+      accuracy = acc_val,
+      precision = prec_val,
+      recall = rec_val,
+      f1_score = f1_val,
+      auc = auc_val,
+      LogFC_Pearson_r = pcc_logfc,
+      LogFC_Spearman_rho = scc_logfc,
+      Top_DEG_Jaccard = jaccard_top,
+      stringsAsFactors = FALSE
+    )
   }
   
-  # Machine Learning Classification (Simpipe)
-  top_sim_de <- if (length(sig_sim) >= 2) {
-    deg_genes_sim
-  } else {
-    rownames(s_sub)[order(padj_sim)[seq_len(min(top_n_de, n_genes))]]
+  if (length(pair_rows) == 0) {
+    return(list(
+      deg_summary_table = data.frame(),
+      pairwise_results = data.frame(),
+      pseudobulks_ref = pb_ref,
+      pseudobulks_sim = pb_sim,
+      de_results_ref = de_ref_list,
+      de_results_sim = de_sim_list,
+      ml_classification = list()
+    ))
   }
   
+  pair_df <- do.call(rbind, pair_rows)
+  
+  # Approach 3: Cell identity predictability on simulated top DEGs
+  all_sim_degs <- unique(unlist(lapply(de_sim_list, function(x) x$feature[x$is_da])))
+  if (length(all_sim_degs) < 5) {
+    all_sim_degs <- unique(unlist(lapply(de_sim_list, function(x) x$feature[order(x$PValue)][seq_len(min(20, nrow(x)))])))
+  }
   ml_res <- evaluate_predictive_de_model(
-    data = cpm_s,
-    group = s_ct,
-    de_features = top_sim_de,
+    data = sim_data,
+    group = sim_celltypes,
+    de_features = all_sim_degs,
     method = classifier
   )
   
-  # --- SimBench Metrics ---
-  smape_denom <- prop_ref + prop_sim
-  smape <- if (smape_denom > 0) abs(prop_sim - prop_ref) / smape_denom else 0
-  simbench_fidelity_score <- pmax(0, 1 - smape)
-  
-  logfc_pcc <- tryCatch(stats::cor(logfc_ref, logfc_sim, method = "pearson"), error = function(e) NA_real_)
-  logfc_scc <- tryCatch(stats::cor(logfc_ref, logfc_sim, method = "spearman"), error = function(e) NA_real_)
-  
-  n_top_eval <- min(top_n_de, n_genes)
-  top_ref_genes <- rownames(r_sub)[order(padj_ref)[seq_len(n_top_eval)]]
-  top_sim_genes <- rownames(s_sub)[order(padj_sim)[seq_len(n_top_eval)]]
-  
-  jaccard_top <- length(intersect(top_ref_genes, top_sim_genes)) / max(1, length(union(top_ref_genes, top_sim_genes)))
-  
-  # --- Shaky Foundations Metrics (Crowell et al., 2023) ---
-  pca_sim <- stats::prcomp(t(cpm_s), rank. = min(5, ncol(cpm_s) - 1))
-  pca_ref <- stats::prcomp(t(cpm_r), rank. = min(5, ncol(cpm_r) - 1))
-  
-  sil_sim <- if (requireNamespace("cluster", quietly = TRUE)) {
-    d_sim <- stats::dist(pca_sim$x[, seq_len(min(3, ncol(pca_sim$x)))])
-    mean(cluster::silhouette(as.integer(s_ct), d_sim)[, 3], na.rm = TRUE)
-  } else NA_real_
-  
-  sil_ref <- if (requireNamespace("cluster", quietly = TRUE)) {
-    d_ref <- stats::dist(pca_ref$x[, seq_len(min(3, ncol(pca_ref$x)))])
-    mean(cluster::silhouette(as.integer(r_ct), d_ref)[, 3], na.rm = TRUE)
-  } else NA_real_
-  
-  silhouette_discrepancy <- abs(sil_sim - sil_ref)
-  
-  pve_vals <- vapply(seq_len(min(3, ncol(pca_sim$x))), function(k) {
-    summary(stats::lm(pca_sim$x[, k] ~ s_ct))$r.squared
-  }, numeric(1))
-  sim_pve <- mean(pve_vals, na.rm = TRUE)
-  
-  pve_ref_vals <- vapply(seq_len(min(3, ncol(pca_ref$x))), function(k) {
-    summary(stats::lm(pca_ref$x[, k] ~ r_ct))$r.squared
-  }, numeric(1))
-  ref_pve <- mean(pve_ref_vals, na.rm = TRUE)
-  pve_discrepancy <- abs(sim_pve - ref_pve)
-  
   summary_df <- data.frame(
-    Framework = c(
-      rep("Simpipe (Duo et al., 2024)", 6),
-      rep("SimBench (Cao et al., 2021)", 5),
-      rep("Shaky Foundations (Crowell et al., 2023)", 4)
-    ),
+    SubCategory = rep("scRNA-seq Differential Expression", 6),
     Metric = c(
-      "DEG_Ratio",
-      "PValue_Uniformity_Chisq",
-      "Distribution_Score",
-      "Classifier_Accuracy",
-      "Classifier_Macro_F1",
-      "Classifier_Macro_Recall",
-      "SimBench_SMAPE",
-      "SimBench_DE_Fidelity_Score",
-      "Log2FC_Pearson_Corr",
-      "Log2FC_Spearman_Corr",
-      "Top_DEG_Jaccard_Overlap",
-      "Silhouette_Sim",
-      "Silhouette_Discrepancy",
-      "PVE_Group_Sim",
-      "PVE_Discrepancy"
+      "pval_dist_score",
+      "accuracy",
+      "precision",
+      "recall",
+      "f1_score",
+      "auc"
     ),
     Value = c(
-      deg_ratio,
-      chisq_stat,
-      dist_score,
-      ml_res$accuracy,
-      ml_res$F1,
-      ml_res$recall,
-      smape,
-      simbench_fidelity_score,
-      logfc_pcc,
-      logfc_scc,
-      jaccard_top,
-      sil_sim,
-      silhouette_discrepancy,
-      sim_pve,
-      pve_discrepancy
+      mean(pair_df$pval_dist_score, na.rm = TRUE),
+      mean(pair_df$accuracy, na.rm = TRUE),
+      mean(pair_df$precision, na.rm = TRUE),
+      mean(pair_df$recall, na.rm = TRUE),
+      mean(pair_df$f1_score, na.rm = TRUE),
+      mean(pair_df$auc, na.rm = TRUE)
     ),
     Direction = c(
-      "Target = 1.0 (Optimal balance)",
-      "Lower is better (closer to Uniform)",
-      "Higher is better (1.0 = Uniform null)",
-      "Higher is better (Group predictability)",
-      "Higher is better (Balanced F1)",
-      "Higher is better (Sensitivity)",
-      "Lower is better (0.0 = zero error)",
-      "Higher is better (1.0 = perfect match)",
-      "Higher is better (Effect size match)",
-      "Higher is better (Rank order match)",
-      "Higher is better (Set intersection)",
-      "Higher is better (Group separation)",
-      "Lower is better (Preserves ref geometry)",
-      "Target ~ Reference PVE",
-      "Lower is better (Preserves variance explained)"
+      "Higher is better (1.0 = uniform null p-values, no inflation)",
+      "Higher is better (1.0 = perfect DEG classification)",
+      "Higher is better (1.0 = zero false discoveries)",
+      "Higher is better (1.0 = 100% true DEG recovery)",
+      "Higher is better (1.0 = harmonic balance of precision & recall)",
+      "Higher is better (1.0 = perfect ranking discrimination)"
     ),
+    Framework = rep("Libra Pseudobulk edgeR-QLF (Squair 2021; Duo 2024)", 6),
     stringsAsFactors = FALSE
   )
   
   list(
     deg_summary_table = summary_df,
-    deg_genes_ref = deg_genes_ref,
-    deg_genes_sim = deg_genes_sim,
-    contrast = paste(group1, "vs", group2),
-    logfc_ref = logfc_ref,
-    logfc_sim = logfc_sim,
-    ml_classification = ml_res,
-    pvalue_uniformity = list(statistic = chisq_stat, pvalue = chisq_pval, distribution_score = dist_score)
+    pairwise_results = pair_df,
+    pseudobulks_ref = pb_ref,
+    pseudobulks_sim = pb_sim,
+    de_results_ref = de_ref_list,
+    de_results_sim = de_sim_list,
+    ml_classification = ml_res
   )
 }
 
+#' @rdname evaluate_deg_fidelity
+#' @export
+evaluate_rna_de_fidelity <- evaluate_deg_fidelity
+
+
+# =============================================================================
+# scATAC-seq Differential Accessibility (DA) Fidelity via Libra Pseudobulk
+# Squair et al. (2021) & Teo et al. (Nature Communications 2024)
+# =============================================================================
+
+#' Binarize Single-Cell Count Matrix (scATAC-seq Feature Binarization)
+#'
+#' Sets all non-zero counts in a single-cell feature matrix to 1 (features x cells),
+#' converting quantitative read cut-counts into binary detection status.
+#' Frequently applied to scATAC-seq peak accessibility data prior to pseudobulking
+#' or single-cell modeling (Squair et al., 2021; Teo et al., 2024 / Libra).
+#'
+#' @param mat Single-cell matrix, sparse dgCMatrix, SingleCellExperiment, or Seurat object.
+#'
+#' @return A matrix of the same class with all positive entries set to 1.
+#' @examples
+#' m <- matrix(c(0, 2, 1, 0, 5, 0), nrow = 2)
+#' binarize_matrix(m)
+#' @export
+binarize_matrix <- function(mat) {
+  if (inherits(mat, "SingleCellExperiment")) {
+    mat <- SummarizedExperiment::assay(mat, "counts")
+  } else if (inherits(mat, "Seurat")) {
+    mat <- Seurat::GetAssayData(mat, slot = "counts")
+  }
+  
+  if (inherits(mat, "dgCMatrix")) {
+    res <- mat
+    res@x[res@x > 0] <- 1
+    return(res)
+  }
+  
+  res <- mat
+  res[res > 0] <- 1
+  res
+}
+
+
+#' Construct Pseudobulk Count Matrices from Single-Cell Data (Libra Engine)
+#'
+#' Converts a single-cell count matrix (features x cells) for scRNA-seq or scATAC-seq
+#' to sample-level pseudobulk matrices by aggregating (summing) single-cell counts
+#' within biological replicates and experimental conditions per cell type (Squair et al.,
+#' Nature Communications 2021 / Libra).
+#'
+#' @param input Single-cell count matrix (features x cells), dgCMatrix, SingleCellExperiment, or Seurat object.
+#' @param cell_types Factor or vector specifying cell type annotations for each cell.
+#' @param replicates Factor or vector specifying biological replicate / batch annotations for each cell. Required.
+#' @param conditions Optional factor or vector specifying experimental conditions or comparison labels.
+#' @param binarize Logical. If TRUE, binarizes single-cell counts (cells > 0 set to 1) prior to aggregation, producing accessibility-count pseudobulks (standard for scATAC-seq in Libra). Default is FALSE.
+#' @param min_cells Minimum number of cells required per cell type to retain. Default is 3.
+#' @param min_reps Minimum number of replicates required to retain. Default is 2.
+#' @param min_features Minimum non-zero count threshold to retain a feature. Default is 0.
+#'
+#' @return A named list of pseudobulk count matrices (features x sample_replicates), one for each retained cell type.
+#' @examples
+#' data(example_scatac, package = "scSimEval")
+#' rep_id <- factor(rep(c("Rep1", "Rep2"), length.out = ncol(example_scatac$ref)))
+#' ct_id <- factor(rep(c("TypeA", "TypeB"), each = ncol(example_scatac$ref) / 2))
+#' pb <- to_pseudobulk(example_scatac$ref, cell_types = ct_id, replicates = rep_id)
+#' length(pb)
+#' @export
+to_pseudobulk <- function(
+  input,
+  cell_types,
+  replicates,
+  conditions = NULL,
+  binarize = FALSE,
+  min_cells = 3,
+  min_reps = 2,
+  min_features = 0
+) {
+  if (is.null(replicates)) {
+    stop("Biological replicate annotations ('replicates') are required for pseudobulk construction.")
+  }
+  
+  if (inherits(input, "SingleCellExperiment")) {
+    input <- SummarizedExperiment::assay(input, "counts")
+  } else if (inherits(input, "Seurat")) {
+    input <- Seurat::GetAssayData(input, slot = "counts")
+  }
+  
+  if (isTRUE(binarize)) {
+    input <- binarize_matrix(input)
+  }
+  
+  cell_types <- as.character(cell_types)
+  replicates <- as.character(replicates)
+  if (length(cell_types) != ncol(input)) cell_types <- rep(cell_types, length.out = ncol(input))
+  if (length(replicates) != ncol(input)) replicates <- rep(replicates, length.out = ncol(input))
+  
+  if (!is.null(conditions)) {
+    conditions <- as.character(conditions)
+    if (length(conditions) != ncol(input)) conditions <- rep(conditions, length.out = ncol(input))
+  }
+  
+  unique_types <- unique(cell_types)
+  pseudobulks <- list()
+  
+  for (ct in unique_types) {
+    idx <- which(cell_types == ct)
+    if (length(idx) < min_cells) next
+    
+    sub_input <- input[, idx, drop = FALSE]
+    sub_reps <- replicates[idx]
+    
+    if (!is.null(conditions)) {
+      sub_conds <- conditions[idx]
+      sample_fac <- factor(paste0(sub_reps, ":", sub_conds))
+    } else {
+      sample_fac <- factor(sub_reps)
+    }
+    
+    if (nlevels(sample_fac) < min_reps) next
+    
+    mm <- stats::model.matrix(~ 0 + sample_fac)
+    colnames(mm) <- levels(sample_fac)
+    
+    pb_mat <- as.matrix(sub_input %*% mm)
+    
+    if (min_features > 0) {
+      keep_f <- Matrix::rowSums(pb_mat > 0) >= min_features
+      pb_mat <- pb_mat[keep_f, , drop = FALSE]
+    }
+    
+    if (nrow(pb_mat) >= 2 && ncol(pb_mat) >= min_reps) {
+      pseudobulks[[ct]] <- pb_mat
+    }
+  }
+  
+  pseudobulks
+}
+
+
+#' Run edgeR-QLF Differential Accessibility (DA) Analysis on Pseudobulk Data (Libra Engine)
+#'
+#' Performs differential accessibility (DA) analysis for scATAC-seq or differential expression (DE)
+#' for scRNA-seq on replicate pseudobulk count matrices using edgeR's Quasi-Likelihood F-test
+#' (QLF) model (Squair et al., Nature Communications 2021; Teo et al., Nature Communications 2024 / Libra).
+#'
+#' Fits negative binomial generalized linear models using Empirical Bayes quasi-likelihood
+#' dispersion shrinkage and F-tests (`edgeR::glmQLFit` and `edgeR::glmQLFTest`), offering
+#' benchmark-proven control over false discovery rates across biological replicates.
+#'
+#' @param pseudobulk_mat Pseudobulk count matrix (features/peaks x sample_replicates).
+#' @param groups Factor or character vector of comparison group conditions for each column in \code{pseudobulk_mat}.
+#' @param fdr_cutoff Adjusted p-value significance threshold (default 0.05).
+#' @param logfc_cutoff Absolute log2 fold-change threshold (default 0).
+#' @param norm_method Normalization method for edgeR calcNormFactors: "TMM" (default), "RLE", or "none".
+#'
+#' @return A data.frame of differential accessibility results:
+#'   \item{feature}{Peak/gene identifier}
+#'   \item{logFC}{log2 fold change between conditions}
+#'   \item{logCPM}{Average log2 counts per million}
+#'   \item{F_stat}{Quasi-likelihood F-statistic}
+#'   \item{PValue}{Raw p-value from F-test}
+#'   \item{FDR}{Benjamini-Hochberg adjusted p-value}
+#'   \item{is_da}{Logical flag indicating whether the region is significantly differentially accessible}
+#' @examples
+#' mat <- matrix(rpois(100 * 4, lambda = 10), nrow = 100, ncol = 4)
+#' rownames(mat) <- paste0("Peak_", 1:100)
+#' colnames(mat) <- c("Rep1:A", "Rep2:A", "Rep1:B", "Rep2:B")
+#' groups <- c("A", "A", "B", "B")
+#' res <- run_edger_qlf_da(mat, groups)
+#' head(res)
+#' @export
+run_edger_qlf_da <- function(
+  pseudobulk_mat,
+  groups,
+  fdr_cutoff = 0.05,
+  logfc_cutoff = 0,
+  norm_method = c("TMM", "RLE", "none")
+) {
+  norm_method <- match.arg(norm_method)
+  groups <- droplevels(as.factor(groups))
+  
+  if (nlevels(groups) != 2) {
+    stop("run_edger_qlf_da requires exactly 2 comparison group conditions.")
+  }
+  
+  if (is.null(rownames(pseudobulk_mat))) {
+    rownames(pseudobulk_mat) <- paste0("Feature_", seq_len(nrow(pseudobulk_mat)))
+  }
+  
+  sub_mat <- as.matrix(pseudobulk_mat)
+  feat_names <- rownames(sub_mat)
+  
+  # Filter features with zero counts across all samples
+  keep_f <- Matrix::rowSums(sub_mat > 0) >= 1
+  if (sum(keep_f) < 2) {
+    return(data.frame(
+      feature = feat_names,
+      logFC = 0, logCPM = 0, F_stat = 0, PValue = 1, FDR = 1, is_da = FALSE,
+      stringsAsFactors = FALSE
+    ))
+  }
+  sub_mat <- sub_mat[keep_f, , drop = FALSE]
+  
+  design <- stats::model.matrix(~ groups)
+  res_df <- NULL
+  
+  if (requireNamespace("edgeR", quietly = TRUE)) {
+    res_df <- tryCatch({
+      y <- edgeR::DGEList(counts = sub_mat, group = groups)
+      if (norm_method != "none") {
+        y <- edgeR::calcNormFactors(y, method = norm_method)
+      }
+      y <- edgeR::estimateDisp(y, design)
+      fit <- edgeR::glmQLFit(y, design)
+      qlf <- edgeR::glmQLFTest(fit, coef = ncol(design))
+      tt <- edgeR::topTags(qlf, n = Inf, sort.by = "none")$table
+      data.frame(
+        feature = rownames(tt),
+        logFC = tt$logFC,
+        logCPM = tt$logCPM,
+        F_stat = tt$F,
+        PValue = tt$PValue,
+        FDR = tt$FDR,
+        stringsAsFactors = FALSE
+      )
+    }, error = function(e) NULL)
+  }
+  
+  # Fallback via limma voom
+  if (is.null(res_df) && requireNamespace("limma", quietly = TRUE)) {
+    res_df <- tryCatch({
+      v <- limma::voom(sub_mat, design)
+      fit <- limma::lmFit(v, design)
+      fit <- limma::eBayes(fit)
+      tt <- limma::topTable(fit, coef = ncol(design), number = Inf, sort.by = "none")
+      data.frame(
+        feature = rownames(tt),
+        logFC = tt$logFC,
+        logCPM = tt$AveExpr,
+        F_stat = tt$t^2,
+        PValue = tt$P.Value,
+        FDR = tt$adj.P.Val,
+        stringsAsFactors = FALSE
+      )
+    }, error = function(e) NULL)
+  }
+  
+  # Second fallback: t-test
+  if (is.null(res_df)) {
+    g1_idx <- which(groups == levels(groups)[1])
+    g2_idx <- which(groups == levels(groups)[2])
+    m1 <- rowMeans(sub_mat[, g1_idx, drop = FALSE])
+    m2 <- rowMeans(sub_mat[, g2_idx, drop = FALSE])
+    v1 <- apply(sub_mat[, g1_idx, drop = FALSE], 1, stats::var)
+    v2 <- apply(sub_mat[, g2_idx, drop = FALSE], 1, stats::var)
+    se <- sqrt(v1 / max(1, length(g1_idx)) + v2 / max(1, length(g2_idx)))
+    se[se == 0] <- 1e-10
+    t_stat <- (m2 - m1) / se
+    p_vals <- 2 * stats::pt(-abs(t_stat), df = max(1, length(groups) - 2))
+    res_df <- data.frame(
+      feature = rownames(sub_mat),
+      logFC = log2((m2 + 1) / (m1 + 1)),
+      logCPM = log2(rowMeans(sub_mat) + 1),
+      F_stat = t_stat^2,
+      PValue = p_vals,
+      FDR = stats::p.adjust(p_vals, method = "BH"),
+      stringsAsFactors = FALSE
+    )
+  }
+  
+  # Align back with original features
+  if (nrow(res_df) < length(feat_names)) {
+    missing_f <- setdiff(feat_names, res_df$feature)
+    if (length(missing_f) > 0) {
+      missing_df <- data.frame(
+        feature = missing_f,
+        logFC = 0, logCPM = 0, F_stat = 0, PValue = 1, FDR = 1,
+        stringsAsFactors = FALSE
+      )
+      res_df <- rbind(res_df, missing_df)
+    }
+  }
+  
+  res_df$is_da <- (!is.na(res_df$FDR) & res_df$FDR <= fdr_cutoff) & (abs(res_df$logFC) >= logfc_cutoff)
+  rownames(res_df) <- res_df$feature
+  res_df
+}
+
+
+#' Evaluate scATAC-seq Differential Accessibility (DA) Fidelity (Sub-category V-B)
+#'
+#' Evaluates the preservation of Differentially Accessible Regions (DARs) between reference
+#' and simulated scATAC-seq datasets using biological replicate pseudobulks and edgeR-QLF
+#' (Squair et al., Nature Communications 2021; Teo et al., Nature Communications 2024 / Libra)
+#' across standard benchmarking metrics (Duo et al., Genome Biology 2024 / Simpipe).
+#'
+#' Category V is divided into two distinct sub-categories:
+#' \itemize{
+#'   \item \strong{Sub-category V-A (scRNA-seq Differential Expression)}: Computes 8 metrics:
+#'     \code{de_score}, \code{pval_dist_score}, \code{true_proportion}, \code{accuracy},
+#'     \code{precision}, \code{recall}, \code{f1_score}, and \code{auc}.
+#'   \item \strong{Sub-category V-B (scATAC-seq Differential Accessibility)}: Computes 8 metrics:
+#'     \code{da_score}, \code{pval_dist_score}, \code{true_proportion}, \code{accuracy},
+#'     \code{precision}, \code{recall}, \code{f1_score}, and \code{auc}.
+#' }
+#'
+#' If \code{batch_ref} or \code{batch_sim} is NULL, the analysis is gracefully skipped,
+#' adhering to the strict rule that single-cell ATAC-seq biological signal evaluation
+#' requires genuine biological replicates to prevent pseudoreplication bias.
+#'
+#' @param ref_data Reference scATAC-seq count matrix (peaks x cells).
+#' @param sim_data Simulated scATAC-seq count matrix (peaks x cells).
+#' @param ref_celltypes Factor or character vector of reference cell types.
+#' @param sim_celltypes Factor or character vector of simulated cell types.
+#' @param batch_ref Factor or character vector of biological replicate / batch labels for reference cells.
+#' @param batch_sim Factor or character vector of biological replicate / batch labels for simulated cells.
+#' @param binarize Logical. If TRUE (default for scATAC-seq), binarizes single-cell counts prior to pseudobulk aggregation.
+#' @param fdr_cutoff Adjusted p-value significance threshold (default 0.05).
+#' @param logfc_cutoff Absolute log2 fold-change cutoff (default 0).
+#' @param min_cells Minimum number of cells per cell type (default 3).
+#' @param min_reps Minimum number of replicates per group (default 2).
+#'
+#' @return A list containing:
+#'   \item{da_summary_table}{Tidy summary data.frame with 6 scATAC-seq DA metrics: \code{da_score}, \code{pval_dist_score}, \code{true_proportion}, \code{accuracy}, \code{precision}, \code{recall}, \code{f1_score}, and \code{auc}}
+#'   \item{pairwise_results}{Detailed contrast-level data.frame with per-contrast metrics and confusion matrix counts}
+#'   \item{pseudobulks_ref}{List of reference pseudobulk matrices per cell type}
+#'   \item{pseudobulks_sim}{List of simulated pseudobulk matrices per cell type}
+#'   \item{da_results_ref}{List of edgeR-QLF DA results for reference}
+#'   \item{da_results_sim}{List of edgeR-QLF DA results for simulation}
+#' @examples
+#' data(example_scatac, package = "scSimEval")
+#' rep_id <- factor(rep(c("Rep1", "Rep2"), length.out = ncol(example_scatac$ref)))
+#' res <- evaluate_atac_da_fidelity(
+#'   ref_data = example_scatac$ref,
+#'   sim_data = example_scatac$sim,
+#'   ref_celltypes = example_scatac$cell_types,
+#'   sim_celltypes = example_scatac$cell_types,
+#'   batch_ref = rep_id,
+#'   batch_sim = rep_id
+#' )
+#' res$da_summary_table
+#' @export
+evaluate_atac_da_fidelity <- function(
+  ref_data,
+  sim_data,
+  ref_celltypes,
+  sim_celltypes,
+  batch_ref = NULL,
+  batch_sim = NULL,
+  binarize = TRUE,
+  fdr_cutoff = 0.05,
+  logfc_cutoff = 0,
+  min_cells = 3,
+  min_reps = 2
+) {
+  # Strict Requirement: biological replicates must be provided
+  if (is.null(batch_ref) || is.null(batch_sim)) {
+    message("Biological replicate annotations ('batch_ref' / 'batch_sim') not provided: skipping scATAC-seq Category V pseudobulk DA analysis.")
+    return(list(
+      da_summary_table = data.frame(),
+      pseudobulks_ref = list(),
+      pseudobulks_sim = list(),
+      da_results_ref = list(),
+      da_results_sim = list()
+    ))
+  }
+  
+  if (inherits(ref_data, "SingleCellExperiment")) {
+    ref_data <- SummarizedExperiment::assay(ref_data, "counts")
+  } else if (inherits(ref_data, "Seurat")) {
+    ref_data <- Seurat::GetAssayData(ref_data, slot = "counts")
+  }
+  if (inherits(sim_data, "SingleCellExperiment")) {
+    sim_data <- SummarizedExperiment::assay(sim_data, "counts")
+  } else if (inherits(sim_data, "Seurat")) {
+    sim_data <- Seurat::GetAssayData(sim_data, slot = "counts")
+  }
+  
+  ref_celltypes <- as.character(ref_celltypes)
+  sim_celltypes <- as.character(sim_celltypes)
+  batch_ref <- as.character(batch_ref)
+  batch_sim <- as.character(batch_sim)
+  
+  if (length(ref_celltypes) != ncol(ref_data)) ref_celltypes <- rep(ref_celltypes, length.out = ncol(ref_data))
+  if (length(sim_celltypes) != ncol(sim_data)) sim_celltypes <- rep(sim_celltypes, length.out = ncol(sim_data))
+  if (length(batch_ref) != ncol(ref_data)) batch_ref <- rep(batch_ref, length.out = ncol(ref_data))
+  if (length(batch_sim) != ncol(sim_data)) batch_sim <- rep(batch_sim, length.out = ncol(sim_data))
+  
+  # Step 1: Construct pseudobulk matrices per cell type
+  pb_ref <- to_pseudobulk(
+    input = ref_data,
+    cell_types = ref_celltypes,
+    replicates = batch_ref,
+    binarize = binarize,
+    min_cells = min_cells,
+    min_reps = min_reps
+  )
+  
+  pb_sim <- to_pseudobulk(
+    input = sim_data,
+    cell_types = sim_celltypes,
+    replicates = batch_sim,
+    binarize = binarize,
+    min_cells = min_cells,
+    min_reps = min_reps
+  )
+  
+  common_types <- intersect(names(pb_ref), names(pb_sim))
+  if (length(common_types) < 2) {
+    message("Fewer than 2 valid cell types retained across replicates: skipping DA contrast.")
+    return(list(
+      da_summary_table = data.frame(),
+      pseudobulks_ref = pb_ref,
+      pseudobulks_sim = pb_sim,
+      da_results_ref = list(),
+      da_results_sim = list()
+    ))
+  }
+  
+  # Pairs of cell types for contrast
+  pairs <- utils::combn(common_types, 2, simplify = FALSE)
+  
+  pair_rows <- list()
+  da_ref_list <- list()
+  da_sim_list <- list()
+  
+  for (i in seq_along(pairs)) {
+    ct1 <- pairs[[i]][1]
+    ct2 <- pairs[[i]][2]
+    pair_name <- paste0(ct1, "_vs_", ct2)
+    
+    # Combine pseudobulks for ct1 and ct2 in reference
+    mat_r1 <- pb_ref[[ct1]]; mat_r2 <- pb_ref[[ct2]]
+    common_p_r <- intersect(rownames(mat_r1), rownames(mat_r2))
+    if (length(common_p_r) < 2) next
+    comb_r <- cbind(mat_r1[common_p_r, , drop = FALSE], mat_r2[common_p_r, , drop = FALSE])
+    grp_r <- factor(c(rep(ct1, ncol(mat_r1)), rep(ct2, ncol(mat_r2))))
+    colnames(comb_r) <- paste0(as.character(grp_r), "_", colnames(comb_r), "_", seq_len(ncol(comb_r)))
+    
+    # Combine pseudobulks for ct1 and ct2 in simulation
+    mat_s1 <- pb_sim[[ct1]]; mat_s2 <- pb_sim[[ct2]]
+    common_p_s <- intersect(rownames(mat_s1), rownames(mat_s2))
+    if (length(common_p_s) < 2) next
+    comb_s <- cbind(mat_s1[common_p_s, , drop = FALSE], mat_s2[common_p_s, , drop = FALSE])
+    grp_s <- factor(c(rep(ct1, ncol(mat_s1)), rep(ct2, ncol(mat_s2))))
+    colnames(comb_s) <- paste0(as.character(grp_s), "_", colnames(comb_s), "_", seq_len(ncol(comb_s)))
+    
+    # Run edgeR-QLF DA
+    da_r <- run_edger_qlf_da(comb_r, groups = grp_r, fdr_cutoff = fdr_cutoff, logfc_cutoff = logfc_cutoff)
+    da_s <- run_edger_qlf_da(comb_s, groups = grp_s, fdr_cutoff = fdr_cutoff, logfc_cutoff = logfc_cutoff)
+    
+    da_ref_list[[pair_name]] <- da_r
+    da_sim_list[[pair_name]] <- da_s
+    
+    sig_r <- da_r$feature[da_r$is_da]
+    sig_s <- da_s$feature[da_s$is_da]
+    
+    shared_peaks <- intersect(da_r$feature, da_s$feature)
+    if (length(shared_peaks) < 2) next
+    
+    sub_r <- da_r[shared_peaks, , drop = FALSE]
+    sub_s <- da_s[shared_peaks, , drop = FALSE]
+    
+    n_total <- length(shared_peaks)
+    y_true  <- as.logical(sub_r$is_da)
+    y_pred  <- as.logical(sub_s$is_da)
+    
+    n_r <- sum(y_true, na.rm = TRUE)
+    n_s <- sum(y_pred, na.rm = TRUE)
+    
+    tp <- sum(y_true & y_pred, na.rm = TRUE)
+    fp <- sum(!y_true & y_pred, na.rm = TRUE)
+    fn <- sum(y_true & !y_pred, na.rm = TRUE)
+    tn <- sum(!y_true & !y_pred, na.rm = TRUE)
+    
+    # 8 simpipe / benchmarking metrics for scATAC-seq DA analysis:
+    acc_val <- (tp + tn) / max(1, n_total)
+    prec_val <- if ((tp + fp) > 0) tp / (tp + fp) else (if (n_r == 0) 1.0 else 0.0)
+    rec_val <- if ((tp + fn) > 0) tp / (tp + fn) else (if (n_s == 0) 1.0 else 0.0)
+    f1_val <- if ((prec_val + rec_val) > 0) (2 * prec_val * rec_val) / (prec_val + rec_val) else 0.0
+    # In simutils::true_DEGs_proportion: proportion of true DARs identified = length(intersect) / length(ground_truth_DARs)
+    true_prop_val <- if (n_r > 0) tp / n_r else (if (n_s == 0) 1.0 else 0.0)
+    
+    sim_scores <- -log10(pmax(sub_s$PValue, 1e-300))
+    auc_val <- .calc_roc_auc(sim_scores, y_true)
+    
+    null_pvals <- sub_s$PValue[!y_true]
+    if (length(null_pvals) < 5) null_pvals <- sub_s$PValue
+    pval_dist_val <- .calc_pval_distribution_score(null_pvals)
+    
+    # In Simpipe (Duo et al. 2024), the DAR detection evaluation score is formed
+    # directly by the binary-classification metrics (Accuracy, Precision, Recall, F1-Score, and AUC):
+    da_score_val <- mean(c(acc_val, prec_val, rec_val, f1_val, auc_val), na.rm = TRUE)
+    
+    # Peak logFC correlation across shared tested peaks
+    pcc_logfc <- NA_real_
+    scc_logfc <- NA_real_
+    if (length(shared_peaks) >= 5) {
+      lfc_r <- sub_r$logFC
+      lfc_s <- sub_s$logFC
+      pcc_logfc <- tryCatch(stats::cor(lfc_r, lfc_s, method = "pearson"), error = function(e) NA_real_)
+      scc_logfc <- tryCatch(stats::cor(lfc_r, lfc_s, method = "spearman"), error = function(e) NA_real_)
+    }
+    
+    # Top DAR Jaccard overlap (top 100 or all)
+    n_top <- min(100, length(shared_peaks))
+    top_r <- sub_r$feature[order(sub_r$PValue)][seq_len(n_top)]
+    top_s <- sub_s$feature[order(sub_s$PValue)][seq_len(n_top)]
+    jaccard_top <- length(intersect(top_r, top_s)) / max(1, length(union(top_r, top_s)))
+    
+    pair_rows[[i]] <- data.frame(
+      Pair = pair_name,
+      SubCategory = "scATAC-seq Differential Accessibility",
+      N_total = n_total,
+      N_true_DAR = n_r,
+      N_sim_DAR = n_s,
+      TP = tp,
+      FP = fp,
+      FN = fn,
+      TN = tn,
+      pval_dist_score = pval_dist_val,
+      accuracy = acc_val,
+      precision = prec_val,
+      recall = rec_val,
+      f1_score = f1_val,
+      auc = auc_val,
+      LogFC_Pearson_r = pcc_logfc,
+      LogFC_Spearman_rho = scc_logfc,
+      Top_DAR_Jaccard = jaccard_top,
+      stringsAsFactors = FALSE
+    )
+  }
+  
+  if (length(pair_rows) == 0) {
+    return(list(
+      da_summary_table = data.frame(),
+      pairwise_results = data.frame(),
+      pseudobulks_ref = pb_ref,
+      pseudobulks_sim = pb_sim,
+      da_results_ref = da_ref_list,
+      da_results_sim = da_sim_list
+    ))
+  }
+  
+  pair_df <- do.call(rbind, pair_rows)
+  
+  summary_df <- data.frame(
+    SubCategory = rep("scATAC-seq Differential Accessibility", 6),
+    Metric = c(
+      "pval_dist_score",
+      "accuracy",
+      "precision",
+      "recall",
+      "f1_score",
+      "auc"
+    ),
+    Value = c(
+      mean(pair_df$pval_dist_score, na.rm = TRUE),
+      mean(pair_df$accuracy, na.rm = TRUE),
+      mean(pair_df$precision, na.rm = TRUE),
+      mean(pair_df$recall, na.rm = TRUE),
+      mean(pair_df$f1_score, na.rm = TRUE),
+      mean(pair_df$auc, na.rm = TRUE)
+    ),
+    Direction = c(
+      "Higher is better (1.0 = uniform null p-values, no inflation)",
+      "Higher is better (1.0 = perfect DAR classification)",
+      "Higher is better (1.0 = zero false discoveries)",
+      "Higher is better (1.0 = 100% true DAR recovery)",
+      "Higher is better (1.0 = harmonic balance of precision & recall)",
+      "Higher is better (1.0 = perfect ranking discrimination)"
+    ),
+    Framework = rep("Libra Pseudobulk edgeR-QLF (Squair 2021; Teo 2024; Duo 2024)", 6),
+    stringsAsFactors = FALSE
+  )
+  
+  list(
+    da_summary_table = summary_df,
+    pairwise_results = pair_df,
+    pseudobulks_ref = pb_ref,
+    pseudobulks_sim = pb_sim,
+    da_results_ref = da_ref_list,
+    da_results_sim = da_sim_list
+  )
+}

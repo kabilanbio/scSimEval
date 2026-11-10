@@ -10,8 +10,8 @@ plot_metric_mds(
   by_category = FALSE,
   as_list = FALSE,
   category = NULL,
-  exclude_categories = c("(VI) Trajectory & Lineage Dynamics",
-    "(VIII) Computational Scalability"),
+  exclude_categories = c("(VII) Trajectory & Lineage Topology",
+    "(VIII) Computational Scalability & Efficiency"),
   metrics = NULL,
   normalize_scores = TRUE,
   palette = NULL,
@@ -36,8 +36,8 @@ a multi-panel grid displaying an MDS ordination for each evaluation category sep
 \item{category}{Optional character vector to filter by evaluation category (e.g. \code{"(I) Distributional Properties"}).}
 
 \item{exclude_categories}{Character vector of categories to exclude from the ordination.
-Default is \code{c("(VI) Trajectory & Lineage Dynamics", "(VIII) Computational Scalability")}
-because these two categories contain only two measures each, leaving the 6 canonical categories.}
+Default is \code{c("(VII) Trajectory & Lineage Topology", "(VIII) Computational Scalability & Efficiency")}
+because these two categories contain only a few measures each, leaving the 6 canonical categories.}
 
 \item{metrics}{Optional character vector of specific metrics to include.}
 

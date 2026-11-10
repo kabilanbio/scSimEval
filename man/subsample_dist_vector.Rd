@@ -4,12 +4,12 @@
 \alias{subsample_dist_vector}
 \title{Subsample Large Vectors for Accelerated Distributional Distance Estimation}
 \usage{
-subsample_dist_vector(x, max_n = 3000)
+subsample_dist_vector(x, max_n = 10000)
 }
 \arguments{
 \item{x}{Numeric vector.}
 
-\item{max_n}{Maximum sample size (default 3000).}
+\item{max_n}{Maximum sample size (default 10000, matching SimBench framework).}
 }
 \value{
 Subsampled numeric vector if length(x) > max_n, else x.

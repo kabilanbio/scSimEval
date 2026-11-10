@@ -7,44 +7,85 @@
 calc_cdi(
   counts,
   cluster_labels,
+  batch_label = NULL,
   size_factors = NULL,
-  model = c("poisson", "nb"),
+  nfeature = 500L,
+  method = c("wds", "vst"),
+  zp_threshold = 0.95,
+  lrt_pval_threshold = 0.01,
+  max_cells = 1000L,
+  normalize_per_obs = TRUE,
+  threads = 1L,
+  seed = 42L,
   top_features = NULL
 )
 }
 \arguments{
-\item{counts}{Matrix or data.frame of counts (genes x cells or cells x genes).}
+\item{counts}{Count matrix (\code{matrix}, sparse \code{dgCMatrix}, or \code{SingleCellExperiment};
+genes x cells or cells x genes).}
 
-\item{cluster_labels}{Vector of cluster assignments for each cell.}
+\item{cluster_labels}{Vector or factor of cluster / cell-type assignments for each cell.}
 
-\item{size_factors}{Optional numeric vector of cell-specific size factors. If NULL,
-computed as library size scaled by median library size.}
+\item{batch_label}{Optional vector or factor of batch assignments for each cell (enables
+\pkg{CDI}'s batch-common vs. batch-specific NB likelihood ratio test).}
 
-\item{model}{Distribution model to use: "poisson" (fast, default) or "nb" (Negative Binomial).}
+\item{size_factors}{Optional numeric vector of positive cell-specific size factors. If \code{NULL},
+computed via \code{CDI::size_factor()}.}
 
-\item{top_features}{Optional integer; if set, restricts CDI calculation to the top most
-variable features to accelerate computation on large matrices.}
+\item{nfeature}{Integer number of informative feature genes to select via
+\code{CDI::feature_gene_selection()} (default \code{500L}, per Fang et al., 2022).}
+
+\item{method}{Feature selection method passed to \code{CDI::feature_gene_selection()}:
+\code{"wds"} (Working Dispersion Score, default) or \code{"vst"}.}
+
+\item{zp_threshold}{Numeric zero-proportion cutoff in \code{(0, 1)} used to pre-filter
+ultra-sparse features prior to WDS selection (default \code{0.95}). Automatically relaxed
+for ultra-sparse modalities such as scATAC-seq.}
+
+\item{lrt_pval_threshold}{Numeric p-value threshold in \code{(0, 1)} for multi-batch LRT
+in \code{CDI::calculate_CDI()} (default \code{0.01}).}
+
+\item{max_cells}{Maximum number of cells evaluated via proportional stratified subsampling
+across clusters (default \code{1000L}; set \code{Inf} or \code{NULL} to evaluate all cells).}
+
+\item{normalize_per_obs}{Logical; if \code{TRUE} (default), divides raw \code{CDI_AIC} and
+\code{CDI_BIC} by \eqn{N_{\mathrm{eval}} \times G_{\mathrm{selected}}} so scores are
+scale-invariant across simulated datasets of differing dimensions.}
+
+\item{threads}{Integer number of parallel worker threads for \code{BiocParallel} (default \code{1L}).}
+
+\item{seed}{Integer random seed used only during stratified cell subsampling (default \code{42L}).}
+
+\item{top_features}{Optional deprecated alias for \code{nfeature}.}
 }
 \value{
 A list containing:
-  \item{cdi_aic}{Normalized CDI score based on AIC penalty (lower indicates better clustering).}
-  \item{cdi_bic}{Normalized CDI score based on BIC penalty (favors parsimonious main clusters).}
-  \item{loglik}{Total log-likelihood under the cluster-specific count model.}
-  \item{deviance}{Model deviance relative to saturated count model.}
+  \item{cdi_aic}{Per-observation normalized (or raw if \code{normalize_per_obs = FALSE}) CDI-AIC score (lower indicates better clustering, sensitive to subtypes).}
+  \item{cdi_bic}{Per-observation normalized (or raw if \code{normalize_per_obs = FALSE}) CDI-BIC score (lower indicates better clustering, favors main cell types).}
+  \item{cdi_aic_raw}{Unnormalized \code{CDI_AIC} returned directly by \code{CDI::calculate_CDI()}.}
+  \item{cdi_bic_raw}{Unnormalized \code{CDI_BIC} returned directly by \code{CDI::calculate_CDI()}.}
+  \item{loglik}{Total maximized NB log-likelihood (\code{-neg_llk_val}) across selected features.}
   \item{n_clusters}{Number of clusters evaluated.}
-  \item{n_params}{Number of free parameters in the clustering model.}
+  \item{n_features}{Number of selected feature genes evaluated.}
+  \item{n_cells}{Number of cells evaluated.}
 }
 \description{
-Evaluates the deviation and goodness-of-fit of single-cell clustering labels directly
-from raw or normalized count matrices when evaluating unsupervised cell state purity
-(Fang et al., Genome Biology 2022; benchmarked in scDesign3, Song et al., Nat Biotechnol 2024).
-CDI calculates the penalized log-likelihood (CDI-AIC and CDI-BIC) of count data
-under a cluster-specific Poisson or Negative Binomial GLM with cell size factors.
+Evaluates the unsupervised goodness-of-fit of single-cell clustering labels directly
+on count matrices using the official Bioconductor \pkg{CDI} package
+(Fang et al., \emph{Genome Biology}, 2022; DOI: 10.1186/s13059-022-02825-5).
+CDI models UMI counts under cluster- and gene-specific Negative Binomial distributions
+adjusted by cell size factors, returning AIC- and BIC-penalized deviation scores.
+}
+\details{
+To minimize time and space complexity from \eqn{O(G \cdot N)} dense allocations down to
+\eqn{O(\mathrm{nnz}(X) + G_0 \cdot N_{\mathrm{eval}})}, sparse \code{dgCMatrix} inputs are
+stratified-subsampled across cells and pre-filtered by zero-proportion in sparse space prior
+to Working Dispersion Score (WDS) feature selection (\code{CDI::feature_gene_selection}),
+median-of-ratios size factor estimation (\code{CDI::size_factor}), and Negative Binomial MLE
+evaluation (\code{CDI::calculate_CDI}).
 }
 \examples{
-data <- matrix(stats::rnorm(200), 20, 10)
-cl <- factor(rep(c("A", "B"), each = 10))
-dist_mat <- stats::dist(data)
-calc_cdi(data, cl)
+counts <- matrix(stats::rpois(1200, lambda = 3), nrow = 30, ncol = 40)
+cl <- factor(rep(c("TypeA", "TypeB"), each = 20))
+calc_cdi(counts, cl)
 }
-\keyword{internal}

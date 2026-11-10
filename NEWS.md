@@ -2,6 +2,60 @@
 
 ## Major Improvements
 
+* **Strict Input Standardization to Seurat and SingleCellExperiment Objects (Option B):**
+  - Standardized all primary evaluation pipelines (`evaluate_simulation_accuracy()`, `evaluate_multiomics_accuracy()`, `evaluate_multiomics_integration()`, `evaluate_multiple_datasets()`, and `benchmark_simulation_suite()`) to strictly require standard single-cell S4 objects (`Seurat` or `SingleCellExperiment`).
+  - Raw matrices, data frames, or unannotated lists are cleanly rejected with an informative error directing users to wrap their count matrices and metadata using standard constructors (`Seurat::CreateSeuratObject()` or `SingleCellExperiment::SingleCellExperiment()`).
+  - Automatically extracts and utilizes precomputed dimensional reductions (`reducedDims` in `SingleCellExperiment` or `reductions` in `Seurat`, such as `"integrated"`, `"joint"`, `"harmony"`, `"wnn"`, or `"PCA"`) for evaluating Category VI Multiomics Integration & Alignment metrics.
+  - In `scSimEval Studio` Shiny App, input data upload enforces `.rds` files containing `Seurat` or `SingleCellExperiment` objects, rejecting raw spreadsheets (`.csv`/`.xlsx`) with an instructive UI error alert.
+  - Packaged benchmark datasets (`example_scrna`, `example_scatac`, and `example_multiomics`) now bundle pre-built `SingleCellExperiment` objects with precomputed PCA dimensional reductions and cell-type/batch metadata in `colData`.
+
+* **Streamlined Metric Suite & Removal of Conceptually Overlapping Metrics:**
+  - Removed redundant metrics across the benchmarking framework that conceptually overlapped with existing primary evaluators:
+    1. **`Between_Dataset_Silh_Local` (1D Local Neighborhood Silhouette Width)**: Redundant with `Between_Dataset_Silh_Global` (global partition separation) and `NN_Mismatch` / Runs tests (local mixing).
+    2. **`OV` (Kernel Density Overlap Value)**: Redundant with primary continuous density distance measures (Wasserstein, KS distance, Bhattacharyya distance, and KDE ISE).
+    3. **`KDE_Bivariate_zstat` (2D Bivariate KDE Test Statistic)**: Overlapped with 2D Fasano-Franceschini KS test and 2D Earth Mover's Distance (`EMD_2D`).
+    4. **`Between_Dataset_Silh_2D_Local` (2D Local Neighborhood Silhouette Width)**: Overlapped with `Between_Dataset_Silh_2D_Global` and `NN_Mismatch_2D`.
+    5. **`davies_bouldin_sim` (Davies–Bouldin DB Index)**: Redundant with Average Silhouette Width (`silhouette_sim`) and Bioconductor Clustering Difference Index (`cdi`).
+    6. **Composite Differential Scores (`de_score` and `da_score`)**: Removed composite averages in favor of discrete, interpretable binary classification metrics (Accuracy, Precision, Recall, F1-score, and ROC-AUC).
+    7. **True Differential Proportion (`true_proportion`)**: Removed duplicate proportion since it is mathematically and conceptually identical to **Recall / Sensitivity / True Positive Rate (TPR)** ($	ext{TP} / 	ext{True}$).
+
+* **Categories VII & VIII Standardized Renaming:**
+  - Renamed Category VII to **`(VII) Trajectory & Lineage Topology`** and Category VIII to **`(VIII) Computational Scalability & Efficiency`** across the benchmarking engine (`R/09_evaluate_benchmark.R`), visualization standardization tables (`R/10_visualizations.R`), Shiny Studio (`app.R`), vignettes, and `_pkgdown.yml` (retaining backward-compatible category aliases for legacy RDS sessions).
+
+* **Category VI: Multiomics Integration & Alignment (scib, scMultiSim, scCross, Matilda, scMoMtF):**
+  - Standardized Category VI to 5 gold-standard multiomics integration & alignment metrics:
+    - **`batch_asw` (Batch Average Silhouette Width)**: Evaluates technical batch and modality mixing within each cell type in the joint embedding space ($1 - |s_i|$, averaged across cell types, from `scib` and `scMultiSim`).
+    - **`cell_type_asw` (Cell-Type Average Silhouette Width)**: Measures bio-conservation and cell-type separation in the multiomics embedding ($(ASW + 1) / 2$, from `scCross` and `scib`).
+    - **`graph_connectivity` (KNN Graph Connectivity)**: Calculates the relative size of the largest connected component ($|LCC| / |V_c|$) in the $k$-NN graph for each cell type (from `scCross`, `scMultiSim`, and `scib`).
+    - **`ari` / `integration_ari` (Adjusted Rand Index)**: Evaluates clustering concordance on joint multiomics representations against ground-truth cell types (from `scib`, `scCross`, `scMultiSim`, `Matilda`, and `scMoMtF`).
+    - **`nmi` / `integration_nmi` (Normalized Mutual Information)**: Information-theoretic clustering agreement between joint multiomics representations and empirical reference cell-type partitions.
+  - Removed redundant Category VI metrics (`calc_ilisi`, `calc_clisi`, `calc_kbet`) and legacy cross-modal coupling functions (`calc_foscttm`, `calc_atac_rna_coupling`, `calc_coregulation_fidelity`, `calc_peak_coaccessibility_fidelity`, `calc_coexpression_module_fidelity`, `evaluate_cross_modal_prediction`, `calc_modality_alignment`, `calc_network_jaccard`, `calc_cross_modality_correlation`, `calc_cross_modal_generation`, `calc_accessibility_profile_concordance`) from the package.
+  - Master function **`evaluate_multiomics_integration()`** returns all 5 core metrics bounded in $[0, 1]$ where higher indicates superior integration and bio-conservation fidelity.
+
+* **Category V: Structured Dual Sub-Categories for Biological Signal & Differential Fidelity (Simpipe / Libra Integration):**
+  - Divided Category V into two dedicated sub-categories (each containing 8 standardized benchmarking metrics as established in Duo et al., *Genome Biology* 2024 / Simpipe):
+    - **Sub-category V-A: scRNA-seq Differential Expression (`evaluate_deg_fidelity` / `evaluate_rna_de_fidelity`)**:
+      - `de_score`: Composite Differential Expression score synthesized strictly from binary-classification metrics (mean of Accuracy, Precision, Recall, F1, and AUC), matching the Simpipe benchmark standard.
+      - `pval_dist_score`: Null p-value distribution uniformity score evaluated by Kolmogorov-Smirnov goodness-of-fit against $U(0, 1)$ ($1 - D_{\text{KS}}$).
+      - `true_proportion`: Proportion of ground-truth true DEGs recovered ($|\text{Detected} \cap \text{True}| / |\text{True}|$).
+      - `accuracy`: Overall classification accuracy $\frac{\text{TP} + \text{TN}}{N_{\text{total}}}$.
+      - `precision`: Positive predictive value $\frac{\text{TP}}{\text{TP} + \text{FP}}$ (false discovery suppression).
+      - `recall`: True positive rate / sensitivity $\frac{\text{TP}}{\text{TP} + \text{FN}}$ (DEG recovery).
+      - `f1_score`: Harmonic balance of precision and recall ($2 \times \frac{P \times R}{P + R}$).
+      - `auc`: Receiver Operating Characteristic Area Under Curve (ROC-AUC) based on continuous $-\log_{10}(P\text{-value})$ ranking.
+    - **Sub-category V-B: scATAC-seq Differential Accessibility (`evaluate_atac_da_fidelity`)**:
+      - `da_score`: Composite Differential Accessibility score synthesized strictly from binary-classification metrics (mean of Accuracy, Precision, Recall, F1, and AUC).
+      - `pval_dist_score`: Null p-value distribution uniformity score ($1 - D_{\text{KS}}$).
+      - `true_proportion`: Proportion of ground-truth true DARs recovered ($|\text{Detected} \cap \text{True}| / |\text{True}|$).
+      - `accuracy`: Overall DAR classification accuracy.
+      - `precision`: Positive predictive value (DAR precision).
+      - `recall`: True positive rate / sensitivity (DAR recovery).
+      - `f1_score`: Harmonic balance of DAR precision and recall.
+      - `auc`: Receiver Operating Characteristic Area Under Curve (ROC-AUC) based on continuous accessibility significance ranking.
+    - **Strict Biological Replicate Rule**:
+      - Retains the strict requirement: both sub-categories require biological replicate annotations (`batch_info`). Without `batch_info`, Category V evaluation is safely skipped to avoid pseudoreplication bias.
+  - Retained standalone Simpipe single-cell utilities (**`run_edger_qlf_detrate`**, **`calc_simpipe_deg_ratio`**, **`calc_simpipe_distribution_score`**, **`evaluate_predictive_de_model`**) for specialized single-cell DEG analysis.
+
 * **Interactive Step-by-Step Zoom Controls (Shiny App & R Package):**
   - Integrated an interactive step-by-step Zoom Toolbar on **every plot figure and architectural diagram** in `scSimEval Studio` (`launch_scSimEval_app()`):
     - Comparative Bubble Matrix (`plot_bubble_matrix`)
@@ -70,11 +124,11 @@
 
 * **Comprehensive Metric Measurement Capacity Guidance Across All Interfaces:**
   - Embedded rigorous, multi-layered guidance documenting the exact quantitative metric measurement capacity across single-cell and multiomics experiment modes based on uploaded inputs:
-    - **Single-cell count matrix alone:** Evaluates **~23 baseline metrics** spanning Category I (Distributional Properties: KS, Wasserstein, MAD, MAE, RMSE, OV, Bhattacharyya, ECDF diff, Runs test, 2D Fasano-Franceschini, 2D Peacock, KDE test, MMD, Fréchet single-cell distance), Category II (Correlations & Zeroes: BCV discrepancy, dropout curve midpoint/slope, mean-variance $R^2$, cell/gene Pearson correlations), Category VI (Trajectory Dynamics), and Category VIII (Scalability).
+    - **Single-cell count matrix alone:** Evaluates **~23 baseline metrics** spanning Category I (Distributional Properties: KS, Wasserstein, MAD, MAE, RMSE, OV, Bhattacharyya, ECDF diff, Runs test, 2D Fasano-Franceschini, 2D Peacock, KDE test, MMD, Fréchet single-cell distance), Category II (Correlations & Zeroes: BCV discrepancy, dropout curve midpoint/slope, mean-variance $R^2$, cell/gene Pearson correlations), Category VII (Trajectory Dynamics), and Category VIII (Scalability).
     - **+ Cell Types (Optional):** Adds **+12–15 metrics** unlocking Category III (Cellular Structure & Clustering / ARI, NMI, AMI, Silhouette width, Dunn index) and Category V (Biological Signal Fidelity / SimBench DE, DP, DV, top DEG Jaccard overlap, log2FC correlation).
     - **+ Batch Annotations (Optional):** Adds **+7 metrics** unlocking Category IV (Batch Mixing & Technical Confounders / Batch Silhouette, Shannon Entropy, PCR $R^2$, CMS CellMixS, ISI, Seurat mixing metric, LDF difference).
-    - **Full Single-Cell Metadata:** Unlocks up to **~55 metrics** across Categories I–VI and VIII.
-    - **Paired Multiomics (RNA + ATAC alone):** Evaluates **~48 metrics** across unimodal layers plus Category VII Cross-Modal Coupling (FOSCTTM cell alignment score, Match@1 nearest neighbor accuracy, cross-modal generative prediction accuracy/F1, $R_V$ matrix correlation, peak-to-gene regulatory linkage), scaling to the **full suite of 62 metrics** with metadata.
+    - **Full Single-Cell Metadata:** Unlocks up to **~55 metrics** across Categories I–V, VII, and VIII.
+    - **Paired Multiomics (RNA + ATAC alone):** Evaluates **~48 metrics** across unimodal layers plus Category VI Cross-Modal Coupling (FOSCTTM cell alignment score, Match@1 nearest neighbor accuracy, cross-modal generative prediction accuracy/F1, $R_V$ matrix correlation, peak-to-gene regulatory linkage), scaling to the **full suite of 62 metrics** with metadata.
     - **Unpaired Multiomics:** Evaluates **~38–42 metrics** baseline, with cell-type labels unlocking cluster-matched label transfer and cell-type regulatory linkage (up to ~58 metrics).
 
 * **End-to-End Analytical Workflow R Script Generators:**
@@ -270,12 +324,12 @@
 * Unified benchmarking and fidelity assessment for single-cell and multiomics simulation algorithms (scRNA-seq, scATAC-seq, and paired multiomics).
 * 62 quantitative fidelity metrics spanning 8 biological and computational categories:
   - (I) Distributional Properties
-  - (II) Correlations & Zero-Inflation
+  - (II) Sparsity & Zero-Inflation Dynamics
   - (III) Cellular Structure & Concordance
-  - (IV) Batch Effects & Confounder Mixing
-  - (V) Biological Signal & Downstream Fidelity
-  - (VI) Trajectory & Lineage Dynamics
-  - (VII) Cross-Modal Coupling & Modularity
+  - (IV) Technical Variation & Batch Mixing Dynamics
+  - (V) Biological Signal & Differential Fidelity
+  - (VI) Multiomics Integration & Alignment
+  - (VII) Trajectory & Lineage Dynamics
   - (VIII) Computational Scalability
 * Comprehensive visualization suite with publication-ready comparative bubble matrices, individual metric barplots, heatmaps, PCA, and MDS projections.
 * Interactive Shiny Studio (`launch_scSimEval_app()`) for real-time benchmark exploration, custom data upload, and 600 DPI publication exports.

@@ -29,7 +29,7 @@ Description: A simple and unified evaluation toolkit for benchmarking single-cel
     (1) Distribution Differences: Statistical distances between real and simulated values (such as KS, Wasserstein, and MAD),
     (2) Summary Properties: Gene correlations, zero counts, and dropout patterns,
     (3) Cell Structure and Clustering: How well distinct cell types and clusters are preserved (such as Silhouette width, ARI, and NMI),
-    (4) Batch and Confounder Mixing: How well technical batch variations are captured or mixed,
+    (4) Technical Variation & Batch Mixing Dynamics: How well technical batch variations are captured or mixed,
     (5) Biological Signals and Marker Genes: Preservation of differentially expressed genes (DEGs) across Simpipe, SimBench, and Shaky Foundations frameworks,
     (6) Cell Lineage and Trajectories: Preservation of continuous developmental pathways (inferred directly from scRNA-seq counts),
     (7) Multiomics Relationships: Connections between different layers (such as gene expression and chromatin accessibility) — fully active for paired data; population-level metrics available for unpaired and mosaic data,
@@ -54,7 +54,8 @@ Imports:
     SingleCellExperiment,
     SummarizedExperiment,
     matrixStats,
-    BiocParallel
+    BiocParallel,
+    CDI
 Suggests:
     BiocStyle,
     testthat,

@@ -15,6 +15,8 @@
 infer_scrna_pseudotime <- function(data, n_top = 500) {
   if (inherits(data, "SingleCellExperiment") && requireNamespace("SummarizedExperiment", quietly = TRUE)) {
     data <- SummarizedExperiment::assay(data, "counts")
+  } else if (inherits(data, "Seurat")) {
+    data <- tryCatch(data[["RNA"]]$counts, error = function(e) Seurat::GetAssayData(data, slot = "counts"))
   }
   n_cells <- ncol(data)
   if (is.null(n_cells) || n_cells < 3) return(seq(0, 1, length.out = max(1, as.integer(n_cells %||% length(data)))))

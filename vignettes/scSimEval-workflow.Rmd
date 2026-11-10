@@ -42,7 +42,7 @@ Computer simulations of single-cell technologies—specifically single-cell RNA 
 knitr::include_graphics("figures/workflow_diagram.png")
 ```
 
-> **Supported Multiomics Modalities:** `scSimEval` natively supports two multiomics experimental designs:
+> **Supported Multiomics Modalities:** `scSimEval` natively supports two multiomics experimental designs:4
 > **Paired** (co-assays where RNA and ATAC are measured from identical cells, e.g. 10x Multiome, SHARE-seq) with full cross-modal coupling evaluation; and **Unpaired** (independent scRNA-seq and scATAC-seq from separate cells of the same tissue) with unimodal evaluation plus population-level cross-modal concordance metrics. See the dedicated [Multiomics vignette](demo-multiomics.html) for detailed multiomics workflows.
 
 ---
@@ -95,7 +95,7 @@ knitr::include_graphics("figures/workflow_diagram.png")
 | Experiment Mode | Uploaded Inputs | Metrics Measured | Active Evaluation Categories & Scope |
 | :--- | :--- | :---: | :--- |
 | **Single-Cell** *(scRNA / scATAC)* | Count Matrix alone *(no metadata)* | **19 Metrics** *(21 with Scalability)* | **Cat I** (Distributional Properties: 7 metrics / 63 instances), **Cat II** (Correlations & Zeroes: 4 metrics), **Cat III** (Cellular Manifolds: 4 metrics), **Cat VI** (Trajectory: 4 metrics), and **Cat VIII** (Scalability: 2 metrics). |
-| **Single-Cell** *(scRNA / scATAC)* | Matrix + Cell Types | **33 Metrics** | *Adds +12 metrics:* Unlocks **Cat III** (Clustering: ARI, NMI, Silhouette, Davies-Bouldin) and **Cat V** (Biological Signal: SimBench DE, DP, DV, DD, BD, predictive Macro-F1, deconvolution RMSE, delta variance). |
+| **Single-Cell** *(scRNA / scATAC)* | Matrix + Cell Types | **33 Metrics** | *Adds +12 metrics:* Unlocks **Cat III** (Clustering: ARI, NMI, Silhouette, Davies-Bouldin) and **Cat V** (Biological Signal & Differential Fidelity: DE/DA score, p-value distribution score, true proportion, accuracy, precision, recall, F1, AUC). |
 | **Single-Cell** *(scRNA / scATAC)* | Matrix + Batch Info | **27 Metrics** | *Adds +6 metrics:* Unlocks **Cat IV** (Batch Effects: Batch Silhouette, PCR $R^2$, CMS, ISI, Seurat mixing metric, cross-batch F1). |
 | **Single-Cell** *(scRNA / scATAC)* | **Full Metadata** *(Matrix + Cell Types + Batch)* | **39 Metrics** | Unlocks the complete unimodal suite across **Categories I, II, III, IV, V, VI, and VIII**. |
 | **Paired Multiomics** *(scRNA + scATAC - Rice Bud)* | RNA + ATAC Matrices alone | **33 Metrics** | Both unimodal distributions, correlations, manifolds, trajectories (172 instances) PLUS **Cat VII** (Paired Cross-Modal Coupling: FOSCTTM, Match@1, cell Pearson correlation, regulatory coupling correlation, $R_V$ coefficient, module fidelity, peak co-accessibility, network Jaccard, and Scalability). |
@@ -207,7 +207,7 @@ clust_res <- evaluate_clustering_metrics(
 )
 
 cat("Average Silhouette Width:", round(clust_res$silhouette, 4), "\n")
-cat("Davies-Bouldin Index:", round(clust_res$davies_bouldin, 4), "\n")
+cat("Neighborhood Purity:", round(clust_res$neighborhood_purity, 4), "\n")
 cat("Adjusted Rand Index (ARI):", round(clust_res$ARI, 4), "\n")
 cat("Normalized Mutual Information (NMI):", round(clust_res$NMI, 4), "\n")
 ```
@@ -226,14 +226,14 @@ batch_res <- evaluate_batch_metrics(
   verbose = FALSE
 )
 
-cat("Batch Shannon Entropy:", round(batch_res$shannon_entropy, 4), "\n")
+cat("Batch Silhouette:", round(batch_res$batch_silhouette, 4), "\n")
 cat("PC Regression R2 (PCR):", round(batch_res$pcr_r2, 4), "\n")
-cat("Cross-Batch Transfer Accuracy:", round(batch_res$cross_batch_accuracy, 4), "\n")
+cat("Cross-Batch Transfer F1:", round(batch_res$cross_batch_F1, 4), "\n")
 ```
 
 ---
 
-## 8. Evaluating Cell Lineages and Trajectory Dynamics (Category VI)
+## 8. Evaluating Cell Lineages and Trajectory Topology (Category VII)
 
 `scSimEval` automatically infers differentiation pseudotime directly from count matrices and evaluates lineage fidelity without requiring external pseudotime labels:
 
@@ -251,7 +251,7 @@ cat("Lineage Tree Branch Height RMSE:", round(as.numeric(traj_res$tree_height_rm
 
 ---
 
-## 9. Evaluating Biological Signals and Marker Genes (Category V)
+## 9. Evaluating Biological Signal and Differential Fidelity (Category V)
 
 `evaluate_deg_fidelity()` evaluates whether simulated counts preserve true differential expression signals (SimBench DE, DP, DV, DD, BD), cell-type classification accuracy, and top-DEG Jaccard overlap:
 
@@ -268,7 +268,7 @@ knitr::kable(head(deg_res$deg_summary_table, 6), digits = 4)
 
 ---
 
-## 10. Evaluating Computational Scalability (Category VIII)
+## 10. Evaluating Computational Scalability & Efficiency (Category VIII)
 
 `plot_scalability_benchmark()` generates a comprehensive dashboard comparing runtime, memory usage (in **MiB**), runtime-memory Pareto frontiers, and cell throughput:
 
@@ -448,15 +448,15 @@ The studio is organized into 7 modular tabs:
 | Evaluation Dimension & Metric Group | Paired Multiomics | Unpaired Multiomics | Unimodal (scRNA / scATAC) |
 |---|:---:|:---:|:---:|
 | **(I) Distributional Properties** (Wasserstein, KS, MAD, Bhattacharyya, Runs test, NN mismatch, Silhouette) | ✅ (All 7) | ✅ (All 7) | ✅ (All 7) |
-| **(II) Correlations & Zero-Inflation** (Dropout midpoint/slope error, $R^2$ discrepancy, excess zero weights) | ✅ (All 4) | ✅ (All 4) | ✅ (All 4) |
+| **(II) Sparsity & Zero-Inflation Dynamics** (Dropout midpoint/slope error, $R^2$ discrepancy, excess zero weights) | ✅ (All 4) | ✅ (All 4) | ✅ (All 4) |
 | **(III) Cellular Structure & Concordance** (ARI, NMI, Silhouette width, Davies-Bouldin, MMD, Fréchet SC, Precision, Recall) | ✅ (All 8) | ✅ (All 8) | ✅ (All 8) |
-| **(IV) Batch Effects & Confounder Mixing** (Batch Silhouette, PCR $R^2$, CMS, ISI, Seurat mixing, Cross-batch F1) | ✅ (All 6) | ✅ (All 6) | ✅ (All 6) |
-| **(V) Biological Signal & Downstream Fidelity** (SimBench DE, DP, DV, DD, BD, Macro-F1, Deconvolution RMSE, Delta Variance) | ✅ (All 8) | ✅ (All 8) | ✅ (All 8) |
-| **(VI) Trajectory & Lineage Dynamics** (Pseudotime correlation, Tree height RMSE, Graph alignment, Lineage dynamics) | ✅ (All 4) | ✅ (All 4) | ✅ (All 4) |
-| **(VII) Cross-Modal Modularity & Overlap** (Module preservation fidelity, Peak co-accessibility, Label transfer, Network Jaccard) | ✅ (All 4) | ✅ (All 4) | ❌ *(Single modality)* |
-| **(VII) Joint Cell-Level Coupling** (FOSCTTM, Match@1, Cross-modal generation PCC, Regulatory coupling, $R_V$ coefficient) | ✅ (All 5) | ❌ *(Unlinked cells)* | ❌ *(Single modality)* |
-| **(VIII) Computational Scalability** (Elapsed time seconds, Peak memory MiB) | ✅ (Both 2) | ✅ (Both 2) | ✅ (Both 2) |
-| **Total Evaluation Capacity** | **All 48 Metrics** | **41 Metrics** | **39 Metrics** |
+| **(IV) Technical Variation & Batch Mixing Dynamics** (Batch Silhouette, PCR $R^2$, CMS, ISI, Cross-batch F1) | ✅ (All 5) | ✅ (All 5) | ✅ (All 5) |
+| **(V) Biological Signal & Differential Fidelity** (Simpipe / Libra DE/DA score, p-value distribution score, true proportion, accuracy, precision, recall, F1, AUC) | ✅ (All 8) | ✅ (All 8) | ✅ (All 8) |
+| **(VI) Cross-Modal Modularity & Overlap** (Module preservation fidelity, Peak co-accessibility, Label transfer, Network Jaccard) | ✅ (All 4) | ✅ (All 4) | ❌ *(Single modality)* |
+| **(VI) Joint Cell-Level Coupling** (FOSCTTM, Match@1, Cross-modal generation PCC, Regulatory coupling, $R_V$ coefficient) | ✅ (All 5) | ❌ *(Unlinked cells)* | ❌ *(Single modality)* |
+| **(VII) Trajectory & Lineage Topology** (Pseudotime correlation, Tree height RMSE, Graph alignment, Lineage expression fidelity) | ✅ (All 4) | ✅ (All 4) | ✅ (All 4) |
+| **(VIII) Computational Scalability & Efficiency** (Elapsed time seconds, Peak memory MiB) | ✅ (Both 2) | ✅ (Both 2) | ✅ (Both 2) |
+| **Total Evaluation Capacity** | **All 47 Metrics** | **40 Metrics** | **38 Metrics** |
 | **Direct Pipeline Support** | `evaluate_multiomics_accuracy(..., pairing="paired")` | `evaluate_multiomics_accuracy(..., pairing="unpaired")` | `evaluate_simulation_accuracy()` |
 
 ### 15.3 Recommended Workflows by Data Type

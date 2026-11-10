@@ -22,4 +22,3 @@ ref <- matrix(stats::rnorm(100), 50, 2)
 sim <- matrix(stats::rnorm(100), 50, 2)
 calc_kde_test(ref, sim)
 }
-\keyword{internal}

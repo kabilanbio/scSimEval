@@ -14,7 +14,7 @@ A list containing intercept, slope, midpoint (inflection point), and R-squared.
 }
 \description{
 Fits an empirical logistic dropout curve: logit(P(Y=0)) = beta_0 + beta_1 * log(mu)
-to model the dropout relationship with mean expression.
+to model the scRNA-seq dropout relationship with mean expression.
 }
 \examples{
 data(example_scrna, package = "scSimEval")

@@ -2,34 +2,37 @@
 % Please edit documentation in R/05_metrics_de_signal.R
 \name{evaluate_predictive_de_model}
 \alias{evaluate_predictive_de_model}
-\title{Predictive Cell Identity Classification Using DE / Top Variable Features}
+\title{Predictive Cell Identity Classification Using Simulated DEGs (Simpipe Approach 3)}
 \usage{
 evaluate_predictive_de_model(
   data,
   group,
   de_features = NULL,
   n_top = 50,
-  method = c("knn", "rf", "svm")
+  method = c("svm", "knn", "rf")
 )
 }
 \arguments{
-\item{data}{Matrix (features x cells).}
+\item{data}{Matrix of counts or normalized expressions (genes x cells).}
 
-\item{group}{Cell type labels.}
+\item{group}{Cell type / cluster labels.}
 
-\item{de_features}{Optional character vector of selected DE feature names.}
+\item{de_features}{Optional character vector of candidate DEG feature names. If NULL, top variable features are used.}
 
-\item{n_top}{Number of top features to auto-select if \code{de_features} is NULL (default 50).}
+\item{n_top}{Number of top features to select if de_features is NULL (default 50).}
 
-\item{method}{Classifier: "knn" (default), "rf", or "svm".}
+\item{method}{Classifier algorithm: "svm" (default in Simpipe), "knn", or "rf".}
 }
 \value{
-A list containing Accuracy, Macro Precision, Macro Recall, and Macro F1 score.
+A list containing accuracy, precision, recall, and F1 score.
 }
 \description{
-Trains a classifier on simulated features (80\% train / 20\% test) to verify
-whether the simulated biological signals are sufficiently predictive of cell identities.
-If \code{de_features} is NULL, the top variable features are automatically selected.
+Constructs classification models (Support Vector Machine with radial kernel,
+Random Forest, or k-NN) using simulated gene expression matrices and candidate DEGs
+(Duo et al., Genome Biology 2024 / Simpipe).
+Genes with zero variance are filtered out, and DEGs are used to train
+on 80\% of cells and evaluate on 20\% test cells (or cross-validation).
+Computes Accuracy, Macro-Precision, Macro-Recall, and Macro-F1 score.
 }
 \examples{
 data(example_scrna, package = "scSimEval")

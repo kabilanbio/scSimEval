@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ==========================================================================
-   scSimEval Documentation Theme (Tidyverse Style)
+   scSimEval Documentation Theme (Tidyverse Light + High-Contrast Night Mode)
    ========================================================================== */
 
 /* Typography & Global Layout */
@@ -79,6 +79,20 @@ pre {
   line-height: 1.45 !important;
   max-width: 100% !important;
   overflow-x: auto !important;
+}
+
+/* Blockquotes & Callouts */
+blockquote {
+  background-color: #f8fafc !important;
+  border-left: 4px solid #2563eb !important;
+  padding: 0.85rem 1.15rem !important;
+  margin: 1.25rem 0 !important;
+  border-radius: 0 6px 6px 0 !important;
+  color: #334155 !important;
+}
+
+blockquote p:last-child {
+  margin-bottom: 0 !important;
 }
 
 /* Responsive Tables without Column Collision */
@@ -215,8 +229,12 @@ p a code,
 p a > code,
 li code,
 li a code,
-li a > code {
-  color: #1e40af !important; /* Dark blue */
+li a > code,
+td code,
+th code,
+dd code,
+dt code {
+  color: #1e40af !important;
   background-color: #f1f5f9 !important;
   padding: 0.15em 0.35em !important;
   border-radius: 4px !important;
@@ -225,12 +243,14 @@ li a > code {
 }
 
 p a:hover code,
-li a:hover code {
+li a:hover code,
+td a:hover code,
+dt a:hover code {
   color: #1d4ed8 !important;
   text-decoration: underline !important;
 }
 
-/* Black box surrounding figures (only around the figure itself) */
+/* Box surrounding figures (only around the figure itself) */
 .figure img,
 figure img,
 img.r-plt,
@@ -240,6 +260,8 @@ p > img:not(.logo):not([src*="shields.io"]):not([src*="badge"]) {
   padding: 3px !important;
   background-color: #ffffff !important;
   box-sizing: border-box !important;
+  max-width: 100% !important;
+  height: auto !important;
 }
 
 /* Remove 'Source: vignettes/****.Rmd' texts everywhere */
@@ -251,7 +273,6 @@ small.dont-index {
 
 /* ==========================================================================
    Logo Display Control: ONLY on Home Page and Reference Page
-   (Hidden from all article/vignette pages as requested)
    ========================================================================== */
 
 /* Default: hide page logo everywhere */
@@ -269,7 +290,7 @@ small.dont-index {
   display: none !important;
 }
 
-/* Prominently show logo ONLY on Home Page and Reference Index Page (No shading, no square border) */
+/* Prominently show logo ONLY on Home Page and Reference Index Page */
 .template-home .page-header img.logo,
 .template-home img.logo,
 .template-reference-index .page-header img.logo,
@@ -318,7 +339,7 @@ small.dont-index {
 }
 
 /* ==========================================================================
-   Navbar Search Bar & Autocomplete Styling
+   Navbar Search Bar, Lightswitch & Autocomplete Styling
    ========================================================================== */
 .navbar #search-input {
   background-color: rgba(255, 255, 255, 0.15) !important;
@@ -365,6 +386,13 @@ small.dont-index {
   align-items: center !important;
   flex-direction: row !important;
   gap: 0.25rem !important;
+}
+
+#dropdown-lightswitch {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  cursor: pointer !important;
 }
 
 /* Autocomplete dropdown menu */
@@ -414,3 +442,520 @@ small.dont-index {
   border-radius: 3px !important;
 }
 
+/* ==========================================================================
+   COMPREHENSIVE HIGH-CONTRAST NIGHT MODE / DARK THEME STYLING
+   Matches scSimEval Shiny Studio Dark Theme Palette
+   ========================================================================== */
+
+:root[data-bs-theme="dark"],
+[data-bs-theme="dark"] {
+  color-scheme: dark;
+  --bs-body-bg: #0B1329 !important;
+  --bs-body-bg-rgb: 11, 19, 41 !important;
+  --bs-body-color: #F1F5F9 !important;
+  --bs-body-color-rgb: 241, 245, 249 !important;
+  --bs-emphasis-color: #FFFFFF !important;
+  --bs-secondary-color: #CBD5E1 !important;
+  --bs-tertiary-color: #94A3B8 !important;
+  --bs-secondary-bg: #0F172A !important;
+  --bs-tertiary-bg: #1E293B !important;
+  --bs-border-color: #334155 !important;
+  --bs-link-color: #38BDF8 !important;
+  --bs-link-color-rgb: 56, 189, 248 !important;
+  --bs-link-hover-color: #7DD3FC !important;
+  --bs-link-hover-color-rgb: 125, 211, 252 !important;
+  --bs-code-color: #7DD3FC !important;
+  --bs-highlight-bg: rgba(250, 204, 21, 0.25) !important;
+  --bs-highlight-color: #FEF08A !important;
+}
+
+/* 1. Base Surface & Typography */
+[data-bs-theme="dark"],
+[data-bs-theme="dark"] body {
+  background-color: #0B1329 !important;
+  color: #F1F5F9 !important;
+}
+
+[data-bs-theme="dark"] main p,
+[data-bs-theme="dark"] main li,
+[data-bs-theme="dark"] main dd,
+[data-bs-theme="dark"] main dt,
+[data-bs-theme="dark"] .section p,
+[data-bs-theme="dark"] .section li,
+[data-bs-theme="dark"] .section dd,
+[data-bs-theme="dark"] .section dt,
+[data-bs-theme="dark"] .ref-description p,
+[data-bs-theme="dark"] .section-desc p {
+  color: #E2E8F0 !important;
+}
+
+[data-bs-theme="dark"] strong,
+[data-bs-theme="dark"] b {
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] em,
+[data-bs-theme="dark"] i:not(.fa):not(.fas):not(.fab):not(.far):not(.fa-solid):not(.fa-regular):not(.fa-brands) {
+  color: #F1F5F9 !important;
+}
+
+[data-bs-theme="dark"] h1,
+[data-bs-theme="dark"] h2,
+[data-bs-theme="dark"] h3,
+[data-bs-theme="dark"] h4,
+[data-bs-theme="dark"] h5,
+[data-bs-theme="dark"] h6 {
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] h1 {
+  border-bottom-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] h2 {
+  border-bottom-color: #1E293B !important;
+}
+
+[data-bs-theme="dark"] .page-header .author,
+[data-bs-theme="dark"] .page-header .date,
+[data-bs-theme="dark"] .page-header h4.author,
+[data-bs-theme="dark"] .page-header h4.date,
+[data-bs-theme="dark"] aside .roles,
+[data-bs-theme="dark"] small,
+[data-bs-theme="dark"] .text-muted {
+  color: #CBD5E1 !important;
+}
+
+[data-bs-theme="dark"] hr {
+  border-color: #334155 !important;
+  opacity: 1 !important;
+}
+
+/* MathML Equations */
+[data-bs-theme="dark"] math {
+  color: #F8FAFC !important;
+}
+
+/* 2. Links */
+[data-bs-theme="dark"] main a:not(.btn):not(.anchor),
+[data-bs-theme="dark"] aside a:not(.btn),
+[data-bs-theme="dark"] footer a:not(.btn) {
+  color: #38BDF8 !important;
+}
+
+[data-bs-theme="dark"] main a:not(.btn):not(.anchor):hover,
+[data-bs-theme="dark"] aside a:not(.btn):hover,
+[data-bs-theme="dark"] footer a:not(.btn):hover {
+  color: #7DD3FC !important;
+}
+
+/* 3. Navbar, Icons, Lightswitch & Dropdowns */
+[data-bs-theme="dark"] .navbar {
+  background-color: #0F172A !important;
+  border-bottom: 1px solid #334155 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-bs-theme="dark"] .navbar .navbar-brand {
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .navbar .nav-text {
+  color: #CBD5E1 !important;
+}
+
+[data-bs-theme="dark"] .navbar .nav-link {
+  color: #E2E8F0 !important;
+}
+
+[data-bs-theme="dark"] .navbar .nav-link:hover,
+[data-bs-theme="dark"] .navbar .nav-link:focus,
+[data-bs-theme="dark"] .navbar .nav-item.active > .nav-link,
+[data-bs-theme="dark"] .navbar .nav-link.active {
+  color: #38BDF8 !important;
+}
+
+[data-bs-theme="dark"] .navbar .fa,
+[data-bs-theme="dark"] .navbar .fa-solid,
+[data-bs-theme="dark"] .navbar .fa-brands,
+[data-bs-theme="dark"] .navbar .fas,
+[data-bs-theme="dark"] .navbar .fab {
+  color: inherit !important;
+}
+
+[data-bs-theme="dark"] .navbar-toggler {
+  border-color: #475569 !important;
+}
+
+[data-bs-theme="dark"] .navbar .dropdown-menu {
+  background-color: #0F172A !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-bs-theme="dark"] .navbar .dropdown-item {
+  color: #E2E8F0 !important;
+}
+
+[data-bs-theme="dark"] .navbar .dropdown-item:hover,
+[data-bs-theme="dark"] .navbar .dropdown-item:focus {
+  background-color: #1E293B !important;
+  color: #38BDF8 !important;
+}
+
+[data-bs-theme="dark"] .navbar .dropdown-item.active,
+[data-bs-theme="dark"] .navbar .dropdown-item:active {
+  background-color: #0284C7 !important;
+  color: #FFFFFF !important;
+}
+
+/* Search Input & Autocomplete in Dark Mode */
+[data-bs-theme="dark"] .navbar #search-input {
+  background-color: rgba(30, 41, 59, 0.85) !important;
+  border-color: #475569 !important;
+  color: #F8FAFC !important;
+}
+
+[data-bs-theme="dark"] .navbar #search-input::placeholder {
+  color: #94A3B8 !important;
+}
+
+[data-bs-theme="dark"] .navbar #search-input:focus {
+  background-color: #1E293B !important;
+  border-color: #38BDF8 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338BDF8' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") !important;
+}
+
+[data-bs-theme="dark"] .algolia-autocomplete .aa-dropdown-menu {
+  background-color: #0F172A !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65) !important;
+}
+
+[data-bs-theme="dark"] .algolia-autocomplete .aa-suggestion {
+  color: #E2E8F0 !important;
+}
+
+[data-bs-theme="dark"] .algolia-autocomplete .aa-suggestion:hover,
+[data-bs-theme="dark"] .algolia-autocomplete .aa-suggestion.aa-cursor {
+  background-color: #1E293B !important;
+  color: #FFFFFF !important;
+}
+
+[data-bs-theme="dark"] .algolia-autocomplete .search-details {
+  color: #38BDF8 !important;
+}
+
+[data-bs-theme="dark"] .algolia-autocomplete mark,
+[data-bs-theme="dark"] main#main mark {
+  background: rgba(250, 204, 21, 0.25) !important;
+  color: #FEF08A !important;
+  padding: 0.08em 0.25em !important;
+  border-radius: 3px !important;
+}
+
+/* 4. Inline Code & Keyboard Shortcuts */
+[data-bs-theme="dark"] p code,
+[data-bs-theme="dark"] p a code,
+[data-bs-theme="dark"] p a > code,
+[data-bs-theme="dark"] li code,
+[data-bs-theme="dark"] li a code,
+[data-bs-theme="dark"] li a > code,
+[data-bs-theme="dark"] td code,
+[data-bs-theme="dark"] th code,
+[data-bs-theme="dark"] dd code,
+[data-bs-theme="dark"] dt code,
+[data-bs-theme="dark"] blockquote code,
+[data-bs-theme="dark"] h1 code,
+[data-bs-theme="dark"] h2 code,
+[data-bs-theme="dark"] h3 code,
+[data-bs-theme="dark"] h4 code {
+  color: #7DD3FC !important;
+  background-color: #1E293B !important;
+  border: 1px solid #334155 !important;
+}
+
+[data-bs-theme="dark"] p a:hover code,
+[data-bs-theme="dark"] li a:hover code,
+[data-bs-theme="dark"] td a:hover code,
+[data-bs-theme="dark"] dt a:hover code {
+  color: #BAE6FD !important;
+  border-color: #38BDF8 !important;
+}
+
+[data-bs-theme="dark"] kbd {
+  background-color: #1E293B !important;
+  color: #F8FAFC !important;
+  border: 1px solid #475569 !important;
+}
+
+/* 5. Code Blocks, Syntax Highlighting (downlit/pandoc) & Copy Button */
+[data-bs-theme="dark"] pre,
+[data-bs-theme="dark"] div.sourceCode pre {
+  background-color: #0F172A !important;
+  border: 1px solid #334155 !important;
+  color: #E2E8F0 !important;
+}
+
+[data-bs-theme="dark"] pre code {
+  background-color: transparent !important;
+  border: none !important;
+  color: #E2E8F0 !important;
+}
+
+[data-bs-theme="dark"] pre code a {
+  color: inherit !important;
+  text-decoration: underline !important;
+  text-decoration-color: rgba(125, 211, 252, 0.45) !important;
+}
+
+[data-bs-theme="dark"] pre code a:hover {
+  text-decoration-color: #38BDF8 !important;
+}
+
+[data-bs-theme="dark"] pre code span.kw,
+[data-bs-theme="dark"] pre code span.cf,
+[data-bs-theme="dark"] pre code span.ot {
+  color: #C084FC !important;
+}
+
+[data-bs-theme="dark"] pre code span.fu {
+  color: #60A5FA !important;
+}
+
+[data-bs-theme="dark"] pre code span.va {
+  color: #F1F5F9 !important;
+}
+
+[data-bs-theme="dark"] pre code span.st,
+[data-bs-theme="dark"] pre code span.ch,
+[data-bs-theme="dark"] pre code span.ss,
+[data-bs-theme="dark"] pre code span.vs {
+  color: #4ADE80 !important;
+}
+
+[data-bs-theme="dark"] pre code span.fl,
+[data-bs-theme="dark"] pre code span.dv,
+[data-bs-theme="dark"] pre code span.bn {
+  color: #FB923C !important;
+}
+
+[data-bs-theme="dark"] pre code span.cn {
+  color: #F472B6 !important;
+}
+
+[data-bs-theme="dark"] pre code span.op {
+  color: #94A3B8 !important;
+}
+
+[data-bs-theme="dark"] pre code span.co,
+[data-bs-theme="dark"] pre code span.cv,
+[data-bs-theme="dark"] pre code span.do,
+[data-bs-theme="dark"] pre code span.in,
+[data-bs-theme="dark"] pre code span.an,
+[data-bs-theme="dark"] pre code span.wa {
+  color: #94A3B8 !important;
+}
+
+[data-bs-theme="dark"] pre code span.im,
+[data-bs-theme="dark"] pre code span.at {
+  color: #38BDF8 !important;
+}
+
+[data-bs-theme="dark"] pre code span.pp,
+[data-bs-theme="dark"] pre code span.er,
+[data-bs-theme="dark"] pre code span.al {
+  color: #F87171 !important;
+}
+
+[data-bs-theme="dark"] pre code .r-msg,
+[data-bs-theme="dark"] pre code .r-out,
+[data-bs-theme="dark"] pre code .r-pr,
+[data-bs-theme="dark"] pre code .r-wrn {
+  color: #CBD5E1 !important;
+}
+
+[data-bs-theme="dark"] pre code .r-err {
+  color: #F87171 !important;
+}
+
+[data-bs-theme="dark"] .btn-copy-ex {
+  background-color: #1E293B !important;
+  border: 1px solid #475569 !important;
+  color: #E2E8F0 !important;
+}
+
+[data-bs-theme="dark"] .btn-copy-ex:hover,
+[data-bs-theme="dark"] .btn-copy-ex:focus {
+  background-color: #0284C7 !important;
+  border-color: #38BDF8 !important;
+  color: #FFFFFF !important;
+}
+
+/* 6. Blockquotes & Callouts */
+[data-bs-theme="dark"] blockquote {
+  background-color: #0F172A !important;
+  border-left: 4px solid #38BDF8 !important;
+  color: #E2E8F0 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-bs-theme="dark"] blockquote p,
+[data-bs-theme="dark"] blockquote li {
+  color: #E2E8F0 !important;
+}
+
+/* 7. Tables */
+[data-bs-theme="dark"] table,
+[data-bs-theme="dark"] table.table {
+  color: #E2E8F0 !important;
+  border-color: #334155 !important;
+}
+
+[data-bs-theme="dark"] th,
+[data-bs-theme="dark"] table.table th {
+  background-color: #1E293B !important;
+  color: #FFFFFF !important;
+  border-bottom: 2px solid #475569 !important;
+}
+
+[data-bs-theme="dark"] td,
+[data-bs-theme="dark"] table.table td {
+  background-color: #0F172A !important;
+  color: #E2E8F0 !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
+[data-bs-theme="dark"] tr:nth-child(even) td,
+[data-bs-theme="dark"] table.table tr:nth-child(even) td {
+  background-color: #162033 !important;
+}
+
+[data-bs-theme="dark"] tr:hover td,
+[data-bs-theme="dark"] table.table tr:hover td {
+  background-color: #1E293B !important;
+}
+
+[data-bs-theme="dark"] caption,
+[data-bs-theme="dark"] table caption {
+  color: #CBD5E1 !important;
+}
+
+/* 8. Figures, Captions, Badges, Anchors & Hex Logo */
+/* Prevent Bootstrap/pkgdown auto-inversion so publication plots & workflow diagrams preserve exact colors and legibility */
+[data-bs-theme="dark"] img.r-plt,
+[data-bs-theme="dark"] pre .r-plt.img img,
+[data-bs-theme="dark"] .cell-output-display img,
+[data-bs-theme="dark"] .figure img,
+[data-bs-theme="dark"] figure img,
+[data-bs-theme="dark"] p > img {
+  filter: none !important;
+}
+
+[data-bs-theme="dark"] .figure img,
+[data-bs-theme="dark"] figure img,
+[data-bs-theme="dark"] img.r-plt,
+[data-bs-theme="dark"] p > img:not(.logo):not([src*="shields.io"]):not([src*="badge"]) {
+  background-color: #ffffff !important;
+  border: 1.5px solid #475569 !important;
+  border-radius: 6px !important;
+  padding: 6px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-bs-theme="dark"] .figure .caption,
+[data-bs-theme="dark"] figure figcaption,
+[data-bs-theme="dark"] p.caption {
+  color: #CBD5E1 !important;
+  font-size: 0.92rem !important;
+  margin-top: 0.55rem !important;
+}
+
+[data-bs-theme="dark"] .template-home .page-header img.logo,
+[data-bs-theme="dark"] .template-home img.logo,
+[data-bs-theme="dark"] .template-reference-index .page-header img.logo,
+[data-bs-theme="dark"] .template-reference-index img.logo {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.28)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.65)) !important;
+}
+
+[data-bs-theme="dark"] img[src*="shields.io"],
+[data-bs-theme="dark"] img[src*="badge"] {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+[data-bs-theme="dark"] a.anchor {
+  filter: brightness(1.3) saturate(1.15) !important;
+}
+
+/* 9. Right Sidebar, TOC & Footer */
+[data-bs-theme="dark"] aside.col-md-3 {
+  border-left-color: #334155 !important;
+}
+
+@media (max-width: 767.98px) {
+  [data-bs-theme="dark"] aside.col-md-3 {
+    border-top-color: #334155 !important;
+  }
+}
+
+[data-bs-theme="dark"] nav#toc h2,
+[data-bs-theme="dark"] aside.col-md-3 h2 {
+  color: #CBD5E1 !important;
+}
+
+[data-bs-theme="dark"] nav#toc a,
+[data-bs-theme="dark"] aside.col-md-3 a {
+  color: #CBD5E1 !important;
+}
+
+[data-bs-theme="dark"] nav#toc a:hover,
+[data-bs-theme="dark"] nav#toc a.active,
+[data-bs-theme="dark"] aside.col-md-3 a:hover {
+  color: #38BDF8 !important;
+}
+
+[data-bs-theme="dark"] aside.col-md-3 li {
+  color: #E2E8F0 !important;
+}
+
+[data-bs-theme="dark"] footer {
+  background-color: #0F172A !important;
+  border-top: 1px solid #334155 !important;
+  color: #CBD5E1 !important;
+}
+
+[data-bs-theme="dark"] footer p {
+  color: #CBD5E1 !important;
+}
+
+/* 10. Scrollbars for Code Blocks & Wide Tables in Dark Mode */
+[data-bs-theme="dark"] pre::-webkit-scrollbar,
+[data-bs-theme="dark"] table::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+[data-bs-theme="dark"] pre::-webkit-scrollbar-track,
+[data-bs-theme="dark"] table::-webkit-scrollbar-track {
+  background: #0F172A;
+}
+
+[data-bs-theme="dark"] pre::-webkit-scrollbar-thumb,
+[data-bs-theme="dark"] table::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+[data-bs-theme="dark"] pre::-webkit-scrollbar-thumb:hover,
+[data-bs-theme="dark"] table::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}

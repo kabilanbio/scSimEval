@@ -34,13 +34,10 @@ utils::globalVariables(c(
   # Legacy / collinear Category I aliases:
   "MAE"                              = "MAE",
   "RMSE"                             = "RMSE",
-  "OV"                               = "Overlap Coeff.",
   "ECDF_DiffArea"                    = "ECDF Diff. Area",
   "Runs_PValue"                      = "Runs P-Value",
-  "Between_Dataset_Silh_Local"       = "Inter-Dataset Silh. (Local)",
   "Fasano_Franceschini_2D_KS"        = "Fasano-Franceschini 2D",
   "Peacock_2D_KS"                    = "Peacock 2D",
-  "KDE_Bivariate_zstat"              = "2D KDE z-stat",
 
   # (II) Correlations & Zero-Inflation (4 Gold-Standard + legacy aliases)
   "midpoint_error"                   = "Dropout Midpoint Error",
@@ -61,7 +58,6 @@ utils::globalVariables(c(
   "Generative_Precision"             = "Generative Precision",
   "Generative_Recall"                = "Generative Recall",
   "silhouette_sim"                   = "Silhouette ASW",
-  "davies_bouldin_sim"               = "Davies-Bouldin",
   "ari"                              = "ARI",
   "nmi"                              = "NMI",
   # Legacy / collinear Category III aliases:
@@ -118,26 +114,20 @@ utils::globalVariables(c(
   "PVE_Group_Sim"                    = "Group PVE",
   "PVE_Discrepancy"                  = "Group PVE Discrepancy",
 
-  # (VI) Trajectory & Lineage Dynamics (4 Gold-Standard)
+  # (VI) Multiomics Integration & Alignment (scib, scMultiSim, scCross, Matilda, scMoMtF)
+  "batch_asw"                        = "Batch ASW",
+  "cell_type_asw"                    = "Cell-Type ASW",
+  "graph_connectivity"               = "Graph Connectivity",
+  "integration_ari"                  = "Integration ARI",
+  "integration_nmi"                  = "Integration NMI",
+
+  # (VII) Trajectory & Lineage Topology (4 Gold-Standard)
   "pseudotime_correlation"           = "Pseudotime Corr. (rho)",
   "tree_height_rmse"                 = "Lineage Tree RMSE",
   "graph_alignment"                  = "Trajectory Graph Alignment",
   "lineage_expression_fidelity"      = "Lineage Expression Fidelity",
 
-  # (VII) Cross-Modal Coupling & Modularity (9 Gold-Standard + legacy aliases)
-  "FOSCTTM"                          = "FOSCTTM",
-  "match_at_1"                       = "Match@1",
-  "cell_pearson_cor"                 = "Cross-Modal Generation PCC",
-  "mean_coupling_cor"                = "Regulatory Coupling (r)",
-  "cross_modal_F1"                   = "Cross-Modal F1",
-  "rv_coefficient"                   = "RV Coefficient",
-  "module_correlation_r"             = "Module Corr. (r)",
-  # Legacy aliases:
-  "feature_pearson_cor"              = "Feature Pearson Corr.",
-  "cross_modal_accuracy"             = "Cross-Modal Accuracy",
-  "global_PCC"                       = "Global Accessibility PCC",
-
-  # (VIII) Computational Scalability (2 Gold-Standard)
+  # (VIII) Computational Scalability & Efficiency (2 Gold-Standard)
   "elapsed_time_seconds"             = "Elapsed Time (s)",
   "peak_memory_mb"                   = "Peak RAM (MiB)"
 )
@@ -154,13 +144,10 @@ utils::globalVariables(c(
   "Between_Dataset_Silh_Global"      = "(I) Distributional Properties",
   "MAE"                              = "(I) Distributional Properties",
   "RMSE"                             = "(I) Distributional Properties",
-  "OV"                               = "(I) Distributional Properties",
   "ECDF_DiffArea"                    = "(I) Distributional Properties",
   "Runs_PValue"                      = "(I) Distributional Properties",
-  "Between_Dataset_Silh_Local"       = "(I) Distributional Properties",
   "Fasano_Franceschini_2D_KS"        = "(I) Distributional Properties",
   "Peacock_2D_KS"                    = "(I) Distributional Properties",
-  "KDE_Bivariate_zstat"              = "(I) Distributional Properties",
 
   # (II) Correlations & Zero-Inflation
   "midpoint_error"                   = "(II) Correlations & Zero-Inflation",
@@ -178,7 +165,6 @@ utils::globalVariables(c(
   "Generative_Precision"             = "(III) Cellular Structure & Concordance",
   "Generative_Recall"                = "(III) Cellular Structure & Concordance",
   "silhouette_sim"                   = "(III) Cellular Structure & Concordance",
-  "davies_bouldin_sim"               = "(III) Cellular Structure & Concordance",
   "ari"                              = "(III) Cellular Structure & Concordance",
   "nmi"                              = "(III) Cellular Structure & Concordance",
   "dunn_sim"                         = "(III) Cellular Structure & Concordance",
@@ -232,27 +218,22 @@ utils::globalVariables(c(
   "PVE_Group_Sim"                    = "(V) Biological Signal & Downstream Fidelity",
   "PVE_Discrepancy"                  = "(V) Biological Signal & Downstream Fidelity",
 
-  # (VI) Trajectory & Lineage Dynamics
-  "pseudotime_correlation"           = "(VI) Trajectory & Lineage Dynamics",
-  "tree_height_rmse"                 = "(VI) Trajectory & Lineage Dynamics",
-  "graph_alignment"                  = "(VI) Trajectory & Lineage Dynamics",
-  "lineage_expression_fidelity"      = "(VI) Trajectory & Lineage Dynamics",
+  # (VI) Multiomics Integration & Alignment (scib, scMultiSim, scCross, Matilda, scMoMtF)
+  "batch_asw"                        = "(VI) Multiomics Integration & Alignment",
+  "cell_type_asw"                    = "(VI) Multiomics Integration & Alignment",
+  "graph_connectivity"               = "(VI) Multiomics Integration & Alignment",
+  "integration_ari"                  = "(VI) Multiomics Integration & Alignment",
+  "integration_nmi"                  = "(VI) Multiomics Integration & Alignment",
 
-  # (VII) Cross-Modal Coupling & Modularity
-  "FOSCTTM"                          = "(VII) Cross-Modal Coupling & Modularity",
-  "match_at_1"                       = "(VII) Cross-Modal Coupling & Modularity",
-  "cell_pearson_cor"                 = "(VII) Cross-Modal Coupling & Modularity",
-  "mean_coupling_cor"                = "(VII) Cross-Modal Coupling & Modularity",
-  "cross_modal_F1"                   = "(VII) Cross-Modal Coupling & Modularity",
-  "rv_coefficient"                   = "(VII) Cross-Modal Coupling & Modularity",
-  "module_correlation_r"             = "(VII) Cross-Modal Coupling & Modularity",
-  "feature_pearson_cor"              = "(VII) Cross-Modal Coupling & Modularity",
-  "cross_modal_accuracy"             = "(VII) Cross-Modal Coupling & Modularity",
-  "global_PCC"                       = "(VII) Cross-Modal Coupling & Modularity",
+  # (VII) Trajectory & Lineage Topology
+  "pseudotime_correlation"           = "(VII) Trajectory & Lineage Topology",
+  "tree_height_rmse"                 = "(VII) Trajectory & Lineage Topology",
+  "graph_alignment"                  = "(VII) Trajectory & Lineage Topology",
+  "lineage_expression_fidelity"      = "(VII) Trajectory & Lineage Topology",
 
-  # (VIII) Computational Scalability
-  "elapsed_time_seconds"             = "(VIII) Computational Scalability",
-  "peak_memory_mb"                   = "(VIII) Computational Scalability"
+  # (VIII) Computational Scalability & Efficiency
+  "elapsed_time_seconds"             = "(VIII) Computational Scalability & Efficiency",
+  "peak_memory_mb"                   = "(VIII) Computational Scalability & Efficiency"
 )
 
 #' Canonical 48 Gold-Standard Evaluation Metrics Specification
@@ -271,7 +252,7 @@ utils::globalVariables(c(
   "(III) Cellular Structure & Concordance" = list(
     props = c("manifold", "clustering"),
     metrics = c("MMD", "Frechet_SingleCell_Distance", "Generative_Precision", "Generative_Recall",
-                "silhouette_sim", "davies_bouldin_sim", "ari", "nmi")
+                "silhouette_sim", "cdi", "neighborhood_purity", "ari", "nmi")
   ),
   "(IV) Batch Effects & Confounder Mixing" = list(
     props = c("batch_mixing"),
@@ -283,17 +264,15 @@ utils::globalVariables(c(
                 "DP (Proportion/Dropout)_abs_error", "BD (Bimodal Index)_abs_error",
                 "predictive_macro_F1", "deconvolution_RMSE", "delta_variance_MAE")
   ),
-  "(VI) Trajectory & Lineage Dynamics" = list(
+  "(VI) Multiomics Integration & Alignment" = list(
+    props = c("multiomics_integration", "cross_modal_integration", "cross_modality"),
+    metrics = c("batch_asw", "cell_type_asw", "graph_connectivity", "ari", "integration_ari", "nmi", "integration_nmi")
+  ),
+  "(VII) Trajectory & Lineage Topology" = list(
     props = c("pseudotime", "lineage_tree", "trajectory_graph", "lineage_dynamics"),
     metrics = c("pseudotime_correlation", "tree_height_rmse", "graph_alignment", "lineage_expression_fidelity")
   ),
-  "(VII) Cross-Modal Coupling & Modularity" = list(
-    props = c("cross_feature_correlation", "cell_alignment", "in_silico_generation",
-              "regulatory_coupling", "label_transfer", "chromatin_coaccessibility", "coexpression_modularity"),
-    metrics = c("Wasserstein", "KS", "FOSCTTM", "match_at_1", "cell_pearson_cor",
-                "mean_coupling_cor", "cross_modal_F1", "rv_coefficient", "module_correlation_r")
-  ),
-  "(VIII) Computational Scalability" = list(
+  "(VIII) Computational Scalability & Efficiency" = list(
     props = c("resource_usage"),
     metrics = c("elapsed_time_seconds", "peak_memory_mb")
   )
@@ -351,9 +330,9 @@ filter_gold_standard_metrics <- function(df) {
   "(III) Cellular Structure & Concordance",
   "(IV) Batch Effects & Confounder Mixing",
   "(V) Biological Signal & Downstream Fidelity",
-  "(VI) Trajectory & Lineage Dynamics",
-  "(VII) Cross-Modal Coupling & Modularity",
-  "(VIII) Computational Scalability"
+  "(VI) Multiomics Integration & Alignment",
+  "(VII) Trajectory & Lineage Topology",
+  "(VIII) Computational Scalability & Efficiency"
 )
 
 #' @keywords internal
@@ -362,10 +341,10 @@ filter_gold_standard_metrics <- function(df) {
   "(II) Correlations & Zero-Inflation"         = "(II) Correlations &\nZero-Inflation",
   "(III) Cellular Structure & Concordance"     = "(III) Cellular Structure\n& Concordance",
   "(IV) Batch Effects & Confounder Mixing"     = "(IV) Batch Effects &\nConfounder Mixing",
-  "(V) Biological Signal & Downstream Fidelity"= "(V) Biological Signal &\nDownstream Fidelity",
-  "(VI) Trajectory & Lineage Dynamics"         = "(VI) Trajectory &\nLineage Dynamics",
-  "(VII) Cross-Modal Coupling & Modularity"    = "(VII) Cross-Modal\nCoupling & Modularity",
-  "(VIII) Computational Scalability"           = "(VIII) Computational\nScalability"
+  "(V) Biological Signal & Differential Fidelity" = "(V) Biological Signal &\nDifferential Fidelity",
+  "(VI) Multiomics Integration & Alignment"        = "(VI) Cross-Modal\nCoupling & Modularity",
+  "(VII) Trajectory & Lineage Topology"           = "(VII) Trajectory &\nLineage Topology",
+  "(VIII) Computational Scalability & Efficiency" = "(VIII) Computational\nScalability & Efficiency"
 )
 
 #' @keywords internal
@@ -374,10 +353,10 @@ filter_gold_standard_metrics <- function(df) {
   "(II) Correlations & Zero-Inflation"         = "(II)\nCorrelation",
   "(III) Cellular Structure & Concordance"     = "(III)\nCell Structure",
   "(IV) Batch Effects & Confounder Mixing"     = "(IV)\nBatch Mixing",
-  "(V) Biological Signal & Downstream Fidelity"= "(V)\nBio-Signal & DE",
-  "(VI) Trajectory & Lineage Dynamics"         = "(VI)\nTraj.",
-  "(VII) Cross-Modal Coupling & Modularity"    = "(VII)\nCross-Modal",
-  "(VIII) Computational Scalability"           = "(VIII)\nScalability"
+  "(V) Biological Signal & Differential Fidelity" = "(V)\nBio-Signal & DE",
+  "(VI) Multiomics Integration & Alignment"        = "(VI)\nCross-Modal",
+  "(VII) Trajectory & Lineage Topology"           = "(VII)\nTraj.",
+  "(VIII) Computational Scalability & Efficiency" = "(VIII)\nScalability"
 )
 
 #' @keywords internal
@@ -386,10 +365,10 @@ filter_gold_standard_metrics <- function(df) {
   "(II) Correlations & Zero-Inflation"         = "#17A589",
   "(III) Cellular Structure & Concordance"     = "#C0392B",
   "(IV) Batch Effects & Confounder Mixing"     = "#D4AC0D",
-  "(V) Biological Signal & Downstream Fidelity"= "#CA6F1E",
-  "(VI) Trajectory & Lineage Dynamics"         = "#7D3C98",
-  "(VII) Cross-Modal Coupling & Modularity"    = "#2E4057",
-  "(VIII) Computational Scalability"           = "#1E8449"
+  "(V) Biological Signal & Differential Fidelity" = "#CA6F1E",
+  "(VI) Multiomics Integration & Alignment"        = "#2E4057",
+  "(VII) Trajectory & Lineage Topology"           = "#7D3C98",
+  "(VIII) Computational Scalability & Efficiency" = "#1E8449"
 )
 
 #' @keywords internal
@@ -453,7 +432,6 @@ filter_gold_standard_metrics <- function(df) {
   "ami"                         = "global",
   "v_measure"                   = "global",
   "dunn_sim"                    = "global",
-  "davies_bouldin_sim"          = "global",
   "calinski_harabasz_sim"       = "global",
   "pseudotime_correlation"      = "global",
   "tree_height_rmse"            = "global",
@@ -540,16 +518,32 @@ filter_gold_standard_metrics <- function(df) {
   "Cell Structure"                          = "(III) Cellular Structure & Concordance",
   "Batch Effects & Confounder Mixing"       = "(IV) Batch Effects & Confounder Mixing",
   "Batch Mixing"                            = "(IV) Batch Effects & Confounder Mixing",
-  "Biological Signal & Downstream"          = "(V) Biological Signal & Downstream Fidelity",
-  "Biological Signal & Downstream Fidelity" = "(V) Biological Signal & Downstream Fidelity",
-  "Bio-Signal & DE"                         = "(V) Biological Signal & Downstream Fidelity",
-  "Trajectory Dynamics"                     = "(VI) Trajectory & Lineage Dynamics",
-  "Trajectory & Lineage Dynamics"           = "(VI) Trajectory & Lineage Dynamics",
-  "Trajectory"                              = "(VI) Trajectory & Lineage Dynamics",
-  "Cross-Modal Relationships"               = "(VII) Cross-Modal Coupling & Modularity",
-  "Cross-Modal Coupling & Modularity"       = "(VII) Cross-Modal Coupling & Modularity",
-  "Cross-Modal"                             = "(VII) Cross-Modal Coupling & Modularity",
-  "Computational Scalability"               = "(VIII) Computational Scalability"
+  "Biological Signal & Downstream"          = "(V) Biological Signal & Differential Fidelity",
+  "Biological Signal & Downstream Fidelity" = "(V) Biological Signal & Differential Fidelity",
+  "Biological Signal & Differential"        = "(V) Biological Signal & Differential Fidelity",
+  "Biological Signal & Differential Fidelity" = "(V) Biological Signal & Differential Fidelity",
+  "Bio-Signal & DE"                         = "(V) Biological Signal & Differential Fidelity",
+  "Cross-Modal Relationships"               = "(VI) Multiomics Integration & Alignment",
+  "Cross-Modal Coupling & Modularity"       = "(VI) Multiomics Integration & Alignment",
+  "(VI) Multiomics Integration & Alignment"  = "(VI) Multiomics Integration & Alignment",
+  "(VII) Cross-Modal Coupling & Modularity" = "(VI) Multiomics Integration & Alignment",
+  "Cross-Modal"                             = "(VI) Multiomics Integration & Alignment",
+  "Multiomics Integration & Alignment"      = "(VI) Multiomics Integration & Alignment",
+  "(VI) Multiomics Integration & Alignment" = "(VI) Multiomics Integration & Alignment",
+  "Multiomics Integration"                  = "(VI) Multiomics Integration & Alignment",
+  "Integration & Alignment"                 = "(VI) Multiomics Integration & Alignment",
+  "Trajectory Dynamics"                     = "(VII) Trajectory & Lineage Topology",
+  "Trajectory & Lineage Dynamics"           = "(VII) Trajectory & Lineage Topology",
+  "Trajectory & Lineage Topology"           = "(VII) Trajectory & Lineage Topology",
+  "(VI) Trajectory & Lineage Dynamics"      = "(VII) Trajectory & Lineage Topology",
+  "(VII) Trajectory & Lineage Dynamics"     = "(VII) Trajectory & Lineage Topology",
+  "(VII) Trajectory & Lineage Topology"     = "(VII) Trajectory & Lineage Topology",
+  "Trajectory"                              = "(VII) Trajectory & Lineage Topology",
+  "Traj."                                   = "(VII) Trajectory & Lineage Topology",
+  "Computational Scalability"               = "(VIII) Computational Scalability & Efficiency",
+  "Computational Scalability & Efficiency"  = "(VIII) Computational Scalability & Efficiency",
+  "(VIII) Computational Scalability"        = "(VIII) Computational Scalability & Efficiency",
+  "(VIII) Computational Scalability & Efficiency" = "(VIII) Computational Scalability & Efficiency"
 )
 
 #' Standardize Category Names in Benchmark Tables
@@ -590,7 +584,6 @@ standardize_benchmark_categories <- function(df) {
 
 #' @keywords internal
 .HIGHER_IS_BETTER_METRICS <- c(
-  "OV",
   "mean_variance_r2", "cell_pearson_cor", "feature_pearson_cor",
   "silhouette_sim", "dunn_sim", "calinski_harabasz_sim", "ari", "nmi", "ami", "v_measure", "neighborhood_purity",
   "Generative_Precision", "Generative_Recall",
@@ -599,8 +592,8 @@ standardize_benchmark_categories <- function(df) {
   "Distribution_Score", "Classifier_Accuracy", "Classifier_Macro_F1", "Classifier_Macro_Recall",
   "predictive_macro_F1",
   "Silhouette_Sim", "PVE_Group_Sim",
-  "pseudotime_correlation", "graph_alignment", "lineage_expression_fidelity",
-  "cross_modal_accuracy", "cross_modal_F1", "match_at_1", "mean_coupling_cor", "rv_coefficient", "module_correlation_r"
+  "batch_asw", "cell_type_asw", "graph_connectivity", "integration_ari", "integration_nmi",
+  "pseudotime_correlation", "graph_alignment", "lineage_expression_fidelity"
 )
 
 # Shared publication ggplot2 theme
@@ -2162,8 +2155,8 @@ plot_metric_heatmap <- function(
 #' @param as_list Logical. If \code{TRUE} and \code{by_category = TRUE}, returns a named list of ggplot objects. Default \code{FALSE}.
 #' @param category Optional character vector to filter by evaluation category (e.g. \code{"(I) Distributional Properties"}).
 #' @param exclude_categories Character vector of categories to exclude from the ordination.
-#'   Default is \code{c("(VI) Trajectory & Lineage Dynamics", "(VIII) Computational Scalability")}
-#'   because these two categories contain only two measures each, leaving the 6 canonical categories.
+#'   Default is \code{c("(VII) Trajectory & Lineage Topology", "(VIII) Computational Scalability & Efficiency")}
+#'   because these two categories contain only a few measures each, leaving the 6 canonical categories.
 #' @param metrics Optional character vector of specific metrics to include.
 #' @param normalize_scores Logical. If \code{TRUE} (default), scores are direction-aware normalized to [0, 1]
 #'   so that metrics on disparate scales (e.g. MB vs distance) do not artificially distort Euclidean distance.
@@ -2184,7 +2177,7 @@ plot_metric_mds <- function(
   by_category        = FALSE,
   as_list            = FALSE,
   category           = NULL,
-  exclude_categories = c("(VI) Trajectory & Lineage Dynamics", "(VIII) Computational Scalability"),
+  exclude_categories = c("(VII) Trajectory & Lineage Topology", "(VIII) Computational Scalability & Efficiency"),
   metrics            = NULL,
   normalize_scores   = TRUE,
   palette            = NULL,
@@ -3614,17 +3607,24 @@ plot_evaluation_summary <- function(
     "Biological Signal & Downstream Fidelity"    = "(V)\nBio-Signal & DE",
     "Biological Signal & Downstream"             = "(V)\nBio-Signal & DE",
     "Bio-Signal & DE"                            = "(V)\nBio-Signal & DE",
-    "(VI) Trajectory & Lineage Dynamics"         = "(VI)\nTraj.",
-    "Trajectory & Lineage Dynamics"              = "(VI)\nTraj.",
-    "Trajectory Dynamics"                        = "(VI)\nTraj.",
-    "Trajectory"                                 = "(VI)\nTraj.",
-    "Traj."                                      = "(VI)\nTraj.",
-    "(VII) Cross-Modal Coupling & Modularity"    = "(VII)\nCross-Modal",
-    "Cross-Modal Coupling & Modularity"          = "(VII)\nCross-Modal",
-    "Cross-Modal Relationships"                  = "(VII)\nCross-Modal",
-    "Cross-Modal"                                = "(VII)\nCross-Modal",
-    "(VIII) Computational Scalability"           = "(VIII)\nScalability",
-    "Computational Scalability"                  = "(VIII)\nScalability",
+    "(VII) Trajectory & Lineage Topology"        = "(VII)\nTraj.",
+    "(VII) Trajectory & Lineage Dynamics"        = "(VII)\nTraj.",
+    "(VI) Trajectory & Lineage Dynamics"         = "(VII)\nTraj.",
+    "Trajectory & Lineage Topology"              = "(VII)\nTraj.",
+    "Trajectory & Lineage Dynamics"              = "(VII)\nTraj.",
+    "Trajectory Dynamics"                        = "(VII)\nTraj.",
+    "Trajectory"                                 = "(VII)\nTraj.",
+    "Traj."                                      = "(VII)\nTraj.",
+    "(VI) Multiomics Integration & Alignment"    = "(VI)\nMultiomics",
+    "(VI) Cross-Modal Coupling & Modularity"     = "(VI)\nMultiomics",
+    "Multiomics Integration & Alignment"         = "(VI)\nMultiomics",
+    "Cross-Modal Coupling & Modularity"          = "(VI)\nMultiomics",
+    "Cross-Modal Relationships"                  = "(VI)\nMultiomics",
+    "Cross-Modal"                                = "(VI)\nMultiomics",
+    "(VIII) Computational Scalability & Efficiency" = "(VIII)\nScalability",
+    "(VIII) Computational Scalability"             = "(VIII)\nScalability",
+    "Computational Scalability & Efficiency"       = "(VIII)\nScalability",
+    "Computational Scalability"                    = "(VIII)\nScalability",
     "Scalability"                                = "(VIII)\nScalability"
   )
 
@@ -3640,7 +3640,7 @@ plot_evaluation_summary <- function(
       else if (grepl("Batch|Confound", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(IV)\nBatch Mixing"
       else if (grepl("Bio|Signal|DE|Downstream", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(V)\nBio-Signal & DE"
       else if (grepl("Traj|Lineage", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(VI)\nTraj."
-      else if (grepl("Cross|Modal", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(VII)\nCross-Modal"
+      else if (grepl("Cross|Modal|Multiomics|Integration", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(VI)\nMultiomics"
       else if (grepl("Scalab|Comput", dc, ignore.case = TRUE)) df$Short_Category[u_i] <- "(VIII)\nScalability"
       else df$Short_Category[u_i] <- "(I)\nDistribution"
     }
@@ -3695,7 +3695,7 @@ plot_evaluation_summary <- function(
     "(IV)\nBatch Mixing"   = "#FBBF24",  # Amber / Warm Yellow
     "(V)\nBio-Signal & DE" = "#FB923C",  # Coral / Orange
     "(VI)\nTraj."          = "#2DD4BF",  # Teal / Mint
-    "(VII)\nCross-Modal"   = "#818CF8",  # Indigo
+    "(VI)\nMultiomics"     = "#2E4057",  # Indigo
     "(VIII)\nScalability"  = "#4ADE80",  # Light Green
     "Overall\nScore"       = "#94A3B8"   # Slate Grey
   )

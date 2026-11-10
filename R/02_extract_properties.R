@@ -1,211 +1,12 @@
-#' Extract Comprehensive Cell-Level Properties
-#'
-#' Computes library size, log-library size, zero fraction / detection frequency,
-#' pairwise cell correlation (on top HVGs), cell k-NN hubness, pairwise PCA distance,
-#' and outlier proportions.
-#'
-#' @param data Count matrix (features x cells).
-#' @param max_cells_cor Maximum number of cells for computing pairwise correlation (default 1000).
-#' @param n_top_hvgs Number of highly variable genes to use for correlation and PCA (default 500).
-#' @param verbose Logical, whether to print progress messages.
-#'
-#' @return A named list of cell-level summary vectors.
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' extract_cell_properties(example_scrna$ref)
-#' @export
-extract_cell_properties <- function(data, max_cells_cor = 1000, n_top_hvgs = 500, verbose = FALSE) {
-  if (inherits(data, "SingleCellExperiment")) {
-    data <- SummarizedExperiment::assay(data, "counts")
-  } else if (inherits(data, "Seurat")) {
-    data <- Seurat::GetAssayData(data, slot = "counts")
-  }
-  
-  if (verbose) message("Extracting cell library size & log-library size...")
-  lib_size <- as.numeric(Matrix::colSums(data))
-  log_lib_size <- log(lib_size + 1)
-  
-  if (verbose) message("Extracting cell zero fraction & detection rate...")
-  zero_fraction_cell <- fast_sparse_zero_fraction_cell(data)
-  detection_freq_cell <- 1 - zero_fraction_cell
-  
-  # Normalize to log2(CPM+1) for correlation and PCA using top HVGs directly
-  if (verbose) message("Extracting cell-cell correlations on top HVGs...")
-  lib_adj <- lib_size
-  lib_adj[lib_adj == 0] <- 1
-  
-  # Select top variable genes directly from sparse matrix
-  gene_vars <- fast_row_vars(data)
-  n_hvg <- min(n_top_hvgs, length(gene_vars))
-  top_hvg_idx <- order(gene_vars, decreasing = TRUE)[seq_len(n_hvg)]
-  sub_counts <- as.matrix(data[top_hvg_idx, , drop = FALSE])
-  sub_cpm <- log2(t(t(sub_counts) / lib_adj) * 1e6 + 1)
-  
-  n_cells <- ncol(data)
-  max_cor_cells <- min(n_cells, min(max_cells_cor, 500))
-  if (n_cells > max_cor_cells) {
-    sub_cell_idx <- sample(seq_len(n_cells), max_cor_cells)
-    cor_cpm <- sub_cpm[, sub_cell_idx, drop = FALSE]
-  } else {
-    cor_cpm <- sub_cpm
-  }
-  
-  cell_cor_mat <- suppressWarnings(stats::cor(cor_cpm, method = "spearman"))
-  cell_cor <- cell_cor_mat[upper.tri(cell_cor_mat)]
-  
-  # PCA and pairwise cell distance (cell_pcd from HelenaLC)
-  if (verbose) message("Extracting cell PCA distance and k-NN hubness...")
-  pca_dist <- numeric(0)
-  knn_hubness <- numeric(0)
-  tryCatch({
-    pca_pts <- fast_pca(t(sub_cpm), n_pcs = min(20, ncol(sub_cpm) - 1, nrow(sub_cpm)))
-    
-    # Subsample for distance if large
-    if (n_cells > 200) {
-      d_idx <- sample(seq_len(n_cells), 200)
-      pca_dist <- as.numeric(stats::dist(pca_pts[d_idx, ]))
-    } else {
-      pca_dist <- as.numeric(stats::dist(pca_pts))
-    }
-    
-    # Fast k-NN hubness (count how often a cell is in the 5% nearest neighbors)
-    k_val <- max(2, round(0.05 * n_cells))
-    if (requireNamespace("RANN", quietly = TRUE)) {
-      nn <- RANN::nn2(pca_pts, k = k_val + 1)
-      idx_nn <- nn$nn.idx[, seq(2, k_val + 1)]
-      knn_hubness <- as.numeric(tabulate(idx_nn, nbins = n_cells))
-    }
-  }, error = function(e) NULL)
-  
-  # TMM normalization factor & effective library size (countsimQC & simpipe)
-  tmm_factors <- rep(1, n_cells)
-  if (requireNamespace("edgeR", quietly = TRUE) && n_cells <= 1000 && nrow(data) <= 2000) {
-    tryCatch({
-      dge <- suppressMessages(suppressWarnings(edgeR::DGEList(counts = data)))
-      dge <- suppressMessages(suppressWarnings(edgeR::calcNormFactors(dge, method = "TMM")))
-      tmm_factors <- as.numeric(dge$samples$norm.factors)
-    }, error = function(e) NULL)
-  }
-  effective_lib_size <- lib_size * tmm_factors
-  
-  prop_outliers_cell <- calc_outlier_proportion(lib_size)
-  
-  list(
-    library_size = lib_size,
-    log_library_size = log_lib_size,
-    tmm_factor = tmm_factors,
-    effective_library_size = effective_lib_size,
-    zero_fraction_cell = zero_fraction_cell,
-    detection_freq_cell = detection_freq_cell,
-    cell_cor = cell_cor,
-    pca_dist = pca_dist,
-    knn_hubness = knn_hubness,
-    prop_outliers_cell = prop_outliers_cell
-  )
-}
-
-#' Extract Comprehensive Feature-Level (Gene / Peak) Properties
-#'
-#' Computes mean abundance, standard deviation, variance, coefficient of variation (CV),
-#' feature dropout (zero fraction), dispersion, Biological Coefficient of Variation (BCV),
-#' gene-gene correlations, and outlier proportions.
-#'
-#' @param data Count matrix (features x cells).
-#' @param n_top_cor Number of top HVGs to use for gene-gene correlation matrix (default 400).
-#' @param verbose Logical, whether to print progress messages.
-#'
-#' @return A named list of feature-level summary vectors.
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' extract_feature_properties(example_scrna$ref)
-#' @export
-extract_feature_properties <- function(data, n_top_cor = 400, verbose = FALSE) {
-  if (inherits(data, "SingleCellExperiment")) {
-    data <- SummarizedExperiment::assay(data, "counts")
-  } else if (inherits(data, "Seurat")) {
-    data <- Seurat::GetAssayData(data, slot = "counts")
-  }
-  
-  raw_mat <- as.matrix(data)
-  
-  if (verbose) message("Extracting feature zero fraction...")
-  zero_fraction_feature <- fast_sparse_zero_fraction_feature(data)
-  detection_freq_feature <- 1 - zero_fraction_feature
-  
-  lib_sizes <- as.numeric(Matrix::colSums(data))
-  lib_sizes[lib_sizes == 0] <- 1
-  
-  if (verbose) message("Extracting mean, variance, and SD...")
-  raw_mean <- as.numeric(Matrix::rowMeans(data))
-  raw_var <- fast_row_vars(data)
-  raw_sd <- sqrt(raw_var)
-  
-  cv_val <- ifelse(raw_mean > 0, (raw_sd / raw_mean) * 100, 0)
-  dispersion_val <- ifelse(raw_mean > 0, (raw_var) / raw_mean, 0)
-  
-  # Log-normalized mean and variance (computed without full dense matrix conversion)
-  n_genes_cor <- min(n_top_cor, length(raw_var))
-  top_g_idx <- order(raw_var, decreasing = TRUE)[seq_len(n_genes_cor)]
-  
-  if (inherits(data, "dgCMatrix")) {
-    norm_sparse <- data
-    cell_factors <- 1e6 / lib_sizes
-    col_idx <- rep(seq_len(ncol(data)), diff(data@p))
-    norm_sparse@x <- log2(norm_sparse@x * cell_factors[col_idx] + 1)
-    mean_val <- as.numeric(Matrix::rowMeans(norm_sparse))
-    var_val <- fast_row_vars(norm_sparse)
-    sd_val <- sqrt(var_val)
-    sub_g_mat <- as.matrix(norm_sparse[top_g_idx, , drop = FALSE])
-  } else {
-    raw_mat <- as.matrix(data)
-    cpm <- t(t(raw_mat) / lib_sizes) * 1e6
-    norm_mat <- log2(cpm + 1)
-    mean_val <- as.numeric(rowMeans(norm_mat))
-    var_val <- fast_row_vars(norm_mat)
-    sd_val <- sqrt(var_val)
-    sub_g_mat <- norm_mat[top_g_idx, , drop = FALSE]
-  }
-  
-  # Biological Coefficient of Variation (BCV) via fast empirical Negative Binomial approximation
-  if (verbose) message("Extracting Biological Coefficient of Variation (BCV)...")
-  bcv_val <- sqrt(pmax(0, dispersion_val - 1) / pmax(1e-6, raw_mean))
-  
-  # Gene-gene correlation on top variable genes
-  if (verbose) message("Extracting gene-gene correlation...")
-  g_cor_mat <- suppressWarnings({
-    if (ncol(sub_g_mat) > 500) {
-      cor_cells_sub <- sample(seq_len(ncol(sub_g_mat)), 500)
-      stats::cor(t(sub_g_mat[, cor_cells_sub, drop = FALSE]), method = "spearman")
-    } else {
-      stats::cor(t(sub_g_mat), method = "spearman")
-    }
-  })
-  gene_cor <- g_cor_mat[upper.tri(g_cor_mat)]
-  
-  prop_outliers_feature <- calc_outlier_proportion(as.numeric(Matrix::rowSums(data)))
-  
-  list(
-    mean_expression = mean_val,
-    variance = var_val,
-    sd = sd_val,
-    cv = cv_val,
-    zero_fraction_feature = zero_fraction_feature,
-    detection_freq_feature = detection_freq_feature,
-    dispersion = dispersion_val,
-    bcv = bcv_val,
-    gene_cor = gene_cor,
-    prop_outliers_feature = prop_outliers_feature
-  )
-}
-
 # -----------------------------------------------------------------------------
-# Splatter, zingeR & ZINB-WaVE Dropout and Zero-Inflation Modeling
+# Category II: Zero-Inflation, Dropout Kinetics (scRNA-seq), &
+#              Chromatin Accessibility-Sparsity Curves (scATAC-seq)
 # -----------------------------------------------------------------------------
 
 #' Fit Zero-Probability Dropout Curve (Splatter & ZINB-WaVE)
 #'
 #' Fits an empirical logistic dropout curve: logit(P(Y=0)) = beta_0 + beta_1 * log(mu)
-#' to model the dropout relationship with mean expression.
+#' to model the scRNA-seq dropout relationship with mean expression.
 #'
 #' @param counts Count matrix (genes x cells) or SingleCellExperiment.
 #' @return A list containing intercept, slope, midpoint (inflection point), and R-squared.
@@ -254,11 +55,11 @@ calc_zero_probability_curve <- function(counts) {
 
 #' Evaluate Zero-Probability Dropout Curve Fidelity (Splatter & ZINB-WaVE)
 #'
-#' Compares empirical dropout trends between reference and simulated datasets.
+#' Compares empirical logistic dropout trends between reference and simulated scRNA-seq datasets.
 #'
 #' @param ref_counts Reference count matrix.
 #' @param sim_counts Simulated count matrix.
-#' @return Named numeric vector of curve parameter differences.
+#' @return Named numeric vector of curve parameter differences (\code{slope_error}, \code{midpoint_error}, \code{r2_discrepancy}).
 #' @examples
 #' data(example_scrna, package = "scSimEval")
 #' evaluate_zero_probability_curve(example_scrna$ref, example_scrna$sim)
@@ -279,7 +80,7 @@ evaluate_zero_probability_curve <- function(ref_counts, sim_counts) {
 #' Calculates the posterior probability of zero counts being technical dropouts
 #' (excess zeros) versus biological sampling zeros under a Negative Binomial model.
 #'
-#' @param counts Count matrix (genes x cells).
+#' @param counts Count matrix (features x cells).
 #' @return A list with mean excess zero weight, gene-level weights, and estimated zero-inflation rate.
 #' @examples
 #' data(example_scrna, package = "scSimEval")
@@ -317,86 +118,6 @@ calc_excess_zero_weights <- function(counts) {
   )
 }
 
-# -----------------------------------------------------------------------------
-# SymSim: Kinetic Transcription & Intrinsic vs. Extrinsic Noise Decomposition
-# -----------------------------------------------------------------------------
-
-#' Kinetic Noise Decomposition (SymSim & Elowitz et al.)
-#'
-#' Decomposes gene expression variance / squared coefficient of variation (CV^2)
-#' into intrinsic transcriptional bursting noise and extrinsic cell-state noise.
-#'
-#' @param counts Matrix of expression counts (genes x cells) or SingleCellExperiment.
-#' @param cell_states Optional factor or vector of cell states / subpopulation clusters.
-#'   If provided, noise is partitioned into within-state (intrinsic) and between-state (extrinsic) components.
-#'   If NULL, intrinsic noise is estimated via Poisson shot-noise expectation (1 / mean).
-#'
-#' @return A list containing mean intrinsic noise, mean extrinsic noise, noise ratio, and gene-level vectors.
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' calc_kinetic_noise_decomposition(example_scrna$ref)
-#' @export
-calc_kinetic_noise_decomposition <- function(counts, cell_states = NULL) {
-  if (inherits(counts, "SingleCellExperiment")) {
-    counts <- SummarizedExperiment::assay(counts, "counts")
-  }
-  raw_mat <- as.matrix(counts)
-  gene_means <- rowMeans(raw_mat)
-  gene_vars <- apply(raw_mat, 1, stats::var)
-  
-  valid <- which(gene_means > 0.05)
-  if (length(valid) < 5) {
-    return(list(mean_intrinsic_noise = NA_real_, mean_extrinsic_noise = NA_real_, noise_ratio = NA_real_))
-  }
-  
-  sub_mat <- raw_mat[valid, , drop = FALSE]
-  m_sub <- gene_means[valid]
-  v_sub <- gene_vars[valid]
-  cv2_total <- v_sub / (m_sub^2)
-  
-  if (!is.null(cell_states) && length(unique(cell_states)) >= 2) {
-    states <- as.factor(cell_states)
-    n_cells <- ncol(sub_mat)
-    state_weights <- table(states) / n_cells
-    
-    # Within-state variance: intrinsic noise
-    within_vars <- matrix(0, nrow = nrow(sub_mat), ncol = nlevels(states))
-    state_means <- matrix(0, nrow = nrow(sub_mat), ncol = nlevels(states))
-    
-    lvls <- levels(states)
-    for (idx in seq_along(lvls)) {
-      c_idx <- which(states == lvls[idx])
-      if (length(c_idx) >= 2) {
-        state_means[, idx] <- rowMeans(sub_mat[, c_idx, drop = FALSE])
-        within_vars[, idx] <- apply(sub_mat[, c_idx, drop = FALSE], 1, stats::var)
-      } else {
-        state_means[, idx] <- sub_mat[, c_idx]
-        within_vars[, idx] <- 0
-      }
-    }
-    
-    # Expected within-state variance
-    exp_within_var <- as.numeric(within_vars %*% as.numeric(state_weights))
-    cv2_intrinsic <- exp_within_var / (m_sub^2)
-    cv2_extrinsic <- pmax(0, cv2_total - cv2_intrinsic)
-  } else {
-    # Theoretical Poisson shot noise baseline: Var_poisson = mean => CV^2_poisson = 1 / mean
-    cv2_intrinsic <- pmin(cv2_total, 1 / m_sub)
-    cv2_extrinsic <- pmax(0, cv2_total - cv2_intrinsic)
-  }
-  
-  ratio <- ifelse(cv2_total > 0, cv2_intrinsic / cv2_total, 0)
-  
-  list(
-    mean_intrinsic_noise = mean(cv2_intrinsic, na.rm = TRUE),
-    mean_extrinsic_noise = mean(cv2_extrinsic, na.rm = TRUE),
-    mean_total_cv2 = mean(cv2_total, na.rm = TRUE),
-    mean_intrinsic_fraction = mean(ratio, na.rm = TRUE),
-    gene_intrinsic_noise = cv2_intrinsic,
-    gene_extrinsic_noise = cv2_extrinsic
-  )
-}
-
 #' Fit Chromatin Accessibility-Sparsity Polynomial Curve (simATAC)
 #'
 #' Fits a polynomial curve relating peak/bin mean accessibility to non-zero cell
@@ -409,13 +130,16 @@ calc_kinetic_noise_decomposition <- function(counts, cell_states = NULL) {
 #' @return A list with estimated coefficients (c0, c1, c2), R-squared, Spearman/Pearson
 #'   correlations, and model fit summary.
 #' @examples
-#' data(example_scrna, package = "scSimEval")
-#' calc_accessibility_sparsity_curve(example_scrna$ref)
+#' data(example_scatac, package = "scSimEval")
+#' calc_accessibility_sparsity_curve(example_scatac$ref)
 #' @export
 calc_accessibility_sparsity_curve <- function(data, poly_degree = 2) {
+  if (inherits(data, "SingleCellExperiment")) {
+    data <- SummarizedExperiment::assay(data, "counts")
+  }
   if (is.matrix(data) || inherits(data, "Matrix")) {
-    means <- rowMeans(data)
-    nzp <- rowMeans(data > 0)
+    means <- as.numeric(Matrix::rowMeans(data))
+    nzp <- 1 - fast_sparse_zero_fraction_feature(data)
   } else if (is.data.frame(data) && all(c("mean", "nzp") %in% colnames(data))) {
     means <- data$mean
     nzp <- data$nzp
@@ -446,8 +170,8 @@ calc_accessibility_sparsity_curve <- function(data, poly_degree = 2) {
   c2 <- ifelse(length(coefs) >= 3, unname(coefs[3]), 0)
   
   r2 <- s_fit$r.squared
-  spearman_cor <- stats::cor(means, nzp, method = "spearman")
-  pearson_cor <- stats::cor(means, nzp, method = "pearson")
+  spearman_cor <- suppressWarnings(stats::cor(means, nzp, method = "spearman"))
+  pearson_cor <- suppressWarnings(stats::cor(means, nzp, method = "pearson"))
   
   list(
     c0 = c0,
@@ -470,25 +194,26 @@ calc_accessibility_sparsity_curve <- function(data, poly_degree = 2) {
 #' @param sim_data Simulated count matrix (peaks x cells).
 #' @param poly_degree Degree of polynomial (default: 2).
 #'
-#' @return A list of reference and simulated curve parameters, absolute discrepancies,
-#'   and curve prediction RMSE.
+#' @return A list containing \code{curve_rmse} and \code{r2_discrepancy} (along with fitted reference and simulated curve parameters).
 #' @examples
-#' data(example_scrna, package = "scSimEval")
-#' evaluate_accessibility_sparsity_curve(example_scrna$ref, example_scrna$sim)
+#' data(example_scatac, package = "scSimEval")
+#' evaluate_accessibility_sparsity_curve(example_scatac$ref, example_scatac$sim)
 #' @export
 evaluate_accessibility_sparsity_curve <- function(ref_data, sim_data, poly_degree = 2) {
+  if (inherits(ref_data, "SingleCellExperiment")) {
+    ref_data <- SummarizedExperiment::assay(ref_data, "counts")
+  }
+  if (inherits(sim_data, "SingleCellExperiment")) {
+    sim_data <- SummarizedExperiment::assay(sim_data, "counts")
+  }
   ref_res <- calc_accessibility_sparsity_curve(ref_data, poly_degree = poly_degree)
   sim_res <- calc_accessibility_sparsity_curve(sim_data, poly_degree = poly_degree)
   
-  delta_c0 <- abs(sim_res$c0 - ref_res$c0)
-  delta_c1 <- abs(sim_res$c1 - ref_res$c1)
-  delta_c2 <- abs(sim_res$c2 - ref_res$c2)
-  delta_r2 <- abs(sim_res$r_squared - ref_res$r_squared)
-  delta_spearman <- abs(sim_res$spearman_cor - ref_res$spearman_cor)
+  r2_discrepancy <- abs(sim_res$r_squared - ref_res$r_squared)
   
   # Predict on common grid of means
   if (is.matrix(ref_data) || inherits(ref_data, "Matrix")) {
-    ref_means <- rowMeans(ref_data)
+    ref_means <- as.numeric(Matrix::rowMeans(ref_data))
   } else {
     ref_means <- ref_data$mean
   }
@@ -504,111 +229,9 @@ evaluate_accessibility_sparsity_curve <- function(ref_data, sim_data, poly_degre
   }
   
   list(
-    ref_c0 = ref_res$c0,
-    ref_c1 = ref_res$c1,
-    ref_c2 = ref_res$c2,
+    curve_rmse = curve_rmse,
+    r2_discrepancy = r2_discrepancy,
     ref_r_squared = ref_res$r_squared,
-    sim_c0 = sim_res$c0,
-    sim_c1 = sim_res$c1,
-    sim_c2 = sim_res$c2,
-    sim_r_squared = sim_res$r_squared,
-    delta_c0 = delta_c0,
-    delta_c1 = delta_c1,
-    delta_c2 = delta_c2,
-    delta_r_squared = delta_r2,
-    delta_spearman = delta_spearman,
-    curve_rmse = curve_rmse
+    sim_r_squared = sim_res$r_squared
   )
 }
-
-#' Extract Dataset Dimensional Properties and Summary Statistics
-#'
-#' Computes key dimensional and biological properties from single-cell or multiomics count matrices,
-#' including cell counts, feature counts, sparsity percentage, biological group/cell type counts,
-#' batch counts, median library size, median detected features per cell, and mean expression level.
-#'
-#' @param mat A count matrix (genes/features x cells), dgCMatrix, SingleCellExperiment, or Seurat object.
-#' @param role Character string describing the role of the dataset (e.g. \code{"Biological Reference"} or \code{"Simulated"}). Default is \code{"Reference"}.
-#' @param method_name Character string indicating the method or dataset name (e.g. \code{"Empirical Reference"}, \code{"Splatter"}). Default is \code{"Dataset"}.
-#' @param modality Character string describing the molecular modality (e.g. \code{"scRNA-seq"}, \code{"scATAC-seq"}). Default is \code{"scRNA-seq"}.
-#' @param cell_types Optional factor or character vector of cell type annotations.
-#' @param batch_info Optional factor or character vector of batch annotations.
-#'
-#' @return A data.frame with 1 row summarizing the dataset properties.
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' extract_dataset_summary(example_scrna$ref, role = "Reference", method_name = "Empirical")
-#' @export
-extract_dataset_summary <- function(mat, role = "Reference", method_name = "Dataset",
-                                    modality = "scRNA-seq", cell_types = NULL, batch_info = NULL) {
-  if (is.null(mat)) return(NULL)
-  
-  if (inherits(mat, "SingleCellExperiment")) {
-    if (is.null(cell_types) && "cell_type" %in% colnames(SummarizedExperiment::colData(mat))) {
-      cell_types <- SummarizedExperiment::colData(mat)$cell_type
-    }
-    if (is.null(batch_info) && "batch" %in% colnames(SummarizedExperiment::colData(mat))) {
-      batch_info <- SummarizedExperiment::colData(mat)$batch
-    }
-    mat <- SingleCellExperiment::counts(mat)
-  } else if (inherits(mat, "Seurat")) {
-    if (is.null(cell_types)) cell_types <- Seurat::Idents(mat)
-    if (is.null(batch_info) && "batch" %in% colnames(mat@meta.data)) {
-      batch_info <- mat@meta.data$batch
-    }
-    mat <- mat[["RNA"]]$counts
-  }
-  
-  n_cells <- ncol(mat)
-  n_features <- nrow(mat)
-  
-  if (inherits(mat, "dgCMatrix")) {
-    n_zeros <- (as.numeric(n_cells) * as.numeric(n_features)) - length(mat@x)
-    sparsity_pct <- round((n_zeros / (as.numeric(n_cells) * as.numeric(n_features))) * 100, 2)
-    lib_sizes <- Matrix::colSums(mat)
-    det_feats <- Matrix::colSums(mat > 0)
-    mean_expr <- mean(mat@x) * (length(mat@x) / (as.numeric(n_cells) * as.numeric(n_features)))
-  } else {
-    mat_num <- as.matrix(mat)
-    sparsity_pct <- round(mean(mat_num == 0) * 100, 2)
-    lib_sizes <- colSums(mat_num)
-    det_feats <- colSums(mat_num > 0)
-    mean_expr <- mean(mat_num)
-  }
-  
-  med_lib <- stats::median(lib_sizes)
-  med_det <- stats::median(det_feats)
-  
-  ct_str <- if (!is.null(cell_types) && length(cell_types) == n_cells) {
-    u_ct <- unique(stats::na.omit(as.character(cell_types)))
-    formatC(length(u_ct), format = "d", big.mark = ",")
-  } else {
-    "Not specified"
-  }
-  
-  b_str <- if (!is.null(batch_info) && length(batch_info) == n_cells) {
-    u_b <- unique(stats::na.omit(as.character(batch_info)))
-    formatC(length(u_b), format = "d", big.mark = ",")
-  } else {
-    "1"
-  }
-  
-  data.frame(
-    "Dataset / Simulator" = as.character(method_name),
-    "Role" = as.character(role),
-    "Modality" = as.character(modality),
-    "Cells (N)" = formatC(as.integer(n_cells), format = "d", big.mark = ","),
-    "Features (P)" = formatC(as.integer(n_features), format = "d", big.mark = ","),
-    "Sparsity" = sprintf("%.2f%%", sparsity_pct),
-    "Cell Types (Groups)" = ct_str,
-    "Batches" = b_str,
-    "Median Lib Size" = formatC(round(med_lib, 1), format = "f", digits = 1, big.mark = ","),
-    "Median Detected Features" = formatC(round(med_det, 0), format = "d", big.mark = ","),
-    "Mean Expression" = formatC(round(mean_expr, 3), format = "f", digits = 3),
-    check.names = FALSE,
-    stringsAsFactors = FALSE
-  )
-}
-
-
-

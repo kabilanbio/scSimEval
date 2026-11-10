@@ -7,7 +7,7 @@
 calc_excess_zero_weights(counts)
 }
 \arguments{
-\item{counts}{Count matrix (genes x cells).}
+\item{counts}{Count matrix (features x cells).}
 }
 \value{
 A list with mean excess zero weight, gene-level weights, and estimated zero-inflation rate.

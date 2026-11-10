@@ -14,14 +14,13 @@ evaluate_accessibility_sparsity_curve(ref_data, sim_data, poly_degree = 2)
 \item{poly_degree}{Degree of polynomial (default: 2).}
 }
 \value{
-A list of reference and simulated curve parameters, absolute discrepancies,
-  and curve prediction RMSE.
+A list containing \code{curve_rmse} and \code{r2_discrepancy} (along with fitted reference and simulated curve parameters).
 }
 \description{
 Compares the non-linear relationship between peak mean accessibility and non-zero
 proportion (NZP) between reference and simulated scATAC-seq datasets.
 }
 \examples{
-data(example_scrna, package = "scSimEval")
-evaluate_accessibility_sparsity_curve(example_scrna$ref, example_scrna$sim)
+data(example_scatac, package = "scSimEval")
+evaluate_accessibility_sparsity_curve(example_scatac$ref, example_scatac$sim)
 }

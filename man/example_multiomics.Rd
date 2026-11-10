@@ -7,8 +7,8 @@
 \format{
 A list with 5 elements:
 \describe{
-  \item{ref_multi}{Named list of reference matrices: \code{rna} (60 x 80) and \code{atac} (60 x 80).}
-  \item{sim_multi}{Named list of simulated matrices: \code{rna} (60 x 80) and \code{atac} (60 x 80).}
+  \item{ref_multi}{Named list of \code{SingleCellExperiment} objects: \code{rna} (60 x 80) and \code{atac} (60 x 80), complete with precomputed PCA reductions in \code{reducedDims}.}
+  \item{sim_multi}{Named list of \code{SingleCellExperiment} objects: \code{rna} (60 x 80) and \code{atac} (60 x 80), complete with precomputed PCA reductions in \code{reducedDims}.}
   \item{cell_types}{A factor of cell-type identities ("TypeA", "TypeB") for the 80 cells.}
   \item{batch_info}{A factor of batch annotations ("Batch1", "Batch2") for the 80 cells.}
   \item{resource_stats}{A list of computational scalability metrics: \code{cpu_time}, \code{memory_mb}, \code{system_time}, \code{elapsed_time}.}

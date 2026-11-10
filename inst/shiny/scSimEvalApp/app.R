@@ -70,26 +70,49 @@ standardize_benchmark_categories <- function(df) {
   legacy_map <- c(
     "Distributional Properties"               = "(I) Distributional Properties",
     "Distribution"                            = "(I) Distributional Properties",
-    "Correlation & Dependencies"              = "(II) Correlations & Zero-Inflation",
-    "Correlations & Zero-Inflation"           = "(II) Correlations & Zero-Inflation",
-    "Correlation"                             = "(II) Correlations & Zero-Inflation",
-    "Cellular Structure & Mixing"             = "(III) Cellular Structure & Concordance",
-    "Cellular Structure & Concordance"        = "(III) Cellular Structure & Concordance",
-    "Cell Structure"                          = "(III) Cellular Structure & Concordance",
-    "Batch Effects & Confounder Mixing"       = "(IV) Batch Effects & Confounder Mixing",
-    "Batch Mixing"                            = "(IV) Batch Effects & Confounder Mixing",
-    "Biological Signal & Downstream"          = "(V) Biological Signal & Downstream Fidelity",
-    "Biological Signal & Downstream Fidelity" = "(V) Biological Signal & Downstream Fidelity",
-    "Bio-Signal & DE"                         = "(V) Biological Signal & Downstream Fidelity",
-    "Trajectory Dynamics"                     = "(VI) Trajectory & Lineage Dynamics",
-    "Trajectory & Lineage Dynamics"           = "(VI) Trajectory & Lineage Dynamics",
-    "Trajectory"                              = "(VI) Trajectory & Lineage Dynamics",
-    "Traj."                                   = "(VI) Trajectory & Lineage Dynamics",
-    "Cross-Modal Relationships"               = "(VII) Cross-Modal Coupling & Modularity",
-    "Cross-Modal Coupling & Modularity"       = "(VII) Cross-Modal Coupling & Modularity",
-    "Cross-Modal"                             = "(VII) Cross-Modal Coupling & Modularity",
-    "Computational Scalability"               = "(VIII) Computational Scalability",
-    "Scalability"                             = "(VIII) Computational Scalability"
+    "Correlation & Dependencies"              = "(II) Sparsity & Zero-Inflation Dynamics",
+    "Correlations & Dependencies"             = "(II) Sparsity & Zero-Inflation Dynamics",
+    "Sparsity & Zero-Inflation Dynamics"      = "(II) Sparsity & Zero-Inflation Dynamics",
+    "(II) Correlations & Zero-Inflation"      = "(II) Sparsity & Zero-Inflation Dynamics",
+    "Correlations & Zero-Inflation"           = "(II) Sparsity & Zero-Inflation Dynamics",
+    "Correlation"                             = "(II) Sparsity & Zero-Inflation Dynamics",
+    "Cellular Manifold & Clustering Concordance" = "(III) Cellular Manifold & Clustering Concordance",
+    "(III) Cellular Structure & Concordance"     = "(III) Cellular Manifold & Clustering Concordance",
+    "Cellular Structure & Mixing"                = "(III) Cellular Manifold & Clustering Concordance",
+    "Cellular Structure & Concordance"           = "(III) Cellular Manifold & Clustering Concordance",
+    "Cell Structure"                             = "(III) Cellular Manifold & Clustering Concordance",
+    "Technical Variation & Batch Mixing Dynamics"      = "(IV) Technical Variation & Batch Mixing Dynamics",
+    "(IV) Technical Variation & Batch Mixing Dynamics" = "(IV) Technical Variation & Batch Mixing Dynamics",
+    "Batch Effects & Confounder Mixing"               = "(IV) Technical Variation & Batch Mixing Dynamics",
+    "(IV) Batch Effects & Confounder Mixing"          = "(IV) Technical Variation & Batch Mixing Dynamics",
+    "Batch Mixing"                            = "(IV) Technical Variation & Batch Mixing Dynamics",
+    "Biological Signal & Downstream"            = "(V) Biological Signal & Differential Fidelity",
+    "Biological Signal & Differential Fidelity"   = "(V) Biological Signal & Differential Fidelity",
+    "Biological Signal & Differential"          = "(V) Biological Signal & Differential Fidelity",
+    "Biological Signal & Differential Fidelity" = "(V) Biological Signal & Differential Fidelity",
+    "(V) Biological Signal & Differential Fidelity" = "(V) Biological Signal & Differential Fidelity",
+    "(V) Biological Signal & Differential Fidelity"   = "(V) Biological Signal & Differential Fidelity",
+    "Bio-Signal & DE"                           = "(V) Biological Signal & Differential Fidelity",
+    "Cross-Modal Relationships"               = "(VI) Multiomics Integration & Alignment",
+    "Cross-Modal Coupling & Modularity"       = "(VI) Multiomics Integration & Alignment",
+    "(VI) Multiomics Integration & Alignment"  = "(VI) Multiomics Integration & Alignment",
+    "(VII) Cross-Modal Coupling & Modularity" = "(VI) Multiomics Integration & Alignment",
+    "Cross-Modal"                             = "(VI) Multiomics Integration & Alignment",
+    "Multiomics Integration & Alignment"      = "(VI) Multiomics Integration & Alignment",
+    "(VI) Multiomics Integration & Alignment" = "(VI) Multiomics Integration & Alignment",
+    "Trajectory Dynamics"                     = "(VII) Trajectory & Lineage Topology",
+    "Trajectory & Lineage Dynamics"           = "(VII) Trajectory & Lineage Topology",
+    "Trajectory & Lineage Topology"           = "(VII) Trajectory & Lineage Topology",
+    "(VI) Trajectory & Lineage Dynamics"      = "(VII) Trajectory & Lineage Topology",
+    "(VII) Trajectory & Lineage Dynamics"     = "(VII) Trajectory & Lineage Topology",
+    "(VII) Trajectory & Lineage Topology"     = "(VII) Trajectory & Lineage Topology",
+    "Trajectory"                              = "(VII) Trajectory & Lineage Topology",
+    "Traj."                                   = "(VII) Trajectory & Lineage Topology",
+    "Computational Scalability"               = "(VIII) Computational Scalability & Efficiency",
+    "Computational Scalability & Efficiency"  = "(VIII) Computational Scalability & Efficiency",
+    "(VIII) Computational Scalability"        = "(VIII) Computational Scalability & Efficiency",
+    "(VIII) Computational Scalability & Efficiency" = "(VIII) Computational Scalability & Efficiency",
+    "Scalability"                             = "(VIII) Computational Scalability & Efficiency"
   )
   if ("Category" %in% colnames(df)) {
     df$Category <- ifelse(df$Category %in% names(legacy_map),
@@ -98,12 +121,12 @@ standardize_benchmark_categories <- function(df) {
   if ("Metric" %in% colnames(df)) {
     mc <- tryCatch(scSimEval:::.METRIC_CATEGORY_MAP[df$Metric], error = function(e) rep(NA_character_, nrow(df)))
     batch_metrics <- c("batch_silhouette", "shannon_entropy", "pcr_r2", "cms", "isi", "seurat_mixing_metric", "ldf_diff", "cross_batch_F1", "cross_batch_accuracy")
-    zero_metrics  <- c("midpoint_error", "slope_error", "r2_discrepancy", "excess_zero_weight_discrepancy", "dropout_curve_midpoint_x0", "dropout_curve_slope_k", "mean_variance_r2", "bcv_discrepancy")
+    zero_metrics  <- c("midpoint_error", "slope_error", "curve_rmse", "r2_discrepancy", "excess_zero_weight_discrepancy", "dropout_curve_midpoint_x0", "dropout_curve_slope_k", "mean_variance_r2", "bcv_discrepancy")
     
     needs_reassign <- !is.na(mc) & (
       is.na(df$Category) | df$Category == "" | df$Category == "Uncategorized" |
-      (!is.na(df$Category) & df$Metric %in% batch_metrics & df$Category != "(IV) Batch Effects & Confounder Mixing") |
-      (!is.na(df$Category) & df$Metric %in% zero_metrics & df$Category != "(II) Correlations & Zero-Inflation")
+      (!is.na(df$Category) & df$Metric %in% batch_metrics & df$Category != "(IV) Technical Variation & Batch Mixing Dynamics") |
+      (!is.na(df$Category) & df$Metric %in% zero_metrics & df$Category != "(II) Sparsity & Zero-Inflation Dynamics")
     )
     needs_reassign[is.na(needs_reassign)] <- FALSE
     if (any(needs_reassign)) {
@@ -122,14 +145,16 @@ filter_gold_standard_metrics <- function(df) {
   if (is.null(df) || !is.data.frame(df) || nrow(df) == 0) return(df)
   if (!"Metric" %in% colnames(df)) return(df)
   
-  cat1_metrics <- c("Wasserstein", "KS", "MAD", "Bhattacharyya", "Runs_Statistic", "NN_Mismatch", "Between_Dataset_Silh_Global")
-  cat1_props <- c("library_size", "zero_fraction_cell", "cell_cor", "mean_expression", "variance", "cv", "zero_fraction_feature", "dispersion", "gene_cor")
-  cat2_metrics <- c("midpoint_error", "slope_error", "r2_discrepancy", "excess_zero_weight_discrepancy")
-  cat3_metrics <- c("MMD", "Frechet_SingleCell_Distance", "Generative_Precision", "Generative_Recall", "silhouette_sim", "davies_bouldin_sim", "ari", "nmi")
-  cat4_metrics <- c("batch_silhouette", "pcr_r2", "cms", "isi", "seurat_mixing_metric", "cross_batch_F1")
-  cat5_metrics <- c("DE (Mean Shift)_abs_error", "DV (Variability)_abs_error", "DD (Distribution)_abs_error", "DP (Proportion/Dropout)_abs_error", "BD (Bimodal Index)_abs_error", "predictive_macro_F1", "deconvolution_RMSE", "delta_variance_MAE")
-  cat6_metrics <- c("pseudotime_correlation", "tree_height_rmse", "graph_alignment", "lineage_expression_fidelity")
-  cat7_metrics <- c("Wasserstein", "KS", "FOSCTTM", "match_at_1", "cell_pearson_cor", "mean_coupling_cor", "cross_modal_F1", "rv_coefficient", "module_correlation_r")
+  cat1_metrics <- c("Wasserstein", "KS", "MAD", "Bhattacharyya", "Runs_Statistic",
+                    "NN_Mismatch", "Between_Dataset_Silh_Global",
+                    "MAE", "RMSE", "KDE_ISE")
+  cat1_props <- c("library_size", "tmm_factor", "zero_fraction_cell", "cell_cor", "mean_expression", "variance", "cv", "zero_fraction_feature", "dispersion", "gene_cor")
+  cat2_metrics <- c("midpoint_error", "slope_error", "curve_rmse", "r2_discrepancy", "excess_zero_weight_discrepancy")
+  cat3_metrics <- c("MMD", "Generative_Precision", "Generative_Recall", "silhouette_sim", "cdi", "neighborhood_purity", "ari", "nmi")
+  cat4_metrics <- c("batch_silhouette", "pcr_r2", "cms", "isi", "cross_batch_F1")
+  cat5_metrics <- c("pval_dist_score", "accuracy", "precision", "recall", "f1_score", "auc", "predictive_macro_F1")
+  cat6_metrics <- c("batch_asw", "cell_type_asw", "graph_connectivity", "ari", "integration_ari")
+  cat7_metrics <- c("pseudotime_correlation", "tree_height_rmse", "graph_alignment", "lineage_expression_fidelity")
   cat8_metrics <- c("elapsed_time_seconds", "peak_memory_mb")
   
   keep_mask <- rep(FALSE, nrow(df))
@@ -209,54 +234,17 @@ read_uploaded_matrix <- function(file_path, file_name) {
   
   if (ext == "rds") {
     obj <- readRDS(file_path)
-    if (inherits(obj, "sparseMatrix")) {
-      return(obj)
-    } else if (is.matrix(obj) || is.data.frame(obj)) {
-      return(as_sparse_or_matrix(obj))
-    } else if (inherits(obj, "SingleCellExperiment") && requireNamespace("SingleCellExperiment", quietly = TRUE)) {
-      return(as_sparse_or_matrix(SingleCellExperiment::counts(obj)))
+    if (inherits(obj, "SingleCellExperiment") && requireNamespace("SingleCellExperiment", quietly = TRUE)) {
+      m <- SummarizedExperiment::assay(obj, "counts")
+      return(as_sparse_or_matrix(m))
     } else if (inherits(obj, "Seurat") && requireNamespace("Seurat", quietly = TRUE)) {
-      return(as_sparse_or_matrix(tryCatch(obj[["RNA"]]$counts, error = function(e) Seurat::GetAssayData(obj, slot = "counts"))))
-    } else if (is.list(obj) && length(obj) > 0) {
-      candidate_names <- c("new_count", "counts", "sim_counts", "simulated", "sim_rna", "sim_atac", "mat")
-      found <- intersect(candidate_names, names(obj))
-      if (length(found) > 0) return(as_sparse_or_matrix(obj[[found[1]]]))
-      for (item in obj) {
-        if (is.matrix(item) || inherits(item, "Matrix") || is.data.frame(item)) {
-          return(as_sparse_or_matrix(item))
-        }
-      }
-      return(as_sparse_or_matrix(obj[[1]]))
+      m <- tryCatch(obj[["RNA"]]$counts, error = function(e) tryCatch(Seurat::GetAssayData(obj, slot = "counts"), error = function(e2) tryCatch(Seurat::GetAssayData(obj, layer = "counts"), error = function(e3) obj@assays[[1]]@counts)))
+      return(as_sparse_or_matrix(m))
     } else {
-      stop("Unsupported RDS format. Please provide a count matrix or data.frame.")
-    }
-  } else if (ext == "csv") {
-    df <- tryCatch(
-      utils::read.csv(file_path, row.names = 1, check.names = FALSE),
-      error = function(e) utils::read.csv(file_path, check.names = FALSE)
-    )
-    return(as_sparse_or_matrix(df))
-  } else if (ext %in% c("tsv", "txt")) {
-    df <- tryCatch(
-      utils::read.table(file_path, sep = "\t", header = TRUE, row.names = 1, check.names = FALSE),
-      error = function(e) utils::read.table(file_path, sep = "\t", header = TRUE, check.names = FALSE)
-    )
-    return(as_sparse_or_matrix(df))
-  } else if (ext %in% c("xlsx", "xls")) {
-    if (requireNamespace("readxl", quietly = TRUE)) {
-      df <- as.data.frame(readxl::read_excel(file_path))
-      if (!is.null(df) && nrow(df) > 0 && ncol(df) > 1) {
-        if (is.character(df[[1]])) {
-          rownames(df) <- make.unique(as.character(df[[1]]))
-          df <- df[, -1, drop = FALSE]
-        }
-      }
-      return(as_sparse_or_matrix(df))
-    } else {
-      stop("readxl package required to read Excel matrix files.")
+      stop("Unsupported RDS object. scSimEval strictly requires a 'Seurat' or 'SingleCellExperiment' object (Option B). Raw count matrices, data frames, or plain lists are not permitted because Category VI (Multiomics Integration & Alignment) requires dimensional reductions and cell metadata. Please wrap your count matrix using Seurat::CreateSeuratObject() or SingleCellExperiment::SingleCellExperiment() and save it as an .rds file.")
     }
   } else {
-    stop(paste("Unsupported file format:", ext))
+    stop(paste0("Unsupported file format (.", ext, "). scSimEval strictly requires 'Seurat' or 'SingleCellExperiment' objects saved as .rds files (Option B). Spreadsheets (.csv, .xlsx, .tsv) cannot store cell metadata or dimensional reductions."))
   }
 }
 
@@ -2642,8 +2630,8 @@ ui <- page_navbar(
                     div(tags$b("II. Correlations & Zeros"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
                     div("Zero curves, mean-var, excess zeros (4)", style = "font-size: 0.75rem; color: #64748B;")),
                 div(style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px;",
-                    div(tags$b("III. Cellular Structure"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
-                    div("Clustering ARI/NMI, silhouettes, k-NN (8)", style = "font-size: 0.75rem; color: #64748B;")),
+                    div(tags$b("III. Cellular Manifold & Clustering"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
+                    div("MMD, Gen. Precision/Recall, ASW, DB, CDI, Purity, ARI, NMI (9)", style = "font-size: 0.75rem; color: #64748B;")),
                 div(style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px;",
                     div(tags$b("IV. Batch & Technical Mixing"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
                     div("CMS, ISI, Seurat mixing, batch silhouette (6)", style = "font-size: 0.75rem; color: #64748B;")),
@@ -2654,7 +2642,7 @@ ui <- page_navbar(
                     div(tags$b("VI. Lineage Dynamics"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
                     div("Pseudotime Spearman/Kendall concordances (4)", style = "font-size: 0.75rem; color: #64748B;")),
                 div(style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px;",
-                    div(tags$b("VII. Cross-Modal Coupling"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
+                    div(tags$b("VI. Multiomics Integration & Alignment"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
                     div("Peak-gene links, FOSCTTM, Match@1 (9)", style = "font-size: 0.75rem; color: #64748B;")),
                 div(style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px;",
                     div(tags$b("VIII. Scalability"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
@@ -3212,13 +3200,13 @@ ui <- page_navbar(
                          "sel_box_cat_first", "1. Choose Category First:",
                          choices = c(
                            "(I) Distributional Properties",
-                           "(II) Correlations & Zero-Inflation",
-                           "(III) Cellular Structure & Concordance",
-                           "(IV) Batch Effects & Confounder Mixing",
-                           "(V) Biological Signal & Downstream Fidelity",
-                           "(VI) Trajectory & Lineage Dynamics",
-                           "(VII) Cross-Modal Coupling & Modularity",
-                           "(VIII) Computational Scalability"
+                           "(II) Sparsity & Zero-Inflation Dynamics",
+                           "(III) Cellular Manifold & Clustering Concordance",
+                           "(IV) Technical Variation & Batch Mixing Dynamics",
+                           "(V) Biological Signal & Differential Fidelity",
+                           "(VI) Multiomics Integration & Alignment",
+                           "(VII) Trajectory & Lineage Topology",
+                           "(VIII) Computational Scalability & Efficiency"
                          ),
                          selected = "(I) Distributional Properties"
                        )
@@ -3242,13 +3230,13 @@ ui <- page_navbar(
                          choices = c(
                            "All 8 Categories" = "all",
                            "(I) Distributional Properties",
-                           "(II) Correlations & Zero-Inflation",
-                           "(III) Cellular Structure & Concordance",
-                           "(IV) Batch Effects & Confounder Mixing",
-                           "(V) Biological Signal & Downstream Fidelity",
-                           "(VI) Trajectory & Lineage Dynamics",
-                           "(VII) Cross-Modal Coupling & Modularity",
-                           "(VIII) Computational Scalability"
+                           "(II) Sparsity & Zero-Inflation Dynamics",
+                           "(III) Cellular Manifold & Clustering Concordance",
+                           "(IV) Technical Variation & Batch Mixing Dynamics",
+                           "(V) Biological Signal & Differential Fidelity",
+                           "(VI) Multiomics Integration & Alignment",
+                           "(VII) Trajectory & Lineage Topology",
+                           "(VIII) Computational Scalability & Efficiency"
                          ),
                          selected = "all"
                        )
@@ -3299,13 +3287,13 @@ ui <- page_navbar(
                        choices = c(
                          "All 8 Categories Combined" = "all",
                          "(I) Distributional Properties",
-                         "(II) Correlations & Zero-Inflation",
-                         "(III) Cellular Structure & Concordance",
-                         "(IV) Batch Effects & Confounder Mixing",
-                         "(V) Biological Signal & Downstream Fidelity",
-                         "(VI) Trajectory & Lineage Dynamics",
-                         "(VII) Cross-Modal Coupling & Modularity",
-                         "(VIII) Computational Scalability"
+                         "(II) Sparsity & Zero-Inflation Dynamics",
+                         "(III) Cellular Manifold & Clustering Concordance",
+                         "(IV) Technical Variation & Batch Mixing Dynamics",
+                         "(V) Biological Signal & Differential Fidelity",
+                         "(VI) Multiomics Integration & Alignment",
+                         "(VII) Trajectory & Lineage Topology",
+                         "(VIII) Computational Scalability & Efficiency"
                        ),
                        selected = "all"
                      ),
@@ -3369,11 +3357,11 @@ ui <- page_navbar(
                        choices = c(
                          "All Categories Combined" = "all",
                          "(I) Distributional Properties" = "(I) Distributional Properties",
-                         "(II) Correlations & Zero-Inflation" = "(II) Correlations & Zero-Inflation",
-                         "(III) Cellular Structure & Concordance" = "(III) Cellular Structure & Concordance",
-                         "(IV) Batch Effects & Confounder Mixing" = "(IV) Batch Effects & Confounder Mixing",
-                         "(V) Biological Signal & Downstream Fidelity" = "(V) Biological Signal & Downstream Fidelity",
-                         "(VII) Cross-Modal Coupling & Modularity" = "(VII) Cross-Modal Coupling & Modularity"
+                         "(II) Sparsity & Zero-Inflation Dynamics" = "(II) Sparsity & Zero-Inflation Dynamics",
+                         "(III) Cellular Manifold & Clustering Concordance" = "(III) Cellular Manifold & Clustering Concordance",
+                         "(IV) Technical Variation & Batch Mixing Dynamics" = "(IV) Technical Variation & Batch Mixing Dynamics",
+                         "(V) Biological Signal & Differential Fidelity" = "(V) Biological Signal & Differential Fidelity",
+                         "(VI) Multiomics Integration & Alignment" = "(VI) Multiomics Integration & Alignment"
                        ),
                        selected = "all"
                      )
@@ -3442,11 +3430,11 @@ ui <- page_navbar(
                        choices = c(
                          "All Categories Combined" = "all",
                          "(I) Distributional Properties" = "(I) Distributional Properties",
-                         "(II) Correlations & Zero-Inflation" = "(II) Correlations & Zero-Inflation",
-                         "(III) Cellular Structure & Concordance" = "(III) Cellular Structure & Concordance",
-                         "(IV) Batch Effects & Confounder Mixing" = "(IV) Batch Effects & Confounder Mixing",
-                         "(V) Biological Signal & Downstream Fidelity" = "(V) Biological Signal & Downstream Fidelity",
-                         "(VII) Cross-Modal Coupling & Modularity" = "(VII) Cross-Modal Coupling & Modularity"
+                         "(II) Sparsity & Zero-Inflation Dynamics" = "(II) Sparsity & Zero-Inflation Dynamics",
+                         "(III) Cellular Manifold & Clustering Concordance" = "(III) Cellular Manifold & Clustering Concordance",
+                         "(IV) Technical Variation & Batch Mixing Dynamics" = "(IV) Technical Variation & Batch Mixing Dynamics",
+                         "(V) Biological Signal & Differential Fidelity" = "(V) Biological Signal & Differential Fidelity",
+                         "(VI) Multiomics Integration & Alignment" = "(VI) Multiomics Integration & Alignment"
                        ),
                        selected = "all"
                      )
@@ -3778,43 +3766,43 @@ ui <- page_navbar(
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "II"),
-                    tags$td(tags$b("Correlations & Zero-Inflation")),
-                    tags$td(style = "text-align: center;", span(class = "badge bg-light text-info border", "Co-expression")),
-                    tags$td("Non-linear mean-variance fit (R² discrepancy), zero-probability curve fidelity (dropout midpoint error x0, transition slope error k), excess zero weights, and chromatin accessibility sparsity concordance.")
+                    tags$td(tags$b("Sparsity & Zero-Inflation Dynamics")),
+                    tags$td(style = "text-align: center;", span(class = "badge bg-light text-info border", "Sparsity & Dropout")),
+                    tags$td("Zero-probability curve fidelity (dropout midpoint error x0, transition slope error k), chromatin accessibility-sparsity curve RMSE, curve fit R² discrepancy, and posterior excess zero weights.")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "III"),
-                    tags$td(tags$b("Cellular Structure & Concordance")),
-                    tags$td(style = "text-align: center;", span(class = "badge bg-light text-success border", "Clustering")),
-                    tags$td("Adjusted Rand Index (ARI), Normalized Mutual Information (NMI), Average Silhouette Width (ASW), Davies-Bouldin index, Generative Precision and Recall, Maximum Mean Discrepancy (MMD), and Fréchet Single-Cell Distance.")
+                    tags$td(tags$b("Cellular Manifold & Clustering Concordance")),
+                    tags$td(style = "text-align: center;", span(class = "badge bg-light text-success border", "Manifold & Clustering")),
+                    tags$td("Maximum Mean Discrepancy (MMD), Generative Precision and Recall, Average Silhouette Width (ASW), Davies-Bouldin index, Clustering Deviation Index (CDI), Neighborhood Purity, Adjusted Rand Index (ARI), and Normalized Mutual Information (NMI).")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "IV"),
-                    tags$td(tags$b("Batch Effects & Confounder Mixing")),
+                    tags$td(tags$b("Technical Variation & Batch Mixing Dynamics")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-warning border", "Technical")),
                     tags$td("Batch Silhouette Width, Principal Component Regression (PCR R²), Cell-Specific Mixing Score (CMS), Inverse Simpson's Index (ISI / iLISI), Seurat Mixing Metric, and Cross-Batch F1 Score.")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "V"),
-                    tags$td(tags$b("Biological Signal & Downstream Fidelity")),
+                    tags$td(tags$b("Biological Signal & Differential Fidelity")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-danger border", "Phenotype")),
                     tags$td("SimBench 5-signal preservation (DE mean shift, DV variance, DD distribution, DP dropout proportion, BD bimodal index), predictive macro-averaged F1, pseudobulk deconvolution RMSE, and delta variance MAE.")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "VI"),
-                    tags$td(tags$b("Trajectory & Lineage Dynamics")),
+                    tags$td(tags$b("Multiomics Integration & Alignment")),
+                    tags$td(style = "text-align: center;", span(class = "badge bg-light text-indigo border", "Multiomics")),
+                    tags$td("Batch Average Silhouette Width (Batch ASW), Cell-Type Average Silhouette Width (Cell-Type ASW), k-NN Graph Connectivity, and Integration Adjusted Rand Index (ARI).")
+                  ),
+                  tags$tr(
+                    tags$td(style = "text-align: center; font-weight: bold;", "VII"),
+                    tags$td(tags$b("Trajectory & Lineage Topology")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-secondary border", "Pseudotime")),
                     tags$td("Pseudotime Spearman rank correlation with reference, lineage branching tree height RMSE discrepancy, topological trajectory graph alignment, and gene expression pattern fidelity along reconstructed lineages.")
                   ),
                   tags$tr(
-                    tags$td(style = "text-align: center; font-weight: bold;", "VII"),
-                    tags$td(tags$b("Cross-Modal Coupling & Modularity")),
-                    tags$td(style = "text-align: center;", span(class = "badge bg-light text-indigo border", "Multiomics")),
-                    tags$td("Cross-modality correlation, FOSCTTM, Match@1 cell pairing rate, cross-modal generative F1, modality alignment (RV coefficient), ATAC-RNA network Jaccard, peak co-accessibility fidelity, and co-expression module fidelity.")
-                  ),
-                  tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "VIII"),
-                    tags$td(tags$b("Computational Scalability")),
+                    tags$td(tags$b("Computational Scalability & Efficiency")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-dark border", "Efficiency")),
                     tags$td("Wall-clock execution runtime (seconds), peak memory consumption (MiB RAM), runtime-memory Pareto trade-offs, and throughput.")
                   )
@@ -4138,7 +4126,7 @@ Cell_03,TypeB
                     style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;",
                     div(
                       h6(tags$b(icon("boxes-stacked", class = "me-1 text-teal"), " 3. Batch Labels (Optional)"), style = "color: #0F172A; margin-bottom: 6px; font-size: 0.88rem;"),
-                      p("Used for Category IV batch mixing (kBET, CMS, LISI, variance decomposition).", style = "font-size: 0.77rem; color: #64748B; margin-bottom: 8px;"),
+                      p("Used for Category IV batch mixing (Batch Silhouette, PCR R², CMS, ISI, cross-batch F1).", style = "font-size: 0.77rem; color: #64748B; margin-bottom: 8px;"),
                       tags$pre("Cell_ID,Batch
 Cell_01,Batch1
 Cell_02,Batch2
@@ -4904,7 +4892,7 @@ server <- function(input, output, session) {
                   tags$td(tags$b("1. scRNA-seq")),
                   tags$td("Count Matrix alone (No metadata)"),
                   tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #475569 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "22 / 48 Metrics")),
-                  tags$td("Cat I (Distributional Properties, 7 moments & 2D tests), Cat II (Correlations & Zero-Inflation, 4 metrics), Cat III (Unsupervised geometry, 4 metrics), Cat V (Delta variance MAE, 1 metric), Cat VI (Trajectory dynamics, 4 metrics), Cat VIII (Computational Scalability, 2 metrics)")
+                  tags$td("Cat I (Distributional Properties, 7 moments & 2D tests), Cat II (Sparsity & Zero-Inflation Dynamics, 4 metrics), Cat III (Unsupervised geometry, 4 metrics), Cat V (Delta variance MAE, 1 metric), Cat VI (Trajectory dynamics, 4 metrics), Cat VIII (Computational Scalability, 2 metrics)")
                 ),
                 tags$tr(
                   tags$td(tags$b("1. scRNA-seq")),
@@ -4915,8 +4903,8 @@ server <- function(input, output, session) {
                 tags$tr(
                   tags$td(tags$b("1. scRNA-seq")),
                   tags$td(tags$b("Full Metadata (Matrix + Cell Types + Batch)")),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #16A34A !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "All 39 / 39 Unimodal Metrics")),
-                  tags$td("Adds +6 metrics: Unlocks Cat IV (Batch Effects & Confounder Mixing: Batch Silhouette, PCR R², CMS, ISI, Seurat mixing metric, cross-batch F1). Maximum possible for unimodal RNA.")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #16A34A !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "All 38 / 38 Unimodal Metrics")),
+                  tags$td("Adds +5 metrics: Unlocks Cat IV (Technical Variation & Batch Mixing Dynamics: Batch Silhouette, PCR R², CMS, ISI, cross-batch F1). Maximum possible for unimodal RNA.")
                 ),
                 tags$tr(
                   tags$td(tags$b("2. scATAC-seq")),
@@ -4933,8 +4921,8 @@ server <- function(input, output, session) {
                 tags$tr(
                   tags$td(tags$b("2. scATAC-seq")),
                   tags$td(tags$b("Full Metadata (Matrix + Cell Types + Batch)")),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #16A34A !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "34 / 48 Metrics")),
-                  tags$td("Adds +6 metrics: Unlocks Cat IV (Epigenomic Batch Effects & Confounder Mixing: Batch Silhouette, PCR R², CMS, ISI, Seurat mixing, cross-batch F1). Maximum possible for unimodal ATAC.")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #16A34A !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "33 / 47 Metrics")),
+                  tags$td("Adds +5 metrics: Unlocks Cat IV (Epigenomic Technical Variation & Batch Mixing Dynamics: Batch Silhouette, PCR R², CMS, ISI, cross-batch F1). Maximum possible for unimodal ATAC.")
                 ),
                 tags$tr(
                   tags$td(tags$b("3. Paired Multiomics")),
@@ -4951,8 +4939,8 @@ server <- function(input, output, session) {
                 tags$tr(
                   tags$td(tags$b("3. Paired Multiomics")),
                   tags$td(tags$b("Full Metadata (RNA + ATAC + Cell Types + Batch)")),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #15803D !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "All 48 / 48 Metrics")),
-                  tags$td("Adds +6 metrics: Cat IV Batch Effects & Confounder Mixing. 100% complete coverage across all 8 biological and computational dimensions (Categories I–VIII)")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #15803D !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "All 47 / 47 Metrics")),
+                  tags$td("Adds +5 metrics: Cat IV Technical Variation & Batch Mixing Dynamics. 100% complete coverage across all 8 biological and computational dimensions (Categories I–VIII)")
                 ),
                 tags$tr(
                   tags$td(tags$b("4. Unpaired Multiomics")),
@@ -5806,7 +5794,7 @@ server <- function(input, output, session) {
         ),
         fluidRow(
           column(3, textInput(paste0("uni_dset_name_", d), "Dataset Name:", value = sprintf("Dataset %d", d))),
-          column(5, fileInput(paste0("file_uni_ref_", d), "Original Reference Count Matrix (.rds / .csv / .tsv / .txt / .xlsx):", accept = c(".rds", ".csv", ".tsv", ".txt", ".xlsx", ".xls"))),
+          column(5, fileInput(paste0("file_uni_ref_", d), "Reference Dataset (Seurat / SingleCellExperiment .rds):", accept = c(".rds"))),
           column(2, fileInput(paste0("file_uni_celltypes_", d), "Cell Types (Optional):", accept = c(".rds", ".csv", ".tsv", ".txt", ".xlsx", ".xls"))),
           column(2, fileInput(paste0("file_uni_batch_", d), "Batches (Optional):", accept = c(".rds", ".csv", ".tsv", ".txt", ".xlsx", ".xls")))
         )
@@ -5846,7 +5834,7 @@ server <- function(input, output, session) {
             tags$small(class = "text-muted ms-2", "(specify simulation file, runtime, and Peak RAM (MiB) for this dataset)")
           ),
           fluidRow(
-            column(6, fileInput(paste0("file_uni_sim_", s, "_", d), sprintf("Simulated Count Matrix for %s (.rds / .csv / .xlsx):", dname_disp), placeholder = sprintf("Simulated %s matrix...", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt", ".xlsx", ".xls"))),
+            column(6, fileInput(paste0("file_uni_sim_", s, "_", d), sprintf("Simulated Dataset for %s (Seurat / SingleCellExperiment .rds):", dname_disp), placeholder = sprintf("Simulated %s Seurat/SCE object...", dname_disp), accept = c(".rds"))),
             column(3, numericInput(paste0("uni_sim_time_", s, "_", d), "Runtime (s):", value = sim_def$time, min = 0.1, step = 1)),
             column(3, numericInput(paste0("uni_sim_mem_", s, "_", d), "Peak RAM (MiB):", value = sim_def$mem, min = 1, step = 10))
           )
@@ -6012,19 +6000,19 @@ server <- function(input, output, session) {
               }
             }
             
-            # Cellular Structure & Concordance (Category III)
+            # Cellular Manifold & Clustering Concordance (Category III)
             if (!is.null(ct_sim) && length(ct_sim) > 0 && length(unique(stats::na.omit(ct_sim))) > 1) {
               try({
                 clu <- evaluate_clustering_metrics(data = sim_mat_d, cell_types = ct_sim, ref_data = ref_mat_d)
-                clu_names <- c("silhouette_sim", "dunn_sim", "davies_bouldin_sim", "calinski_harabasz_sim", "ari", "nmi", "ami", "fmi", "homogeneity", "completeness", "v_measure", "neighborhood_purity")
+                clu_names <- c("silhouette_sim", "cdi", "neighborhood_purity", "ari", "nmi")
                 clu_rows <- list()
                 for (cm in clu_names) {
                   if (!is.null(clu[[cm]])) {
                     val_cm <- as.numeric(clu[[cm]])
                     if (!is.na(val_cm)) {
                       clu_rows[[length(clu_rows) + 1]] <- data.frame(
-                        Category = "(III) Cellular Structure & Concordance",
-                        Property = "clustering_concordance",
+                        Category = "(III) Cellular Manifold & Clustering Concordance",
+                        Property = "clustering",
                         Metric = cm,
                         Value = val_cm,
                         stringsAsFactors = FALSE
@@ -6036,20 +6024,20 @@ server <- function(input, output, session) {
               }, silent = TRUE)
             }
             
-            # Batch Effects & Confounder Mixing (Category IV)
+            # Technical Variation & Batch Mixing Dynamics (Category IV)
             if (!is.null(bt_sim) && length(bt_sim) > 0 && length(unique(stats::na.omit(bt_sim))) > 1) {
               try({
                 sim_m_num <- as.matrix(sim_mat_d)
                 mode(sim_m_num) <- "double"
                 bat <- evaluate_batch_metrics(data = sim_m_num, batch_info = bt_sim, cell_types = ct_sim)
-                bat_names <- c("batch_silhouette", "shannon_entropy", "pcr_r2", "cms", "isi", "seurat_mixing_metric", "ldf_diff")
+                bat_names <- c("batch_silhouette", "pcr_r2", "cms", "isi", "cross_batch_F1")
                 bat_rows <- list()
                 for (bm in bat_names) {
                   if (!is.null(bat[[bm]])) {
                     val_bm <- as.numeric(bat[[bm]])
                     if (!is.na(val_bm)) {
                       bat_rows[[length(bat_rows) + 1]] <- data.frame(
-                        Category = "(IV) Batch Effects & Confounder Mixing",
+                        Category = "(IV) Technical Variation & Batch Mixing Dynamics",
                         Property = "batch_mixing",
                         Metric = bm,
                         Value = val_bm,
@@ -6062,30 +6050,54 @@ server <- function(input, output, session) {
               }, silent = TRUE)
             }
             
-            # Biological Signal & Downstream Fidelity (Category V)
+            # Biological Signal & Differential Fidelity (Category V - Simpipe DEG)
             if (!is.null(ct_sim) && !is.null(ct_ref) && length(unique(stats::na.omit(ct_sim))) > 1 && length(unique(stats::na.omit(ct_ref))) > 1) {
               try({
-                sig_eval <- evaluate_simbench_signals(ref_mat = ref_mat_d, sim_mat = sim_mat_d, ref_celltypes = ct_ref, sim_celltypes = ct_sim)
-                if (is.data.frame(sig_eval) && nrow(sig_eval) > 0) {
+                deg_eval <- evaluate_deg_fidelity(ref_data = ref_mat_d, sim_data = sim_mat_d, ref_celltypes = ct_ref, sim_celltypes = ct_sim)
+                if (!is.null(deg_eval)) {
                   sig_rows <- list()
-                  for (i in seq_len(nrow(sig_eval))) {
-                    val_sig <- as.numeric(sig_eval$Absolute_Error[i])
-                    if (!is.na(val_sig)) {
-                      sig_rows[[length(sig_rows) + 1]] <- data.frame(
-                        Category = "(V) Biological Signal & Downstream Fidelity",
-                        Property = "simbench_signal",
-                        Metric = paste0(sig_eval$Signal_Type[i], "_fidelity"),
-                        Value = val_sig,
-                        stringsAsFactors = FALSE
-                      )
-                    }
+                  if (!is.null(deg_eval$deg_ratio_results$P) && !is.na(deg_eval$deg_ratio_results$P)) {
+                    sig_rows[[length(sig_rows) + 1]] <- data.frame(
+                      Category = "(V) Biological Signal & Differential Fidelity",
+                      Property = "differential_expression",
+                      Metric = "simpipe_true_deg_recovery",
+                      Value = as.numeric(deg_eval$deg_ratio_results$P),
+                      stringsAsFactors = FALSE
+                    )
+                  }
+                  if (!is.null(deg_eval$deg_ratio_results$deg_ratio) && !is.na(deg_eval$deg_ratio_results$deg_ratio)) {
+                    sig_rows[[length(sig_rows) + 1]] <- data.frame(
+                      Category = "(V) Biological Signal & Differential Fidelity",
+                      Property = "differential_expression",
+                      Metric = "simpipe_deg_ratio",
+                      Value = as.numeric(deg_eval$deg_ratio_results$deg_ratio),
+                      stringsAsFactors = FALSE
+                    )
+                  }
+                  if (!is.null(deg_eval$distribution_score_results$distribution_score) && !is.na(deg_eval$distribution_score_results$distribution_score)) {
+                    sig_rows[[length(sig_rows) + 1]] <- data.frame(
+                      Category = "(V) Biological Signal & Differential Fidelity",
+                      Property = "differential_expression",
+                      Metric = "simpipe_distribution_score",
+                      Value = as.numeric(deg_eval$distribution_score_results$distribution_score),
+                      stringsAsFactors = FALSE
+                    )
+                  }
+                  if (!is.null(deg_eval$ml_classification$F1) && !is.na(deg_eval$ml_classification$F1)) {
+                    sig_rows[[length(sig_rows) + 1]] <- data.frame(
+                      Category = "(V) Biological Signal & Differential Fidelity",
+                      Property = "cell_identity_prediction",
+                      Metric = "predictive_macro_F1",
+                      Value = as.numeric(deg_eval$ml_classification$F1),
+                      stringsAsFactors = FALSE
+                    )
                   }
                   if (length(sig_rows) > 0) tbl_sd <- rbind(tbl_sd, do.call(rbind, sig_rows))
                 }
               }, silent = TRUE)
             }
             
-            # Trajectory & Lineage Dynamics (Category VI)
+            # Trajectory & Lineage Topology (Category VII)
             if (!any(grepl("Trajectory", tbl_sd$Category, ignore.case = TRUE))) {
               try({
                 traj_sd <- evaluate_trajectory_metrics(
@@ -6097,7 +6109,7 @@ server <- function(input, output, session) {
                 traj_rows <- list()
                 if (!is.null(traj_sd$pseudotime_correlation) && !is.na(traj_sd$pseudotime_correlation)) {
                   traj_rows[[length(traj_rows) + 1]] <- data.frame(
-                    Category = "(VI) Trajectory & Lineage Dynamics",
+                    Category = "(VII) Trajectory & Lineage Topology",
                     Property = "pseudotime",
                     Metric = "pseudotime_correlation",
                     Value = as.numeric(traj_sd$pseudotime_correlation),
@@ -6106,7 +6118,7 @@ server <- function(input, output, session) {
                 }
                 if (!is.null(traj_sd$tree_height_rmse) && !is.na(traj_sd$tree_height_rmse)) {
                   traj_rows[[length(traj_rows) + 1]] <- data.frame(
-                    Category = "(VI) Trajectory & Lineage Dynamics",
+                    Category = "(VII) Trajectory & Lineage Topology",
                     Property = "lineage_tree",
                     Metric = "tree_height_rmse",
                     Value = as.numeric(traj_sd$tree_height_rmse),
@@ -6115,7 +6127,7 @@ server <- function(input, output, session) {
                 }
                 if (!is.null(traj_sd$graph_alignment) && !is.na(traj_sd$graph_alignment)) {
                   traj_rows[[length(traj_rows) + 1]] <- data.frame(
-                    Category = "(VI) Trajectory & Lineage Dynamics",
+                    Category = "(VII) Trajectory & Lineage Topology",
                     Property = "trajectory_graph",
                     Metric = "graph_alignment",
                     Value = as.numeric(traj_sd$graph_alignment),
@@ -6124,7 +6136,7 @@ server <- function(input, output, session) {
                 }
                 if (!is.null(traj_sd$lineage_expression_fidelity) && !is.na(traj_sd$lineage_expression_fidelity)) {
                   traj_rows[[length(traj_rows) + 1]] <- data.frame(
-                    Category = "(VI) Trajectory & Lineage Dynamics",
+                    Category = "(VII) Trajectory & Lineage Topology",
                     Property = "lineage_dynamics",
                     Metric = "lineage_expression_fidelity",
                     Value = as.numeric(traj_sd$lineage_expression_fidelity),
@@ -6240,8 +6252,8 @@ server <- function(input, output, session) {
           tagList(
             fluidRow(
               column(2, textInput(paste0("multi_dset_name_", d), "Dataset Name:", value = sprintf("Dataset %d", d))),
-              column(5, fileInput(paste0("file_multi_ref_rna_", d), "Reference RNA Matrix (.rds / .csv):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
-              column(5, fileInput(paste0("file_multi_ref_atac_", d), "Reference ATAC Matrix (.rds / .csv):", accept = c(".rds", ".csv", ".tsv", ".txt")))
+              column(5, fileInput(paste0("file_multi_ref_rna_", d), "Reference RNA Dataset (Seurat / SCE .rds):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
+              column(5, fileInput(paste0("file_multi_ref_atac_", d), "Reference ATAC Dataset (Seurat / SCE .rds):", accept = c(".rds", ".csv", ".tsv", ".txt")))
             ),
             div(
               style = "background: #EEF2FF; border: 1px dashed #A5B4FC; border-radius: 6px; padding: 10px; margin-top: 6px;",
@@ -6258,8 +6270,8 @@ server <- function(input, output, session) {
         } else {
           fluidRow(
             column(2, textInput(paste0("multi_dset_name_", d), "Dataset Name:", value = sprintf("Dataset %d", d))),
-            column(3, fileInput(paste0("file_multi_ref_rna_", d), "Reference RNA Matrix (.rds / .csv):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
-            column(3, fileInput(paste0("file_multi_ref_atac_", d), "Reference ATAC Matrix (.rds / .csv):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
+            column(3, fileInput(paste0("file_multi_ref_rna_", d), "Reference RNA Dataset (Seurat / SCE .rds):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
+            column(3, fileInput(paste0("file_multi_ref_atac_", d), "Reference ATAC Dataset (Seurat / SCE .rds):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
             column(2, fileInput(paste0("file_multi_celltypes_", d), "Cell Types (Opt):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
             column(2, fileInput(paste0("file_multi_batch_", d), "Batches (Opt):", accept = c(".rds", ".csv", ".tsv", ".txt")))
           )
@@ -6307,8 +6319,8 @@ server <- function(input, output, session) {
           if (is_unpaired) {
             tagList(
               fluidRow(
-                column(6, fileInput(paste0("file_multi_sim_rna_", s, "_", d), sprintf("Simulated RNA for %s (.rds / .csv):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt"))),
-                column(6, fileInput(paste0("file_multi_sim_atac_", s, "_", d), sprintf("Simulated ATAC for %s (.rds / .csv):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt")))
+                column(6, fileInput(paste0("file_multi_sim_rna_", s, "_", d), sprintf("Simulated RNA for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt"))),
+                column(6, fileInput(paste0("file_multi_sim_atac_", s, "_", d), sprintf("Simulated ATAC for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt")))
               ),
               div(
                 style = "background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;",
@@ -6324,8 +6336,8 @@ server <- function(input, output, session) {
             )
           } else {
             fluidRow(
-              column(4, fileInput(paste0("file_multi_sim_rna_", s, "_", d), sprintf("Simulated RNA for %s (.rds / .csv):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt"))),
-              column(4, fileInput(paste0("file_multi_sim_atac_", s, "_", d), sprintf("Simulated ATAC for %s (.rds / .csv):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt"))),
+              column(4, fileInput(paste0("file_multi_sim_rna_", s, "_", d), sprintf("Simulated RNA for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt"))),
+              column(4, fileInput(paste0("file_multi_sim_atac_", s, "_", d), sprintf("Simulated ATAC for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt"))),
               column(2, numericInput(paste0("multi_sim_time_", s, "_", d), "Runtime (s):", value = sim_def$time, min = 0.1, step = 1)),
               column(2, numericInput(paste0("multi_sim_mem_", s, "_", d), "Peak RAM (MiB):", value = sim_def$mem, min = 1, step = 10))
             )
@@ -7412,7 +7424,7 @@ server <- function(input, output, session) {
             "Uploading ", tags$span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "+ Cell Types"), 
             " unlocks ", tags$b("44 metrics (scRNA)", style = "color: #0C4A6E;"), " / ", tags$b("36 metrics (scATAC)", style = "color: #0C4A6E;"), " (clustering concordance, ARI, NMI, SimBench biological signal fidelity). ",
             "Uploading ", tags$span(class = "badge bg-warning-subtle text-warning border border-warning-subtle", "+ Batch Info"), 
-            " unlocks ", tags$b("51 metrics (scRNA)", style = "color: #0C4A6E;"), " / ", tags$b("43 metrics (scATAC)", style = "color: #0C4A6E;"), " (batch mixing, kBET, LISI, CMS, Shannon entropy)."
+            " unlocks ", tags$b("38 metrics (scRNA)", style = "color: #0C4A6E;"), " / ", tags$b("38 metrics (scATAC)", style = "color: #0C4A6E;"), " (Batch Silhouette, PCR R², CMS, ISI, cross-batch F1)."
           ),
           actionLink(
             "btn_show_metadata_format_hint",
@@ -7519,7 +7531,7 @@ server <- function(input, output, session) {
           div(
             style = "color: #3730A3; line-height: 1.55;",
             tags$b(icon("circle-info", class = "me-1 text-indigo"), "Exact Multiomics Metric Measurement Capacity: ", style = "color: #1E1B4B;"),
-            "Paired RNA + ATAC matrices alone evaluate ", tags$b("30 / 48 metrics", style = "color: #1E1B4B;"), " (unimodal properties for both layers + Category VII Cross-Modal Coupling, FOSCTTM alignment, Match@1, cell Pearson cor, and regulatory linkages). ",
+            "Paired RNA + ATAC matrices alone evaluate ", tags$b("30 / 48 metrics", style = "color: #1E1B4B;"), " (unimodal properties for both layers + Category VI Cross-Modal Coupling, FOSCTTM alignment, Match@1, cell Pearson cor, and regulatory linkages). ",
             "Including ", tags$span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "+ Cell Types"), " unlocks ",
             tags$b("42 / 48 metrics", style = "color: #1E1B4B;"), ". Adding ",
             tags$span(class = "badge bg-warning-subtle text-warning border border-warning-subtle", "+ Batch Info"), 
@@ -8310,13 +8322,13 @@ server <- function(input, output, session) {
       avail <- avail[!is.na(avail) & trimws(avail) != ""]
       canon_order <- c(
         "(I) Distributional Properties",
-        "(II) Correlations & Zero-Inflation",
-        "(III) Cellular Structure & Concordance",
-        "(IV) Batch Effects & Confounder Mixing",
-        "(V) Biological Signal & Downstream Fidelity",
-        "(VI) Trajectory & Lineage Dynamics",
-        "(VII) Cross-Modal Coupling & Modularity",
-        "(VIII) Computational Scalability"
+        "(II) Sparsity & Zero-Inflation Dynamics",
+        "(III) Cellular Manifold & Clustering Concordance",
+        "(IV) Technical Variation & Batch Mixing Dynamics",
+        "(V) Biological Signal & Differential Fidelity",
+        "(VI) Multiomics Integration & Alignment",
+        "(VII) Trajectory & Lineage Topology",
+        "(VIII) Computational Scalability & Efficiency"
       )
       intersect(canon_order, avail)
     } else {

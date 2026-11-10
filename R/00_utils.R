@@ -307,10 +307,10 @@ fast_pca <- function(mat, n_pcs = 20, n_hvg = 2000, scale = FALSE, normalize = F
 
 #' Subsample Large Vectors for Accelerated Distributional Distance Estimation
 #' @param x Numeric vector.
-#' @param max_n Maximum sample size (default 3000).
+#' @param max_n Maximum sample size (default 10000, matching SimBench framework).
 #' @return Subsampled numeric vector if length(x) > max_n, else x.
 #' @export
-subsample_dist_vector <- function(x, max_n = 3000) {
+subsample_dist_vector <- function(x, max_n = 10000) {
   x <- stats::na.omit(as.numeric(x))
   if (length(x) > max_n) {
     sample(x, max_n)
@@ -369,5 +369,308 @@ normalize_counts <- function(mat, scale_factor = 1e6, log_base = 2, pseudo_count
   }
 }
 
+#' Extract Dataset Dimensional Properties and Summary Statistics
+#'
+#' Computes key dimensional and biological properties from single-cell or multiomics count matrices,
+#' including cell counts, feature counts, sparsity percentage, biological group/cell type counts,
+#' batch counts, median library size, median detected features per cell, and mean expression level.
+#'
+#' @param mat A count matrix (genes/features x cells), dgCMatrix, SingleCellExperiment, or Seurat object.
+#' @param role Character string describing the role of the dataset (e.g. \code{"Biological Reference"} or \code{"Simulated"}). Default is \code{"Reference"}.
+#' @param method_name Character string indicating the method or dataset name (e.g. \code{"Empirical Reference"}, \code{"Splatter"}). Default is \code{"Dataset"}.
+#' @param modality Character string describing the molecular modality (e.g. \code{"scRNA-seq"}, \code{"scATAC-seq"}). Default is \code{"scRNA-seq"}.
+#' @param cell_types Optional factor or character vector of cell type annotations.
+#' @param batch_info Optional factor or character vector of batch annotations.
+#'
+#' @return A data.frame with 1 row summarizing the dataset properties.
+#' @examples
+#' data(example_scrna, package = "scSimEval")
+#' extract_dataset_summary(example_scrna$ref, role = "Reference", method_name = "Empirical")
+#' @export
+extract_dataset_summary <- function(mat, role = "Reference", method_name = "Dataset",
+                                    modality = "scRNA-seq", cell_types = NULL, batch_info = NULL) {
+  if (is.null(mat)) return(NULL)
+  
+  if (inherits(mat, "SingleCellExperiment")) {
+    if (is.null(cell_types) && "cell_type" %in% colnames(SummarizedExperiment::colData(mat))) {
+      cell_types <- SummarizedExperiment::colData(mat)$cell_type
+    }
+    if (is.null(batch_info) && "batch" %in% colnames(SummarizedExperiment::colData(mat))) {
+      batch_info <- SummarizedExperiment::colData(mat)$batch
+    }
+    mat <- SingleCellExperiment::counts(mat)
+  } else if (inherits(mat, "Seurat")) {
+    if (is.null(cell_types)) cell_types <- Seurat::Idents(mat)
+    if (is.null(batch_info) && "batch" %in% colnames(mat@meta.data)) {
+      batch_info <- mat@meta.data$batch
+    }
+    mat <- mat[["RNA"]]$counts
+  }
+  
+  n_cells <- ncol(mat)
+  n_features <- nrow(mat)
+  
+  if (inherits(mat, "dgCMatrix")) {
+    n_zeros <- (as.numeric(n_cells) * as.numeric(n_features)) - length(mat@x)
+    sparsity_pct <- round((n_zeros / (as.numeric(n_cells) * as.numeric(n_features))) * 100, 2)
+    lib_sizes <- Matrix::colSums(mat)
+    det_feats <- Matrix::colSums(mat > 0)
+    mean_expr <- mean(mat@x) * (length(mat@x) / (as.numeric(n_cells) * as.numeric(n_features)))
+  } else {
+    mat_num <- as.matrix(mat)
+    sparsity_pct <- round(mean(mat_num == 0) * 100, 2)
+    lib_sizes <- colSums(mat_num)
+    det_feats <- colSums(mat_num > 0)
+    mean_expr <- mean(mat_num)
+  }
+  
+  med_lib <- stats::median(lib_sizes)
+  med_det <- stats::median(det_feats)
+  
+  ct_str <- if (!is.null(cell_types) && length(cell_types) == n_cells) {
+    u_ct <- unique(stats::na.omit(as.character(cell_types)))
+    formatC(length(u_ct), format = "d", big.mark = ",")
+  } else {
+    "Not specified"
+  }
+  
+  b_str <- if (!is.null(batch_info) && length(batch_info) == n_cells) {
+    u_b <- unique(stats::na.omit(as.character(batch_info)))
+    formatC(length(u_b), format = "d", big.mark = ",")
+  } else {
+    "1"
+  }
+  
+  data.frame(
+    "Dataset / Simulator" = as.character(method_name),
+    "Role" = as.character(role),
+    "Modality" = as.character(modality),
+    "Cells (N)" = formatC(as.integer(n_cells), format = "d", big.mark = ","),
+    "Features (P)" = formatC(as.integer(n_features), format = "d", big.mark = ","),
+    "Sparsity" = sprintf("%.2f%%", sparsity_pct),
+    "Cell Types (Groups)" = ct_str,
+    "Batches" = b_str,
+    "Median Lib Size" = formatC(round(med_lib, 1), format = "f", digits = 1, big.mark = ","),
+    "Median Detected Features" = formatC(round(med_det, 0), format = "d", big.mark = ","),
+    "Mean Expression" = formatC(round(mean_expr, 3), format = "f", digits = 3),
+    check.names = FALSE,
+    stringsAsFactors = FALSE
+  )
+}
 
 
+
+
+
+#' Validate and Standardize Single-Cell Input Objects
+#'
+#' Strictly enforces standard input object compliance in \code{scSimEval} (Option B).
+#' Validates that input datasets are either \code{SingleCellExperiment} or
+#' \code{Seurat} objects, extracting underlying count matrices, cell annotations,
+#' batch labels, and dimensional reductions.
+#'
+#' @param obj An object to validate, strictly required to be a \code{SingleCellExperiment} or \code{Seurat} object.
+#' @param arg_name Name of the argument being validated (for clear error messages).
+#' @param reduction_name Optional name of precomputed dimensional reduction (e.g. \code{"PCA"}, \code{"integrated"}).
+#'
+#' @return A list with standardized components:
+#'   \item{object}{The original \code{SingleCellExperiment} or \code{Seurat} object.}
+#'   \item{counts}{Extracted raw count matrix (features x cells).}
+#'   \item{cell_types}{Extracted or parsed cell-type factor/vector, or NULL if absent.}
+#'   \item{batch_info}{Extracted or parsed batch factor/vector, or NULL if absent.}
+#'   \item{embedding}{Extracted dimensional reduction matrix (cells x dims), or NULL if absent.}
+#'
+#' @export
+validate_sc_object <- function(obj, arg_name = "data", reduction_name = NULL) {
+  if (is.null(obj)) return(NULL)
+  
+  is_sce <- inherits(obj, "SingleCellExperiment")
+  is_seurat <- inherits(obj, "Seurat")
+  
+  if (!is_sce && !is_seurat) {
+    stop(sprintf(
+      "scSimEval strictly requires a 'Seurat' or 'SingleCellExperiment' object for '%s' (received '%s').\nTo benchmark your simulation and evaluate all categories (including Category VI Multiomics Integration & Alignment reductions), please package your counts and metadata:\n  - Seurat: Seurat::CreateSeuratObject(counts = <matrix>, meta.data = <data.frame>)\n  - SingleCellExperiment: SingleCellExperiment::SingleCellExperiment(assays = list(counts = <matrix>), colData = <data.frame>)",
+      arg_name, paste(class(obj), collapse = "/")
+    ), call. = FALSE)
+  }
+  
+  counts_mat <- NULL
+  ct_vec <- NULL
+  bt_vec <- NULL
+  embed_mat <- NULL
+  
+  if (is_sce) {
+    # 1. Counts
+    if (requireNamespace("SingleCellExperiment", quietly = TRUE)) {
+      assays_list <- SummarizedExperiment::assays(obj)
+      if ("counts" %in% names(assays_list)) {
+        counts_mat <- assays_list[["counts"]]
+      } else if (length(assays_list) > 0) {
+        counts_mat <- assays_list[[1]]
+      }
+    }
+    # 2. Metadata (cell_type and batch)
+    cd <- SummarizedExperiment::colData(obj)
+    cd_cols <- tolower(colnames(cd))
+    ct_col <- which(cd_cols %in% c("cell_type", "celltype", "cell_types", "cluster", "group", "label", "cell_identity"))[1]
+    if (!is.na(ct_col)) ct_vec <- as.character(cd[[ct_col]])
+    
+    bt_col <- which(cd_cols %in% c("batch", "batch_info", "batches", "replicate", "rep", "donor", "sample"))[1]
+    if (!is.na(bt_col)) bt_vec <- as.character(cd[[bt_col]])
+    
+    # 3. Dimensional Reductions
+    rd_names <- SingleCellExperiment::reducedDimNames(obj)
+    if (!is.null(rd_names) && length(rd_names) > 0) {
+      target_rd <- if (!is.null(reduction_name) && reduction_name %in% rd_names) {
+        reduction_name
+      } else {
+        pref <- c("integrated", "joint", "harmony", "wnn", "PCA", "pca")
+        found <- intersect(pref, rd_names)
+        if (length(found) > 0) found[1] else rd_names[1]
+      }
+      embed_mat <- as.matrix(SingleCellExperiment::reducedDim(obj, target_rd))
+    }
+  } else if (is_seurat) {
+    # 1. Counts
+    counts_mat <- tryCatch(
+      obj[["RNA"]]$counts,
+      error = function(e) {
+        tryCatch(
+          Seurat::GetAssayData(obj, slot = "counts"),
+          error = function(e2) {
+            tryCatch(
+              Seurat::GetAssayData(obj, layer = "counts"),
+              error = function(e3) obj@assays[[1]]@counts
+            )
+          }
+        )
+      }
+    )
+    # 2. Metadata
+    md <- obj@meta.data
+    md_cols <- tolower(colnames(md))
+    ct_col <- which(md_cols %in% c("cell_type", "celltype", "cell_types", "cluster", "group", "label", "cell_identity"))[1]
+    if (!is.na(ct_col)) {
+      ct_vec <- as.character(md[[ct_col]])
+    } else {
+      ident_vec <- tryCatch(as.character(Seurat::Idents(obj)), error = function(e) NULL)
+      if (!is.null(ident_vec) && length(ident_vec) == ncol(counts_mat)) ct_vec <- ident_vec
+    }
+    
+    bt_col <- which(md_cols %in% c("batch", "batch_info", "batches", "replicate", "rep", "donor", "sample"))[1]
+    if (!is.na(bt_col)) bt_vec <- as.character(md[[bt_col]])
+    
+    # 3. Dimensional Reductions
+    red_names <- names(obj@reductions)
+    if (!is.null(red_names) && length(red_names) > 0) {
+      target_red <- if (!is.null(reduction_name) && reduction_name %in% red_names) {
+        reduction_name
+      } else {
+        pref <- c("integrated", "joint", "harmony", "wnn", "pca", "PCA")
+        found <- intersect(pref, red_names)
+        if (length(found) > 0) found[1] else red_names[1]
+      }
+      embed_mat <- as.matrix(Seurat::Embeddings(obj, reduction = target_red))
+    }
+  }
+  
+  list(
+    object = obj,
+    counts = counts_mat,
+    cell_types = ct_vec,
+    batch_info = bt_vec,
+    embedding = embed_mat
+  )
+}
+
+#' Validate and Standardize Multiomics Input Objects
+#'
+#' Strictly enforces standard multiomics input compliance in \code{scSimEval}.
+#' Validates that multiomics inputs conform to \code{Seurat} or \code{SingleCellExperiment} structures.
+#' Accepts either:
+#' \itemize{
+#'   \item A named list of 2 \code{Seurat} or \code{SingleCellExperiment} objects (e.g. \code{list(rna = ..., atac = ...)}).
+#'   \item A multi-modal \code{Seurat} object containing both RNA and ATAC assays.
+#'   \item A multi-modal \code{SingleCellExperiment} object with an \code{altExp} (e.g. ATAC).
+#' }
+#'
+#' @param obj Multiomics dataset object to validate.
+#' @param arg_name Name of argument.
+#' @param reduction_name Optional reduction name to extract.
+#' @return A list with standardized components: \code{m1}, \code{m2}, \code{cell_types}, \code{batch_info}, \code{embedding}.
+#' @export
+validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_name = NULL) {
+  if (is.null(obj)) return(NULL)
+  
+  # Case A: Named list of 2 objects
+  if (is.list(obj) && !inherits(obj, "Seurat") && !inherits(obj, "SingleCellExperiment") && length(obj) >= 2) {
+    o1 <- obj[[1]]
+    o2 <- obj[[2]]
+    v1 <- validate_sc_object(o1, paste0(arg_name, "[[1]]"), reduction_name = reduction_name)
+    v2 <- validate_sc_object(o2, paste0(arg_name, "[[2]]"), reduction_name = reduction_name)
+    
+    ct <- if (!is.null(v1$cell_types)) v1$cell_types else v2$cell_types
+    bt <- if (!is.null(v1$batch_info)) v1$batch_info else v2$batch_info
+    emb <- if (!is.null(v1$embedding)) v1$embedding else v2$embedding
+    
+    return(list(
+      m1 = v1$counts,
+      m2 = v2$counts,
+      m1_obj = v1$object,
+      m2_obj = v2$object,
+      cell_types = ct,
+      batch_info = bt,
+      embedding = emb
+    ))
+  }
+  
+  # Case B: Multi-modal Seurat object
+  if (inherits(obj, "Seurat")) {
+    assay_names <- names(obj@assays)
+    if (length(assay_names) >= 2) {
+      a1_name <- assay_names[1]
+      a2_name <- assay_names[2]
+      m1 <- tryCatch(obj[[a1_name]]$counts, error = function(e) Seurat::GetAssayData(obj, assay = a1_name, slot = "counts"))
+      m2 <- tryCatch(obj[[a2_name]]$counts, error = function(e) Seurat::GetAssayData(obj, assay = a2_name, slot = "counts"))
+      v <- validate_sc_object(obj, arg_name, reduction_name = reduction_name)
+      return(list(
+        m1 = m1,
+        m2 = m2,
+        m1_obj = obj,
+        m2_obj = obj,
+        cell_types = v$cell_types,
+        batch_info = v$batch_info,
+        embedding = v$embedding
+      ))
+    } else {
+      stop(sprintf("Multiomics Seurat object '%s' must contain at least 2 assays (found only '%s').", arg_name, assay_names[1]), call. = FALSE)
+    }
+  }
+  
+  # Case C: Multi-modal SingleCellExperiment with altExp
+  if (inherits(obj, "SingleCellExperiment")) {
+    alt_names <- SingleCellExperiment::altExpNames(obj)
+    if (length(alt_names) >= 1) {
+      m1 <- SummarizedExperiment::assay(obj, "counts")
+      a2 <- SingleCellExperiment::altExp(obj, alt_names[1])
+      m2 <- SummarizedExperiment::assay(a2, "counts")
+      v <- validate_sc_object(obj, arg_name, reduction_name = reduction_name)
+      return(list(
+        m1 = m1,
+        m2 = m2,
+        m1_obj = obj,
+        m2_obj = a2,
+        cell_types = v$cell_types,
+        batch_info = v$batch_info,
+        embedding = v$embedding
+      ))
+    } else {
+      stop(sprintf("Multiomics SingleCellExperiment object '%s' must contain at least one altExp for the secondary modality.", arg_name), call. = FALSE)
+    }
+  }
+  
+  stop(sprintf(
+    "scSimEval strictly requires multiomics inputs for '%s' to be standardized 'Seurat' or 'SingleCellExperiment' objects (or a named list of two such objects, e.g. list(rna = sce_rna, atac = sce_atac)). Received '%s'.",
+    arg_name, paste(class(obj), collapse = "/")
+  ), call. = FALSE)
+}

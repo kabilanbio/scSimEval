@@ -13,7 +13,6 @@ evaluate_multiomics_accuracy(
   is_paired = NULL,
   memory_mb = NULL,
   elapsed_time = NULL,
-  peak_memory_mb = NULL,
   feature_pairs = NULL,
   compute_bivariate = FALSE,
   threads = 1,
@@ -23,7 +22,7 @@ evaluate_multiomics_accuracy(
 \arguments{
 \item{ref_multi}{Named list of reference matrices for Modality 1 and 2.}
 
-\item{sim_multi}{Named list of simulated matrices for Modality 1 and 2.}
+\item{sim_multi}{Simulated matrices for Modality 1 and 2.}
 
 \item{cell_types}{Optional factor or vector of cell type labels for cells.}
 
@@ -42,11 +41,9 @@ accessibility profile concordance) are computed alongside all unimodal metrics.}
 \item{is_paired}{Optional logical alias for \code{pairing}. If provided,
 \code{TRUE} corresponds to \code{"paired"} and \code{FALSE} to \code{"unpaired"}.}
 
-\item{memory_mb}{Optional numeric value of peak memory allocation in MB (or peak_memory_mb).}
+\item{memory_mb}{Optional numeric value of peak memory allocation in MB.}
 
 \item{elapsed_time}{Optional numeric value of wall-clock elapsed time in seconds.}
-
-\item{peak_memory_mb}{Optional alias for \code{memory_mb}.}
 
 \item{feature_pairs}{Optional 2-column data.frame of linked feature pairs.}
 
@@ -80,7 +77,7 @@ using strictly the user's provided inputs:
   \item \strong{Paired Multiomics (e.g. 10x Chromium Multiome, SHARE-seq, SNARE-seq):}
     \itemize{
       \item \emph{Count Matrices Alone (RNA + ATAC):} Measures unimodal distribution layers
-        plus Category VII Cross-Modal Coupling (Wasserstein, KS, FOSCTTM cell alignment score, Match@1,
+        plus Category VI Cross-Modal Coupling (Wasserstein, KS, FOSCTTM cell alignment score, Match@1,
         cross-modal generation PCC, RV coefficient, and peak-to-gene regulatory coupling).
       \item \emph{+ Cell Types:} Unlocks cross-modal label transfer F1, cell-type clustering concordance,
         and SimBench biological signal fidelity.

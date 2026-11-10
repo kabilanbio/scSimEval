@@ -24,4 +24,3 @@ ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_mae(ref, sim)
 }
-\keyword{internal}

@@ -9,7 +9,6 @@ evaluate_batch_metrics(
   batch_info,
   k = NULL,
   n_pcs = 30,
-  pre_data = NULL,
   cell_types = NULL,
   verbose = FALSE
 )
@@ -23,8 +22,6 @@ evaluate_batch_metrics(
 
 \item{n_pcs}{Number of principal components for embedding evaluation. Default is 30.}
 
-\item{pre_data}{Optional matrix of pre-integration / reference expression data (for ldfDiff and local structure).}
-
 \item{cell_types}{Optional factor or character vector of cell types for cross-batch evaluation.}
 
 \item{verbose}{Logical, whether to print progress.}
@@ -32,23 +29,17 @@ evaluate_batch_metrics(
 \value{
 A named list of batch metrics:
   \item{batch_silhouette}{Average silhouette width using batch labels (lower is better mixed)}
-  \item{shannon_entropy}{Entropy of batch frequencies in local neighborhoods}
   \item{pcr_r2}{Total variance explained by batch in principal components (PCR)}
   \item{cms}{Mean Cell-specific mixing score (CellMixS)}
   \item{isi}{Mean Inverse Simpson Index for batch mixing (CellMixS)}
-  \item{seurat_mixing_metric}{Mean Seurat mixing metric (Stuart et al. / CellMixS)}
-  \item{ldf_diff}{Mean Local Density Factor difference (if pre_data supplied)}
-  \item{local_structure}{Mean Local structure preservation overlap (if pre_data supplied)}
-  \item{kbet_rejection}{kBET rejection rate (if kBET installed)}
-  \item{lisi_batch}{Average batch LISI (if lisi installed)}
-  \item{cross_batch_accuracy}{Mean cross-batch cell type transfer accuracy (if cell_types supplied)}
   \item{cross_batch_F1}{Mean cross-batch cell type transfer macro F1 (if cell_types supplied)}
 }
 \description{
 Evaluates how realistically simulated technical batches mix or separate,
-computing kBET, LISI, Batch Silhouette, Shannon Entropy, PC Regression,
-CMS (Cell-Specific Mixing Score), Inverse Simpson Index (ISI), Seurat Mixing Metric,
-and optionally Local Density Differences (ldfDiff) and Local Structure Preservation.
+computing the five canonical Category IV (Technical Variation & Batch Mixing
+Dynamics) metrics: Batch Silhouette, PC Regression R2, CMS (Cell-Specific
+Mixing Score), Inverse Simpson Index (ISI), and cross-batch cell type
+classification macro F1.
 }
 \examples{
 data(example_scrna, package = "scSimEval")

@@ -10,11 +10,14 @@ evaluate_simulation_accuracy(
   cell_types = NULL,
   cell_types_ref = NULL,
   cell_types_sim = NULL,
+  batch_info = NULL,
+  batch_ref = NULL,
+  batch_sim = NULL,
+  modality = NULL,
   compute_bivariate = TRUE,
   threads = 1,
   memory_mb = NULL,
   elapsed_time = NULL,
-  peak_memory_mb = NULL,
   verbose = TRUE
 )
 }
@@ -27,11 +30,9 @@ evaluate_simulation_accuracy(
 
 \item{threads}{Number of threads for parallel computation. Default is 1.}
 
-\item{memory_mb}{Optional numeric value of peak memory allocation in MB (or peak_memory_mb).}
+\item{memory_mb}{Optional numeric value of peak memory allocation in MB.}
 
 \item{elapsed_time}{Optional numeric value of wall-clock elapsed time in seconds.}
-
-\item{peak_memory_mb}{Optional alias for \code{memory_mb}.}
 
 \item{verbose}{Logical, whether to print execution messages. Default is TRUE.}
 }
@@ -50,19 +51,20 @@ zero-inflation curves, and manifold distances between reference and simulated da
 \itemize{
   \item \strong{Count Matrix Alone (No Metadata):} Measures 15 baseline metrics spanning
     Category I (Distributional Properties: Wasserstein, KS, MAD, Bhattacharyya, Runs test,
-    NN mismatch, Inter-dataset silhouette), Category II (Correlations & Zero-Inflation:
-    dropout curve midpoint/slope error, R2 discrepancy, excess zero-inflation weight discrepancy),
-    and Category VI (Trajectory & Lineage Dynamics: pseudotime correlation, tree height RMSE,
+    NN mismatch, Inter-dataset silhouette), Category II (Sparsity & Zero-Inflation Dynamics:
+    dropout curve midpoint/slope error, accessibility-sparsity curve RMSE, R2 discrepancy,
+    excess zero-inflation weight discrepancy),
+    and Category VII (Trajectory & Lineage Topology: pseudotime correlation, tree height RMSE,
     graph alignment, lineage dynamics).
-  \item \strong{+ Cell Types (Optional):} Unlocks 15 additional metrics spanning Category III
-    (Cellular Structure & Concordance: MMD, Fréchet SC distance, Generative Precision/Recall,
-    Silhouette width, Davies-Bouldin, ARI, NMI) and Category V (Biological Signal Fidelity:
+  \item \strong{+ Cell Types (Optional):} Unlocks 16 additional metrics spanning Category III
+    (Cellular Manifold & Clustering Concordance: MMD, Generative Precision/Recall,
+    Silhouette width, Davies-Bouldin, CDI, Neighborhood Purity, ARI, NMI) and Category V (Biological Signal Fidelity:
     SimBench DE/DV/DD/DP/BD signals, predictive cell identity Macro-F1, deconvolution RMSE).
-  \item \strong{+ Batch Annotations (Optional):} Unlocks 7 additional metrics spanning Category IV
-    (Batch Effects & Confounder Mixing: Batch Silhouette, PCR R2, CMS score, LISI/ISI,
-    Seurat mixing metric, cross-batch F1) and biological replicate delta variance MAE.
+  \item \strong{+ Batch Annotations (Optional):} Unlocks 6 additional metrics spanning Category IV
+    (Technical Variation & Batch Mixing Dynamics: Batch Silhouette, PCR R2, CMS score, LISI/ISI,
+    cross-batch F1) and biological replicate delta variance MAE.
   \item \strong{Full Metadata (Count Matrix + Cell Types + Batch):} Unlocks the complete unimodal
-    benchmarking suite of 39 metrics (or all 48 metrics for paired multiomics).
+    benchmarking suite of 38 metrics (or all 47 metrics for paired multiomics).
 }
 }
 \examples{

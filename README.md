@@ -29,10 +29,10 @@ The package supports:
   2. *Correlations & Zero-Inflation* (logistic dropout curves, mean-variance fit, excess zero weights)
   3. *Cellular Structure & Concordance* (unsupervised clustering fidelity, ARI, NMI, Silhouette, Davies-Bouldin, Generative Precision/Recall)
   4. *Batch & Technical Confounders* (batch ASW, PCR $R^2$, CMS, LISI, Seurat mixing, cross-batch F1)
-  5. *Biological Signals & Marker Genes* (SimBench 5-signal DE/DV/DD/DP/BD, predictive Macro-F1, deconvolution RMSE, delta variance MAE)
-  6. *Trajectory & Lineage Dynamics* (pseudotime rank correlation, tree height RMSE, graph alignment, lineage expression fidelity)
-  7. *Cross-Modal Coupling & Modularity* (FOSCTTM alignment, Match@1, joint cell correlation, peak-to-gene $R_V$ linkage, co-regulatory modules)
-  8. *Computational Scalability* (execution runtime in seconds and peak RAM in MiB)
+  5. *Biological Signal & Differential Fidelity* (Simpipe / Libra dual sub-categories for scRNA-seq DEGs and scATAC-seq DARs: DE/DA score, p-value distribution score, true proportion, accuracy, precision, recall, F1, AUC)
+  6. *Cross-Modal Coupling & Modularity* (FOSCTTM alignment, Match@1, joint cell correlation, peak-to-gene $R_V$ linkage, co-regulatory modules)
+  7. *Trajectory & Lineage Topology* (pseudotime rank correlation, tree height RMSE, graph alignment, lineage expression fidelity)
+  8. *Computational Scalability & Efficiency* (execution runtime in seconds and peak RAM in MiB)
 - **Robust Normalization Engine**: Automated library-size scaling, $\log_2(\text{CPM}+1)$ transformation, and joint low-dimensional latent projections prevent technical sequencing-depth artifacts from confounding evaluations.
 - **Low-Dimensional Cell Embeddings**: Multi-simulator UMAP, t-SNE, and PCA projections comparing reference and simulated cells in grid or 1-to-1 layouts, accompanied by quantitative clustering and manifold quality metrics.
 - **Publication-Ready Figures & Reproducible R Scripts**: Generates 600 DPI vector graphics and 100% procedural, self-contained R workflow scripts (free of hardcoded `dput` dumps) equipped with dedicated file path configuration blocks for local or HPC cluster execution.

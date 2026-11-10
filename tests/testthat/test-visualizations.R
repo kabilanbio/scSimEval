@@ -55,7 +55,7 @@ test_that("compute_method_leaderboard computes valid ranking table", {
 test_that("plot_scalability_benchmark returns valid ggplot and patchwork objects", {
   demo_sc <- data.frame(
     Method = rep(c("Splatter", "scDesign3", "SymSim"), each = 2),
-    Category = "(VIII) Computational Scalability",
+    Category = "(VIII) Computational Scalability & Efficiency",
     Metric = rep(c("elapsed_time_seconds", "peak_memory_mb"), 3),
     Score = c(30, 700, 65, 1300, 45, 800)
   )

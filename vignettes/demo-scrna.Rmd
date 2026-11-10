@@ -81,7 +81,7 @@ clust_res <- evaluate_clustering_metrics(
 
 # Preview clustering concordance metrics
 cat("Average Silhouette Width (Simulated):", round(clust_res$silhouette, 4), "\n")
-cat("Davies-Bouldin Index:", round(clust_res$davies_bouldin, 4), "\n")
+cat("Neighborhood Purity:", round(clust_res$neighborhood_purity, 4), "\n")
 cat("Adjusted Rand Index (ARI):", round(clust_res$ARI, 4), "\n")
 cat("Normalized Mutual Information (NMI):", round(clust_res$NMI, 4), "\n")
 ```
@@ -99,9 +99,9 @@ batch_res <- evaluate_batch_metrics(
 )
 
 # Preview batch mixing metrics
-cat("Batch Shannon Entropy:", round(batch_res$shannon_entropy, 4), "\n")
+cat("Batch Silhouette:", round(batch_res$batch_silhouette, 4), "\n")
 cat("Principal Component Regression (PCR R2):", round(batch_res$pcr_r2, 4), "\n")
-cat("Cross-Batch Transfer Accuracy:", round(batch_res$cross_batch_accuracy, 4), "\n")
+cat("Cross-Batch Transfer F1:", round(batch_res$cross_batch_F1, 4), "\n")
 ```
 
 ### 2.4 Differential Expression (DEG) Fidelity (Category 5)
@@ -120,7 +120,7 @@ deg_res <- evaluate_deg_fidelity(
 head(deg_res$deg_summary_table)
 ```
 
-### 2.5 Trajectory and Lineage Dynamics (Category 6)
+### 2.5 Trajectory and Lineage Dynamics (Category 7)
 
 We infer developmental pseudotime and lineage branching directly from scRNA-seq expression counts using `evaluate_trajectory_metrics()`:
 

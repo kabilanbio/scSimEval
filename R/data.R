@@ -10,8 +10,8 @@
 #' @usage data(example_scrna)
 #' @format A list with 4 elements:
 #' \describe{
-#'   \item{ref}{A numeric matrix of reference count data (60 genes x 80 cells).}
-#'   \item{sim}{A numeric matrix of simulated count data (60 genes x 80 cells).}
+#'   \item{ref}{A \code{SingleCellExperiment} object containing reference count data (60 genes x 80 cells), cell types and batch annotations in \code{colData}, and precomputed PCA reductions in \code{reducedDims}.}
+#'   \item{sim}{A \code{SingleCellExperiment} object containing simulated count data (60 genes x 80 cells), cell types and batch annotations in \code{colData}, and precomputed PCA reductions in \code{reducedDims}.}
 #'   \item{cell_types}{A factor of cell-type identities ("TypeA", "TypeB") for the 80 cells.}
 #'   \item{batch_info}{A factor of batch annotations ("Batch1", "Batch2") for the 80 cells.}
 #' }
@@ -36,8 +36,8 @@
 #' @usage data(example_scatac)
 #' @format A list with 4 elements:
 #' \describe{
-#'   \item{ref}{A numeric matrix of reference peak accessibility counts (60 peaks x 80 cells).}
-#'   \item{sim}{A numeric matrix of simulated peak accessibility counts (60 peaks x 80 cells).}
+#'   \item{ref}{A \code{SingleCellExperiment} object containing reference peak accessibility counts (60 peaks x 80 cells), cell types and batch annotations in \code{colData}, and precomputed PCA reductions in \code{reducedDims}.}
+#'   \item{sim}{A \code{SingleCellExperiment} object containing simulated peak accessibility counts (60 peaks x 80 cells), cell types and batch annotations in \code{colData}, and precomputed PCA reductions in \code{reducedDims}.}
 #'   \item{cell_types}{A factor of cell-type identities ("TypeA", "TypeB") for the 80 cells.}
 #'   \item{batch_info}{A factor of batch annotations ("Batch1", "Batch2") for the 80 cells.}
 #' }
@@ -61,8 +61,8 @@
 #' @usage data(example_multiomics)
 #' @format A list with 5 elements:
 #' \describe{
-#'   \item{ref_multi}{Named list of reference matrices: \code{rna} (60 x 80) and \code{atac} (60 x 80).}
-#'   \item{sim_multi}{Named list of simulated matrices: \code{rna} (60 x 80) and \code{atac} (60 x 80).}
+#'   \item{ref_multi}{Named list of \code{SingleCellExperiment} objects: \code{rna} (60 x 80) and \code{atac} (60 x 80), complete with precomputed PCA reductions in \code{reducedDims}.}
+#'   \item{sim_multi}{Named list of \code{SingleCellExperiment} objects: \code{rna} (60 x 80) and \code{atac} (60 x 80), complete with precomputed PCA reductions in \code{reducedDims}.}
 #'   \item{cell_types}{A factor of cell-type identities ("TypeA", "TypeB") for the 80 cells.}
 #'   \item{batch_info}{A factor of batch annotations ("Batch1", "Batch2") for the 80 cells.}
 #'   \item{resource_stats}{A list of computational scalability metrics: \code{cpu_time}, \code{memory_mb}, \code{system_time}, \code{elapsed_time}.}

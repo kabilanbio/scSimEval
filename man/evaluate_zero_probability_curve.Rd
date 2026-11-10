@@ -12,10 +12,10 @@ evaluate_zero_probability_curve(ref_counts, sim_counts)
 \item{sim_counts}{Simulated count matrix.}
 }
 \value{
-Named numeric vector of curve parameter differences.
+Named numeric vector of curve parameter differences (\code{slope_error}, \code{midpoint_error}, \code{r2_discrepancy}).
 }
 \description{
-Compares empirical dropout trends between reference and simulated datasets.
+Compares empirical logistic dropout trends between reference and simulated scRNA-seq datasets.
 }
 \examples{
 data(example_scrna, package = "scSimEval")

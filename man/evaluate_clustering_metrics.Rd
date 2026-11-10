@@ -11,7 +11,9 @@ evaluate_clustering_metrics(
   dist_mat = NULL,
   cell_types = NULL,
   ref_data = NULL,
-  ref_cell_types = NULL
+  ref_cell_types = NULL,
+  batch_info = NULL,
+  threads = 1L
 )
 }
 \arguments{
@@ -28,18 +30,21 @@ evaluate_clustering_metrics(
 \item{ref_data}{Optional reference data to compute reference clustering quality.}
 
 \item{ref_cell_types}{Optional reference cell type labels (if ref_data has different cells than data).}
+
+\item{batch_info}{Optional batch labels per cell passed to \code{\link{calc_cdi}}.}
+
+\item{threads}{Integer number of parallel CPU threads passed to \code{\link{calc_cdi}} (default \code{1L}).}
 }
 \value{
 A named list of all clustering metrics.
 }
 \description{
-Evaluates both unsupervised cluster separation (ASW, Dunn, Connectivity, DB, CH, Neighborhood Purity, CDI)
-and supervised concordance against ground truth labels (Clustering Accuracy ACC,
-Hungarian F1/Precision/Recall, ARI, NMI, AMI, FMI, Homogeneity, Completeness, V-measure).
+Evaluates both unsupervised cluster separation (ASW, DB, Neighborhood Purity, CDI)
+and supervised concordance against ground truth labels (ARI, NMI).
 }
 \examples{
-data <- matrix(stats::rnorm(200), 20, 10)
+data <- matrix(stats::rpois(200, lambda = 3), 20, 10)
 cl <- factor(rep(c("A", "B"), each = 5))
-dist_mat <- stats::dist(data)
+dist_mat <- stats::dist(t(data))
 evaluate_clustering_metrics(data, cl)
 }

@@ -2,27 +2,29 @@
 % Please edit documentation in R/01_metrics_distribution.R
 \name{calc_nn_mismatch}
 \alias{calc_nn_mismatch}
-\title{Calculate Nearest-Neighbor Label Mismatch Proportion}
+\title{Calculate Nearest-Neighbor Composition / Local Neighborhood Similarity (NN Mismatch)}
 \usage{
 calc_nn_mismatch(ref, sim, k = NULL, subsample_size = 300)
 }
 \arguments{
-\item{ref}{Vector or matrix for reference dataset.}
+\item{ref}{Numeric vector (1D) or 2-column matrix/data.frame (2D) of reference values.}
 
-\item{sim}{Vector or matrix for simulated dataset.}
+\item{sim}{Numeric vector (1D) or 2-column matrix/data.frame (2D) of simulated values.}
 
-\item{k}{Number of nearest neighbors (default max(5, 0.05 * N)).}
+\item{k}{Integer number of nearest neighbors. If NULL, defaults to \code{max(5, round(0.05 * N))}.}
 
-\item{subsample_size}{Number of subsampled points to test (default 300).}
+\item{subsample_size}{Maximum number of observations per dataset to subsample for speed (default 300).}
 }
 \value{
-Fraction of points with significant neighbor composition mismatch (p <= 0.05).
+Numeric scalar in \code{[0, 1]} representing the fraction of local neighborhoods with significant dataset composition mismatch (0 = well-mixed, 1 = completely separated).
 }
 \description{
-Integrated from countsimQC (Soneson & Robinson). Evaluates whether the
-dataset label composition in k-NN neighborhoods departs significantly from
-the overall global dataset proportion using Chi-squared tests.
-Works for both 1D numeric vectors and 2D matrices.
+Integrated from countsimQC (Soneson & Robinson). Evaluates local neighborhood
+composition by pooling reference and simulated observations (1D vector or 2D
+matrix), finding the \eqn{k} nearest neighbors for each observation, and
+performing a Pearson Chi-squared goodness-of-fit test comparing the local
+neighborhood dataset proportions against the global dataset proportions.
+Returns the fraction of observations with \eqn{p \le 0.05}.
 }
 \examples{
 ref <- stats::rnorm(50)

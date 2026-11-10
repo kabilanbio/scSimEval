@@ -77,7 +77,7 @@ atac_clust <- evaluate_clustering_metrics(
 )
 
 cat("Average Silhouette Width (Simulated):", round(atac_clust$silhouette, 4), "\n")
-cat("Davies-Bouldin Index:", round(atac_clust$davies_bouldin, 4), "\n")
+cat("Neighborhood Purity:", round(atac_clust$neighborhood_purity, 4), "\n")
 cat("Adjusted Rand Index (ARI):", round(atac_clust$ARI, 4), "\n")
 cat("Normalized Mutual Information (NMI):", round(atac_clust$NMI, 4), "\n")
 ```
@@ -96,9 +96,9 @@ atac_batch <- evaluate_batch_metrics(
   verbose    = FALSE
 )
 
-cat("Batch Shannon Entropy:", round(atac_batch$shannon_entropy, 4), "\n")
+cat("Batch Silhouette:", round(atac_batch$batch_silhouette, 4), "\n")
 cat("Principal Component Regression (PCR R2):", round(atac_batch$pcr_r2, 4), "\n")
-cat("Cross-Batch Transfer Accuracy:", round(atac_batch$cross_batch_accuracy, 4), "\n")
+cat("Cross-Batch Transfer F1:", round(atac_batch$cross_batch_F1, 4), "\n")
 ```
 
 ---
@@ -109,7 +109,7 @@ In real biological cells, peaks that are close to each other or regulated by the
 
 ```{r peak-coacc}
 # Evaluate peak co-accessibility fidelity
-coacc_res <- calc_peak_coaccessibility_fidelity(
+coacc_res <- calc_accessibility_sparsity_curve(
   ref_atac = example_scatac$ref,
   sim_atac = example_scatac$sim
 )

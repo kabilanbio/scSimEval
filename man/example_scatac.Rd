@@ -7,8 +7,8 @@
 \format{
 A list with 4 elements:
 \describe{
-  \item{ref}{A numeric matrix of reference peak accessibility counts (60 peaks x 80 cells).}
-  \item{sim}{A numeric matrix of simulated peak accessibility counts (60 peaks x 80 cells).}
+  \item{ref}{A \code{SingleCellExperiment} object containing reference peak accessibility counts (60 peaks x 80 cells), cell types and batch annotations in \code{colData}, and precomputed PCA reductions in \code{reducedDims}.}
+  \item{sim}{A \code{SingleCellExperiment} object containing simulated peak accessibility counts (60 peaks x 80 cells), cell types and batch annotations in \code{colData}, and precomputed PCA reductions in \code{reducedDims}.}
   \item{cell_types}{A factor of cell-type identities ("TypeA", "TypeB") for the 80 cells.}
   \item{batch_info}{A factor of batch annotations ("Batch1", "Batch2") for the 80 cells.}
 }

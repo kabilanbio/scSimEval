@@ -1,864 +1,539 @@
-
-#' Calculate Cross-Modality Correlation Fidelity
-#'
-#' Evaluates whether cross-modality feature relationships (e.g. peak-to-gene links,
-#' promoter accessibility vs. gene expression, or mRNA vs. surface protein) are accurately
-#' captured by the simulation method compared to the empirical reference.
-#'
-#' @param ref_mod1 Reference matrix for Modality 1 (features x cells).
-#' @param ref_mod2 Reference matrix for Modality 2 (features x cells).
-#' @param sim_mod1 Simulated matrix for Modality 1.
-#' @param sim_mod2 Simulated matrix for Modality 2.
-#' @param feature_pairs Optional 2-column data.frame/matrix of paired feature names/indices.
-#' @param method Correlation method: "spearman" (default) or "pearson".
-#' @param threads Number of threads for parallel computation. Default is 1.
-#'
-#' @return A named list of the 7 univariate accuracy metrics comparing the reference vs.
-#'   simulated cross-modality correlation distributions.
-#' @examples
-#' data(example_multiomics, package = "scSimEval")
-#' m <- example_multiomics
-#' calc_cross_modality_correlation(m$ref_multi$rna, m$ref_multi$atac,
-#'                                 m$sim_multi$rna, m$sim_multi$atac)
-#' @export
-calc_cross_modality_correlation <- function(
-  ref_mod1,
-  ref_mod2,
-  sim_mod1,
-  sim_mod2,
-  feature_pairs = NULL,
-  method = c("spearman", "pearson"),
-  threads = 1
-) {
-  method <- match.arg(method)
-  
-  ref_mod1 <- as.matrix(normalize_counts(ref_mod1))
-  ref_mod2 <- as.matrix(normalize_counts(ref_mod2))
-  sim_mod1 <- as.matrix(normalize_counts(sim_mod1))
-  sim_mod2 <- as.matrix(normalize_counts(sim_mod2))
-  
-  if (is.null(feature_pairs)) {
-    n_pairs <- min(nrow(ref_mod1), nrow(ref_mod2), nrow(sim_mod1), nrow(sim_mod2))
-    max_p <- min(n_pairs, 2000)
-    if (n_pairs > max_p) {
-      idx1 <- sample(seq_len(n_pairs), max_p)
-      idx2 <- idx1
-    } else {
-      idx1 <- seq_len(n_pairs)
-      idx2 <- seq_len(n_pairs)
-    }
-  } else {
-    feature_pairs <- as.data.frame(feature_pairs)
-    idx1 <- feature_pairs[[1]]
-    idx2 <- feature_pairs[[2]]
-    if (length(idx1) > 2000) {
-      p_sub <- sample(seq_along(idx1), 2000)
-      idx1 <- idx1[p_sub]
-      idx2 <- idx2[p_sub]
-    }
-  }
-  
-  # Subsample cells if large for faster cross-correlation estimation
-  n_cells <- min(ncol(ref_mod1), ncol(ref_mod2), ncol(sim_mod1), ncol(sim_mod2))
-  cell_idx <- if (n_cells > 1000) sample(seq_len(n_cells), 1000) else seq_len(n_cells)
-  
-  .compute_cors <- function(m1, m2, i1, i2, c_idx, met, th = 1) {
-    n <- length(i1)
-    if (th > 1 && n >= 100 && requireNamespace("BiocParallel", quietly = TRUE)) {
-      bparam <- if (.Platform$OS.type == "windows") {
-        BiocParallel::SnowParam(workers = th)
-      } else {
-        BiocParallel::MulticoreParam(workers = th)
-      }
-      chunk_size <- max(25, ceiling(n / (th * 4)))
-      chunks <- split(seq_len(n), ceiling(seq_len(n) / chunk_size))
-      cors_list <- tryCatch({
-        suppressWarnings(BiocParallel::bplapply(chunks, function(ck) {
-          vapply(ck, function(i) {
-            x <- m1[i1[i], c_idx]
-            y <- m2[i2[i], c_idx]
-            if (stats::sd(x) > 0 && stats::sd(y) > 0) stats::cor(x, y, method = met) else 0
-          }, numeric(1))
-        }, BPPARAM = bparam))
-      }, error = function(e) NULL)
-      if (!is.null(cors_list)) return(unlist(cors_list, use.names = FALSE))
-    }
-    vapply(seq_along(i1), function(i) {
-      x <- m1[i1[i], c_idx]
-      y <- m2[i2[i], c_idx]
-      if (stats::sd(x) > 0 && stats::sd(y) > 0) stats::cor(x, y, method = met) else 0
-    }, numeric(1))
-  }
-
-  ref_cors <- .compute_cors(ref_mod1, ref_mod2, idx1, idx2, cell_idx, method, threads)
-  sim_cors <- .compute_cors(sim_mod1, sim_mod2, idx1, idx2, cell_idx, method, threads)
-  
-  calc_all_univariate_metrics(ref_cors, sim_cors, metric_prefix = "cross_modality_cor")
-}
-
-#' Cross-Modal Cell-Type Label Transfer Accuracy
-#'
-#' Trains a model using ONLY Modality 1 (e.g., scATAC-seq) and predicts cell-type
-#' identities defined in Modality 2 (e.g., scRNA-seq) to test cross-modal biological coherence.
-#'
-#' @param mod1_data Matrix for Modality 1 (features x cells).
-#' @param cell_types Ground truth cell-type vector from Modality 2.
-#' @return A list with cross-modal classification accuracy and macro F1 score.
-#' @examples
-#' data(example_multiomics, package = "scSimEval")
-#' r_rna <- example_multiomics$ref_multi$rna
-#' r_atac <- example_multiomics$ref_multi$atac
-#' evaluate_cross_modal_prediction(r_rna, example_multiomics$cell_types)
-#' @export
-evaluate_cross_modal_prediction <- function(mod1_data, cell_types) {
-  cell_types <- as.factor(cell_types)
-  data_t <- t(as.matrix(mod1_data))
-  
-  n <- nrow(data_t)
-  train_idx <- sample(seq_len(n), round(0.8 * n))
-  
-  train_x <- data_t[train_idx, , drop = FALSE]
-  test_x <- data_t[-train_idx, , drop = FALSE]
-  train_y <- cell_types[train_idx]
-  test_y <- cell_types[-train_idx]
-  
-  # k-NN prediction
-  pred_y <- class::knn(train = train_x, test = test_x, cl = train_y, k = min(5, nrow(train_x)))
-  
-  cm <- table(Predicted = pred_y, Actual = test_y)
-  acc <- sum(diag(cm)) / max(1, sum(cm))
-  
-  cls <- levels(cell_types)
-  prs <- vapply(cls, function(c) {
-    d <- sum(pred_y == c)
-    if (d > 0) sum(pred_y == c & test_y == c) / d else 0
-  }, numeric(1))
-  
-  res <- vapply(cls, function(c) {
-    d <- sum(test_y == c)
-    if (d > 0) sum(pred_y == c & test_y == c) / d else 0
-  }, numeric(1))
-  
-  f1s <- ifelse(prs + res > 0, 2 * (prs * res) / (prs + res), 0)
-  
-  list(
-    cross_modal_accuracy = acc,
-    cross_modal_F1 = mean(f1s, na.rm = TRUE)
-  )
-}
-
 # ==============================================================================
-# Cross-Modality Integration & In Silico Generation Benchmarks (scCross Metrics)
-# Reference: Zhai et al., Genome Biology 2024, 25:178 (scCross framework)
+# (VI) Multiomics Integration & Alignment
+# Multiomics Integration & Cross-Modal Alignment Fidelity
+# Gold-standard benchmarking metrics extracted from scib, scMultiSim, scCross, Matilda, scMoMtF
 # ==============================================================================
 
-#' Fraction of Samples Closer Than The True Match (FOSCTTM)
+#' Calculate Batch Average Silhouette Width (Batch ASW)
 #'
-#' Computes the Fraction of Samples Closer Than The True Match (FOSCTTM) to quantify
-#' cell alignment error across single-cell multi-omics modalities in a shared latent
-#' or integrated space (Zhai et al., Genome Biology 2024; Liu et al., Nat Biotechnol 2023).
-#' A score of 0 represents perfect alignment (where the true paired cell is the nearest neighbor),
-#' while 0.5 corresponds to random chance.
+#' Evaluates batch mixing within each cell type in integrated or joint multiomics
+#' embedding space, following the definitions in \code{scib} and \code{scMultiSim}.
+#' For each cell type, the silhouette width of cells with respect to batch labels
+#' is computed ($s_i \in [-1, 1]$), where values near 0 indicate well-mixed batches.
+#' The per-cell-type score is $1 - |s_i|$, averaged across all cells and cell types.
 #'
-#' @param x Coordinates matrix for Modality 1 (cells x dimensions).
-#' @param y Coordinates matrix for Modality 2 (cells x dimensions), where row i of y
-#'   corresponds to the true match of row i of x.
-#' @param metric Distance metric to evaluate: "euclidean" (default) or "cosine".
+#' @param embed Numeric matrix of cell coordinates (cells x dimensions, e.g. PCA or joint embedding).
+#' @param batch Vector or factor of batch or modality labels for each cell.
+#' @param cell_type Optional vector or factor of cell-type labels for each cell.
 #'
-#' @return A list containing:
-#'   \item{foscttm}{Bidirectional mean FOSCTTM score across all cells (lower is better, 0 to 0.5).}
-#'   \item{foscttm_xy}{Directional FOSCTTM from Modality 1 to Modality 2.}
-#'   \item{foscttm_yx}{Directional FOSCTTM from Modality 2 to Modality 1.}
-#'   \item{match_at_1}{Top-1 match rate (proportion of cells where the true match is rank 1).}
-#'   \item{match_at_5}{Top-5 match rate (proportion of cells where the true match is in top 5).}
-#'   \item{cell_foscttm}{Vector of bidirectional FOSCTTM scores for individual cells.}
+#' @return Numeric scalar between 0 and 1, where 1 indicates optimal batch mixing.
+#' @references
+#' Luecken et al. (2022) Benchmarking atlas-level data integration in single-cell genomics. Nature Methods.
+#' Li et al. (2023) scMultiSim: simulation of multi-modality single cell data guided by gene regulatory networks. Cell Systems.
 #' @examples
-#' data(example_multiomics, package = "scSimEval")
-#' r_rna <- example_multiomics$ref_multi$rna
-#' r_atac <- example_multiomics$ref_multi$atac
-#' calc_foscttm(r_rna, r_atac)
+#' set.seed(42)
+#' emb <- matrix(rnorm(100 * 10), 100, 10)
+#' bt <- rep(c("B1", "B2"), each = 50)
+#' ct <- rep(c("T1", "T2"), 50)
+#' calc_batch_asw(emb, bt, ct)
 #' @export
-calc_foscttm <- function(x, y, metric = c("euclidean", "cosine")) {
-  metric <- match.arg(metric)
-  x <- as.matrix(x)
-  y <- as.matrix(y)
-  
-  if (nrow(x) != nrow(y)) {
-    min_r <- min(nrow(x), nrow(y))
-    x <- x[seq_len(min_r), , drop = FALSE]
-    y <- y[seq_len(min_r), , drop = FALSE]
-  }
-  if (ncol(x) != ncol(y)) {
-    min_c <- min(ncol(x), ncol(y))
-    x <- x[, seq_len(min_c), drop = FALSE]
-    y <- y[, seq_len(min_c), drop = FALSE]
-  }
-  
-  N <- nrow(x)
-  if (N < 2) {
-    return(list(foscttm = 0, foscttm_xy = 0, foscttm_yx = 0, match_at_1 = 1, match_at_5 = 1, cell_foscttm = 0))
-  }
-  
-  if (metric == "cosine") {
-    norm_x <- sqrt(rowSums(x^2))
-    norm_y <- sqrt(rowSums(y^2))
-    norm_x[norm_x == 0] <- 1e-10
-    norm_y[norm_y == 0] <- 1e-10
-    x_norm <- sweep(x, 1, norm_x, "/")
-    y_norm <- sweep(y, 1, norm_y, "/")
-    d_mat <- 1 - (x_norm %*% t(y_norm))
-  } else {
-    x_sq <- rowSums(x^2)
-    y_sq <- rowSums(y^2)
-    d_sq <- outer(x_sq, y_sq, "+") - 2 * (x %*% t(y))
-    d_sq[d_sq < 0] <- 0
-    d_mat <- sqrt(d_sq)
-  }
-  
-  true_dist <- diag(d_mat)
-  
-  comp_xy <- d_mat < true_dist
-  foscttm_xy <- rowMeans(comp_xy)
-  
-  comp_yx <- t(d_mat) < true_dist
-  foscttm_yx <- rowMeans(comp_yx)
-  
-  cell_foscttm <- (foscttm_xy + foscttm_yx) / 2
-  mean_foscttm <- mean(cell_foscttm)
-  
-  ranks_xy <- rowSums(comp_xy)
-  match_at_1 <- mean(ranks_xy == 0)
-  match_at_5 <- mean(ranks_xy < 5)
-  
-  list(
-    foscttm = as.numeric(mean_foscttm),
-    foscttm_xy = as.numeric(mean(foscttm_xy)),
-    foscttm_yx = as.numeric(mean(foscttm_yx)),
-    match_at_1 = as.numeric(match_at_1),
-    match_at_5 = as.numeric(match_at_5),
-    cell_foscttm = cell_foscttm
-  )
-}
-
-#' Cross-Modality In Silico Generation & Translation Fidelity
-#'
-#' Evaluates the biological accuracy and reconstruction fidelity of cross-modality
-#' generation (e.g. predicting scATAC from scRNA or vice versa; Zhai et al., Genome Biology 2024).
-#' Computes cell-wise and feature-wise Pearson and Spearman correlations, cosine similarity,
-#' RMSE, and MAE between predicted and measured multi-omics profiles.
-#'
-#' @param true_data Matrix or data.frame of measured features across cells (features x cells).
-#' @param pred_data Matrix or data.frame of in-silico generated / predicted features (features x cells).
-#'
-#' @return A list containing cell-wise and feature-wise correlation, cosine similarity, RMSE, and MAE.
-#' @examples
-#' data(example_multiomics, package = "scSimEval")
-#' r_rna <- example_multiomics$ref_multi$rna
-#' r_atac <- example_multiomics$ref_multi$atac
-#' calc_cross_modal_generation(r_rna, r_atac)
-#' @export
-calc_cross_modal_generation <- function(true_data, pred_data) {
-  true_data <- as.matrix(normalize_counts(true_data))
-  pred_data <- as.matrix(normalize_counts(pred_data))
-  
-  if (all(dim(true_data) != dim(pred_data))) {
-    if (nrow(true_data) == ncol(pred_data) && ncol(true_data) == nrow(pred_data)) {
-      pred_data <- t(pred_data)
-    } else {
-      min_r <- min(nrow(true_data), nrow(pred_data))
-      min_c <- min(ncol(true_data), ncol(pred_data))
-      true_data <- true_data[seq_len(min_r), seq_len(min_c), drop = FALSE]
-      pred_data <- pred_data[seq_len(min_r), seq_len(min_c), drop = FALSE]
-    }
-  }
-  
-  G <- nrow(true_data)
-  N <- ncol(true_data)
-  
-  pcc_cell <- vapply(seq_len(N), function(i) {
-    u <- true_data[, i]
-    v <- pred_data[, i]
-    if (stats::sd(u) > 0 && stats::sd(v) > 0) {
-      stats::cor(u, v, method = "pearson")
-    } else 0
-  }, numeric(1))
-  
-  scc_cell <- vapply(seq_len(N), function(i) {
-    u <- true_data[, i]
-    v <- pred_data[, i]
-    if (stats::sd(u) > 0 && stats::sd(v) > 0) {
-      stats::cor(u, v, method = "spearman")
-    } else 0
-  }, numeric(1))
-  
-  pcc_feat <- vapply(seq_len(G), function(g) {
-    u <- true_data[g, ]
-    v <- pred_data[g, ]
-    if (stats::sd(u) > 0 && stats::sd(v) > 0) {
-      stats::cor(u, v, method = "pearson")
-    } else 0
-  }, numeric(1))
-  
-  scc_feat <- vapply(seq_len(G), function(g) {
-    u <- true_data[g, ]
-    v <- pred_data[g, ]
-    if (stats::sd(u) > 0 && stats::sd(v) > 0) {
-      stats::cor(u, v, method = "spearman")
-    } else 0
-  }, numeric(1))
-  
-  diff_mat <- true_data - pred_data
-  rmse <- sqrt(mean(diff_mat^2))
-  mae <- mean(abs(diff_mat))
-  
-  cos_sim <- vapply(seq_len(N), function(i) {
-    u <- true_data[, i]
-    v <- pred_data[, i]
-    norm_u <- sqrt(sum(u^2))
-    norm_v <- sqrt(sum(v^2))
-    if (norm_u > 0 && norm_v > 0) {
-      sum(u * v) / (norm_u * norm_v)
-    } else 0
-  }, numeric(1))
-  
-  list(
-    mean_cell_pcc = as.numeric(mean(pcc_cell, na.rm = TRUE)),
-    median_cell_pcc = as.numeric(stats::median(pcc_cell, na.rm = TRUE)),
-    mean_cell_scc = as.numeric(mean(scc_cell, na.rm = TRUE)),
-    median_cell_scc = as.numeric(stats::median(scc_cell, na.rm = TRUE)),
-    mean_feat_pcc = as.numeric(mean(pcc_feat, na.rm = TRUE)),
-    median_feat_pcc = as.numeric(stats::median(pcc_feat, na.rm = TRUE)),
-    mean_feat_scc = as.numeric(mean(scc_feat, na.rm = TRUE)),
-    median_feat_scc = as.numeric(stats::median(scc_feat, na.rm = TRUE)),
-    mean_cell_cosine = as.numeric(mean(cos_sim, na.rm = TRUE)),
-    rmse = as.numeric(rmse),
-    mae = as.numeric(mae)
-  )
-}
-
-#' Modality Alignment & Omics Layer Mixing in Joint Latent Space
-#'
-#' Quantifies how well different single-cell omics layers mix in a unified latent embedding space
-#' without sacrificing biological clustering (Zhai et al., Genome Biology 2024; Luecken et al., Nat Methods 2022).
-#'
-#' @param embedding Joint coordinates matrix (cells x latent_dimensions).
-#' @param modalities Factor or character vector indicating the modality of each cell (e.g. "RNA" vs "ATAC").
-#' @param cell_types Optional factor or character vector of cell type labels.
-#' @param k Number of nearest neighbors for neighborhood connectivity calculation (default 15).
-#'
-#' @return A list containing modality_asw, modality_mixing_score, and mean_cross_modality_neighbor_frac.
-#' @examples
-#' data(example_multiomics, package = "scSimEval")
-#' r_rna <- example_multiomics$ref_multi$rna
-#' r_atac <- example_multiomics$ref_multi$atac
-#' joint_emb <- rbind(t(r_rna[seq_len(10), ]), t(r_atac[seq_len(10), ]))
-#' calc_modality_alignment(joint_emb, rep(c("RNA", "ATAC"), each = ncol(r_rna)))
-#' @export
-calc_modality_alignment <- function(embedding, modalities, cell_types = NULL, k = 15) {
-  embedding <- as.matrix(embedding)
-  modalities <- as.factor(modalities)
-  N <- nrow(embedding)
-  
-  dist_mat <- stats::dist(embedding)
-  asw_modality <- if (requireNamespace("cluster", quietly = TRUE)) {
-    tryCatch({
-      sil <- cluster::silhouette(as.integer(modalities), dist_mat)
-      mean(sil[, 3], na.rm = TRUE)
-    }, error = function(e) NA_real_)
-  } else {
-    calc_silhouette(dist_mat, modalities)
-  }
-  
-  modality_mixing_score <- if (!is.na(asw_modality)) 1 - abs(asw_modality) else NA_real_
-  
-  dist_full <- as.matrix(dist_mat)
-  diag(dist_full) <- Inf
-  
-  k <- min(k, N - 1)
-  knn_idx <- t(apply(dist_full, 1, order)[seq_len(k), , drop = FALSE])
-  
-  cross_mod_frac <- vapply(seq_len(N), function(i) {
-    mean(modalities[knn_idx[i, ]] != modalities[i])
-  }, numeric(1))
-  
-  list(
-    modality_asw = as.numeric(asw_modality),
-    modality_mixing_score = as.numeric(modality_mixing_score),
-    mean_cross_modality_neighbor_frac = as.numeric(mean(cross_mod_frac))
-  )
-}
-
-# Standardize edge list helper
-standardize_edges <- function(edges, directed = TRUE) {
-  if (is.data.frame(edges)) {
-    cols <- tolower(colnames(edges))
-    g1_col <- which(cols %in% c("gene1", "from", "source", "regulator", "tf"))[1]
-    g2_col <- which(cols %in% c("gene2", "to", "target"))[1]
-    w_col  <- which(cols %in% c("edgeweight", "weight", "score", "importance", "abs_weight"))[1]
-    
-    if (is.na(g1_col) || is.na(g2_col)) {
-      if (ncol(edges) >= 2) {
-        g1_col <- 1
-        g2_col <- 2
-      } else {
-        stop("edges data.frame must contain at least 2 columns")
-      }
-    }
-    
-    g1 <- as.character(edges[[g1_col]])
-    g2 <- as.character(edges[[g2_col]])
-    w <- if (!is.na(w_col)) as.numeric(edges[[w_col]]) else rep(1, length(g1))
-    
-    valid <- g1 != g2
-    g1 <- g1[valid]
-    g2 <- g2[valid]
-    w <- w[valid]
-    
-    if (!directed) {
-      swap <- g1 > g2
-      tmp <- g1[swap]
-      g1[swap] <- g2[swap]
-      g2[swap] <- tmp
-    }
-    
-    sep <- if (directed) "->" else "--"
-    edge_id <- paste0(g1, sep, g2)
-    df <- data.frame(
-      Gene1 = g1,
-      Gene2 = g2,
-      EdgeWeight = w,
-      EdgeID = edge_id,
-      stringsAsFactors = FALSE
-    )
-    df$abs_weight <- abs(df$EdgeWeight)
-    df <- df[order(df$abs_weight, decreasing = TRUE), ]
-    df <- df[!duplicated(df$EdgeID), ]
-    return(df)
-  } else if (is.character(edges)) {
-    return(unique(edges))
-  } else {
-    stop("Unsupported edge format: must be data.frame or character vector")
-  }
-}
-
-#' Jaccard Similarity of Predicted Regulatory Networks / Links
-#'
-#' Computes the Jaccard similarity index of top-k edge predictions between two networks
-#' or top correlated feature pairs between reference and simulated datasets.
-#'
-#' @param edges1 Data frame or character vector representing the first network.
-#' @param edges2 Data frame or character vector representing the second network.
-#' @param k Integer cutoff for top edge selection (optional).
-#' @param directed Logical, whether edges are directed (default TRUE) or undirected (FALSE).
-#'
-#' @return Jaccard similarity index in [0, 1] (|E1 cap E2| / |E1 cup E2|).
-#' @examples
-#' calc_network_jaccard(data.frame(from = c("g1", "g2"), to = c("g2", "g3")),
-#'                      data.frame(from = c("g1", "g2"), to = c("g2", "g3")))
-#' @export
-calc_network_jaccard <- function(edges1, edges2, k = NULL, directed = TRUE) {
-  std1 <- standardize_edges(edges1, directed = directed)
-  std2 <- standardize_edges(edges2, directed = directed)
-  
-  ids1 <- if (is.data.frame(std1)) std1$EdgeID else std1
-  ids2 <- if (is.data.frame(std2)) std2$EdgeID else std2
-  
-  if (!is.null(k)) {
-    ids1 <- ids1[seq_len(min(k, length(ids1)))]
-    ids2 <- ids2[seq_len(min(k, length(ids2)))]
-  }
-  
-  set1 <- unique(ids1)
-  set2 <- unique(ids2)
-  
-  inter <- length(intersect(set1, set2))
-  uni <- length(union(set1, set2))
-  
-  if (uni == 0) 1.0 else inter / uni
-}
-
-#' Chromatin Accessibility to RNA Regulatory Effect Coupling
-#'
-#' Evaluates whether simulated paired scATAC-seq and scRNA-seq profiles capture the true
-#' regulatory coupling where regional chromatin opening gates target gene transcription
-#' (scMultiSim; Li et al., Nat Methods 2023).
-#'
-#' @param atac_data Matrix of chromatin peak accessibilities (peaks x cells).
-#' @param rna_data Matrix of gene expression counts (genes x cells).
-#' @param linked_pairs Optional 2-column data.frame of known linked peak-gene pairs.
-#'   If NULL, assumes 1-to-1 matching by row index.
-#'
-#' @return A list containing mean coupling correlation, positive coupling ratio, and mean R-squared.
-#' @examples
-#' data(example_multiomics, package = "scSimEval")
-#' r_rna <- example_multiomics$ref_multi$rna
-#' r_atac <- example_multiomics$ref_multi$atac
-#' calc_atac_rna_coupling(r_rna, r_atac)
-#' @export
-calc_atac_rna_coupling <- function(atac_data, rna_data, linked_pairs = NULL) {
-  atac_data <- as.matrix(normalize_counts(atac_data))
-  rna_data <- as.matrix(normalize_counts(rna_data))
-  
-  if (is.null(linked_pairs)) {
-    n_pairs <- min(nrow(atac_data), nrow(rna_data))
-    idx_atac <- seq_len(n_pairs)
-    idx_rna <- seq_len(n_pairs)
-  } else {
-    linked_pairs <- as.data.frame(linked_pairs)
-    idx_atac <- linked_pairs[[1]]
-    idx_rna <- linked_pairs[[2]]
-  }
-  
-  n_eval <- length(idx_atac)
-  
-  cors <- vapply(seq_len(n_eval), function(i) {
-    a <- atac_data[idx_atac[i], ]
-    r <- rna_data[idx_rna[i], ]
-    if (stats::sd(a) > 0 && stats::sd(r) > 0) {
-      stats::cor(a, r, method = "pearson")
-    } else 0
-  }, numeric(1))
-  
-  r2s <- vapply(seq_len(n_eval), function(i) {
-    a <- atac_data[idx_atac[i], ]
-    r <- rna_data[idx_rna[i], ]
-    if (stats::sd(a) > 0 && stats::sd(r) > 0) {
-      summary(stats::lm(r ~ a))$r.squared
-    } else 0
-  }, numeric(1))
-  
-  list(
-    mean_coupling_cor = as.numeric(mean(cors)),
-    median_coupling_cor = as.numeric(stats::median(cors)),
-    positive_coupling_ratio = as.numeric(mean(cors > 0)),
-    mean_r_squared = as.numeric(mean(r2s)),
-    coupling_correlations = cors
-  )
-}
-
-#' Multi-Omics Co-Regulation & Modularity Fidelity
-#'
-#' Evaluates the preservation of co-regulated gene/feature modules between reference
-#' and simulated multi-omics datasets (Monzo et al., 2025; Arzalluz-Luque et al., 2022).
-#'
-#' @param ref_data Reference feature-by-cell matrix or data frame.
-#' @param sim_data Simulated feature-by-cell matrix or data frame.
-#' @param modules A list of character vectors representing feature clusters/modules,
-#'   or a named vector/factor of module assignments per feature.
-#' @param method Correlation method: "pearson" (default) or "spearman".
-#'
-#' @return A list containing module correlation r, RMSE, MAE, and modularity fidelity.
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' modules <- list(Module_1 = rownames(example_scrna$ref)[seq_len(30)],
-#'                 Module_2 = rownames(example_scrna$ref)[31:60])
-#' calc_coregulation_fidelity(example_scrna$ref, example_scrna$sim, modules)
-#' @export
-calc_coregulation_fidelity <- function(
-  ref_data,
-  sim_data,
-  modules,
-  method = c("pearson", "spearman")
-) {
-  method <- match.arg(method)
-  ref_mat <- as.matrix(normalize_counts(ref_data))
-  sim_mat <- as.matrix(normalize_counts(sim_data))
-  
-  if (!is.list(modules)) {
-    if (!is.null(names(modules))) {
-      modules <- split(names(modules), as.character(modules))
-    } else {
-      stop("modules must be a list of feature vectors or a named factor/vector.")
-    }
-  }
-  
-  all_mod_genes <- unlist(modules)
-  common_genes <- intersect(all_mod_genes, intersect(rownames(ref_mat), rownames(sim_mat)))
-  if (length(common_genes) < 4) {
-    # If gene names don't match, use top rows
-    n_use <- min(length(all_mod_genes), nrow(ref_mat), nrow(sim_mat))
-    common_genes <- rownames(ref_mat)[seq_len(n_use)]
-    modules <- list(Module_1 = common_genes[seq_len(n_use %/% 2)],
-                    Module_2 = common_genes[(n_use %/% 2 + 1):n_use])
-  }
-  
-  modules_filt <- lapply(modules, function(m) intersect(m, common_genes))
-  modules_filt <- modules_filt[vapply(modules_filt, length, integer(1)) >= 2]
-  
-  if (length(modules_filt) == 0) {
-    stop("No modules have at least 2 common features between ref and sim data.")
-  }
-  
-  genes_eval <- unlist(modules_filt)
-  c_ref <- stats::cor(t(ref_mat[genes_eval, ]), method = method)
-  c_sim <- stats::cor(t(sim_mat[genes_eval, ]), method = method)
-  c_ref[is.na(c_ref)] <- 0
-  c_sim[is.na(c_sim)] <- 0
-  
-  gene_to_mod <- rep(names(modules_filt), times = vapply(modules_filt, length, integer(1)))
-  names(gene_to_mod) <- genes_eval
-  
-  is_intra <- outer(gene_to_mod, gene_to_mod, "==")
-  diag(is_intra) <- FALSE
-  
-  is_inter <- outer(gene_to_mod, gene_to_mod, "!=")
-  
-  ref_intra_vals <- c_ref[is_intra]
-  sim_intra_vals <- c_sim[is_intra]
-  
-  r_val <- stats::cor(ref_intra_vals, sim_intra_vals, method = "pearson")
-  rmse_val <- sqrt(mean((ref_intra_vals - sim_intra_vals)^2))
-  mae_val <- mean(abs(ref_intra_vals - sim_intra_vals))
-  
-  ref_mean_intra <- mean(ref_intra_vals, na.rm = TRUE)
-  sim_mean_intra <- mean(sim_intra_vals, na.rm = TRUE)
-  
-  ref_mean_inter <- if (any(is_inter)) mean(abs(c_ref[is_inter]), na.rm = TRUE) else 1e-4
-  sim_mean_inter <- if (any(is_inter)) mean(abs(c_sim[is_inter]), na.rm = TRUE) else 1e-4
-  
-  ref_modularity <- ref_mean_intra / max(ref_mean_inter, 1e-4)
-  sim_modularity <- sim_mean_intra / max(sim_mean_inter, 1e-4)
-  
-  modularity_fid <- if (ref_modularity > 0 && sim_modularity > 0) {
-    min(ref_modularity, sim_modularity) / max(ref_modularity, sim_modularity)
-  } else 0
-  
-  list(
-    module_correlation_r = as.numeric(r_val),
-    module_correlation_rmse = as.numeric(rmse_val),
-    module_correlation_mae = as.numeric(mae_val),
-    ref_modularity_ratio = as.numeric(ref_modularity),
-    sim_modularity_ratio = as.numeric(sim_modularity),
-    modularity_fidelity = as.numeric(modularity_fid)
-  )
-}
-
-#' Evaluate Single-Cell ATAC Peak Co-Accessibility Fidelity (SCRIP)
-#'
-#' Evaluates the preservation of chromatin peak-to-peak co-accessibility correlation
-#' matrices (cis-regulatory interactions) between reference and simulated scATAC-seq datasets.
-#'
-#' @param ref_atac Reference scATAC-seq matrix (peaks x cells).
-#' @param sim_atac Simulated scATAC-seq matrix (peaks x cells).
-#' @param top_n_peaks Number of highest variance peaks to evaluate (default 300).
-#' @param method Correlation method: "spearman" (default) or "pearson".
-#'
-#' @return A list containing RV coefficient, matrix correlation, Frobenius distance, and MAE.
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' calc_peak_coaccessibility_fidelity(example_scrna$ref, example_scrna$sim)
-#' @export
-calc_peak_coaccessibility_fidelity <- function(
-  ref_atac,
-  sim_atac,
-  top_n_peaks = 300,
-  method = c("spearman", "pearson")
-) {
-  method <- match.arg(method)
-  ref_mat <- as.matrix(normalize_counts(ref_atac))
-  sim_mat <- as.matrix(normalize_counts(sim_atac))
-  
-  common_peaks <- intersect(rownames(ref_mat), rownames(sim_mat))
-  if (length(common_peaks) < 10) {
-    n_use <- min(top_n_peaks, nrow(ref_mat), nrow(sim_mat))
-    ref_vars <- apply(ref_mat, 1, stats::var)
-    sim_vars <- apply(sim_mat, 1, stats::var)
-    ref_sub <- ref_mat[order(ref_vars, decreasing = TRUE)[seq_len(n_use)], ]
-    sim_sub <- sim_mat[order(sim_vars, decreasing = TRUE)[seq_len(n_use)], ]
-  } else {
-    ref_vars <- apply(ref_mat[common_peaks, , drop = FALSE], 1, stats::var)
-    n_use <- min(top_n_peaks, length(common_peaks))
-    top_p <- names(sort(ref_vars, decreasing = TRUE))[seq_len(n_use)]
-    ref_sub <- ref_mat[top_p, , drop = FALSE]
-    sim_sub <- sim_mat[top_p, , drop = FALSE]
-  }
-  
-  cor_ref <- stats::cor(t(ref_sub), method = method)
-  cor_sim <- stats::cor(t(sim_sub), method = method)
-  cor_ref[is.na(cor_ref)] <- 0
-  cor_sim[is.na(cor_sim)] <- 0
-  
-  tr <- function(m) sum(diag(m))
-  rv <- tr(cor_ref %*% cor_sim) / sqrt(tr(cor_ref %*% cor_ref) * tr(cor_sim %*% cor_sim) + 1e-12)
-  
-  mask <- upper.tri(cor_ref)
-  vals_ref <- cor_ref[mask]
-  vals_sim <- cor_sim[mask]
-  
-  r_val <- stats::cor(vals_ref, vals_sim, method = "pearson")
-  rho_val <- stats::cor(vals_ref, vals_sim, method = "spearman")
-  frobenius_dist <- sqrt(sum((cor_ref - cor_sim)^2)) / max(1, length(vals_ref))
-  mae_val <- mean(abs(vals_ref - vals_sim))
-  
-  list(
-    rv_coefficient = as.numeric(rv),
-    coaccessibility_pearson = as.numeric(r_val),
-    coaccessibility_spearman = as.numeric(rho_val),
-    frobenius_distance = as.numeric(frobenius_dist),
-    coaccessibility_mae = as.numeric(mae_val)
-  )
-}
-
-#' Evaluate Gene Co-Expression Module Fidelity (ESCO)
-#'
-#' Automatically discovers or evaluates co-expression modules and measures
-#' the preservation of intra-module vs. inter-module correlation structure.
-#'
-#' @param ref_mat Reference gene expression matrix (genes x cells).
-#' @param sim_mat Simulated gene expression matrix (genes x cells).
-#' @param modules Optional named list of gene modules. If NULL, auto-detected via hierarchical clustering.
-#' @param n_modules Number of modules to detect if modules is NULL (default 5).
-#' @param top_genes Number of top variable genes to consider for clustering (default 200).
-#'
-#' @return A list summarizing module correlation preservation, RMSE, and modularity ratio fidelity.
-#' @examples
-#' data(example_scrna, package = "scSimEval")
-#' calc_coexpression_module_fidelity(example_scrna$ref, example_scrna$sim)
-#' @export
-calc_coexpression_module_fidelity <- function(
-  ref_mat,
-  sim_mat,
-  modules = NULL,
-  n_modules = 5,
-  top_genes = 200
-) {
-  ref_m <- as.matrix(normalize_counts(ref_mat))
-  sim_m <- as.matrix(normalize_counts(sim_mat))
-  
-  common_genes <- intersect(rownames(ref_m), rownames(sim_m))
-  if (length(common_genes) < 20) {
-    n_use <- min(top_genes, nrow(ref_m), nrow(sim_m))
-    ref_m <- ref_m[seq_len(n_use), ]
-    sim_m <- sim_m[seq_len(n_use), ]
-    common_genes <- rownames(ref_m)
-  }
-  
-  if (is.null(modules)) {
-    gene_vars <- apply(ref_m[common_genes, , drop = FALSE], 1, stats::var)
-    n_sel <- min(top_genes, length(common_genes))
-    top_g <- names(sort(gene_vars, decreasing = TRUE))[seq_len(n_sel)]
-    
-    sub_ref <- ref_m[top_g, , drop = FALSE]
-    cor_ref <- stats::cor(t(sub_ref), method = "spearman")
-    cor_ref[is.na(cor_ref)] <- 0
-    dist_mat <- stats::as.dist(1 - cor_ref)
-    hc <- stats::hclust(dist_mat, method = "average")
-    clusters <- stats::cutree(hc, k = min(n_modules, max(2, length(top_g) %/% 4)))
-    modules <- split(names(clusters), paste0("Module_", clusters))
-  }
-  
-  calc_coregulation_fidelity(ref_m, sim_m, modules = modules, method = "spearman")
-}
-
-#' Evaluate Chromatin Accessibility Profile Concordance (DiTSim)
-#'
-#' Computes global and cell-type-stratified Pearson and Spearman correlations
-#' and Kullback-Leibler (KL) divergence between empirical reference and simulated
-#' single-cell chromatin accessibility profiles.
-#'
-#' @param ref_data Reference count/accessibility matrix (peaks x cells).
-#' @param sim_data Simulated count/accessibility matrix (peaks x cells).
-#' @param cell_types Optional factor or vector of cell-type annotations for cells.
-#' @param use_tfidf Logical, whether to apply TF-IDF transformation prior to mean profile calculation (default TRUE).
-#'
-#' @return A list containing global PCC, global SCC, per-cell-type mean PCC/SCC,
-#'   and mean accessibility KL divergence.
-#' @examples
-#' data(example_multiomics, package = "scSimEval")
-#' r_rna <- example_multiomics$ref_multi$rna
-#' r_atac <- example_multiomics$ref_multi$atac
-#' calc_accessibility_profile_concordance(r_rna, r_atac)
-#' @export
-calc_accessibility_profile_concordance <- function(
-  ref_data,
-  sim_data,
-  cell_types = NULL,
-  use_tfidf = TRUE
-) {
-  r_mat <- as.matrix(ref_data)
-  s_mat <- as.matrix(sim_data)
-  
-  common_feats <- intersect(rownames(r_mat), rownames(s_mat))
-  if (length(common_feats) >= 10) {
-    r_mat <- r_mat[common_feats, , drop = FALSE]
-    s_mat <- s_mat[common_feats, , drop = FALSE]
-  } else {
-    n_use <- min(nrow(r_mat), nrow(s_mat))
-    r_mat <- r_mat[seq_len(n_use), , drop = FALSE]
-    s_mat <- s_mat[seq_len(n_use), , drop = FALSE]
-  }
-  
-  apply_tfidf <- function(mat) {
-    tf <- sweep(mat, 2, pmax(colSums(mat), 1), "/")
-    n_cells <- ncol(mat)
-    peak_counts <- rowSums(mat > 0)
-    idf <- log(1 + n_cells / pmax(peak_counts, 1))
-    tfidf <- sweep(tf, 1, idf, "*")
-    log(1 + 1e4 * tfidf)
-  }
-  
-  if (use_tfidf) {
-    r_proc <- apply_tfidf(r_mat)
-    s_proc <- apply_tfidf(s_mat)
-  } else {
-    r_proc <- r_mat
-    s_proc <- s_mat
-  }
-  
-  mean_ref <- rowMeans(r_proc)
-  mean_sim <- rowMeans(s_proc)
-  
-  global_pcc <- stats::cor(mean_ref, mean_sim, method = "pearson")
-  global_scc <- stats::cor(mean_ref, mean_sim, method = "spearman")
-  
-  p <- mean_ref / max(sum(mean_ref), 1e-12)
-  q <- mean_sim / max(sum(mean_sim), 1e-12)
-  eps <- 1e-10
-  p <- (p + eps) / sum(p + eps)
-  q <- (q + eps) / sum(q + eps)
-  kl_div <- sum(p * log(p / q))
-  
-  ct_pcc <- NA_real_
-  ct_scc <- NA_real_
-  ct_summary <- NULL
-  
-  if (!is.null(cell_types)) {
-    cts <- as.factor(cell_types)
-    if (length(cts) == ncol(r_proc) && length(cts) == ncol(s_proc)) {
-      u_cts <- levels(cts)
-      pccs <- numeric(length(u_cts))
-      sccs <- numeric(length(u_cts))
-      names(pccs) <- names(sccs) <- u_cts
+calc_batch_asw <- function(embed, batch, cell_type = NULL) {
+  if (is.null(embed) || nrow(embed) < 3) return(NA_real_)
+  batch <- as.character(batch)
+  if (length(unique(batch)) < 2) return(1.0)
+  
+  if (requireNamespace("cluster", quietly = TRUE)) {
+    if (!is.null(cell_type) && length(unique(cell_type)) >= 2) {
+      cell_type <- as.character(cell_type)
+      cts <- unique(cell_type)
+      asw_per_ct <- numeric(0)
       
-      for (cl in u_cts) {
-        idx <- which(cts == cl)
-        if (length(idx) >= 2) {
-          m_r <- rowMeans(r_proc[, idx, drop = FALSE])
-          m_s <- rowMeans(s_proc[, idx, drop = FALSE])
-          pccs[cl] <- stats::cor(m_r, m_s, method = "pearson")
-          sccs[cl] <- stats::cor(m_r, m_s, method = "spearman")
-        } else {
-          pccs[cl] <- NA_real_
-          sccs[cl] <- NA_real_
+      for (ct in cts) {
+        idx <- which(cell_type == ct)
+        if (length(idx) >= 4 && length(unique(batch[idx])) >= 2) {
+          sub_embed <- embed[idx, , drop = FALSE]
+          sub_batch <- as.numeric(as.factor(batch[idx]))
+          tb <- table(sub_batch)
+          if (all(tb >= 2)) {
+            d_mat <- stats::dist(sub_embed)
+            sil <- tryCatch(cluster::silhouette(sub_batch, d_mat), error = function(e) NULL)
+            if (!is.null(sil) && inherits(sil, "silhouette")) {
+              s_vals <- sil[, 3]
+              asw_score <- mean(1 - abs(s_vals), na.rm = TRUE)
+              asw_per_ct <- c(asw_per_ct, asw_score)
+            }
+          }
         }
       }
-      ct_pcc <- mean(pccs, na.rm = TRUE)
-      ct_scc <- mean(sccs, na.rm = TRUE)
-      ct_summary <- data.frame(
-        CellType = u_cts,
-        PCC = pccs,
-        SCC = sccs,
-        stringsAsFactors = FALSE
-      )
+      if (length(asw_per_ct) > 0) {
+        return(max(0, min(1, mean(asw_per_ct))))
+      }
+    }
+    # Fallback to global batch silhouette
+    d_mat <- stats::dist(embed)
+    b_num <- as.numeric(as.factor(batch))
+    sil <- tryCatch(cluster::silhouette(b_num, d_mat), error = function(e) NULL)
+    if (!is.null(sil) && inherits(sil, "silhouette")) {
+      return(max(0, min(1, mean(1 - abs(sil[, 3]), na.rm = TRUE))))
+    }
+  }
+  1.0
+}
+
+
+#' Calculate Cell-Type Average Silhouette Width (Cell-Type ASW)
+#'
+#' Evaluates biological conservation and cell-type cluster separation in integrated
+#' or joint multiomics space, following \code{scCross} and \code{scib}.
+#' The silhouette width of cells with respect to ground-truth cell-type labels is
+#' computed and scaled to $[0, 1]$ via $(ASW + 1) / 2$.
+#'
+#' @param embed Numeric matrix of cell coordinates (cells x dimensions).
+#' @param cell_type Vector or factor of cell-type labels for each cell.
+#'
+#' @return Numeric scalar between 0 and 1, where 1 indicates distinct, tight cell-type clusters.
+#' @references
+#' Ding et al. (2023) scCross: deep generative modeling for single-cell cross-modality integration and perturbation analysis.
+#' Luecken et al. (2022) Benchmarking atlas-level data integration in single-cell genomics. Nature Methods.
+#' @examples
+#' set.seed(42)
+#' emb <- matrix(rnorm(100 * 10), 100, 10)
+#' ct <- rep(c("T1", "T2"), each = 50)
+#' calc_cell_type_asw(emb, ct)
+#' @export
+calc_cell_type_asw <- function(embed, cell_type) {
+  if (is.null(embed) || nrow(embed) < 3) return(NA_real_)
+  cell_type <- as.character(cell_type)
+  if (length(unique(cell_type)) < 2) return(1.0)
+  
+  if (requireNamespace("cluster", quietly = TRUE)) {
+    n <- nrow(embed)
+    if (n > 3000) {
+      idx <- sample(seq_len(n), 3000)
+      embed <- embed[idx, , drop = FALSE]
+      cell_type <- cell_type[idx]
+    }
+    ct_num <- as.numeric(as.factor(cell_type))
+    tb <- table(ct_num)
+    if (any(tb < 2)) {
+      valid_classes <- as.numeric(names(tb)[tb >= 2])
+      keep <- ct_num %in% valid_classes
+      embed <- embed[keep, , drop = FALSE]
+      ct_num <- ct_num[keep]
+    }
+    if (length(unique(ct_num)) < 2) return(1.0)
+    
+    d_mat <- stats::dist(embed)
+    sil <- tryCatch(cluster::silhouette(ct_num, d_mat), error = function(e) NULL)
+    if (!is.null(sil) && inherits(sil, "silhouette")) {
+      raw_asw <- mean(sil[, 3], na.rm = TRUE)
+      scaled_asw <- (raw_asw + 1) / 2
+      return(max(0, min(1, scaled_asw)))
+    }
+  }
+  1.0
+}
+
+
+#' Calculate KNN Graph Connectivity
+#'
+#' Evaluates whether cells of the same cell type form a connected component in
+#' the k-nearest neighbor (k-NN) graph across modalities/batches, following
+#' \code{scCross}, \code{scMultiSim}, and \code{scib}.
+#' For each cell type, the relative size of the largest connected component
+#' (LCC) in the induced subgraph is calculated: $|LCC| / |V_c|$. The overall score
+#' is the mean across all cell types.
+#'
+#' @param embed Numeric matrix of cell coordinates (cells x dimensions).
+#' @param cell_type Vector or factor of cell-type labels for each cell.
+#' @param k Number of nearest neighbors to construct the graph (default 15).
+#'
+#' @return Numeric scalar between 0 and 1, where 1 indicates complete graph connectivity.
+#' @references
+#' Ding et al. (2023) scCross: deep generative modeling for single-cell cross-modality integration.
+#' Li et al. (2023) scMultiSim: simulation of multi-modality single cell data. Cell Systems.
+#' Luecken et al. (2022) Benchmarking atlas-level data integration. Nature Methods.
+#' @examples
+#' set.seed(42)
+#' emb <- matrix(rnorm(60 * 5), 60, 5)
+#' ct <- rep(c("A", "B"), each = 30)
+#' calc_graph_connectivity(emb, ct, k = 10)
+#' @export
+calc_graph_connectivity <- function(embed, cell_type, k = 15) {
+  if (is.null(embed) || nrow(embed) < 2) return(NA_real_)
+  cell_type <- as.character(cell_type)
+  cts <- unique(cell_type)
+  if (length(cts) < 1) return(1.0)
+  
+  n_cells <- nrow(embed)
+  k <- max(1, min(k, n_cells - 1))
+  
+  d_mat <- as.matrix(stats::dist(embed))
+  diag(d_mat) <- Inf
+  
+  adj <- matrix(FALSE, nrow = n_cells, ncol = n_cells)
+  for (i in seq_len(n_cells)) {
+    nn <- order(d_mat[i, ])[seq_len(k)]
+    adj[i, nn] <- TRUE
+    adj[nn, i] <- TRUE
+  }
+  
+  conn_scores <- numeric(length(cts))
+  for (ci in seq_along(cts)) {
+    c_label <- cts[ci]
+    idx <- which(cell_type == c_label)
+    if (length(idx) <= 1) {
+      conn_scores[ci] <- 1.0
+      next
+    }
+    
+    sub_adj <- adj[idx, idx, drop = FALSE]
+    n_sub <- length(idx)
+    
+    visited <- rep(FALSE, n_sub)
+    comp_sizes <- integer(0)
+    
+    for (start_node in seq_len(n_sub)) {
+      if (!visited[start_node]) {
+        queue <- start_node
+        visited[start_node] <- TRUE
+        size <- 0
+        while (length(queue) > 0) {
+          curr <- queue[1]
+          queue <- queue[-1]
+          size <- size + 1
+          nbrs <- which(sub_adj[curr, ] & !visited)
+          if (length(nbrs) > 0) {
+            visited[nbrs] <- TRUE
+            queue <- c(queue, nbrs)
+          }
+        }
+        comp_sizes <- c(comp_sizes, size)
+      }
+    }
+    
+    max_comp <- if (length(comp_sizes) > 0) max(comp_sizes) else 1
+    conn_scores[ci] <- max_comp / n_sub
+  }
+  
+  mean_conn <- mean(conn_scores, na.rm = TRUE)
+  max(0, min(1, mean_conn))
+}
+
+
+#' Calculate Integration Adjusted Rand Index (ARI)
+#'
+#' Computes the Adjusted Rand Index (ARI) evaluating the concordance between
+#' clusters identified in the integrated/joint multiomics embedding and ground-truth
+#' cell-type labels, following \code{scib}, \code{scCross}, \code{scMultiSim},
+#' \code{Matilda}, and \code{scMoMtF}.
+#'
+#' @param embed Numeric matrix of cell coordinates (cells x dimensions).
+#' @param cell_type Vector or factor of ground-truth cell-type labels.
+#' @param n_clusters Number of clusters (defaults to the number of unique cell types).
+#'
+#' @return Numeric scalar between 0 and 1, where 1 indicates perfect clustering match.
+#' @references
+#' Hubert & Arabie (1985) Comparing partitions. Journal of Classification.
+#' Luecken et al. (2022) Benchmarking atlas-level data integration. Nature Methods.
+#' Ding et al. (2023) scCross.
+#' Li et al. (2023) scMultiSim. Cell Systems.
+#' Yang et al. (2023) Matilda. Nucleic Acids Research.
+#' Lan et al. (2024) scMoMtF.
+#' @examples
+#' set.seed(42)
+#' emb <- matrix(rnorm(60 * 4), 60, 4)
+#' ct <- rep(c("TypeA", "TypeB"), each = 30)
+#' calc_integration_ari(emb, ct)
+#' @export
+calc_integration_ari <- function(embed, cell_type, n_clusters = NULL) {
+  if (is.null(embed) || nrow(embed) < 2) return(NA_real_)
+  cell_type <- as.character(cell_type)
+  n_types <- length(unique(cell_type))
+  if (n_types <= 1) return(1.0)
+  
+  k_clust <- if (!is.null(n_clusters)) n_clusters else n_types
+  k_clust <- max(2, min(k_clust, nrow(embed) - 1))
+  
+  set.seed(42)
+  km <- tryCatch(
+    suppressWarnings(stats::kmeans(embed, centers = k_clust, nstart = 10, iter.max = 50)),
+    error = function(e) NULL
+  )
+  if (is.null(km)) return(NA_real_)
+  pred_cl <- km$cluster
+  
+  if (requireNamespace("mclust", quietly = TRUE)) {
+    ari <- mclust::adjustedRandIndex(pred_cl, cell_type)
+  } else {
+    tab <- table(pred_cl, cell_type)
+    n <- sum(tab)
+    a_i <- rowSums(tab)
+    b_j <- colSums(tab)
+    sum_n2 <- sum(choose(tab, 2))
+    sum_a2 <- sum(choose(a_i, 2))
+    sum_b2 <- sum(choose(b_j, 2))
+    n2 <- choose(n, 2)
+    exp_idx <- (sum_a2 * sum_b2) / n2
+    max_idx <- 0.5 * (sum_a2 + sum_b2)
+    ari <- if (max_idx == exp_idx) 1.0 else (sum_n2 - exp_idx) / (max_idx - exp_idx)
+  }
+  max(0, min(1, ari))
+}
+
+
+#' Calculate Integration Normalized Mutual Information (NMI)
+#'
+#' Computes Normalized Mutual Information (NMI) between clusters in the integrated
+#' multiomics space and ground-truth cell-type labels, following \code{scib},
+#' \code{scCross}, \code{scMultiSim}, \code{Matilda}, and \code{scMoMtF}.
+#'
+#' @param embed Numeric matrix of cell coordinates (cells x dimensions).
+#' @param cell_type Vector or factor of ground-truth cell-type labels.
+#' @param n_clusters Number of clusters (defaults to the number of unique cell types).
+#'
+#' @return Numeric scalar between 0 and 1, where 1 indicates perfect mutual information.
+#' @references
+#' Luecken et al. (2022) Benchmarking atlas-level data integration. Nature Methods.
+#' Ding et al. (2023) scCross.
+#' Li et al. (2023) scMultiSim. Cell Systems.
+#' Yang et al. (2023) Matilda. Nucleic Acids Research.
+#' Lan et al. (2024) scMoMtF.
+#' @examples
+#' set.seed(42)
+#' emb <- matrix(rnorm(60 * 4), 60, 4)
+#' ct <- rep(c("TypeA", "TypeB"), each = 30)
+#' calc_integration_nmi(emb, ct)
+#' @export
+calc_integration_nmi <- function(embed, cell_type, n_clusters = NULL) {
+  if (is.null(embed) || nrow(embed) < 2) return(NA_real_)
+  cell_type <- as.character(cell_type)
+  n_types <- length(unique(cell_type))
+  if (n_types <= 1) return(1.0)
+  
+  k_clust <- if (!is.null(n_clusters)) n_clusters else n_types
+  k_clust <- max(2, min(k_clust, nrow(embed) - 1))
+  
+  set.seed(42)
+  km <- tryCatch(
+    suppressWarnings(stats::kmeans(embed, centers = k_clust, nstart = 10, iter.max = 50)),
+    error = function(e) NULL
+  )
+  if (is.null(km)) return(NA_real_)
+  pred_cl <- km$cluster
+  
+  tab <- table(pred_cl, cell_type)
+  total <- sum(tab)
+  p_xy <- tab / total
+  p_x <- rowSums(p_xy)
+  p_y <- colSums(p_xy)
+  
+  h_x <- -sum(p_x[p_x > 0] * log(p_x[p_x > 0]))
+  h_y <- -sum(p_y[p_y > 0] * log(p_y[p_y > 0]))
+  
+  p_outer <- outer(p_x, p_y)
+  nz <- p_xy > 0
+  mi <- sum(p_xy[nz] * log(p_xy[nz] / p_outer[nz]))
+  
+  denom <- (h_x + h_y) / 2
+  if (denom <= 0) return(1.0)
+  nmi <- mi / denom
+  max(0, min(1, nmi))
+}
+
+
+#' Evaluate Multiomics Integration & Cross-Modal Alignment Fidelity (Category VI)
+#'
+#' Evaluates the multiomics integration and cross-modal alignment fidelity of simulated
+#' single-cell multiomics data across 5 gold-standard integration metrics extracted from
+#' key single-cell benchmarking suites (\code{scib}, \code{scMultiSim}, \code{scCross},
+#' \code{Matilda}, and \code{scMoMtF}):
+#' \enumerate{
+#'   \item \strong{Batch ASW (\code{batch_asw}):} Average Silhouette Width evaluating batch mixing within cell types (scib, scMultiSim).
+#'   \item \strong{Cell-Type ASW (\code{cell_type_asw}):} Average Silhouette Width evaluating cell-type bio-conservation in the multiomics space (scCross, scib).
+#'   \item \strong{Graph Connectivity (\code{graph_connectivity}):} Relative size of the largest connected component in the k-NN graph for each cell type (scCross, scMultiSim, scib).
+#'   \item \strong{ARI (\code{ari}):} Adjusted Rand Index comparing joint multiomics clustering against ground-truth cell types (scib, scCross, scMultiSim, Matilda, scMoMtF).
+#'   \item \strong{NMI (\code{nmi}):} Normalized Mutual Information quantifying information concordance between joint clustering and cell types (scib, scCross, scMultiSim, Matilda, scMoMtF).
+#' }
+#'
+#' @param ref_multi Optional reference multiomics list of matrices (e.g. \code{list(rna = ..., atac = ...)}).
+#' @param sim_multi Simulated multiomics list of matrices or a matrix representing joint embedding coordinates.
+#' @param cell_types Optional cell-type vector or list/data.frame of annotations for each cell.
+#' @param batch_info Optional batch/donor/replicate vector or list/data.frame of annotations for each cell.
+#' @param embed Optional precomputed joint embedding matrix (cells x dimensions). If NULL, computed automatically from \code{sim_multi}.
+#' @param reduction_name Optional name of the precomputed dimensional reduction to extract from Seurat/SCE objects.
+#' @param n_pcs Number of principal components per modality to retain for joint embedding (default 15).
+#' @param k Number of nearest neighbors for graph-based metrics (default 30).
+#' @param threads Number of CPU threads for parallel processing (default 1).
+#' @param verbose Logical; whether to print progress messages (default TRUE).
+#'
+#' @return A list of class \code{scSimEval_integration} containing:
+#'   \item{metrics}{Named list of the 5 calculated integration metric values (batch_asw, cell_type_asw, graph_connectivity, ari, nmi).}
+#'   \item{integration_summary_table}{A tidy data.frame containing the 5 metrics with columns \code{Category}, \code{Property}, \code{Metric}, \code{Value}, and \code{Modality}.}
+#'   \item{embedding}{The joint multiomics embedding matrix used for evaluation.}
+#' @examples
+#' data(example_multiomics, package = "scSimEval")
+#' ct <- rep(c("A", "B"), each = 50)
+#' res <- evaluate_multiomics_integration(sim_multi = example_multiomics$sim_multi, cell_types = ct)
+#' @export
+evaluate_multiomics_integration <- function(
+  ref_multi = NULL,
+  sim_multi,
+  cell_types = NULL,
+  batch_info = NULL,
+  embed = NULL,
+  reduction_name = NULL,
+  n_pcs = 15,
+  k = 30,
+  threads = 1,
+  verbose = TRUE
+) {
+  # Strict standardization check (Option B: Seurat / SingleCellExperiment)
+  val_sim <- validate_multiomics_input(sim_multi, "sim_multi", reduction_name = reduction_name)
+  sim_multi <- list(val_sim$m1, val_sim$m2)
+  if (!is.null(ref_multi)) {
+    val_ref <- validate_multiomics_input(ref_multi, "ref_multi", reduction_name = reduction_name)
+    ref_multi <- list(val_ref$m1, val_ref$m2)
+  }
+  
+  if (is.null(embed) && !is.null(val_sim$embedding)) {
+    embed <- val_sim$embedding
+    if (verbose) message("Using precomputed dimensional reduction from sim_multi for Category VI.")
+  }
+  if (is.null(cell_types) && !is.null(val_sim$cell_types)) {
+    cell_types <- val_sim$cell_types
+  }
+  if (is.null(batch_info) && !is.null(val_sim$batch_info)) {
+    batch_info <- val_sim$batch_info
+  }
+
+  # 1. Resolve Joint Embedding
+  joint_embed <- embed
+  ct_vec <- NULL
+  bt_vec <- NULL
+  
+  if (is.null(joint_embed)) {
+    if (is.matrix(sim_multi) || (is.data.frame(sim_multi) && !is.list(sim_multi))) {
+      joint_embed <- as.matrix(sim_multi)
+    } else if (is.list(sim_multi) && length(sim_multi) >= 2) {
+      m1 <- as.matrix(sim_multi[[1]])
+      m2 <- as.matrix(sim_multi[[2]])
+      n1 <- ncol(m1)
+      n2 <- ncol(m2)
+      
+      # Paired multiomics (equal cell counts)
+      if (n1 == n2) {
+        p1 <- fast_pca(t(normalize_counts(m1)), n_pcs = min(n_pcs, n1 - 1, nrow(m1) - 1))
+        p2 <- fast_pca(t(normalize_counts(m2)), n_pcs = min(n_pcs, n2 - 1, nrow(m2) - 1))
+        s1 <- scale(p1)
+        s2 <- scale(p2)
+        s1[is.na(s1)] <- 0
+        s2[is.na(s2)] <- 0
+        joint_embed <- cbind(s1, s2)
+        
+        # Resolve cell types
+        if (!is.null(cell_types)) {
+          if (length(cell_types) == n1) {
+            ct_vec <- as.character(cell_types)
+          } else if (is.data.frame(cell_types) && nrow(cell_types) == n1) {
+            ct_vec <- as.character(cell_types[[1]])
+          } else if (is.list(cell_types) && length(cell_types[[1]]) == n1) {
+            ct_vec <- as.character(cell_types[[1]])
+          }
+        }
+        
+        # Resolve batches
+        if (!is.null(batch_info)) {
+          if (length(batch_info) == n1) {
+            bt_vec <- as.character(batch_info)
+          } else if (is.data.frame(batch_info) && nrow(batch_info) == n1) {
+            bt_vec <- as.character(batch_info[[1]])
+          } else if (is.list(batch_info) && length(batch_info[[1]]) == n1) {
+            bt_vec <- as.character(batch_info[[1]])
+          }
+        }
+      } else {
+        # Unpaired multiomics: modalities stacked
+        p1 <- fast_pca(t(normalize_counts(m1)), n_pcs = min(n_pcs, n1 - 1, nrow(m1) - 1))
+        p2 <- fast_pca(t(normalize_counts(m2)), n_pcs = min(n_pcs, n2 - 1, nrow(m2) - 1))
+        min_p <- min(ncol(p1), ncol(p2))
+        joint_embed <- rbind(scale(p1[, seq_len(min_p), drop = FALSE]),
+                             scale(p2[, seq_len(min_p), drop = FALSE]))
+        joint_embed[is.na(joint_embed)] <- 0
+        bt_vec <- c(rep("Modality_1", n1), rep("Modality_2", n2))
+        
+        if (!is.null(cell_types)) {
+          if (length(cell_types) == (n1 + n2)) {
+            ct_vec <- as.character(cell_types)
+          } else if (is.list(cell_types) && length(cell_types) >= 2) {
+            ct_vec <- c(as.character(cell_types[[1]]), as.character(cell_types[[2]]))
+          }
+        }
+      }
+    } else if (is.list(sim_multi) && length(sim_multi) == 1) {
+      m1 <- as.matrix(sim_multi[[1]])
+      joint_embed <- fast_pca(t(normalize_counts(m1)), n_pcs = min(n_pcs, ncol(m1) - 1, nrow(m1) - 1))
     }
   }
   
-  list(
-    global_pcc = as.numeric(global_pcc),
-    global_scc = as.numeric(global_scc),
-    kl_divergence = as.numeric(kl_div),
-    mean_celltype_pcc = as.numeric(ct_pcc),
-    mean_celltype_scc = as.numeric(ct_scc),
-    celltype_summary = ct_summary
+  if (is.null(joint_embed) || nrow(joint_embed) < 3) {
+    warning("Unable to construct valid joint embedding for multiomics integration evaluation.")
+    return(NULL)
+  }
+  
+  n_cells <- nrow(joint_embed)
+  
+  # Fallbacks for cell types and batches if missing
+  if (is.null(ct_vec)) {
+    if (!is.null(cell_types) && length(cell_types) == n_cells) {
+      ct_vec <- as.character(cell_types)
+    } else {
+      # Unsupervised clustering fallback
+      k_fallback <- min(3, max(2, n_cells - 1))
+      ct_vec <- paste0("Cluster_", stats::kmeans(joint_embed, centers = k_fallback, nstart = 5)$cluster)
+    }
+  }
+  
+  # If batch is NULL or unimodal, evaluate cross-modal alignment by projecting modalities
+  eval_modality_mixing <- is.null(bt_vec) || length(unique(bt_vec)) < 2
+  
+  if (eval_modality_mixing && is.list(sim_multi) && length(sim_multi) >= 2) {
+    m1 <- as.matrix(sim_multi[[1]])
+    m2 <- as.matrix(sim_multi[[2]])
+    n1 <- ncol(m1)
+    n2 <- ncol(m2)
+    p1 <- fast_pca(t(normalize_counts(m1)), n_pcs = min(n_pcs, n1 - 1, nrow(m1) - 1))
+    p2 <- fast_pca(t(normalize_counts(m2)), n_pcs = min(n_pcs, n2 - 1, nrow(m2) - 1))
+    min_p <- min(ncol(p1), ncol(p2))
+    cross_embed <- rbind(scale(p1[, seq_len(min_p), drop = FALSE]),
+                         scale(p2[, seq_len(min_p), drop = FALSE]))
+    cross_embed[is.na(cross_embed)] <- 0
+    cross_batch <- c(rep("Modality_1", n1), rep("Modality_2", n2))
+    cross_ct <- c(ct_vec, if (length(ct_vec) == n1) ct_vec else rep(ct_vec, length.out = n2))
+    
+    b_asw <- calc_batch_asw(cross_embed, cross_batch, cross_ct)
+  } else {
+    bt_target <- if (!is.null(bt_vec)) bt_vec else rep("Batch_1", n_cells)
+    b_asw <- calc_batch_asw(joint_embed, bt_target, ct_vec)
+  }
+  
+  ct_asw <- calc_cell_type_asw(joint_embed, ct_vec)
+  g_conn <- calc_graph_connectivity(joint_embed, ct_vec, k = min(15, n_cells - 1))
+  ari_val <- calc_integration_ari(joint_embed, ct_vec)
+  nmi_val <- calc_integration_nmi(joint_embed, ct_vec)
+  
+  metrics_list <- list(
+    batch_asw = as.numeric(b_asw),
+    cell_type_asw = as.numeric(ct_asw),
+    graph_connectivity = as.numeric(g_conn),
+    ari = as.numeric(ari_val),
+    nmi = as.numeric(nmi_val)
   )
+  
+  summary_df <- data.frame(
+    Category = "(VI) Multiomics Integration & Alignment",
+    Property = "multiomics_integration",
+    Metric = c("batch_asw", "cell_type_asw", "graph_connectivity", "ari", "nmi"),
+    Value = as.numeric(c(b_asw, ct_asw, g_conn, ari_val, nmi_val)),
+    Modality = "Joint (Cross-Modal)",
+    stringsAsFactors = FALSE
+  )
+  
+  res <- list(
+    metrics = metrics_list,
+    integration_summary_table = summary_df,
+    embedding = joint_embed
+  )
+  class(res) <- c("scSimEval_integration", "list")
+  res
 }
