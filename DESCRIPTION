@@ -3,16 +3,26 @@ Type: Package
 Title: Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods
 Version: 0.99.9
 Authors@R: c(
-    person("Kabilan", "Sakthivel", role = c("aut", "cre"), email = "kabilan151414@gmail.com"),
-    person("Dr", "Dwijesh Chandra Mishra", role = c("aut", "ths"), email = "dwij.mishra@gmail.com"),
-    person("Dr", "Shashi Bhushan Lal", role = c("aut"), email = "sblall16@gmail.com"),
-    person("Dr", "Ulavappa Angadi", role = c("aut"), email = "ubaangadi.iasri@icar.org.in"),
-    person("Dr", "Sudhir Srivastava", role = c("aut"), email = "sudhir0401bm@gmail.com"),
-    person("Dr", "Neeraj Budhlakoti", role = c("aut"), email = "neeraj35669@gmail.com"),
-    person("Dr", "Krishna Kumar Chaturvedi", role = c("aut"), email = "kkcchaturvedi@gmail.com"),
-    person("Dr", "Ranjeet Ranjan Kumar", role = c("aut"), email = "ranjeetranjaniari@gmail.com"),
-    person("Dr", "Navin Chandra Gupta", role = c("aut"), email = "navinbtc@gmail.com"),
-    person("Dr", "Sharanbasappa", role = c("ctb"), email = "smadival509@gmail.com")
+    person("Kabilan", "Sakthivel", role = c("aut", "cre"), email = "kabilan151414@gmail.com",
+      comment = c(ORCID = "0009-0002-9422-0938")),
+    person("Dr", "Dwijesh Chandra Mishra", role = c("aut", "ths"), email = "dwij.mishra@gmail.com",
+      comment = c(ORCID = "0000-0002-3327-6156")),
+    person("Dr", "Shashi Bhushan Lal", role = c("aut"), email = "sblall16@gmail.com",
+      comment = c(ORCID = "0000-0002-2958-6178")),
+    person("Dr", "Ulavappa Angadi", role = c("aut"), email = "ubaangadi.iasri@icar.org.in",
+      comment = c(ORCID = "0000-0003-0012-0179")),
+    person("Dr", "Sudhir Srivastava", role = c("aut"), email = "sudhir0401bm@gmail.com",
+      comment = c(ORCID = "0000-0003-4990-7693")),
+    person("Dr", "Neeraj Budhlakoti", role = c("aut"), email = "neeraj35669@gmail.com",
+      comment = c(ORCID = "0000-0003-3380-7831")),
+    person("Dr", "Krishna Kumar Chaturvedi", role = c("aut"), email = "kkcchaturvedi@gmail.com",
+      comment = c(ORCID = "0000-0002-6529-5466")),
+    person("Dr", "Ranjeet Ranjan Kumar", role = c("aut"), email = "ranjeetranjaniari@gmail.com",
+      comment = c(ORCID = "0000-0002-2279-6340")),
+    person("Dr", "Navin Chandra Gupta", role = c("aut"), email = "navinbtc@gmail.com",
+      comment = c(ORCID = "0000-0002-6502-448X")),
+    person("Dr", "Sharanbasappa", role = c("ctb"), email = "smadival509@gmail.com",
+      comment = c(ORCID = "0000-0002-6571-9070"))
   )
 Description: A simple and unified evaluation toolkit for benchmarking single-cell
     and multiomics data simulation methods. Evaluates how realistic simulated data
@@ -134,5 +144,6 @@ Suggests:
     scater,
     scuttle,
     dynwrap,
-    dyneval
+    dyneval,
+    bsicons
 Config/roxygen2/version: 8.1.0

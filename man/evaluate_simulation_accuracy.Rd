@@ -31,19 +31,19 @@ evaluate_simulation_accuracy(
 
 \item{sim_data}{Simulated count matrix (features x cells).}
 
-\item{cell_types}{Optional vector of shared cell-type annotations across cells.}
+\item{cell_types}{Cell type metadata details}
 
-\item{cell_types_ref}{Optional vector of cell-type annotations for \code{ref_data}.}
+\item{cell_types_ref}{Cell type details of reference dataset}
 
-\item{cell_types_sim}{Optional vector of cell-type annotations for \code{sim_data}.}
+\item{cell_types_sim}{Cell type details of simulated dataset}
 
-\item{batch_info}{Optional vector of shared batch or replicate labels across cells.}
+\item{batch_info}{Batch details}
 
-\item{batch_ref}{Optional vector of batch or replicate labels for \code{ref_data}.}
+\item{batch_ref}{Batch details of reference dataset}
 
-\item{batch_sim}{Optional vector of batch or replicate labels for \code{sim_data}.}
+\item{batch_sim}{Batch details of simulated dataset}
 
-\item{modality}{Optional character scalar specifying the omics modality (e.g., \code{"RNA"} or \code{"ATAC"}).}
+\item{modality}{Name of modality}
 
 \item{compute_bivariate}{Logical, whether to compute 2D bivariate tests. Default is TRUE.}
 

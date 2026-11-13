@@ -63,7 +63,7 @@ res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
 \references{
 Lannelongue, L., et al. (2021). Green Algorithms: Quantifying the carbon footprint of computation. \emph{Advanced Science}, 8(12), 2100707.
 
-Holtgrewe, M., et al. (2015). Methods for the detection and assembly of novel sequence. \emph{Bioinformatics}, 31(12), 1904–1912.
+Holtgrewe, M., et al. (2015). Methods for the detection and assembly of novel sequence. \emph{Bioinformatics}, 31(12), 1904-1912.
 
 Boisvert, S., et al. (2012). Ray Meta: scalable de novo metagenome assembly. \emph{Genome Biology}, 13(12), R122.
 

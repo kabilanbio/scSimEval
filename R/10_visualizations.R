@@ -5509,13 +5509,32 @@ compute_method_leaderboard <- function(benchmark_data) {
 #'     \item \code{n_simulators}: Integer number of unique simulators.
 #'   }
 #' @examples
-#' \donttest{
-#' data(example_scrna, package = "scSimEval")
-#' res1 <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
-#' res2 <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
-#' comb <- combine_benchmark_results(res1, res2, dataset_names = c("Cohort A", "Cohort B"))
+#' res1 <- list(
+#'   metrics_summary_table = data.frame(
+#'     Category = "Distributional Properties",
+#'     Property = "library_size",
+#'     Metric = "Wasserstein",
+#'     Value = 0.22
+#'   )
+#' )
+#'
+#' res2 <- list(
+#'   metrics_summary_table = data.frame(
+#'     Category = "Distributional Properties",
+#'     Property = "library_size",
+#'     Metric = "Wasserstein",
+#'     Value = 0.18
+#'   )
+#' )
+#'
+#' comb <- combine_benchmark_results(
+#'   res1, res2,
+#'   dataset_names = c("Cohort A", "Cohort B"),
+#'   filter_gold_standard = FALSE,
+#'   recompute_normalized = FALSE
+#' )
+#'
 #' print(comb$datasets)
-#' }
 #' @export
 #' @aliases append_benchmark_results
 combine_benchmark_results <- function(
@@ -5560,7 +5579,8 @@ combine_benchmark_results <- function(
     if (inherits(item, "scSimEval_multidataset_benchmark") || inherits(item, "scSimEval_consolidated")) {
       df <- item$granular_benchmark_table %||% item$benchmark_summary_table %||% item$consolidated_summary_table
     } else if (is.list(item) && !is.data.frame(item)) {
-      df <- item$benchmark_df %||% item$granular_benchmark_table %||% item$benchmark_summary_table %||% item$summary_table
+      df <- item$benchmark_df %||% item$granular_benchmark_table %||% item$benchmark_summary_table %||% item$summary_table %||%
+        item$metrics_summary_table
     } else if (is.data.frame(item)) {
       df <- item
     }

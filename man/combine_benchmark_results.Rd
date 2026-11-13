@@ -64,11 +64,30 @@ evaluation metrics. This enables rigorous comparative evaluation and bubble matr
 of average simulator performance across diverse biological contexts.
 }
 \examples{
-\donttest{
-data(example_scrna, package = "scSimEval")
-res1 <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
-res2 <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
-comb <- combine_benchmark_results(res1, res2, dataset_names = c("Cohort A", "Cohort B"))
+res1 <- list(
+  metrics_summary_table = data.frame(
+    Category = "Distributional Properties",
+    Property = "library_size",
+    Metric = "Wasserstein",
+    Value = 0.22
+  )
+)
+
+res2 <- list(
+  metrics_summary_table = data.frame(
+    Category = "Distributional Properties",
+    Property = "library_size",
+    Metric = "Wasserstein",
+    Value = 0.18
+  )
+)
+
+comb <- combine_benchmark_results(
+  res1, res2,
+  dataset_names = c("Cohort A", "Cohort B"),
+  filter_gold_standard = FALSE,
+  recompute_normalized = FALSE
+)
+
 print(comb$datasets)
-}
 }

@@ -4,12 +4,19 @@
 .RData
 .Ruserdata
 scSimEval.Rproj
+*.html
+*.json
+/docs/reference/example_rice_bud.html
+/docs/reference/example_soybean_root.html
+/docs/reference/search.json
+/docs/search.json
 
 # R build artifacts
 *.tar.gz
 *.Rcheck/
 Meta/
 scSimEval.BiocCheck/
+docs/
 
 # Development-only directories (not needed by users)
 examples/

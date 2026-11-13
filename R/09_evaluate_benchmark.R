@@ -64,6 +64,13 @@
 #' @param ref_data Reference count matrix (features x cells).
 #' @param sim_data Simulated count matrix (features x cells).
 #' @param compute_bivariate Logical, whether to compute 2D bivariate tests. Default is TRUE.
+#' @param cell_types Cell type metadata details
+#' @param cell_types_ref Cell type details of reference dataset
+#' @param cell_types_sim Cell type details of simulated dataset
+#' @param batch_info Batch details
+#' @param batch_ref Batch details of reference dataset
+#' @param batch_sim Batch details of simulated dataset
+#' @param modality Name of modality
 #' @param threads Number of threads for parallel computation. Default is 1.
 #' @param memory_mb Optional numeric value of peak memory allocation (in \code{memory_unit}).
 #' @param elapsed_time Optional numeric value of wall-clock elapsed time (in \code{time_unit}).
