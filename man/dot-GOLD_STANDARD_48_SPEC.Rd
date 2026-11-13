@@ -2,11 +2,11 @@
 % Please edit documentation in R/10_visualizations.R
 \name{.GOLD_STANDARD_48_SPEC}
 \alias{.GOLD_STANDARD_48_SPEC}
-\title{Canonical 48 Curated Evaluation Metrics Specification}
+\title{Canonical 56 Curated Evaluation Measures Specification (with Legacy Compatibility)}
 \usage{
 .GOLD_STANDARD_48_SPEC
 }
 \description{
-Canonical 48 Curated Evaluation Metrics Specification
+Canonical 56 Curated Evaluation Measures Specification (with Legacy Compatibility)
 }
 \keyword{internal}

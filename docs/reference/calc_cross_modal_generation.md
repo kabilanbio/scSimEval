@@ -37,10 +37,10 @@ r_rna <- example_multiomics$ref_multi$rna
 r_atac <- example_multiomics$ref_multi$atac
 calc_cross_modal_generation(r_rna, r_atac)
 #> $mean_cell_pcc
-#> [1] 0.07326002
+#> [1] 0.05812026
 #> 
 #> $median_cell_pcc
-#> [1] 0.06511867
+#> [1] 0.06043748
 #> 
 #> $mean_cell_scc
 #> [1] 0.07055168
@@ -49,24 +49,24 @@ calc_cross_modal_generation(r_rna, r_atac)
 #> [1] 0.07361193
 #> 
 #> $mean_feat_pcc
-#> [1] 0.05053426
+#> [1] 0.04695087
 #> 
 #> $median_feat_pcc
-#> [1] 0.05450756
+#> [1] 0.05451325
 #> 
 #> $mean_feat_scc
-#> [1] 0.05363397
+#> [1] 0.05410635
 #> 
 #> $median_feat_scc
-#> [1] 0.05325754
+#> [1] 0.06122589
 #> 
 #> $mean_cell_cosine
-#> [1] 0.4599328
+#> [1] 0.5955659
 #> 
 #> $rmse
-#> [1] 6.034916
+#> [1] 10.3143
 #> 
 #> $mae
-#> [1] 3.951458
+#> [1] 8.019169
 #> 
 ```

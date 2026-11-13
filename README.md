@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://kabilanbio.github.io/scSimEval/)
-[![Bioconductor submission](https://img.shields.io/badge/Bioconductor-submission%20v0.99.9-brightgreen.svg)](https://github.com/BiocStaging/scSimEval)
+[![Bioconductor submission](https://img.shields.io/badge/Bioconductor-submission%20v0.99.10-brightgreen.svg)](https://github.com/BiocStaging/scSimEval)
 
 **`scSimEval`** is a unified evaluation and benchmarking toolkit designed to systematically quantify how faithfully single-cell simulation methods reproduce empirical biological experiments.
 
@@ -24,15 +24,15 @@ The package supports:
 
 ## Key Features
 
-- **55 Curated Evaluation Measures Across 8 Canonical Categories**:
+- **56 Curated Evaluation Measures Across 8 Canonical Categories**:
   1. *Distributional Properties* (14 metrics: 10 univariate---Wasserstein, KS, MAD, MAE, RMSE, Bhattacharyya, KDE-ISE, Runs statistic, NN mismatch, Inter-dataset silhouette---and 4 bivariate---Fasano-Franceschini 2D KS, 2D EMD, 2D NN mismatch, 2D Inter-dataset silhouette---across 7 cell-level, 7 feature-level, and 4 bivariate property pairs)
   2. *Sparsity & Zero-Inflation Dynamics* (5 metrics: logistic dropout midpoint/slope/R² for scRNA-seq, quadratic accessibility-sparsity curve RMSE/R² for scATAC-seq, and posterior excess zero weight discrepancy)
   3. *Cellular Manifold & Clustering Concordance* (8 primary metrics: MMD, Generative Precision, Generative Recall, Silhouette ASW, Clustering Deviation Index [CDI], Neighborhood Purity, ARI, NMI, plus auxiliary Davies-Bouldin Index)
   4. *Technical Variation & Batch Mixing Dynamics* (5 metrics: Batch Silhouette, PCR $R^2$, CMS, Inverse Simpson Index [ISI], Cross-Batch F1)
   5. *Biological Signal & Differential Fidelity* (12 metrics: parallel scRNA-seq DE and scATAC-seq DA suites assessing null P-value uniformity, accuracy, precision, recall, F1-score, and ROC-AUC via pseudobulk edgeR-QLF)
   6. *Multiomics Integration & Alignment* (5 metrics: joint-embedding Batch ASW, Cell-Type ASW, Graph Connectivity, Integration ARI, and Integration NMI)
-  7. *Trajectory & Lineage Topology* (4 metrics: pseudotime correlation, lineage tree branch height RMSE, trajectory graph alignment, lineage gene expression fidelity)
-  8. *Computational Scalability & Efficiency* (2 metrics: elapsed execution time in seconds and peak memory allocation in MB/MiB)
+  7. *Trajectory & Lineage Topology* (5 metrics: HVG-filtered *dynverse* benchmark [Saelens et al., 2019] comprising HIM topology similarity [`him`], edge flip similarity [`edge_flip`], geodesic distance correlation [`geodesic_correlation`], branch assignment F1 [`F1_branches`], and Random Forest feature importance weighted correlation [`wcor_features`])
+  8. *Computational Scalability & Efficiency* (2 metrics: core-normalized execution time in core-seconds [`core_seconds`] and peak memory footprint per allocated core in MiB [`memory_per_core_mib`], with automated multi-core scaling and unified `memory_mb` resource benchmarking)
 - **Robust Normalization Engine**: Automated library-size scaling, $\log_2(\text{CPM}+1)$ transformation, and joint low-dimensional latent projections prevent technical sequencing-depth artifacts from confounding evaluations.
 - **Low-Dimensional Cell Embeddings**: Multi-simulator UMAP, t-SNE, and PCA projections comparing reference and simulated cells in grid or 1-to-1 layouts, accompanied by quantitative clustering and manifold quality metrics.
 - **Publication-Ready Figures & Reproducible R Scripts**: Generates 600 DPI vector graphics and 100% procedural, self-contained R workflow scripts (free of hardcoded `dput` dumps) equipped with dedicated file path configuration blocks for local or HPC cluster execution.
@@ -142,10 +142,14 @@ Detailed in-app guides and file templates are also available directly within the
 
 - **Kabilan Sakthivel** (Maintainer & Ph.D Scholar) — `kabilan151414@gmail.com`
 - **Dr. Dwijesh Chandra Mishra** (Principal Scientist & Thesis Guide) — `dwij.mishra@gmail.com`
-- **Dr. Shashi Bhushan Lal** (Author) — `sblall16@gmail.com`
-- **Dr. Sudhir Srivastava** (Author) — `sudhir0401bm@gmail.com`
-- **Dr. Krishna Kumar Chaturvedi** (Author) — `kkcchaturvedi@gmail.com`
-- **Dr. Sharanbasappa** (Contributor) — `smadival509@gmail.com`
+- **Dr. Shashi Bhushan Lal** (Principal Scientist) — `sblall16@gmail.com`
+- **Dr. Ulavappa Angadi** (Principal Scientist) — `ubaangadi.iasri@icar.org.in`
+- **Dr. Sudhir Srivastava** (Senior Scientist) — `sudhir0401bm@gmail.com`
+- **Dr. Neeraj Budhlakoti** (Senior Scientist) — `neeraj35669@gmail.com`
+- **Dr. Krishna Kumar Chaturvedi** (Principal Scientist) — `kkcchaturvedi@gmail.com`
+- **Dr. Ranjeet Ranjan Kumar** (Senior Scientist) — `ranjeetranjaniari@gmail.com`
+- **Dr. Navin Chandra Gupta** (Senior Scientist) — `navinbtc@gmail.com`
+- **Dr. Sharanbasappa** (Scientist) — `smadival509@gmail.com`
 
 - **Bug Reports & Issues:** [https://github.com/kabilanbio/scSimEval/issues](https://github.com/kabilanbio/scSimEval/issues)
 

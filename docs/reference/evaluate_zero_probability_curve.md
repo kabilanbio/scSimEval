@@ -1,7 +1,7 @@
 # Evaluate Zero-Probability Dropout Curve Fidelity (Splatter & ZINB-WaVE)
 
-Compares empirical dropout trends between reference and simulated
-datasets.
+Compares empirical logistic dropout trends between reference and
+simulated scRNA-seq datasets.
 
 ## Usage
 
@@ -21,7 +21,8 @@ evaluate_zero_probability_curve(ref_counts, sim_counts)
 
 ## Value
 
-Named numeric vector of curve parameter differences.
+Named numeric vector of curve parameter differences (`slope_error`,
+`midpoint_error`, `r2_discrepancy`).
 
 ## Examples
 

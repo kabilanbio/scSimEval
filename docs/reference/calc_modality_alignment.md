@@ -41,7 +41,8 @@ mean_cross_modality_neighbor_frac.
 data(example_multiomics, package = "scSimEval")
 r_rna <- example_multiomics$ref_multi$rna
 r_atac <- example_multiomics$ref_multi$atac
-calc_modality_alignment(rbind(t(r_rna[seq_len(10),]), t(r_atac[seq_len(10),])), rep(c("RNA","ATAC"), each=ncol(r_rna)))
+joint_emb <- rbind(t(r_rna[seq_len(10), ]), t(r_atac[seq_len(10), ]))
+calc_modality_alignment(joint_emb, rep(c("RNA", "ATAC"), each = ncol(r_rna)))
 #> $modality_asw
 #> [1] 0.3818172
 #> 

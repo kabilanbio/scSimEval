@@ -1,9 +1,11 @@
-# Predictive Cell Identity Classification Using DE / Top Variable Features
+# Predictive Cell Identity Classification Using Simulated DEGs (Simpipe Approach 3)
 
-Trains a classifier on simulated features (80% train / 20% test) to
-verify whether the simulated biological signals are sufficiently
-predictive of cell identities. If `de_features` is NULL, the top
-variable features are automatically selected.
+Constructs classification models (Support Vector Machine with radial
+kernel, Random Forest, or k-NN) using simulated gene expression matrices
+and candidate DEGs (Duo et al., Genome Biology 2024 / Simpipe). Genes
+with zero variance are filtered out, and DEGs are used to train on 80%
+of cells and evaluate on 20% test cells (or cross-validation). Computes
+Accuracy, Macro-Precision, Macro-Recall, and Macro-F1 score.
 
 ## Usage
 
@@ -13,7 +15,7 @@ evaluate_predictive_de_model(
   group,
   de_features = NULL,
   n_top = 50,
-  method = c("knn", "rf", "svm")
+  method = c("svm", "knn", "rf")
 )
 ```
 
@@ -21,29 +23,28 @@ evaluate_predictive_de_model(
 
 - data:
 
-  Matrix (features x cells).
+  Matrix of counts or normalized expressions (genes x cells).
 
 - group:
 
-  Cell type labels.
+  Cell type / cluster labels.
 
 - de_features:
 
-  Optional character vector of selected DE feature names.
+  Optional character vector of candidate DEG feature names. If NULL, top
+  variable features are used.
 
 - n_top:
 
-  Number of top features to auto-select if `de_features` is NULL
-  (default 50).
+  Number of top features to select if de_features is NULL (default 50).
 
 - method:
 
-  Classifier: "knn" (default), "rf", or "svm".
+  Classifier algorithm: "svm" (default in Simpipe), "knn", or "rf".
 
 ## Value
 
-A list containing Accuracy, Macro Precision, Macro Recall, and Macro F1
-score.
+A list containing accuracy, precision, recall, and F1 score.
 
 ## Examples
 
@@ -51,15 +52,15 @@ score.
 data(example_scrna, package = "scSimEval")
 evaluate_predictive_de_model(example_scrna$ref, group = example_scrna$cell_types)
 #> $accuracy
-#> [1] 0.8125
+#> [1] 0.5625
 #> 
 #> $precision
-#> [1] 0.8846154
+#> [1] 0.5833333
 #> 
 #> $recall
-#> [1] 0.75
+#> [1] 0.5793651
 #> 
 #> $F1
-#> [1] 0.7681159
+#> [1] 0.5607843
 #> 
 ```

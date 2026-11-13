@@ -18,7 +18,12 @@ evaluate_simulation_accuracy(
   threads = 1,
   memory_mb = NULL,
   elapsed_time = NULL,
-  verbose = TRUE
+  verbose = TRUE,
+  time_unit = c("seconds", "minutes"),
+  memory_unit = c("MiB", "MB"),
+  sim_cores = NULL,
+  trajectory_num_trees = 10000L,
+  include_trajectory = TRUE
 )
 }
 \arguments{
@@ -30,11 +35,26 @@ evaluate_simulation_accuracy(
 
 \item{threads}{Number of threads for parallel computation. Default is 1.}
 
-\item{memory_mb}{Optional numeric value of peak memory allocation in MB.}
+\item{memory_mb}{Optional numeric value of peak memory allocation (in \code{memory_unit}).}
 
-\item{elapsed_time}{Optional numeric value of wall-clock elapsed time in seconds.}
+\item{elapsed_time}{Optional numeric value of wall-clock elapsed time (in \code{time_unit}).}
 
 \item{verbose}{Logical, whether to print execution messages. Default is TRUE.}
+
+\item{time_unit}{Character string specifying the unit of \code{elapsed_time}:
+\code{"seconds"} (default, or \code{"s"}) or \code{"minutes"} (or \code{"min"}).}
+
+\item{memory_unit}{Character string specifying the unit of \code{memory_mb}:
+\code{"MiB"} (default, binary mebibytes) or \code{"MB"} (decimal megabytes, converted to MiB).}
+
+\item{sim_cores}{Optional positive integer specifying the number of CPU cores used
+by the simulator to generate \code{sim_data}. Default is NULL.}
+
+\item{trajectory_num_trees}{Number of Random Forest trees for Category VII \code{wcor_features}
+(default \code{10000L}, per Saelens et al. 2019).}
+
+\item{include_trajectory}{Logical; whether to evaluate Category VII trajectory & lineage topology
+metrics when \code{modality} is scRNA-seq (automatically skipped for \code{scATAC-seq}). Default is \code{TRUE}.}
 }
 \value{
 A list containing tidy summary tables and detailed metric lists.
@@ -47,24 +67,28 @@ zero-inflation curves, and manifold distances between reference and simulated da
 \if{html}{\figure{workflow_diagram.png}{options: width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 
 
-\strong{Metric Measurement Capacity by Data & Metadata Mode (48 Curated Evaluation Measures Suite):}
+\strong{Metric Measurement Capacity by Data & Metadata Mode (56 Evaluation Measures Suite):}
 \itemize{
-  \item \strong{Count Matrix Alone (No Metadata):} Measures 15 baseline metrics spanning
-    Category I (Distributional Properties: Wasserstein, KS, MAD, Bhattacharyya, Runs test,
-    NN mismatch, Inter-dataset silhouette), Category II (Sparsity & Zero-Inflation Dynamics:
-    dropout curve midpoint/slope error, accessibility-sparsity curve RMSE, R2 discrepancy,
-    excess zero-inflation weight discrepancy),
-    and Category VII (Trajectory & Lineage Topology: pseudotime correlation, tree height RMSE,
-    graph alignment, lineage dynamics).
-  \item \strong{+ Cell Types (Optional):} Unlocks 16 additional metrics spanning Category III
-    (Cellular Manifold & Clustering Concordance: MMD, Generative Precision/Recall,
-    Silhouette width, Davies-Bouldin, CDI, Neighborhood Purity, ARI, NMI) and Category V (Biological Signal Fidelity:
-    SimBench DE/DV/DD/DP/BD signals, predictive cell identity Macro-F1, deconvolution RMSE).
-  \item \strong{+ Batch Annotations (Optional):} Unlocks 6 additional metrics spanning Category IV
-    (Technical Variation & Batch Mixing Dynamics: Batch Silhouette, PCR R2, CMS score, LISI/ISI,
-    cross-batch F1) and biological replicate delta variance MAE.
-  \item \strong{Full Metadata (Count Matrix + Cell Types + Batch):} Unlocks the complete unimodal
-    benchmarking suite of 38 metrics (or all 47 metrics for paired multiomics).
+  \item \strong{Count Matrix Alone (No Metadata):} Evaluates Category I (Distributional
+    Properties: 10 univariate metrics---Wasserstein, KS, MAD, MAE, RMSE, Bhattacharyya,
+    KDE-ISE, Runs statistic, NN mismatch, Inter-dataset silhouette---and 4 bivariate metrics---
+    Fasano-Franceschini 2D KS, 2D EMD, 2D NN mismatch, 2D Inter-dataset silhouette),
+    Category II (Sparsity & Zero-Inflation Dynamics: logistic dropout curve midpoint/slope/R2
+    or accessibility-sparsity curve RMSE/R2, and excess zero-inflation weight discrepancy),
+    Category III manifold metrics (MMD, Generative Precision/Recall), and Category VII
+    (Trajectory & Lineage Topology via the HVG-filtered dynverse workflow, evaluated for
+    \code{scRNA-seq} only and skipped for \code{scATAC-seq}: HIM topology similarity,
+    edge flip similarity, geodesic distance correlation, branch assignment F1,
+    and Random Forest feature importance weighted correlation wcor_features).
+  \item \strong{+ Cell Types (Optional):} Unlocks Category III subpopulation metrics
+    (Silhouette ASW, CDI, Neighborhood Purity, ARI, NMI, and auxiliary Davies-Bouldin Index).
+  \item \strong{+ Batch / Biological Replicate Annotations (Optional):} Unlocks Category IV
+    (Technical Variation & Batch Mixing Dynamics: Batch Silhouette, PCR R2, CMS score,
+    LISI/ISI, Cross-Batch F1) and Category V (Biological Signal & Differential Fidelity:
+    Libra pseudobulk edgeR-QLF null P-value uniformity, accuracy, precision, recall,
+    F1-score, and ROC-AUC for scRNA-seq DE or scATAC-seq DA).
+  \item \strong{Full Metadata (+ Runtime & Memory):} Unlocks Category VIII scalability tracking
+    (\code{core_seconds}, \code{memory_per_core_mib}) for the complete 56-measure suite.
 }
 }
 \examples{

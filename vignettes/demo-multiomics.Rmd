@@ -53,13 +53,13 @@ meaningful entry at the same column index in the ATAC matrix.
 
 **What scSimEval can evaluate:**
 
-* ✅ Full unimodal evaluation for each modality (Categories 1–6 and 8)
-* ✅ **All** Category 6 cross-modal coupling metrics:
-  * FOSCTTM and Match@1 (cell alignment in joint embedding space)
-  * Cross-modal generation fidelity (predict ATAC from RNA, or vice versa)
-  * Direct peak-to-gene regulatory linkage (promoter/enhancer accessibility vs. transcription)
-  * Cross-modality feature correlation fidelity
-  * Modality alignment and mixing score in joint latent space
+* ✅ Full unimodal evaluation for each modality (Categories 1–5, 7, and 8)
+* ✅ **All** Category 6 multiomics integration & alignment metrics (`evaluate_multiomics_integration()`):
+  * `batch_asw` (Batch Average Silhouette Width in joint embedding space)
+  * `cell_type_asw` (Cell-Type Average Silhouette Width in joint embedding space)
+  * `graph_connectivity` (Within-cell-type k-NN graph connectivity)
+  * `ari` (Adjusted Rand Index on joint latent clustering)
+  * `nmi` (Normalized Mutual Information on joint latent clustering)
 
 ---
 
@@ -73,18 +73,12 @@ entirely different cells.
 **Technologies:** Bulk ATAC + scRNA-seq, independent 10x scATAC + scRNA experiments on
 the same tissue, sci-ATAC-seq paired with scRNA-seq on sibling aliquots
 
-**Simulators:** Splatter (RNA only) + ArchR (ATAC only) used separately, AMULET
+**Simulators:** scDesign3, scMultiSim, scCross
 
 **What scSimEval can evaluate:**
 
-* ✅ Full unimodal evaluation for each modality independently (Categories 1–6 and 8)
-* ✅ **Population-level** cross-modal metrics that do not require cell-by-cell pairing:
-* ❌ **NOT applicable** (require 1-to-1 cell pairing):
-
-> **Note:** Using `evaluate_multiomics_accuracy()` directly on unpaired data is NOT
-> recommended because it internally calls paired metrics. Instead, use
-> `evaluate_simulation_accuracy()` per modality plus the population-level functions listed
-> above, and combine results with `evaluate_multiple_datasets()`.
+* ✅ Full unimodal evaluation for each modality independently (Categories 1–5, 7, and 8)
+* ✅ Joint-embedding multiomics integration metrics (Category 6) when pre-integrated embeddings (`integrated` or `pca`) are supplied on the combined multiomics object via `pairing = "unpaired"` in `evaluate_multiomics_accuracy()`.
 
 ---
 
@@ -96,9 +90,9 @@ the same tissue, sci-ATAC-seq paired with scRNA-seq on sibling aliquots
 | `evaluate_clustering_metrics()` | ✅ | ✅ |
 | `evaluate_batch_metrics()` | ✅ | ✅ |
 | `evaluate_deg_fidelity()` | ✅ | ✅ |
-| `evaluate_trajectory_metrics()` | ✅ | ✅ |
-| `calc_modality_alignment()` | ✅ | ⚠️ needs integration first |
-| **`evaluate_multiomics_accuracy()`** | ✅ | ❌ direct use |
+| `evaluate_trajectory_metrics()` *(scRNA-seq only)* | ✅ | ✅ |
+| `evaluate_multiomics_integration()` | ✅ | ✅ (via joint embedding) |
+| **`evaluate_multiomics_accuracy()`** | ✅ (`pairing = "paired"`) | ✅ (`pairing = "unpaired"`) |
 
 ---
 
@@ -202,28 +196,7 @@ atac_eval <- evaluate_simulation_accuracy(
   verbose = FALSE
 )
 
-# ── Step 2: Population-level cross-modal metrics (no cell pairing needed) ─────
-
-# 2a. Co-expression module fidelity (RNA only, no pairing needed)
-  ref_mat = example_scrna$ref,
-  sim_mat = example_scrna$sim
-)
-cat("Module correlation r:", round(module_fid$module_correlation_r, 4), "\n")
-
-# 2b. Peak co-accessibility fidelity (ATAC only, no pairing needed)
-  ref_atac = example_scatac$ref,
-  sim_atac = example_scatac$sim
-)
-cat("RV coefficient:", round(coaccess_fid$rv_coefficient, 4), "\n")
-
-# 2c. Cross-modal label transfer (uses ATAC features to predict RNA-based labels)
-# NOTE: cell_types come from the RNA experiment; applied to ATAC data for transfer
-  mod1_data  = example_scatac$sim,
-  cell_types = example_scatac$cell_types
-)
-cat("Label transfer accuracy:", round(label_transfer$cross_modal_accuracy, 4), "\n")
-
-# ── Step 3: Consolidate and compare across modalities ─────────────────────────
+# ── Step 2: Consolidate and compare across modalities ─────────────────────────
 dataset_collection <- list(
   "Method_A-RNA"  = list(ref = example_scrna$ref,  sim = example_scrna$sim),
   "Method_A-ATAC" = list(ref = example_scatac$ref, sim = example_scatac$sim)
@@ -238,9 +211,6 @@ consolidated <- evaluate_multiple_datasets(
 
 print(consolidated$dataset_overview)
 ```
-
-> These functions assume row/column `i` of the RNA matrix matches row/column `i` of the
-> ATAC matrix — an assumption that is biologically false for unpaired experiments.
 
 ---
 
@@ -294,13 +264,8 @@ knitr::kable(compute_embedding_quality_metrics(emb_rna), digits = 4)
 
 | Data Type | Example Technologies | `evaluate_multiomics_accuracy()` | Category 6 Metrics | Recommended Function |
 |---|---|:---:|:---:|---|
-| **Paired** | 10x Multiome, SHARE-seq | ✅ Direct | All Category 6 metrics (FOSCTTM, Match@1, Cross-Modal Generation, RV coefficient) | `evaluate_multiomics_accuracy()` |
-| **Unpaired** | Independent scRNA + scATAC | ❌ Not valid (cells differ) | Population coupling (module fidelity, label transfer, peak co-accessibility) | `evaluate_simulation_accuracy()` × 2 + `evaluate_multiple_datasets()` |
-
-The most important rule: **Cell-pairing metrics (FOSCTTM, cross-modal generation,
-peak-to-gene coupling) are only scientifically valid when the RNA and ATAC columns
-correspond to the same physical cells.** For unpaired multiomics data, rely on
-population-level metrics and per-modality unimodal evaluation.
+| **Paired** | 10x Multiome, SHARE-seq | ✅ `pairing = "paired"` | All 5 Category VI integration metrics (`batch_asw`, `cell_type_asw`, `graph_connectivity`, `ari`, `nmi`) | `evaluate_multiomics_accuracy(..., pairing = "paired")` |
+| **Unpaired** | Independent scRNA + scATAC | ✅ `pairing = "unpaired"` | Joint-embedding integration metrics + per-modality unimodal evaluation | `evaluate_multiomics_accuracy(..., pairing = "unpaired")` |
 
 ```{r session-info}
 sessionInfo()

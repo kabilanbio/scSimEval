@@ -16,13 +16,15 @@ A list with 5 elements:
 
 - ref_multi:
 
-  Named list of reference matrices: `rna` (60 x 80) and `atac` (60 x
-  80).
+  Named list of `SingleCellExperiment` objects: `rna` (60 x 80) and
+  `atac` (60 x 80), complete with precomputed PCA reductions in
+  `reducedDims`.
 
 - sim_multi:
 
-  Named list of simulated matrices: `rna` (60 x 80) and `atac` (60 x
-  80).
+  Named list of `SingleCellExperiment` objects: `rna` (60 x 80) and
+  `atac` (60 x 80), complete with precomputed PCA reductions in
+  `reducedDims`.
 
 - cell_types:
 

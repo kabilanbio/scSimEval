@@ -1,4 +1,34 @@
 
+#' Append Category VII dynverse Trajectory Metrics to Summary Rows
+#' @keywords internal
+#' @noRd
+.append_trajectory_rows <- function(traj_res, modality = NULL) {
+  if (is.null(traj_res)) return(list())
+  spec <- list(
+    list(field = "him", prop = "trajectory_topology"),
+    list(field = "edge_flip", prop = "trajectory_topology"),
+    list(field = "geodesic_correlation", prop = "geodesic_ordering"),
+    list(field = "F1_branches", prop = "branch_concordance"),
+    list(field = "wcor_features", prop = "dynamic_features")
+  )
+  rows <- list()
+  for (s in spec) {
+    val <- traj_res[[s$field]]
+    if (!is.null(val) && length(val) == 1L && is.finite(val)) {
+      df <- data.frame(
+        Category = "(VII) Trajectory & Lineage Topology",
+        Property = s$prop,
+        Metric = s$field,
+        Value = as.numeric(val),
+        stringsAsFactors = FALSE
+      )
+      if (!is.null(modality)) df$Modality <- modality
+      rows[[length(rows) + 1L]] <- df
+    }
+  }
+  rows
+}
+
 #' Evaluate Comprehensive Simulation Accuracy (Unimodal Omics Layer)
 #'
 #' Computes distribution distances, cellular and feature-level properties,
@@ -7,7 +37,7 @@
 #' \if{html}{\figure{workflow_diagram.png}{options: width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 #'
 #' @details
-#' \strong{Metric Measurement Capacity by Data & Metadata Mode (55 Evaluation Measures Suite):}
+#' \strong{Metric Measurement Capacity by Data & Metadata Mode (56 Evaluation Measures Suite):}
 #' \itemize{
 #'   \item \strong{Count Matrix Alone (No Metadata):} Evaluates Category I (Distributional
 #'     Properties: 10 univariate metrics---Wasserstein, KS, MAD, MAE, RMSE, Bhattacharyya,
@@ -16,8 +46,10 @@
 #'     Category II (Sparsity & Zero-Inflation Dynamics: logistic dropout curve midpoint/slope/R2
 #'     or accessibility-sparsity curve RMSE/R2, and excess zero-inflation weight discrepancy),
 #'     Category III manifold metrics (MMD, Generative Precision/Recall), and Category VII
-#'     (Trajectory & Lineage Topology inferred from expression: pseudotime correlation, tree
-#'     height RMSE, graph alignment, lineage gene expression fidelity).
+#'     (Trajectory & Lineage Topology via the HVG-filtered dynverse workflow, evaluated for
+#'     \code{scRNA-seq} only and skipped for \code{scATAC-seq}: HIM topology similarity,
+#'     edge flip similarity, geodesic distance correlation, branch assignment F1,
+#'     and Random Forest feature importance weighted correlation wcor_features).
 #'   \item \strong{+ Cell Types (Optional):} Unlocks Category III subpopulation metrics
 #'     (Silhouette ASW, CDI, Neighborhood Purity, ARI, NMI, and auxiliary Davies-Bouldin Index).
 #'   \item \strong{+ Batch / Biological Replicate Annotations (Optional):} Unlocks Category IV
@@ -26,16 +58,26 @@
 #'     Libra pseudobulk edgeR-QLF null P-value uniformity, accuracy, precision, recall,
 #'     F1-score, and ROC-AUC for scRNA-seq DE or scATAC-seq DA).
 #'   \item \strong{Full Metadata (+ Runtime & Memory):} Unlocks Category VIII scalability tracking
-#'     (\code{elapsed_time_seconds}, \code{peak_memory_mb}) for the complete 55-measure suite.
+#'     (\code{core_seconds}, \code{memory_per_core_mib}) for the complete 56-measure suite.
 #' }
 #'
 #' @param ref_data Reference count matrix (features x cells).
 #' @param sim_data Simulated count matrix (features x cells).
 #' @param compute_bivariate Logical, whether to compute 2D bivariate tests. Default is TRUE.
 #' @param threads Number of threads for parallel computation. Default is 1.
-#' @param memory_mb Optional numeric value of peak memory allocation in MB.
-#' @param elapsed_time Optional numeric value of wall-clock elapsed time in seconds.
+#' @param memory_mb Optional numeric value of peak memory allocation (in \code{memory_unit}).
+#' @param elapsed_time Optional numeric value of wall-clock elapsed time (in \code{time_unit}).
 #' @param verbose Logical, whether to print execution messages. Default is TRUE.
+#' @param time_unit Character string specifying the unit of \code{elapsed_time}:
+#'   \code{"seconds"} (default, or \code{"s"}) or \code{"minutes"} (or \code{"min"}).
+#' @param memory_unit Character string specifying the unit of \code{memory_mb}:
+#'   \code{"MiB"} (default, binary mebibytes) or \code{"MB"} (decimal megabytes, converted to MiB).
+#' @param sim_cores Optional positive integer specifying the number of CPU cores used
+#'   by the simulator to generate \code{sim_data}. Default is NULL.
+#' @param trajectory_num_trees Number of Random Forest trees for Category VII \code{wcor_features}
+#'   (default \code{10000L}, per Saelens et al. 2019).
+#' @param include_trajectory Logical; whether to evaluate Category VII trajectory & lineage topology
+#'   metrics when \code{modality} is scRNA-seq (automatically skipped for \code{scATAC-seq}). Default is \code{TRUE}.
 #'
 #' @return A list containing tidy summary tables and detailed metric lists.
 #' @examples
@@ -56,7 +98,12 @@ evaluate_simulation_accuracy <- function(
   threads = 1,
   memory_mb = NULL,
   elapsed_time = NULL,
-  verbose = TRUE
+  verbose = TRUE,
+  time_unit = c("seconds", "minutes"),
+  memory_unit = c("MiB", "MB"),
+  sim_cores = NULL,
+  trajectory_num_trees = 10000L,
+  include_trajectory = TRUE
 ) {
   # Strict standardization check (Option B: Seurat / SingleCellExperiment)
   val_ref <- validate_sc_object(ref_data, "ref_data")
@@ -489,80 +536,63 @@ evaluate_simulation_accuracy <- function(
     }
   }
   
-  # Step 6: Trajectory & Lineage Topology (Category VII)
-  if (verbose) message("[6/7] Evaluating trajectory and lineage topology...")
-  traj_res <- tryCatch({
-    evaluate_trajectory_metrics(
-      ref_data = ref_data,
-      sim_data = sim_data,
-      cell_types_ref = cell_types_ref,
-      cell_types_sim = cell_types_sim
-    )
-  }, error = function(e) NULL)
-  
-  if (!is.null(traj_res)) {
-    if (!is.null(traj_res$pseudotime_correlation) && !is.na(traj_res$pseudotime_correlation)) {
-      summary_rows[[length(summary_rows) + 1]] <- data.frame(
-        Category = "(VII) Trajectory & Lineage Topology",
-        Property = "pseudotime",
-        Metric = "pseudotime_correlation",
-        Value = as.numeric(traj_res$pseudotime_correlation),
-        stringsAsFactors = FALSE
+  # Step 6: Trajectory & Lineage Topology (Category VII - dynverse workflow, scRNA-seq only)
+  traj_res <- NULL
+  if (!is_atac && isTRUE(include_trajectory)) {
+    if (verbose) message("[6/7] Evaluating trajectory and lineage topology (HVG + dynverse, scRNA-seq only)...")
+    traj_res <- tryCatch({
+      evaluate_trajectory_metrics(
+        ref_data = ref_data,
+        sim_data = sim_data,
+        cell_types_ref = cell_types_ref,
+        cell_types_sim = cell_types_sim,
+        num_trees = trajectory_num_trees,
+        threads = threads,
+        verbose = FALSE
       )
-    }
-    if (!is.null(traj_res$tree_height_rmse) && !is.na(traj_res$tree_height_rmse)) {
-      summary_rows[[length(summary_rows) + 1]] <- data.frame(
-        Category = "(VII) Trajectory & Lineage Topology",
-        Property = "lineage_tree",
-        Metric = "tree_height_rmse",
-        Value = as.numeric(traj_res$tree_height_rmse),
-        stringsAsFactors = FALSE
-      )
-    }
-    if (!is.null(traj_res$graph_alignment) && !is.na(traj_res$graph_alignment)) {
-      summary_rows[[length(summary_rows) + 1]] <- data.frame(
-        Category = "(VII) Trajectory & Lineage Topology",
-        Property = "trajectory_graph",
-        Metric = "graph_alignment",
-        Value = as.numeric(traj_res$graph_alignment),
-        stringsAsFactors = FALSE
-      )
-    }
-    if (!is.null(traj_res$lineage_expression_fidelity) && !is.na(traj_res$lineage_expression_fidelity)) {
-      summary_rows[[length(summary_rows) + 1]] <- data.frame(
-        Category = "(VII) Trajectory & Lineage Topology",
-        Property = "lineage_dynamics",
-        Metric = "lineage_expression_fidelity",
-        Value = as.numeric(traj_res$lineage_expression_fidelity),
-        stringsAsFactors = FALSE
-      )
-    }
+    }, error = function(e) NULL)
+
+    summary_rows <- c(summary_rows, .append_trajectory_rows(traj_res, modality = NULL))
+  } else if (is_atac && verbose) {
+    message("[6/7] Category VII (Trajectory & Lineage Topology) requires scRNA-seq data: skipping for scATAC-seq.")
   }
   
   # Step 7: Computational Scalability & Efficiency (Category VIII)
-  if (!is.null(elapsed_time) || !is.null(memory_mb)) {
+  time_unit_norm <- .normalize_time_unit(time_unit)
+  memory_unit_norm <- .normalize_memory_unit(memory_unit)
+  elapsed_seconds <- .convert_time_to_seconds(elapsed_time, time_unit_norm)
+  memory_mib <- .convert_memory_to_mib(memory_mb, memory_unit_norm)
+  sim_cores_val <- .normalize_sim_cores(sim_cores)
+  cores_mult <- if (!is.null(sim_cores_val)) sim_cores_val else 1L
+  core_sec_val <- if (!is.null(elapsed_seconds) && !is.na(elapsed_seconds)) as.numeric(elapsed_seconds * cores_mult) else NULL
+  mem_core_val <- if (!is.null(memory_mib) && !is.na(memory_mib)) as.numeric(memory_mib / cores_mult) else NULL
+
+  if (!is.null(core_sec_val) || !is.null(mem_core_val)) {
     if (verbose) message("[7/7] Logging computational scalability & efficiency metrics...")
-    if (!is.null(elapsed_time)) {
+    if (!is.null(core_sec_val)) {
       summary_rows[[length(summary_rows) + 1]] <- data.frame(
         Category = "(VIII) Computational Scalability & Efficiency",
         Property = "resource_usage",
-        Metric = "elapsed_time_seconds",
-        Value = as.numeric(elapsed_time),
+        Metric = "core_seconds",
+        Value = as.numeric(core_sec_val),
         stringsAsFactors = FALSE
       )
     }
-    if (!is.null(memory_mb)) {
+    if (!is.null(mem_core_val)) {
       summary_rows[[length(summary_rows) + 1]] <- data.frame(
         Category = "(VIII) Computational Scalability & Efficiency",
         Property = "resource_usage",
-        Metric = "peak_memory_mb",
-        Value = as.numeric(memory_mb),
+        Metric = "memory_per_core_mib",
+        Value = as.numeric(mem_core_val),
         stringsAsFactors = FALSE
       )
     }
   }
 
   summary_table <- do.call(rbind, summary_rows)
+  if (!is.null(sim_cores_val) && !is.null(summary_table) && nrow(summary_table) > 0) {
+    summary_table$Sim_Cores <- sim_cores_val
+  }
   if (verbose) message("Unimodal accuracy evaluation complete.")
   
   list(
@@ -581,7 +611,19 @@ evaluate_simulation_accuracy <- function(
     sim_properties = list(cell = sim_cell, feature = sim_feat),
     batch_effects = b_eval_uni,
     biological_signal = signal_eval_uni,
-    resource_usage = list(memory_mb = memory_mb, elapsed_time = elapsed_time)
+    trajectory = traj_res,
+    resource_usage = list(
+      core_seconds = core_sec_val,
+      memory_per_core_mib = mem_core_val,
+      memory_per_core_gib = if (!is.null(mem_core_val)) mem_core_val / 1024 else NULL,
+      memory_mb = memory_mib,
+      memory_input = memory_mb,
+      memory_unit = memory_unit_norm,
+      elapsed_time = elapsed_seconds,
+      elapsed_time_input = elapsed_time,
+      time_unit = time_unit_norm,
+      sim_cores = sim_cores_val
+    )
   )
 }
 
@@ -601,28 +643,29 @@ evaluate_simulation_accuracy <- function(
 #' \if{html}{\figure{workflow_diagram.png}{options: width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 #'
 #' @details
-#' \strong{Multiomics Metric Measurement Capacity Across the 55 Evaluation Measures:}
+#' \strong{Multiomics Metric Measurement Capacity Across the 56 Evaluation Measures:}
 #' \itemize{
 #'   \item \strong{Paired or Unpaired Count Data Alone:} Evaluates unimodal Category I (10 univariate
 #'     + 4 bivariate metrics when \code{compute_bivariate = TRUE}), Category II (5 sparsity/zero-inflation
 #'     metrics across RNA & ATAC), Category III manifold metrics (MMD, Generative Precision/Recall),
-#'     and Category VII trajectory metrics inferred from scRNA-seq.
+#'     and Category VII trajectory metrics inferred from scRNA-seq via the HVG-filtered dynverse workflow
+#'     (\code{him}, \code{edge_flip}, \code{geodesic_correlation}, \code{F1_branches}, \code{wcor_features}).
 #'   \item \strong{+ Cell Types:} Unlocks Category III supervised clustering concordance (Silhouette ASW,
 #'     CDI, Neighborhood Purity, ARI, NMI) and Category VI (Multiomics Integration & Alignment:
 #'     Batch ASW, Cell-Type ASW, Graph Connectivity, Integration ARI, Integration NMI).
 #'   \item \strong{+ Batch / Biological Replicate Annotations:} Unlocks Category IV batch mixing across
 #'     both layers and Category V (12 differential fidelity metrics: null P-value uniformity, accuracy,
 #'     precision, recall, F1-score, ROC-AUC across both scRNA-seq DE and scATAC-seq DA).
-#'   \item \strong{+ Runtime & Memory:} Logs Category VIII (\code{elapsed_time_seconds}, \code{peak_memory_mb})
-#'     to complete the full 55-measure evaluation suite across all 8 canonical categories.
+#'   \item \strong{+ Runtime & Memory:} Logs Category VIII (\code{core_seconds}, \code{memory_per_core_mib})
+#'     to complete the full 56-measure evaluation suite across all 8 canonical categories.
 #' }
 #'
 #' @param ref_multi Named list of reference matrices for Modality 1 and 2.
 #' @param sim_multi Named list of simulated matrices for Modality 1 and 2.
 #' @param cell_types Optional factor or vector of cell type labels for cells.
 #' @param batch_info Optional factor or vector of batch labels for cells.
-#' @param memory_mb Optional numeric value of peak memory allocation in MB.
-#' @param elapsed_time Optional numeric value of wall-clock elapsed time in seconds.
+#' @param memory_mb Optional numeric value of peak memory allocation (in \code{memory_unit}).
+#' @param elapsed_time Optional numeric value of wall-clock elapsed time (in \code{time_unit}).
 #' @param feature_pairs Optional 2-column data.frame of linked feature pairs.
 #' @param pairing Character string specifying whether the multiomics dataset is
 #'   \code{"paired"} (simultaneous co-assay from the same individual cells, e.g.,
@@ -638,6 +681,24 @@ evaluate_simulation_accuracy <- function(
 #' @param compute_bivariate Logical, whether to compute 2D bivariate tests. Default FALSE for speed.
 #' @param threads Number of CPU threads. Default is 1.
 #' @param verbose Logical, whether to print execution progress. Default is TRUE.
+#' @param time_unit Character string specifying the unit of \code{elapsed_time}:
+#'   \code{"seconds"} (default, or \code{"s"}) or \code{"minutes"} (or \code{"min"}).
+#' @param memory_unit Character string specifying the unit of \code{memory_mb}:
+#'   \code{"MiB"} (default, binary mebibytes) or \code{"MB"} (decimal megabytes, converted to MiB).
+#' @param sim_cores Optional positive integer specifying the number of CPU cores used
+#'   by the simulator to generate \code{sim_multi}. Default is NULL.
+#' @param elapsed_time_rna,elapsed_time_atac Optional separate wall-clock runtimes for RNA and ATAC layers
+#'   when modalities are simulated independently (used if combined \code{elapsed_time} is NULL).
+#' @param memory_mb_rna,memory_mb_atac Optional separate peak RAM allocations for RNA and ATAC layers
+#'   when modalities are simulated independently (used if combined \code{memory_mb} is NULL).
+#' @param time_unit_rna,time_unit_atac Optional time units (\code{"seconds"} or \code{"minutes"}) for
+#'   \code{elapsed_time_rna} and \code{elapsed_time_atac}; defaults to \code{time_unit}.
+#' @param memory_unit_rna,memory_unit_atac Optional memory units (\code{"MiB"} or \code{"MB"}) for
+#'   \code{memory_mb_rna} and \code{memory_mb_atac}; defaults to \code{memory_unit}.
+#' @param sim_cores_rna,sim_cores_atac Optional positive integers specifying simulation CPU cores for
+#'   separate RNA and ATAC runs (used if combined \code{sim_cores} is NULL).
+#' @param trajectory_num_trees Number of Random Forest trees for Category VII \code{wcor_features}
+#'   (default \code{10000L}, per Saelens et al. 2019).
 #'
 #' @return A list containing detailed results and a unified tidy master summary table.
 #' @examples
@@ -656,7 +717,21 @@ evaluate_multiomics_accuracy <- function(
   feature_pairs = NULL,
   compute_bivariate = FALSE,
   threads = 1,
-  verbose = TRUE
+  verbose = TRUE,
+  time_unit = c("seconds", "minutes"),
+  memory_unit = c("MiB", "MB"),
+  sim_cores = NULL,
+  elapsed_time_rna = NULL,
+  elapsed_time_atac = NULL,
+  memory_mb_rna = NULL,
+  memory_mb_atac = NULL,
+  time_unit_rna = NULL,
+  time_unit_atac = NULL,
+  memory_unit_rna = NULL,
+  memory_unit_atac = NULL,
+  sim_cores_rna = NULL,
+  sim_cores_atac = NULL,
+  trajectory_num_trees = 10000L
 ) {
   # Strict standardization check (Option B: Seurat / SingleCellExperiment)
   val_ref <- validate_multiomics_input(ref_multi, "ref_multi")
@@ -720,10 +795,11 @@ evaluate_multiomics_accuracy <- function(
     modality = m1_name,
     compute_bivariate = compute_bivariate,
     threads = threads,
-    verbose = verbose
+    verbose = verbose,
+    include_trajectory = FALSE
   )
   t1 <- m1_eval$metrics_summary_table
-  t1 <- t1[t1$Property != "clustering", , drop = FALSE]
+  t1 <- t1[t1$Property != "clustering" & !grepl("Trajectory", t1$Category, ignore.case = TRUE), , drop = FALSE]
   t1$Modality <- m1_name
   master_rows[[length(master_rows) + 1]] <- t1
   
@@ -734,10 +810,11 @@ evaluate_multiomics_accuracy <- function(
     modality = m2_name,
     compute_bivariate = compute_bivariate,
     threads = threads,
-    verbose = verbose
+    verbose = verbose,
+    include_trajectory = FALSE
   )
   t2 <- m2_eval$metrics_summary_table
-  t2 <- t2[t2$Property != "clustering", , drop = FALSE]
+  t2 <- t2[t2$Property != "clustering" & !grepl("Trajectory", t2$Category, ignore.case = TRUE), , drop = FALSE]
   t2$Modality <- m2_name
   master_rows[[length(master_rows) + 1]] <- t2
   
@@ -964,53 +1041,32 @@ evaluate_multiomics_accuracy <- function(
   }
   
   # ============================================================================
-  # 5. Trajectory & Lineage Topology (Category VII)
+  # 5. Trajectory & Lineage Topology (Category VII - dynverse workflow; scRNA-seq only)
   # ============================================================================
-  if (verbose) message("=== [Step 6] Evaluating Trajectory & Lineage Topology Inferred from scRNA-seq ===")
-  sim_ct_traj <- if (!is.null(ct_m1)) (if (length(ct_m1) == ncol(sim_multi[[1]])) ct_m1 else rep(ct_m1, length.out = ncol(sim_multi[[1]]))) else NULL
-  traj_eval <- evaluate_trajectory_metrics(
-    ref_data = ref_multi[[1]],
-    sim_data = sim_multi[[1]],
-    cell_types_ref = ct_m1,
-    cell_types_sim = sim_ct_traj
-  )
-  master_rows[[length(master_rows) + 1]] <- data.frame(
-    Category = "(VII) Trajectory & Lineage Topology",
-    Property = "pseudotime",
-    Metric = "pseudotime_correlation",
-    Value = as.numeric(traj_eval$pseudotime_correlation),
-    Modality = m1_name,
-    stringsAsFactors = FALSE
-  )
-  if (!is.null(traj_eval$tree_height_rmse) && !is.na(traj_eval$tree_height_rmse)) {
-    master_rows[[length(master_rows) + 1]] <- data.frame(
-      Category = "(VII) Trajectory & Lineage Topology",
-      Property = "lineage_tree",
-      Metric = "tree_height_rmse",
-      Value = as.numeric(traj_eval$tree_height_rmse),
-      Modality = m1_name,
-      stringsAsFactors = FALSE
-    )
-  }
-  if (!is.null(traj_eval$graph_alignment) && !is.na(traj_eval$graph_alignment)) {
-    master_rows[[length(master_rows) + 1]] <- data.frame(
-      Category = "(VII) Trajectory & Lineage Topology",
-      Property = "trajectory_graph",
-      Metric = "graph_alignment",
-      Value = as.numeric(traj_eval$graph_alignment),
-      Modality = m1_name,
-      stringsAsFactors = FALSE
-    )
-  }
-  if (!is.null(traj_eval$lineage_expression_fidelity) && !is.na(traj_eval$lineage_expression_fidelity)) {
-    master_rows[[length(master_rows) + 1]] <- data.frame(
-      Category = "(VII) Trajectory & Lineage Topology",
-      Property = "lineage_dynamics",
-      Metric = "lineage_expression_fidelity",
-      Value = as.numeric(traj_eval$lineage_expression_fidelity),
-      Modality = m1_name,
-      stringsAsFactors = FALSE
-    )
+  m1_is_atac <- .is_atac_modality(ref_multi[[1]], m1_name) || .is_atac_modality(sim_multi[[1]], m1_name)
+  m2_is_atac <- .is_atac_modality(ref_multi[[2]], m2_name) || .is_atac_modality(sim_multi[[2]], m2_name)
+  rna_idx <- if (!m1_is_atac) 1L else if (!m2_is_atac) 2L else NA_integer_
+
+  traj_eval <- NULL
+  if (!is.na(rna_idx)) {
+    rna_mod_name <- if (rna_idx == 1L) m1_name else m2_name
+    rna_ct <- if (rna_idx == 1L) ct_m1 else ct_m2
+    if (verbose) message(sprintf("=== [Step 6] Evaluating Trajectory & Lineage Topology Inferred from %s (HVG + dynverse) ===", rna_mod_name))
+    sim_ct_traj <- if (!is.null(rna_ct)) (if (length(rna_ct) == ncol(sim_multi[[rna_idx]])) rna_ct else rep(rna_ct, length.out = ncol(sim_multi[[rna_idx]]))) else NULL
+    traj_eval <- tryCatch({
+      evaluate_trajectory_metrics(
+        ref_data = ref_multi[[rna_idx]],
+        sim_data = sim_multi[[rna_idx]],
+        cell_types_ref = rna_ct,
+        cell_types_sim = sim_ct_traj,
+        num_trees = trajectory_num_trees,
+        threads = threads,
+        verbose = FALSE
+      )
+    }, error = function(e) NULL)
+    master_rows <- c(master_rows, .append_trajectory_rows(traj_eval, modality = rna_mod_name))
+  } else if (verbose) {
+    message("=== [Step 6] Skipping Category VII Trajectory & Lineage Topology (requires scRNA-seq modality, not scATAC-seq) ===")
   }
   
   # ============================================================================
@@ -1057,24 +1113,102 @@ evaluate_multiomics_accuracy <- function(
   # ============================================================================
   # 7. Computational Scalability & Efficiency (Category VIII)
   # ============================================================================
-  if (!is.null(elapsed_time) || !is.null(memory_mb)) {
+  time_unit_norm <- .normalize_time_unit(time_unit)
+  memory_unit_norm <- .normalize_memory_unit(memory_unit)
+  t_u_rna <- if (!is.null(time_unit_rna)) .normalize_time_unit(time_unit_rna) else time_unit_norm
+  t_u_atac <- if (!is.null(time_unit_atac)) .normalize_time_unit(time_unit_atac) else time_unit_norm
+  m_u_rna <- if (!is.null(memory_unit_rna)) .normalize_memory_unit(memory_unit_rna) else memory_unit_norm
+  m_u_atac <- if (!is.null(memory_unit_atac)) .normalize_memory_unit(memory_unit_atac) else memory_unit_norm
+
+  elapsed_rna_sec  <- .convert_time_to_seconds(elapsed_time_rna, t_u_rna)
+  elapsed_atac_sec <- .convert_time_to_seconds(elapsed_time_atac, t_u_atac)
+  mem_rna_mib      <- .convert_memory_to_mib(memory_mb_rna, m_u_rna)
+  mem_atac_mib     <- .convert_memory_to_mib(memory_mb_atac, m_u_atac)
+  cores_rna_val    <- .normalize_sim_cores(sim_cores_rna)
+  cores_atac_val   <- .normalize_sim_cores(sim_cores_atac)
+
+  has_sep_time <- (!is.null(elapsed_rna_sec) && !is.na(elapsed_rna_sec)) ||
+                  (!is.null(elapsed_atac_sec) && !is.na(elapsed_atac_sec))
+  has_sep_mem  <- (!is.null(mem_rna_mib) && !is.na(mem_rna_mib)) ||
+                  (!is.null(mem_atac_mib) && !is.na(mem_atac_mib))
+
+  elapsed_seconds <- .convert_time_to_seconds(elapsed_time, time_unit_norm)
+  if ((is.null(elapsed_seconds) || is.na(elapsed_seconds)) && has_sep_time) {
+    t_parts <- c(if (!is.null(elapsed_rna_sec)) elapsed_rna_sec else 0,
+                 if (!is.null(elapsed_atac_sec)) elapsed_atac_sec else 0)
+    t_parts <- t_parts[!is.na(t_parts)]
+    if (length(t_parts) > 0) elapsed_seconds <- sum(t_parts)
+  }
+
+  memory_mib <- .convert_memory_to_mib(memory_mb, memory_unit_norm)
+  if ((is.null(memory_mib) || is.na(memory_mib)) && has_sep_mem) {
+    m_parts <- c(if (!is.null(mem_rna_mib)) mem_rna_mib else NA_real_,
+                 if (!is.null(mem_atac_mib)) mem_atac_mib else NA_real_)
+    m_parts <- m_parts[!is.na(m_parts)]
+    if (length(m_parts) > 0) memory_mib <- max(m_parts)
+  }
+
+  sim_cores_val <- .normalize_sim_cores(sim_cores)
+  if (is.null(sim_cores_val) && (!is.null(cores_rna_val) || !is.null(cores_atac_val))) {
+    c_parts <- c(cores_rna_val, cores_atac_val)
+    c_parts <- c_parts[!is.na(c_parts)]
+    if (length(c_parts) > 0) sim_cores_val <- max(c_parts)
+  }
+  scal_input_mode <- if (has_sep_time || has_sep_mem) "separate" else "combined"
+
+  # Core-Seconds and Peak RAM per Core calculations
+  cores_comb_mult <- if (!is.null(sim_cores_val)) sim_cores_val else 1L
+  c_rna <- if (!is.null(cores_rna_val)) cores_rna_val else cores_comb_mult
+  c_atac <- if (!is.null(cores_atac_val)) cores_atac_val else cores_comb_mult
+
+  if (has_sep_time) {
+    cs_rna <- if (!is.null(elapsed_rna_sec) && !is.na(elapsed_rna_sec)) elapsed_rna_sec * c_rna else 0
+    cs_atac <- if (!is.null(elapsed_atac_sec) && !is.na(elapsed_atac_sec)) elapsed_atac_sec * c_atac else 0
+    core_sec_total <- cs_rna + cs_atac
+  } else if (!is.null(elapsed_seconds) && !is.na(elapsed_seconds)) {
+    core_sec_total <- elapsed_seconds * cores_comb_mult
+    cs_rna <- if (!is.null(elapsed_rna_sec)) elapsed_rna_sec * c_rna else NULL
+    cs_atac <- if (!is.null(elapsed_atac_sec)) elapsed_atac_sec * c_atac else NULL
+  } else {
+    core_sec_total <- NULL
+    cs_rna <- NULL
+    cs_atac <- NULL
+  }
+
+  if (has_sep_mem) {
+    mpc_rna <- if (!is.null(mem_rna_mib) && !is.na(mem_rna_mib)) mem_rna_mib / c_rna else NA_real_
+    mpc_atac <- if (!is.null(mem_atac_mib) && !is.na(mem_atac_mib)) mem_atac_mib / c_atac else NA_real_
+    mpc_parts <- c(mpc_rna, mpc_atac)
+    mpc_parts <- mpc_parts[!is.na(mpc_parts)]
+    mem_core_total <- if (length(mpc_parts) > 0) max(mpc_parts) else NA_real_
+  } else if (!is.null(memory_mib) && !is.na(memory_mib)) {
+    mem_core_total <- memory_mib / cores_comb_mult
+    mpc_rna <- if (!is.null(mem_rna_mib)) mem_rna_mib / c_rna else NULL
+    mpc_atac <- if (!is.null(mem_atac_mib)) mem_atac_mib / c_atac else NULL
+  } else {
+    mem_core_total <- NULL
+    mpc_rna <- NULL
+    mpc_atac <- NULL
+  }
+
+  if (!is.null(core_sec_total) || !is.null(mem_core_total)) {
     if (verbose) message("=== [Step 8] Logging Computational Scalability & Efficiency ===")
-    if (!is.null(elapsed_time)) {
+    if (!is.null(core_sec_total)) {
       master_rows[[length(master_rows) + 1]] <- data.frame(
         Category = "(VIII) Computational Scalability & Efficiency",
         Property = "resource_usage",
-        Metric = "elapsed_time_seconds",
-        Value = as.numeric(elapsed_time),
+        Metric = "core_seconds",
+        Value = as.numeric(core_sec_total),
         Modality = "Computation",
         stringsAsFactors = FALSE
       )
     }
-    if (!is.null(memory_mb)) {
+    if (!is.null(mem_core_total)) {
       master_rows[[length(master_rows) + 1]] <- data.frame(
         Category = "(VIII) Computational Scalability & Efficiency",
         Property = "resource_usage",
-        Metric = "peak_memory_mb",
-        Value = as.numeric(memory_mb),
+        Metric = "memory_per_core_mib",
+        Value = as.numeric(mem_core_total),
         Modality = "Computation",
         stringsAsFactors = FALSE
       )
@@ -1082,6 +1216,9 @@ evaluate_multiomics_accuracy <- function(
   }
   
   master_table <- do.call(rbind, master_rows)
+  if (!is.null(sim_cores_val) && !is.null(master_table) && nrow(master_table) > 0) {
+    master_table$Sim_Cores <- sim_cores_val
+  }
   if (verbose) message("Master multiomics benchmarking complete.")
   
   list(
@@ -1104,7 +1241,41 @@ evaluate_multiomics_accuracy <- function(
       coexpression = coexpr_fid,
       profile = acc_prof
     ),
-    resource_usage = list(memory_mb = memory_mb, elapsed_time = elapsed_time)
+    resource_usage = list(
+      mode = scal_input_mode,
+      core_seconds = core_sec_total,
+      memory_per_core_mib = mem_core_total,
+      memory_per_core_gib = if (!is.null(mem_core_total)) mem_core_total / 1024 else NULL,
+      memory_mb = memory_mib,
+      memory_input = memory_mb,
+      memory_unit = memory_unit_norm,
+      elapsed_time = elapsed_seconds,
+      elapsed_time_input = elapsed_time,
+      time_unit = time_unit_norm,
+      sim_cores = sim_cores_val,
+      rna = list(
+        core_seconds = cs_rna,
+        memory_per_core_mib = mpc_rna,
+        elapsed_time = elapsed_rna_sec,
+        elapsed_time_input = elapsed_time_rna,
+        time_unit = t_u_rna,
+        memory_mb = mem_rna_mib,
+        memory_input = memory_mb_rna,
+        memory_unit = m_u_rna,
+        sim_cores = cores_rna_val
+      ),
+      atac = list(
+        core_seconds = cs_atac,
+        memory_per_core_mib = mpc_atac,
+        elapsed_time = elapsed_atac_sec,
+        elapsed_time_input = elapsed_time_atac,
+        time_unit = t_u_atac,
+        memory_mb = mem_atac_mib,
+        memory_input = memory_mb_atac,
+        memory_unit = m_u_atac,
+        sim_cores = cores_atac_val
+      )
+    )
   )
 }
 
@@ -1186,6 +1357,9 @@ evaluate_multiple_datasets <- function(
             batch_info = item$batch_info,
             memory_mb = item$memory_mb,
             elapsed_time = item$elapsed_time,
+            time_unit = if (!is.null(item$time_unit)) item$time_unit else "seconds",
+            memory_unit = if (!is.null(item$memory_unit)) item$memory_unit else "MiB",
+            sim_cores = if (!is.null(item$sim_cores)) item$sim_cores else if (!is.null(item$cores)) item$cores else item$n_cores,
             feature_pairs = item$feature_pairs
           )
         } else {
@@ -1202,7 +1376,12 @@ evaluate_multiple_datasets <- function(
             ref = ref_mat,
             sim = sim_mat,
             cell_types = item$cell_types,
-            batch_info = item$batch_info
+            batch_info = item$batch_info,
+            memory_mb = item$memory_mb,
+            elapsed_time = item$elapsed_time,
+            time_unit = if (!is.null(item$time_unit)) item$time_unit else "seconds",
+            memory_unit = if (!is.null(item$memory_unit)) item$memory_unit else "MiB",
+            sim_cores = if (!is.null(item$sim_cores)) item$sim_cores else if (!is.null(item$cores)) item$cores else item$n_cores
           )
         }
       } else {
@@ -1236,8 +1415,16 @@ evaluate_multiple_datasets <- function(
             cell_types = ct,
             batch_info = bi,
             pairing = if (!is.null(sub_items[[rna_idx]]$pairing)) sub_items[[rna_idx]]$pairing else if (!is.null(sub_items[[rna_idx]]$is_paired)) (if (isTRUE(sub_items[[rna_idx]]$is_paired)) "paired" else "unpaired") else "paired",
-            memory_mb = sub_items[[rna_idx]]$memory_mb,
-            elapsed_time = sub_items[[rna_idx]]$elapsed_time,
+            memory_mb_rna = sub_items[[rna_idx]]$memory_mb,
+            elapsed_time_rna = sub_items[[rna_idx]]$elapsed_time,
+            time_unit_rna = if (!is.null(sub_items[[rna_idx]]$time_unit)) sub_items[[rna_idx]]$time_unit else "seconds",
+            memory_unit_rna = if (!is.null(sub_items[[rna_idx]]$memory_unit)) sub_items[[rna_idx]]$memory_unit else "MiB",
+            sim_cores_rna = if (!is.null(sub_items[[rna_idx]]$sim_cores)) sub_items[[rna_idx]]$sim_cores else if (!is.null(sub_items[[rna_idx]]$cores)) sub_items[[rna_idx]]$cores else sub_items[[rna_idx]]$n_cores,
+            memory_mb_atac = sub_items[[atac_idx]]$memory_mb,
+            elapsed_time_atac = sub_items[[atac_idx]]$elapsed_time,
+            time_unit_atac = if (!is.null(sub_items[[atac_idx]]$time_unit)) sub_items[[atac_idx]]$time_unit else "seconds",
+            memory_unit_atac = if (!is.null(sub_items[[atac_idx]]$memory_unit)) sub_items[[atac_idx]]$memory_unit else "MiB",
+            sim_cores_atac = if (!is.null(sub_items[[atac_idx]]$sim_cores)) sub_items[[atac_idx]]$sim_cores else if (!is.null(sub_items[[atac_idx]]$cores)) sub_items[[atac_idx]]$cores else sub_items[[atac_idx]]$n_cores,
             feature_pairs = sub_items[[rna_idx]]$feature_pairs
           )
         } else {
@@ -1260,7 +1447,12 @@ evaluate_multiple_datasets <- function(
               ref = ref_m,
               sim = sim_m,
               cell_types = it$cell_types,
-              batch_info = it$batch_info
+              batch_info = it$batch_info,
+              memory_mb = it$memory_mb,
+              elapsed_time = it$elapsed_time,
+              time_unit = if (!is.null(it$time_unit)) it$time_unit else "seconds",
+              memory_unit = if (!is.null(it$memory_unit)) it$memory_unit else "MiB",
+              sim_cores = if (!is.null(it$sim_cores)) it$sim_cores else if (!is.null(it$cores)) it$cores else it$n_cores
             )
           }
         }
@@ -1284,6 +1476,19 @@ evaluate_multiple_datasets <- function(
           pairing = if (!is.null(item$pairing)) item$pairing else if (!is.null(item$is_paired)) (if (isTRUE(item$is_paired)) "paired" else "unpaired") else "paired",
           memory_mb = item$memory_mb,
           elapsed_time = item$elapsed_time,
+          time_unit = if (!is.null(item$time_unit)) item$time_unit else "seconds",
+          memory_unit = if (!is.null(item$memory_unit)) item$memory_unit else "MiB",
+          sim_cores = if (!is.null(item$sim_cores)) item$sim_cores else if (!is.null(item$cores)) item$cores else item$n_cores,
+          elapsed_time_rna = item$elapsed_time_rna,
+          elapsed_time_atac = item$elapsed_time_atac,
+          memory_mb_rna = item$memory_mb_rna,
+          memory_mb_atac = item$memory_mb_atac,
+          time_unit_rna = item$time_unit_rna,
+          time_unit_atac = item$time_unit_atac,
+          memory_unit_rna = item$memory_unit_rna,
+          memory_unit_atac = item$memory_unit_atac,
+          sim_cores_rna = item$sim_cores_rna,
+          sim_cores_atac = item$sim_cores_atac,
           feature_pairs = item$feature_pairs
         )
       } else {
@@ -1300,7 +1505,12 @@ evaluate_multiple_datasets <- function(
           ref = ref_mat,
           sim = sim_mat,
           cell_types = item$cell_types,
-          batch_info = item$batch_info
+          batch_info = item$batch_info,
+          memory_mb = item$memory_mb,
+          elapsed_time = item$elapsed_time,
+          time_unit = if (!is.null(item$time_unit)) item$time_unit else "seconds",
+          memory_unit = if (!is.null(item$memory_unit)) item$memory_unit else "MiB",
+          sim_cores = if (!is.null(item$sim_cores)) item$sim_cores else if (!is.null(item$cores)) item$cores else item$n_cores
         )
       }
     }
@@ -1333,7 +1543,20 @@ evaluate_multiple_datasets <- function(
         feature_pairs = exp$feature_pairs,
         compute_bivariate = compute_bivariate,
         threads = threads,
-        verbose = verbose
+        verbose = verbose,
+        time_unit = if (!is.null(exp$time_unit)) exp$time_unit else "seconds",
+        memory_unit = if (!is.null(exp$memory_unit)) exp$memory_unit else "MiB",
+        sim_cores = exp$sim_cores,
+        elapsed_time_rna = exp$elapsed_time_rna,
+        elapsed_time_atac = exp$elapsed_time_atac,
+        memory_mb_rna = exp$memory_mb_rna,
+        memory_mb_atac = exp$memory_mb_atac,
+        time_unit_rna = exp$time_unit_rna,
+        time_unit_atac = exp$time_unit_atac,
+        memory_unit_rna = exp$memory_unit_rna,
+        memory_unit_atac = exp$memory_unit_atac,
+        sim_cores_rna = exp$sim_cores_rna,
+        sim_cores_atac = exp$sim_cores_atac
       )
 
       df <- res$benchmark_summary_table
@@ -1361,7 +1584,9 @@ evaluate_multiple_datasets <- function(
         }
       }
       df$Data_Name <- data_name_col
-      df <- df[, c("Dataset", "Data_Name", "Modality", "Category", "Property", "Metric", "Value")]
+      keep_cols <- c("Dataset", "Data_Name", "Modality", "Category", "Property", "Metric", "Value")
+      if ("Sim_Cores" %in% colnames(df)) keep_cols <- c(keep_cols, "Sim_Cores")
+      df <- df[, keep_cols, drop = FALSE]
       all_master_rows[[length(all_master_rows) + 1]] <- df
       dataset_results[[exp_name]] <- res
 
@@ -1374,19 +1599,31 @@ evaluate_multiple_datasets <- function(
         threads = threads,
         memory_mb = exp$memory_mb,
         elapsed_time = exp$elapsed_time,
-        verbose = verbose
+        verbose = verbose,
+        time_unit = if (!is.null(exp$time_unit)) exp$time_unit else "seconds",
+        memory_unit = if (!is.null(exp$memory_unit)) exp$memory_unit else "MiB",
+        sim_cores = exp$sim_cores
       )
 
       df <- res$metrics_summary_table
       df$Dataset <- exp_name
       df$Data_Name <- exp$data_name
       df$Modality <- exp$modality
-      df <- df[, c("Dataset", "Data_Name", "Modality", "Category", "Property", "Metric", "Value")]
+      keep_cols <- c("Dataset", "Data_Name", "Modality", "Category", "Property", "Metric", "Value")
+      if ("Sim_Cores" %in% colnames(df)) keep_cols <- c(keep_cols, "Sim_Cores")
+      df <- df[, keep_cols, drop = FALSE]
       all_master_rows[[length(all_master_rows) + 1]] <- df
       dataset_results[[exp$data_name]] <- res
     }
   }
 
+  has_any_cores <- any(vapply(all_master_rows, function(d) "Sim_Cores" %in% colnames(d), logical(1)))
+  if (has_any_cores) {
+    all_master_rows <- lapply(all_master_rows, function(d) {
+      if (!"Sim_Cores" %in% colnames(d)) d$Sim_Cores <- NA_integer_
+      d
+    })
+  }
   consolidated_table <- do.call(rbind, all_master_rows)
   rownames(consolidated_table) <- NULL
 

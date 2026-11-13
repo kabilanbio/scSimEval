@@ -15,8 +15,7 @@ plot_evaluation_summary(
   simulators_order = NULL,
   show_labels = TRUE,
   title = "Single-Cell Simulator Evaluation Summary",
-  subtitle =
-    "Average fidelity scores across 8 canonical evaluation categories and overall benchmark performance",
+  subtitle = "Average fidelity scores across 8 evaluation categories",
   base_size = 11
 )
 
@@ -28,8 +27,7 @@ plot_benchmark_summary_bars(
   simulators_order = NULL,
   show_labels = TRUE,
   title = "Single-Cell Simulator Evaluation Summary",
-  subtitle =
-    "Average fidelity scores across 8 canonical evaluation categories and overall benchmark performance",
+  subtitle = "Average fidelity scores across 8 evaluation categories",
   base_size = 11
 )
 
@@ -41,8 +39,7 @@ plot_summary_bars(
   simulators_order = NULL,
   show_labels = TRUE,
   title = "Single-Cell Simulator Evaluation Summary",
-  subtitle =
-    "Average fidelity scores across 8 canonical evaluation categories and overall benchmark performance",
+  subtitle = "Average fidelity scores across 8 evaluation categories",
   base_size = 11
 )
 ```
@@ -111,29 +108,14 @@ res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
 #> [1/5] Extracting cell-level properties...
 #> [2/5] Extracting feature-level properties...
 #> [3/5] Computing univariate accuracy metrics...
-#> [4/5] Computing bivariate metrics (Fasano-Franceschini, Peacock, KDE zstat, 2D EMD)...
+#> [4/5] Computing bivariate metrics (Fasano-Franceschini, KDE zstat, 2D EMD)...
 #> [5/5] Computing zero-probability and manifold distances...
+#> Evaluating batch integration & confounder mixing...
+#> Evaluating scRNA-seq biological signal fidelity (Libra Pseudobulk edgeR-QLF)...
+#> calcNormFactors has been renamed to normLibSizes
+#> calcNormFactors has been renamed to normLibSizes
+#> [6/7] Evaluating trajectory and lineage topology (HVG + dynverse, scRNA-seq only)...
 #> Unimodal accuracy evaluation complete.
-# \donttest{
-demo <- readRDS(system.file("shiny/scSimEvalApp/data/demo_benchmark_data.rds", package = "scSimEval"))
-p <- plot_evaluation_summary(demo$benchmark_summary_table)
+p <- plot_evaluation_summary(res)
 print(p)
-
-# }
-data(example_scrna, package = "scSimEval")
-res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
-#> [1/5] Extracting cell-level properties...
-#> [2/5] Extracting feature-level properties...
-#> [3/5] Computing univariate accuracy metrics...
-#> [4/5] Computing bivariate metrics (Fasano-Franceschini, Peacock, KDE zstat, 2D EMD)...
-#> [5/5] Computing zero-probability and manifold distances...
-#> Unimodal accuracy evaluation complete.
-data(example_scrna, package = "scSimEval")
-res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
-#> [1/5] Extracting cell-level properties...
-#> [2/5] Extracting feature-level properties...
-#> [3/5] Computing univariate accuracy metrics...
-#> [4/5] Computing bivariate metrics (Fasano-Franceschini, Peacock, KDE zstat, 2D EMD)...
-#> [5/5] Computing zero-probability and manifold distances...
-#> Unimodal accuracy evaluation complete.
 ```

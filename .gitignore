@@ -19,6 +19,8 @@ scratch/
 # Temporary files
 *.tmp
 *.log
+Rplots.pdf
+vignettes/*.html
 
 # OS generated files
 .DS_Store

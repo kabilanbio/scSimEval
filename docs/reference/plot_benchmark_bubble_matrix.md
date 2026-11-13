@@ -20,10 +20,10 @@ plot_benchmark_bubble_matrix(
   show_missing_dots = TRUE,
   bubble_size_range = c(2, 7.8),
   title = NULL,
-  subtitle =
-    "Standardized Direction-Aware Fidelity Scores [0, 1] Across 8 Canonical Evaluation Categories",
+  subtitle = NULL,
   base_size = 11,
-  show_score_labels = FALSE
+  show_score_labels = FALSE,
+  show_category_bars = TRUE
 )
 
 plot_bubble_matrix(
@@ -38,10 +38,10 @@ plot_bubble_matrix(
   show_missing_dots = TRUE,
   bubble_size_range = c(2, 7.8),
   title = NULL,
-  subtitle =
-    "Standardized Direction-Aware Fidelity Scores [0, 1] Across 8 Canonical Evaluation Categories",
+  subtitle = NULL,
   base_size = 11,
-  show_score_labels = FALSE
+  show_score_labels = FALSE,
+  show_category_bars = TRUE
 )
 ```
 
@@ -121,6 +121,11 @@ plot_bubble_matrix(
 
   Logical. Annotate bubbles with numeric score. Default `FALSE`.
 
+- show_category_bars:
+
+  Logical. Append a compact horizontal summary bar (normalized category
+  mean score) at the right end of each category panel. Default `TRUE`.
+
 ## Value
 
 A `ggplot` object rendering the multi-dimensional bubble matrix.
@@ -137,9 +142,10 @@ A `ggplot` object rendering the multi-dimensional bubble matrix.
 - **Fill color**: Evaluation category (one of the eight canonical
   groups).
 
-- **Circle (shape 21)**: Regular performance (score \< 0.96).
+- **Circle (standard outline)**: Standard performance for that metric.
 
-- **Square (shape 22)**: Top performer (score \>= 0.96).
+- **Bold outline circle (shape 21, stroke 1.6)**: Top-performing
+  simulator for that specific metric.
 
 - **Small grey dot**: Metric not available/computed for that method.
 

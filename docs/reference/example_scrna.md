@@ -17,11 +17,15 @@ A list with 4 elements:
 
 - ref:
 
-  A numeric matrix of reference count data (60 genes x 80 cells).
+  A `SingleCellExperiment` object containing reference count data (60
+  genes x 80 cells), cell types and batch annotations in `colData`, and
+  precomputed PCA reductions in `reducedDims`.
 
 - sim:
 
-  A numeric matrix of simulated count data (60 genes x 80 cells).
+  A `SingleCellExperiment` object containing simulated count data (60
+  genes x 80 cells), cell types and batch annotations in `colData`, and
+  precomputed PCA reductions in `reducedDims`.
 
 - cell_types:
 

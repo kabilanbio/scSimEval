@@ -1,8 +1,11 @@
-# Calculate Between-Dataset Silhouette Width
+# Calculate Overall Clustering-Like Separation of Datasets via Silhouette-Based Measures
 
-Integrated from countsimQC (Soneson & Robinson). Treats dataset identity
-(reference vs. simulation) as cluster labels to test if the two datasets
-separate into distinct clusters or remain well-mixed.
+Integrated from countsimQC (Soneson & Robinson). Evaluates overall
+separation between reference and simulated distributions by treating
+dataset identity (reference vs. simulated) as cluster labels on the
+pooled observations and computing both the global average silhouette
+width and the local neighborhood silhouette width (based on the closest
+\\k = \max(5, \text{round}(0.05 N))\\ points in each dataset).
 
 ## Usage
 
@@ -14,19 +17,23 @@ calc_between_dataset_silhouette(ref, sim, subsample_size = 300)
 
 - ref:
 
-  Vector or matrix for reference dataset.
+  Numeric vector (1D) or 2-column matrix/data.frame (2D) of reference
+  values.
 
 - sim:
 
-  Vector or matrix for simulated dataset.
+  Numeric vector (1D) or 2-column matrix/data.frame (2D) of simulated
+  values.
 
 - subsample_size:
 
-  Number of subsampled points to evaluate (default 300).
+  Maximum number of observations per dataset to subsample for speed
+  (default 300).
 
 ## Value
 
-A named list with global and local between-dataset silhouette widths.
+A named list with `between_dataset_silh_global` and
+`between_dataset_silh_local`.
 
 ## Examples
 
@@ -35,9 +42,9 @@ ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_between_dataset_silhouette(ref, sim)
 #> $between_dataset_silh_global
-#> [1] -0.00194838
+#> [1] -0.01126145
 #> 
 #> $between_dataset_silh_local
-#> [1] 0.05351383
+#> [1] -0.1681511
 #> 
 ```

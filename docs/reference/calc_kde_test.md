@@ -29,5 +29,5 @@ estimates.
 ref <- matrix(stats::rnorm(100), 50, 2)
 sim <- matrix(stats::rnorm(100), 50, 2)
 calc_kde_test(ref, sim)
-#> [1] NA
+#> [1] 0.1061465
 ```

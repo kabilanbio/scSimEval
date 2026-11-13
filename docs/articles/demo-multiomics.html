@@ -11,11 +11,11 @@
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><script src="../lightswitch.js"></script><link href="../extra.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Demonstration 3: Multiomics (scRNA-seq + scATAC-seq) Simulation Evaluation">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,11 +25,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +50,7 @@
     <li><a class="dropdown-item" href="../articles/demo-saved-rds.html">4. Analyzing Pre-Saved Benchmark (.rds)</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (56 Metrics)</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -58,14 +58,6 @@
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/kabilanbio/scSimEval" aria-label="GitHub repository"><span class="fa fa-github fa-lg"></span></a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Toggle theme"><span class="fa-solid fa-sun fa-fw"></span></button>
-  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
-    <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-bs-theme-value="light" aria-pressed="false"><span class="fa-solid fa-sun fa-fw"></span>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-bs-theme-value="dark" aria-pressed="false"><span class="fa-solid fa-moon fa-fw"></span>Dark</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-bs-theme-value="auto" aria-pressed="false"><span class="fa-solid fa-circle-half-stroke fa-fw"></span>Auto</button></li>
-  </ul>
-</li>
       </ul>
 </div>
 
@@ -124,18 +116,26 @@ SNARE-seq, Paired-seq, ASTAR-seq</p>
 Methods</em> 2023), SymSim2+ATAC, MultiSim</p>
 <p><strong>What scSimEval can evaluate:</strong></p>
 <ul>
-<li>✅ Full unimodal evaluation for each modality (Categories 1–6 and
-8)</li>
-<li>✅ <strong>All</strong> Category 7 cross-modal coupling metrics:
+<li>✅ Full unimodal evaluation for each modality (Categories 1–5, 7,
+and 8)</li>
+<li>✅ <strong>All</strong> Category 6 multiomics integration &amp;
+alignment metrics (<code><a href="../reference/evaluate_multiomics_integration.html">evaluate_multiomics_integration()</a></code>):
 <ul>
-<li>FOSCTTM and <a href="mailto:Match@1" class="email">Match@1</a> (cell
-alignment in joint embedding space)</li>
-<li>Cross-modal generation fidelity (predict ATAC from RNA, or vice
-versa)</li>
-<li>Direct peak-to-gene regulatory linkage (promoter/enhancer
-accessibility vs. transcription)</li>
-<li>Cross-modality feature correlation fidelity</li>
-<li>Modality alignment and mixing score in joint latent space</li>
+<li>
+<code>batch_asw</code> (Batch Average Silhouette Width in joint
+embedding space)</li>
+<li>
+<code>cell_type_asw</code> (Cell-Type Average Silhouette Width in
+joint embedding space)</li>
+<li>
+<code>graph_connectivity</code> (Within-cell-type k-NN graph
+connectivity)</li>
+<li>
+<code>ari</code> (Adjusted Rand Index on joint latent
+clustering)</li>
+<li>
+<code>nmi</code> (Normalized Mutual Information on joint latent
+clustering)</li>
 </ul>
 </li>
 </ul>
@@ -153,53 +153,28 @@ cells.</p>
 <p><strong>Technologies:</strong> Bulk ATAC + scRNA-seq, independent 10x
 scATAC + scRNA experiments on the same tissue, sci-ATAC-seq paired with
 scRNA-seq on sibling aliquots</p>
-<p><strong>Simulators:</strong> Splatter (RNA only) + ArchR (ATAC only)
-used separately, AMULET</p>
+<p><strong>Simulators:</strong> scDesign3, scMultiSim, scCross</p>
 <p><strong>What scSimEval can evaluate:</strong></p>
 <ul>
 <li>✅ Full unimodal evaluation for each modality independently
-(Categories 1–6 and 8)</li>
-<li>✅ <strong>Population-level</strong> cross-modal metrics that do not
-require cell-by-cell pairing:
-<ul>
-<li>Cross-modal label transfer accuracy
-(<code>evaluate_cross_modal_prediction</code>)</li>
-<li>Co-expression module fidelity
-(<code>calc_coexpression_module_fidelity</code>)</li>
-<li>Peak co-accessibility fidelity
-(<code>calc_peak_coaccessibility_fidelity</code>)</li>
-<li>Network topology similarity (<code>calc_network_jaccard</code>)</li>
-<li>Chromatin accessibility profile concordance
-(<code>calc_accessibility_profile_concordance</code>)</li>
+(Categories 1–5, 7, and 8)</li>
+<li>✅ Joint-embedding multiomics integration metrics (Category 6) when
+pre-integrated embeddings (<code>integrated</code> or <code>pca</code>)
+are supplied on the combined multiomics object via
+<code>pairing = "unpaired"</code> in
+<code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code>.</li>
 </ul>
-</li>
-<li>❌ <strong>NOT applicable</strong> (require 1-to-1 cell pairing):
-<ul>
-<li>FOSCTTM and <a href="mailto:Match@1" class="email">Match@1</a>
-(<code>calc_foscttm</code>)</li>
-<li>Cross-modal generation fidelity
-(<code>calc_cross_modal_generation</code>)</li>
-<li>Peak-to-gene regulatory coupling
-(<code>calc_atac_rna_coupling</code>)</li>
-<li>Cross-modality correlation
-(<code>calc_cross_modality_correlation</code>)</li>
-</ul>
-</li>
-</ul>
-<blockquote>
-<p><strong>Note:</strong> Using
-<code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code> directly on unpaired data is
-NOT recommended because it internally calls paired metrics. Instead, use
-<code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code> per modality plus the
-population-level functions listed above, and combine results with
-<code><a href="../reference/evaluate_multiple_datasets.html">evaluate_multiple_datasets()</a></code>.</p>
-</blockquote>
 <hr>
 </div>
 <div class="section level3">
 <h3 id="metric-compatibility-summary">1.3 Metric Compatibility Summary<a class="anchor" aria-label="anchor" href="#metric-compatibility-summary"></a>
 </h3>
 <table class="table">
+<colgroup>
+<col width="23%">
+<col width="38%">
+<col width="38%">
+</colgroup>
 <thead><tr class="header">
 <th>Metric / Function</th>
 <th align="center">Paired</th>
@@ -228,64 +203,22 @@ population-level functions listed above, and combine results with
 <td align="center">✅</td>
 </tr>
 <tr class="odd">
-<td><code><a href="../reference/evaluate_trajectory_metrics.html">evaluate_trajectory_metrics()</a></code></td>
+<td>
+<code><a href="../reference/evaluate_trajectory_metrics.html">evaluate_trajectory_metrics()</a></code> <em>(scRNA-seq
+only)</em>
+</td>
 <td align="center">✅</td>
 <td align="center">✅</td>
 </tr>
 <tr class="even">
-<td><code><a href="../reference/calc_coexpression_module_fidelity.html">calc_coexpression_module_fidelity()</a></code></td>
+<td><code><a href="../reference/evaluate_multiomics_integration.html">evaluate_multiomics_integration()</a></code></td>
 <td align="center">✅</td>
-<td align="center">✅</td>
+<td align="center">✅ (via joint embedding)</td>
 </tr>
 <tr class="odd">
-<td><code><a href="../reference/calc_peak_coaccessibility_fidelity.html">calc_peak_coaccessibility_fidelity()</a></code></td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-</tr>
-<tr class="even">
-<td><code><a href="../reference/calc_accessibility_profile_concordance.html">calc_accessibility_profile_concordance()</a></code></td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-</tr>
-<tr class="odd">
-<td><code><a href="../reference/calc_network_jaccard.html">calc_network_jaccard()</a></code></td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-</tr>
-<tr class="even">
-<td><code><a href="../reference/evaluate_cross_modal_prediction.html">evaluate_cross_modal_prediction()</a></code></td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-</tr>
-<tr class="odd">
-<td><code><a href="../reference/calc_modality_alignment.html">calc_modality_alignment()</a></code></td>
-<td align="center">✅</td>
-<td align="center">⚠️ needs integration first</td>
-</tr>
-<tr class="even">
-<td><strong><code><a href="../reference/calc_foscttm.html">calc_foscttm()</a></code></strong></td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-</tr>
-<tr class="odd">
-<td><strong><code><a href="../reference/calc_cross_modal_generation.html">calc_cross_modal_generation()</a></code></strong></td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-</tr>
-<tr class="even">
-<td><strong><code><a href="../reference/calc_atac_rna_coupling.html">calc_atac_rna_coupling()</a></code></strong></td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-</tr>
-<tr class="odd">
-<td><strong><code><a href="../reference/calc_cross_modality_correlation.html">calc_cross_modality_correlation()</a></code></strong></td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-</tr>
-<tr class="even">
 <td><strong><code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code></strong></td>
-<td align="center">✅</td>
-<td align="center">❌ direct use</td>
+<td align="center">✅ (<code>pairing = "paired"</code>)</td>
+<td align="center">✅ (<code>pairing = "unpaired"</code>)</td>
 </tr>
 </tbody>
 </table>
@@ -339,52 +272,43 @@ peak RAM in MiB).</li>
 <hr>
 </div>
 <div class="section level3">
-<h3 id="alignment-in-joint-embedding-space-foscttm-match1">2.2 Alignment in Joint Embedding Space (FOSCTTM &amp; <a href="mailto:Match@1" class="email">Match@1</a>)<a class="anchor" aria-label="anchor" href="#alignment-in-joint-embedding-space-foscttm-match1"></a>
+<h3 id="multiomics-integration-alignment-category-vi">2.2 Multiomics Integration &amp; Alignment (Category VI)<a class="anchor" aria-label="anchor" href="#multiomics-integration-alignment-category-vi"></a>
 </h3>
-<p>FOSCTTM (Fraction Of Samples Closer Than The True Match) quantifies
-whether paired cells are each other’s nearest neighbors in joint latent
-space. <strong>Valid only for paired data.</strong></p>
+<p>Category VI evaluates multiomics integration and biological
+preservation using gold-standard metrics from <code>scib</code>,
+<code>scMultiSim</code>, <code>scCross</code>, <code>Matilda</code>, and
+<code>scMoMtF</code>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compute reduced representations (PCA) for RNA and ATAC</span></span>
-<span><span class="va">pca_rna</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">example_multiomics</span><span class="op">$</span><span class="va">ref_multi</span><span class="op">$</span><span class="va">rna</span><span class="op">)</span>, rank. <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">$</span><span class="va">x</span></span>
-<span><span class="va">pca_atac</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/prcomp.html" class="external-link">prcomp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">example_multiomics</span><span class="op">$</span><span class="va">ref_multi</span><span class="op">$</span><span class="va">atac</span><span class="op">)</span>, rank. <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">$</span><span class="va">x</span></span>
-<span></span>
-<span><span class="va">foscttm_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_foscttm.html">calc_foscttm</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">pca_rna</span>, y <span class="op">=</span> <span class="va">pca_atac</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Bidirectional FOSCTTM score:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">foscttm_res</span><span class="op">$</span><span class="va">foscttm</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Bidirectional FOSCTTM score: 0.455</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Top-1 Match Rate (Match@1):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">foscttm_res</span><span class="op">$</span><span class="va">match_at_1</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Top-1 Match Rate (Match@1): 0.0125</span></span></code></pre></div>
-<p>A score of 0.00 indicates perfect alignment; 0.50 represents random
-chance.</p>
-<hr>
-</div>
-<div class="section level3">
-<h3 id="cross-modal-cell-type-label-transfer">2.3 Cross-Modal Cell Type Label Transfer<a class="anchor" aria-label="anchor" href="#cross-modal-cell-type-label-transfer"></a>
-</h3>
-<p>Tests whether chromatin accessibility profiles in simulated ATAC can
-predict cell types annotated in RNA. This metric works for <strong>all
-three data types</strong> because it uses population-level kNN
-classification:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">transfer_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_cross_modal_prediction.html">evaluate_cross_modal_prediction</a></span><span class="op">(</span></span>
-<span>  mod1_data  <span class="op">=</span> <span class="va">example_multiomics</span><span class="op">$</span><span class="va">sim_multi</span><span class="op">$</span><span class="va">atac</span>,</span>
-<span>  cell_types <span class="op">=</span> <span class="va">example_multiomics</span><span class="op">$</span><span class="va">cell_types</span></span>
+<code class="sourceCode R"><span><span class="va">int_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_multiomics_integration.html">evaluate_multiomics_integration</a></span><span class="op">(</span></span>
+<span>  ref_multi  <span class="op">=</span> <span class="va">example_multiomics</span><span class="op">$</span><span class="va">ref_multi</span>,</span>
+<span>  sim_multi  <span class="op">=</span> <span class="va">example_multiomics</span><span class="op">$</span><span class="va">sim_multi</span>,</span>
+<span>  cell_types <span class="op">=</span> <span class="va">example_multiomics</span><span class="op">$</span><span class="va">cell_types</span>,</span>
+<span>  batch_info <span class="op">=</span> <span class="va">example_multiomics</span><span class="op">$</span><span class="va">batch_info</span>,</span>
+<span>  verbose    <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Cross-Modal Prediction Accuracy:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">transfer_res</span><span class="op">$</span><span class="va">cross_modal_accuracy</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Cross-Modal Prediction Accuracy: 0.8125</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Cross-Modal Macro F1 Score:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">transfer_res</span><span class="op">$</span><span class="va">cross_modal_F1</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Cross-Modal Macro F1 Score: 0.8057</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">int_res</span><span class="op">$</span><span class="va">integration_summary_table</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                                  Category               Property</span></span>
+<span><span class="co">#&gt; 1 (VI) Multiomics Integration &amp; Alignment multiomics_integration</span></span>
+<span><span class="co">#&gt; 2 (VI) Multiomics Integration &amp; Alignment multiomics_integration</span></span>
+<span><span class="co">#&gt; 3 (VI) Multiomics Integration &amp; Alignment multiomics_integration</span></span>
+<span><span class="co">#&gt; 4 (VI) Multiomics Integration &amp; Alignment multiomics_integration</span></span>
+<span><span class="co">#&gt; 5 (VI) Multiomics Integration &amp; Alignment multiomics_integration</span></span>
+<span><span class="co">#&gt;               Metric     Value            Modality</span></span>
+<span><span class="co">#&gt; 1          batch_asw 0.9762642 Joint (Cross-Modal)</span></span>
+<span><span class="co">#&gt; 2      cell_type_asw 0.5582026 Joint (Cross-Modal)</span></span>
+<span><span class="co">#&gt; 3 graph_connectivity 1.0000000 Joint (Cross-Modal)</span></span>
+<span><span class="co">#&gt; 4                ari 0.6765538 Joint (Cross-Modal)</span></span>
+<span><span class="co">#&gt; 5                nmi 0.5821401 Joint (Cross-Modal)</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level3">
-<h3 id="master-paired-pipeline-evaluate_multiomics_accuracy">2.4 Master Paired Pipeline:
+<h3 id="master-paired-pipeline-evaluate_multiomics_accuracy">2.3 Master Paired Pipeline:
 <code>evaluate_multiomics_accuracy()</code><a class="anchor" aria-label="anchor" href="#master-paired-pipeline-evaluate_multiomics_accuracy"></a>
 </h3>
 <p>For fully paired data, the master function coordinates all 8
 categories:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">master_eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy</a></span><span class="op">(</span></span>
 <span>  ref_multi  <span class="op">=</span> <span class="va">example_multiomics</span><span class="op">$</span><span class="va">ref_multi</span>,</span>
 <span>  sim_multi  <span class="op">=</span> <span class="va">example_multiomics</span><span class="op">$</span><span class="va">sim_multi</span>,</span>
@@ -406,7 +330,7 @@ categories:</p>
 <p><strong>Parallel Multi-Core Acceleration
 (<code>threads</code>):</strong> On multi-core systems or HPC nodes, set
 <code>threads = 4</code> or <code>threads = 8</code> to accelerate the
-dual unimodal layer evaluations and Category 7 cross-modal correlation
+dual unimodal layer evaluations and Category 6 cross-modal correlation
 computations across CPU worker threads via
 <code>BiocParallel</code>.</p>
 </blockquote>
@@ -422,7 +346,7 @@ evaluate each modality independently and combine results.</p>
 <div class="section level3">
 <h3 id="step-by-step-workflow-for-unpaired-data">3.1 Step-by-Step Workflow for Unpaired Data<a class="anchor" aria-label="anchor" href="#step-by-step-workflow-for-unpaired-data"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kabilanbio.github.io/scSimEval/">scSimEval</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">example_scrna</span><span class="op">)</span>   <span class="co"># RNA modality</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">example_scatac</span><span class="op">)</span>  <span class="co"># ATAC modality (different cells)</span></span>
@@ -442,31 +366,7 @@ evaluate each modality independently and combine results.</p>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># ── Step 2: Population-level cross-modal metrics (no cell pairing needed) ─────</span></span>
-<span></span>
-<span><span class="co"># 2a. Co-expression module fidelity (RNA only, no pairing needed)</span></span>
-<span><span class="va">module_fid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_coexpression_module_fidelity.html">calc_coexpression_module_fidelity</a></span><span class="op">(</span></span>
-<span>  ref_mat <span class="op">=</span> <span class="va">example_scrna</span><span class="op">$</span><span class="va">ref</span>,</span>
-<span>  sim_mat <span class="op">=</span> <span class="va">example_scrna</span><span class="op">$</span><span class="va">sim</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Module correlation r:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">module_fid</span><span class="op">$</span><span class="va">module_correlation_r</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 2b. Peak co-accessibility fidelity (ATAC only, no pairing needed)</span></span>
-<span><span class="va">coaccess_fid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calc_peak_coaccessibility_fidelity.html">calc_peak_coaccessibility_fidelity</a></span><span class="op">(</span></span>
-<span>  ref_atac <span class="op">=</span> <span class="va">example_scatac</span><span class="op">$</span><span class="va">ref</span>,</span>
-<span>  sim_atac <span class="op">=</span> <span class="va">example_scatac</span><span class="op">$</span><span class="va">sim</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"RV coefficient:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">coaccess_fid</span><span class="op">$</span><span class="va">rv_coefficient</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 2c. Cross-modal label transfer (uses ATAC features to predict RNA-based labels)</span></span>
-<span><span class="co"># NOTE: cell_types come from the RNA experiment; applied to ATAC data for transfer</span></span>
-<span><span class="va">label_transfer</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_cross_modal_prediction.html">evaluate_cross_modal_prediction</a></span><span class="op">(</span></span>
-<span>  mod1_data  <span class="op">=</span> <span class="va">example_scatac</span><span class="op">$</span><span class="va">sim</span>,</span>
-<span>  cell_types <span class="op">=</span> <span class="va">example_scatac</span><span class="op">$</span><span class="va">cell_types</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Label transfer accuracy:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">label_transfer</span><span class="op">$</span><span class="va">cross_modal_accuracy</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># ── Step 3: Consolidate and compare across modalities ─────────────────────────</span></span>
+<span><span class="co"># ── Step 2: Consolidate and compare across modalities ─────────────────────────</span></span>
 <span><span class="va">dataset_collection</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Method_A-RNA"</span>  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ref <span class="op">=</span> <span class="va">example_scrna</span><span class="op">$</span><span class="va">ref</span>,  sim <span class="op">=</span> <span class="va">example_scrna</span><span class="op">$</span><span class="va">sim</span><span class="op">)</span>,</span>
 <span>  <span class="st">"Method_A-ATAC"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ref <span class="op">=</span> <span class="va">example_scatac</span><span class="op">$</span><span class="va">ref</span>, sim <span class="op">=</span> <span class="va">example_scatac</span><span class="op">$</span><span class="va">sim</span><span class="op">)</span></span>
@@ -480,15 +380,6 @@ evaluate each modality independently and combine results.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">consolidated</span><span class="op">$</span><span class="va">dataset_overview</span><span class="op">)</span></span></code></pre></div>
-<blockquote>
-<p><strong>Key point:</strong> Do NOT call <code><a href="../reference/calc_foscttm.html">calc_foscttm()</a></code>,
-<code><a href="../reference/calc_cross_modal_generation.html">calc_cross_modal_generation()</a></code>,
-<code><a href="../reference/calc_atac_rna_coupling.html">calc_atac_rna_coupling()</a></code>, or
-<code><a href="../reference/calc_cross_modality_correlation.html">calc_cross_modality_correlation()</a></code> on unpaired data. These
-functions assume row/column <code>i</code> of the RNA matrix matches
-row/column <code>i</code> of the ATAC matrix — an assumption that is
-biologically false for unpaired experiments.</p>
-</blockquote>
 <hr>
 </div>
 </div>
@@ -497,7 +388,7 @@ biologically false for unpaired experiments.</p>
 </h2>
 <p><code>scSimEval</code> visualization functions work seamlessly across
 unimodal, paired, and unpaired multiomics configurations:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Multi-dataset consolidated benchmark bubble matrix</span></span>
 <span><span class="fu"><a href="../reference/plot_benchmark_bubble_matrix.html">plot_benchmark_bubble_matrix</a></span><span class="op">(</span></span>
 <span>  data  <span class="op">=</span> <span class="va">consolidated</span>,</span>
@@ -516,7 +407,7 @@ unimodal, paired, and unpaired multiomics configurations:</p>
 manifold of empirical data across modalities, researchers can project
 reference and simulated cells into low-dimensional UMAP, t-SNE, or PCA
 coordinates:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute low-dimensional embeddings for the scRNA-seq modality</span></span>
 <span><span class="va">emb_rna</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compute_dataset_embeddings.html">compute_dataset_embeddings</a></span><span class="op">(</span></span>
 <span>  reference   <span class="op">=</span> <span class="va">example_multiomics</span><span class="op">$</span><span class="va">ref_multi</span><span class="op">$</span><span class="va">rna</span>,</span>
@@ -534,7 +425,7 @@ coordinates:</p>
 <span>  color_by       <span class="op">=</span> <span class="st">"cell_type"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="demo-multiomics_files/figure-html/multiomics-embeddings-demo-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="co"># Quantitative embedding quality metrics</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="../reference/compute_embedding_quality_metrics.html">compute_embedding_quality_metrics</a></span><span class="op">(</span><span class="va">emb_rna</span><span class="op">)</span>, digits <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
@@ -600,37 +491,33 @@ coordinates:</p>
 <th>Data Type</th>
 <th>Example Technologies</th>
 <th align="center"><code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code></th>
-<th align="center">Category 7 Metrics</th>
+<th align="center">Category 6 Metrics</th>
 <th>Recommended Function</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td><strong>Paired</strong></td>
 <td>10x Multiome, SHARE-seq</td>
-<td align="center">✅ Direct</td>
-<td align="center">All Category 7 metrics (FOSCTTM, <a href="mailto:Match@1" class="email">Match@1</a>, Cross-Modal Generation,
-RV coefficient)</td>
-<td><code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code></td>
+<td align="center">✅ <code>pairing = "paired"</code>
+</td>
+<td align="center">All 5 Category VI integration metrics
+(<code>batch_asw</code>, <code>cell_type_asw</code>,
+<code>graph_connectivity</code>, <code>ari</code>,
+<code>nmi</code>)</td>
+<td><code>evaluate_multiomics_accuracy(..., pairing = "paired")</code></td>
 </tr>
 <tr class="even">
 <td><strong>Unpaired</strong></td>
 <td>Independent scRNA + scATAC</td>
-<td align="center">❌ Not valid (cells differ)</td>
-<td align="center">Population coupling (module fidelity, label transfer,
-peak co-accessibility)</td>
-<td>
-<code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code> × 2 +
-<code><a href="../reference/evaluate_multiple_datasets.html">evaluate_multiple_datasets()</a></code>
+<td align="center">✅ <code>pairing = "unpaired"</code>
 </td>
+<td align="center">Joint-embedding integration metrics + per-modality
+unimodal evaluation</td>
+<td><code>evaluate_multiomics_accuracy(..., pairing = "unpaired")</code></td>
 </tr>
 </tbody>
 </table>
-<p>The most important rule: <strong>Cell-pairing metrics (FOSCTTM,
-cross-modal generation, peak-to-gene coupling) are only scientifically
-valid when the RNA and ATAC columns correspond to the same physical
-cells.</strong> For unpaired multiomics data, rely on population-level
-metrics and per-modality unimodal evaluation.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; R version 4.6.1 (2026-06-24 ucrt)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-w64-mingw32/x64</span></span>
@@ -651,75 +538,116 @@ metrics and per-modality unimodal evaluation.</p>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] scSimEval_0.99.9</span></span>
+<span><span class="co">#&gt; [1] scSimEval_0.99.10</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;   [1] RColorBrewer_1.1-3          jsonlite_2.0.0             </span></span>
-<span><span class="co">#&gt;   [3] magrittr_2.0.5              modeltools_0.2-24          </span></span>
-<span><span class="co">#&gt;   [5] farver_2.1.2                nloptr_2.2.1               </span></span>
-<span><span class="co">#&gt;   [7] rmarkdown_2.32              provenance_4.4             </span></span>
-<span><span class="co">#&gt;   [9] fs_2.1.0                    ragg_1.5.2                 </span></span>
-<span><span class="co">#&gt;  [11] vctrs_0.7.3                 memoise_2.0.1              </span></span>
-<span><span class="co">#&gt;  [13] minqa_1.2.8                 htmltools_0.5.9            </span></span>
-<span><span class="co">#&gt;  [15] S4Arrays_1.13.0             curl_8.0.0                 </span></span>
-<span><span class="co">#&gt;  [17] BiocNeighbors_2.7.3         SparseArray_1.13.2         </span></span>
-<span><span class="co">#&gt;  [19] overlapping_2.5             sass_0.4.10                </span></span>
-<span><span class="co">#&gt;  [21] bslib_0.12.0                htmlwidgets_1.6.4          </span></span>
-<span><span class="co">#&gt;  [23] desc_1.4.3                  testthat_3.3.2             </span></span>
-<span><span class="co">#&gt;  [25] httr2_1.3.0                 cachem_1.1.0               </span></span>
-<span><span class="co">#&gt;  [27] igraph_2.3.3                lifecycle_1.0.5            </span></span>
-<span><span class="co">#&gt;  [29] pkgconfig_2.0.3             Matrix_1.7-6               </span></span>
-<span><span class="co">#&gt;  [31] R6_2.6.1                    fastmap_1.2.0              </span></span>
-<span><span class="co">#&gt;  [33] clue_0.3-68                 rbibutils_2.4.1            </span></span>
-<span><span class="co">#&gt;  [35] MatrixGenerics_1.25.0       digest_0.6.39              </span></span>
-<span><span class="co">#&gt;  [37] S4Vectors_0.51.10           irlba_2.3.7                </span></span>
-<span><span class="co">#&gt;  [39] IsoplotR_7.0                textshaping_1.0.5          </span></span>
-<span><span class="co">#&gt;  [41] GenomicRanges_1.65.4        RSQLite_3.53.3             </span></span>
-<span><span class="co">#&gt;  [43] labeling_0.4.3              philentropy_0.10.0         </span></span>
-<span><span class="co">#&gt;  [45] filelock_1.0.3              abind_1.4-8                </span></span>
-<span><span class="co">#&gt;  [47] compiler_4.6.1              proxy_0.4-29               </span></span>
-<span><span class="co">#&gt;  [49] bit64_4.8.6                 withr_3.0.3                </span></span>
-<span><span class="co">#&gt;  [51] S7_0.2.2                    BiocParallel_1.47.0        </span></span>
-<span><span class="co">#&gt;  [53] DBI_1.3.0                   MASS_7.3-66                </span></span>
-<span><span class="co">#&gt;  [55] DelayedArray_0.39.8         bluster_1.23.1             </span></span>
-<span><span class="co">#&gt;  [57] tools_4.6.1                 otel_0.2.0                 </span></span>
-<span><span class="co">#&gt;  [59] prabclus_2.3-5              nnet_7.3-21                </span></span>
-<span><span class="co">#&gt;  [61] glue_1.8.1                  nlme_3.1-171               </span></span>
-<span><span class="co">#&gt;  [63] grid_4.6.1                  waddR_1.27.0               </span></span>
-<span><span class="co">#&gt;  [65] cluster_2.1.8.3             ade4_1.7-24                </span></span>
-<span><span class="co">#&gt;  [67] generics_0.1.4              gtable_0.3.6               </span></span>
-<span><span class="co">#&gt;  [69] class_7.3-24                data.table_1.18.6.1        </span></span>
-<span><span class="co">#&gt;  [71] XVector_0.52.0              flexmix_2.3-21             </span></span>
-<span><span class="co">#&gt;  [73] BiocGenerics_0.59.12        RANN_2.6.3                 </span></span>
-<span><span class="co">#&gt;  [75] pillar_1.11.1               limma_3.99.0               </span></span>
-<span><span class="co">#&gt;  [77] clValid_0.7                 robustbase_0.99-7          </span></span>
-<span><span class="co">#&gt;  [79] splines_4.6.1               dplyr_1.2.1                </span></span>
-<span><span class="co">#&gt;  [81] BiocFileCache_3.3.0         lattice_0.22-9             </span></span>
-<span><span class="co">#&gt;  [83] bit_4.6.0                   tidyselect_1.2.1           </span></span>
-<span><span class="co">#&gt;  [85] SingleCellExperiment_1.35.2 locfit_1.5-9.12            </span></span>
-<span><span class="co">#&gt;  [87] clusterSim_0.51-6           knitr_1.52                 </span></span>
-<span><span class="co">#&gt;  [89] reformulas_0.4.4            IRanges_2.47.5             </span></span>
-<span><span class="co">#&gt;  [91] Seqinfo_1.3.2               edgeR_4.99.6               </span></span>
-<span><span class="co">#&gt;  [93] SummarizedExperiment_1.43.0 RhpcBLASctl_0.23-42        </span></span>
-<span><span class="co">#&gt;  [95] stats4_4.6.1                xfun_0.60                  </span></span>
-<span><span class="co">#&gt;  [97] Biobase_2.73.2              statmod_1.5.2              </span></span>
-<span><span class="co">#&gt;  [99] diptest_0.77-2              randtests_1.0.2            </span></span>
-<span><span class="co">#&gt; [101] brio_1.1.5                  arm_1.15-3                 </span></span>
-<span><span class="co">#&gt; [103] matrixStats_1.5.0           DEoptimR_1.2-2             </span></span>
-<span><span class="co">#&gt; [105] yaml_2.3.12                 boot_1.3-32                </span></span>
-<span><span class="co">#&gt; [107] eva_0.2.7                   evaluate_1.0.5             </span></span>
-<span><span class="co">#&gt; [109] codetools_0.2-20            MLmetrics_1.1.3            </span></span>
-<span><span class="co">#&gt; [111] kernlab_0.9-33              tibble_3.3.1               </span></span>
-<span><span class="co">#&gt; [113] cli_3.6.6                   RcppParallel_6.2.1         </span></span>
-<span><span class="co">#&gt; [115] systemfonts_1.3.2           Rdpack_2.6.6               </span></span>
-<span><span class="co">#&gt; [117] jquerylib_0.1.4             dichromat_2.0-1            </span></span>
-<span><span class="co">#&gt; [119] Rcpp_1.1.2                  dbplyr_2.6.0               </span></span>
-<span><span class="co">#&gt; [121] coda_0.19-4.1               parallel_4.6.1             </span></span>
-<span><span class="co">#&gt; [123] pkgdown_2.2.1               ggplot2_4.0.3              </span></span>
-<span><span class="co">#&gt; [125] blob_1.3.0                  mclust_6.1.3               </span></span>
-<span><span class="co">#&gt; [127] lme4_2.0-6                  scales_1.4.0               </span></span>
-<span><span class="co">#&gt; [129] e1071_1.7-17                purrr_1.2.2                </span></span>
-<span><span class="co">#&gt; [131] fpc_2.2-15                  rlang_1.3.0</span></span></code></pre></div>
+<span><span class="co">#&gt;   [1] fs_2.1.0                    matrixStats_1.5.0          </span></span>
+<span><span class="co">#&gt;   [3] spatstat.sparse_3.2-0       httr_1.4.9                 </span></span>
+<span><span class="co">#&gt;   [5] RColorBrewer_1.1-3          ggsci_5.2.0                </span></span>
+<span><span class="co">#&gt;   [7] tools_4.6.1                 sctransform_0.4.3          </span></span>
+<span><span class="co">#&gt;   [9] R6_2.6.1                    uwot_0.2.5                 </span></span>
+<span><span class="co">#&gt;  [11] withr_3.0.3                 sp_2.2-3                   </span></span>
+<span><span class="co">#&gt;  [13] gridExtra_2.3.1             progressr_1.0.0            </span></span>
+<span><span class="co">#&gt;  [15] cli_3.6.6                   Biobase_2.73.2             </span></span>
+<span><span class="co">#&gt;  [17] textshaping_1.0.5           spatstat.explore_3.8-3     </span></span>
+<span><span class="co">#&gt;  [19] fastDummies_1.7.6           labeling_0.4.3             </span></span>
+<span><span class="co">#&gt;  [21] sass_0.4.10                 Seurat_5.5.1               </span></span>
+<span><span class="co">#&gt;  [23] S7_0.2.2                    spatstat.data_3.1-9        </span></span>
+<span><span class="co">#&gt;  [25] readr_2.2.0                 proxy_0.4-29               </span></span>
+<span><span class="co">#&gt;  [27] ggridges_0.5.7              pbapply_1.7-5              </span></span>
+<span><span class="co">#&gt;  [29] pkgdown_2.2.1               systemfonts_1.3.2          </span></span>
+<span><span class="co">#&gt;  [31] dichromat_2.0-1             scater_1.41.2              </span></span>
+<span><span class="co">#&gt;  [33] parallelly_1.48.0           limma_3.99.0               </span></span>
+<span><span class="co">#&gt;  [35] MLmetrics_1.1.3             RSQLite_3.53.3             </span></span>
+<span><span class="co">#&gt;  [37] generics_0.1.4              ica_1.0-3                  </span></span>
+<span><span class="co">#&gt;  [39] spatstat.random_3.5-2       dplyr_1.2.1                </span></span>
+<span><span class="co">#&gt;  [41] Matrix_1.7-6                ggbeeswarm_0.7.3           </span></span>
+<span><span class="co">#&gt;  [43] S4Vectors_0.51.10           abind_1.4-8                </span></span>
+<span><span class="co">#&gt;  [45] lifecycle_1.0.5             yaml_2.3.12                </span></span>
+<span><span class="co">#&gt;  [47] edgeR_4.99.6                SummarizedExperiment_1.43.0</span></span>
+<span><span class="co">#&gt;  [49] SparseArray_1.13.2          BiocFileCache_3.3.0        </span></span>
+<span><span class="co">#&gt;  [51] provenance_4.4              Rtsne_0.17                 </span></span>
+<span><span class="co">#&gt;  [53] grid_4.6.1                  blob_1.3.0                 </span></span>
+<span><span class="co">#&gt;  [55] dqrng_0.4.1                 promises_1.5.0             </span></span>
+<span><span class="co">#&gt;  [57] crayon_1.5.3                miniUI_0.1.2               </span></span>
+<span><span class="co">#&gt;  [59] lattice_0.22-9              dynwrap_1.3.0              </span></span>
+<span><span class="co">#&gt;  [61] beachmat_2.29.3             cowplot_1.2.0              </span></span>
+<span><span class="co">#&gt;  [63] dynfeature_1.0.1            metapod_1.21.0             </span></span>
+<span><span class="co">#&gt;  [65] pillar_1.11.1               knitr_1.52                 </span></span>
+<span><span class="co">#&gt;  [67] GenomicRanges_1.65.4        boot_1.3-32                </span></span>
+<span><span class="co">#&gt;  [69] future.apply_1.20.2         kSamples_1.2-12            </span></span>
+<span><span class="co">#&gt;  [71] codetools_0.2-20            glue_1.8.1                 </span></span>
+<span><span class="co">#&gt;  [73] spatstat.univar_3.2-0       remotes_2.5.0              </span></span>
+<span><span class="co">#&gt;  [75] clusterSim_0.51-6           data.table_1.18.6.1        </span></span>
+<span><span class="co">#&gt;  [77] dynparam_1.0.2              vctrs_0.7.3                </span></span>
+<span><span class="co">#&gt;  [79] CDI_1.11.0                  png_0.1-9                  </span></span>
+<span><span class="co">#&gt;  [81] spam_2.11-4                 Rdpack_2.6.6               </span></span>
+<span><span class="co">#&gt;  [83] testthat_3.3.2              gtable_0.3.6               </span></span>
+<span><span class="co">#&gt;  [85] assertthat_0.2.1            cachem_1.1.0               </span></span>
+<span><span class="co">#&gt;  [87] xfun_0.60                   rbibutils_2.4.1            </span></span>
+<span><span class="co">#&gt;  [89] S4Arrays_1.13.0             mime_0.13                  </span></span>
+<span><span class="co">#&gt;  [91] Seqinfo_1.3.2               coda_0.19-4.1              </span></span>
+<span><span class="co">#&gt;  [93] reformulas_0.4.4            survival_3.8-12            </span></span>
+<span><span class="co">#&gt;  [95] SingleCellExperiment_1.35.2 statmod_1.5.2              </span></span>
+<span><span class="co">#&gt;  [97] bluster_1.23.1              fitdistrplus_1.2-6         </span></span>
+<span><span class="co">#&gt;  [99] ROCR_1.0-12                 nlme_3.1-171               </span></span>
+<span><span class="co">#&gt; [101] dynutils_1.0.12             eva_0.2.7                  </span></span>
+<span><span class="co">#&gt; [103] bit64_4.8.6                 filelock_1.0.3             </span></span>
+<span><span class="co">#&gt; [105] RcppAnnoy_0.0.23            dyneval_0.9.9              </span></span>
+<span><span class="co">#&gt; [107] bslib_0.12.0                irlba_2.3.7                </span></span>
+<span><span class="co">#&gt; [109] waddR_1.27.0                vipor_0.4.7                </span></span>
+<span><span class="co">#&gt; [111] KernSmooth_2.23-26          otel_0.2.0                 </span></span>
+<span><span class="co">#&gt; [113] BiocGenerics_0.59.12        DBI_1.3.0                  </span></span>
+<span><span class="co">#&gt; [115] ade4_1.7-24                 processx_3.9.0             </span></span>
+<span><span class="co">#&gt; [117] carrier_0.3.0.4             tidyselect_1.2.1           </span></span>
+<span><span class="co">#&gt; [119] proxyC_0.5.2                bit_4.6.0                  </span></span>
+<span><span class="co">#&gt; [121] compiler_4.6.1              curl_8.0.0                 </span></span>
+<span><span class="co">#&gt; [123] httr2_1.3.0                 BiocNeighbors_2.7.3        </span></span>
+<span><span class="co">#&gt; [125] randtests_1.0.2             desc_1.4.3                 </span></span>
+<span><span class="co">#&gt; [127] DelayedArray_0.39.8         plotly_4.12.1              </span></span>
+<span><span class="co">#&gt; [129] scales_1.4.0                lmtest_0.9-40              </span></span>
+<span><span class="co">#&gt; [131] stringr_1.6.0               digest_0.6.39              </span></span>
+<span><span class="co">#&gt; [133] goftest_1.2-3               spatstat.utils_3.2-5       </span></span>
+<span><span class="co">#&gt; [135] minqa_1.2.8                 rmarkdown_2.32             </span></span>
+<span><span class="co">#&gt; [137] XVector_0.52.0              RhpcBLASctl_0.23-42        </span></span>
+<span><span class="co">#&gt; [139] htmltools_0.5.9             pkgconfig_2.0.3            </span></span>
+<span><span class="co">#&gt; [141] lme4_2.0-6                  MatrixGenerics_1.25.0      </span></span>
+<span><span class="co">#&gt; [143] dbplyr_2.6.0                fastmap_1.2.0              </span></span>
+<span><span class="co">#&gt; [145] rlang_1.3.0                 htmlwidgets_1.6.4          </span></span>
+<span><span class="co">#&gt; [147] shiny_1.14.0                SuppDists_1.1-9.9          </span></span>
+<span><span class="co">#&gt; [149] farver_2.1.2                jquerylib_0.1.4            </span></span>
+<span><span class="co">#&gt; [151] zoo_1.9-1                   jsonlite_2.0.0             </span></span>
+<span><span class="co">#&gt; [153] BiocParallel_1.47.0         mclust_6.1.3               </span></span>
+<span><span class="co">#&gt; [155] BiocSingular_1.29.1         magrittr_2.0.5             </span></span>
+<span><span class="co">#&gt; [157] scuttle_1.23.2              dotCall64_1.2              </span></span>
+<span><span class="co">#&gt; [159] patchwork_1.3.2             Rcpp_1.1.2                 </span></span>
+<span><span class="co">#&gt; [161] viridis_0.6.5               reticulate_1.47.0          </span></span>
+<span><span class="co">#&gt; [163] stringi_1.8.9               brio_1.1.5                 </span></span>
+<span><span class="co">#&gt; [165] MASS_7.3-66                 plyr_1.8.9                 </span></span>
+<span><span class="co">#&gt; [167] parallel_4.6.1              listenv_1.0.0              </span></span>
+<span><span class="co">#&gt; [169] ggrepel_0.9.8               deldir_2.0-4               </span></span>
+<span><span class="co">#&gt; [171] splines_4.6.1               tensor_1.5.1               </span></span>
+<span><span class="co">#&gt; [173] hms_1.1.4                   locfit_1.5-9.12            </span></span>
+<span><span class="co">#&gt; [175] ranger_0.18.0               igraph_2.3.3               </span></span>
+<span><span class="co">#&gt; [177] babelwhale_1.2.0            spatstat.geom_3.8-3        </span></span>
+<span><span class="co">#&gt; [179] RcppHNSW_0.7.0              reshape2_1.4.5             </span></span>
+<span><span class="co">#&gt; [181] stats4_4.6.1                ScaledMatrix_1.21.0        </span></span>
+<span><span class="co">#&gt; [183] philentropy_0.10.0          evaluate_1.0.5             </span></span>
+<span><span class="co">#&gt; [185] SeuratObject_5.4.0          scran_1.41.1               </span></span>
+<span><span class="co">#&gt; [187] RcppParallel_6.2.1          IsoplotR_7.0               </span></span>
+<span><span class="co">#&gt; [189] tzdb_0.5.0                  nloptr_2.2.1               </span></span>
+<span><span class="co">#&gt; [191] httpuv_1.6.17               RANN_2.6.3                 </span></span>
+<span><span class="co">#&gt; [193] tidyr_1.3.2                 purrr_1.2.2                </span></span>
+<span><span class="co">#&gt; [195] polyclip_1.10-7             future_1.76.0              </span></span>
+<span><span class="co">#&gt; [197] scattermore_1.2             ggplot2_4.0.3              </span></span>
+<span><span class="co">#&gt; [199] CellMixS_1.29.0             rsvd_1.0.5                 </span></span>
+<span><span class="co">#&gt; [201] xtable_1.8-8                e1071_1.7-17               </span></span>
+<span><span class="co">#&gt; [203] RSpectra_0.16-2             later_1.4.8                </span></span>
+<span><span class="co">#&gt; [205] viridisLite_0.4.3           class_7.3-24               </span></span>
+<span><span class="co">#&gt; [207] ragg_1.5.2                  arm_1.15-3                 </span></span>
+<span><span class="co">#&gt; [209] tibble_3.3.1                memoise_2.0.1              </span></span>
+<span><span class="co">#&gt; [211] beeswarm_0.4.0              IRanges_2.47.5             </span></span>
+<span><span class="co">#&gt; [213] cluster_2.1.8.3             globals_0.19.1</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -728,7 +656,7 @@ metrics and per-modality unimodal evaluation.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Kabilan Sakthivel, Dr Dwijesh Chandra Mishra, Dr Shashi Bhushan Lal, Dr Sudhir Srivastava, Dr Krishna Kumar Chaturvedi.</p>
+  <p>Developed by Kabilan Sakthivel, Dr. Dwijesh Chandra Mishra, Dr. Shashi Bhushan Lal, Dr. Ulavappa Angadi, Dr. Sudhir Srivastava, Dr. Neeraj Budhlakoti, Dr. Krishna Kumar Chaturvedi, Dr. Ranjeet Ranjan Kumar, Dr. Navin Chandra Gupta.</p>
 </div>
 
 <div class="pkgdown-footer-right">

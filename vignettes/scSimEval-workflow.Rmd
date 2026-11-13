@@ -1,6 +1,6 @@
 ---
 title: "Getting Started with scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations"
-author: "Kabilan S, Dr. Dwijesh Chandra Mishra, Dr. Shashi Bhushan Lal, Dr. Sudhir Srivastava, Dr. Krishna Kumar Chaturvedi, Dr. Sharanbasappa"
+author: "Kabilan Sakthivel, Dr. Dwijesh Chandra Mishra, Dr. Shashi Bhushan Lal, Dr. Ulavappa Angadi, Dr. Sudhir Srivastava, Dr. Neeraj Budhlakoti, Dr. Krishna Kumar Chaturvedi, Dr. Ranjeet Ranjan Kumar, Dr. Navin Chandra Gupta, Dr. Sharanbasappa"
 date: "`r Sys.Date()`"
 output:
   rmarkdown::html_vignette:
@@ -29,16 +29,16 @@ knitr::opts_chunk$set(
 
 Computer simulations of single-cell technologies—specifically single-cell RNA sequencing (**scRNA-seq**), single-cell ATAC sequencing (**scATAC-seq**), and **scRNA-seq + scATAC-seq multiomics**—are essential in bioinformatics for developing pipelines, optimizing analysis workflows, and evaluating statistical methods. A fundamental question for any benchmark is: *how realistically does the simulated data replicate genuine biological experiments?*
 
-**`scSimEval`** provides a standardized, reference-based benchmarking framework computing **48 curated evaluation metrics across 8 foundational categories** (39 metrics for unimodal assays, up to 48 metrics for paired multiomics):
+**`scSimEval`** provides a standardized, reference-based benchmarking framework computing **56 curated evaluation measures across 8 foundational categories**:
 
 1. **Experimental reference data** (`ref_rna`, `ref_atac`)
 2. **Simulated synthetic data** (`sim_rna`, `sim_atac`)
 3. **Cell type annotations** (`cell_types`, optional)
 4. **Batch or donor identifiers** (`batch_info`, optional)
-5. **Computer resources** (Runtime in seconds and peak RAM in MiB)
+5. **Computer resources** (Core-seconds and memory footprint per core in MiB)
 6. **Developmental trajectories** (automatically inferred directly from count matrices)
 
-```{r workflow-overview, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 1: Unified benchmarking architecture of scSimEval.** The end-to-end framework ingests reference and simulated single-cell and multiomics count matrices with experimental metadata, evaluates 48 curated evaluation measures across eight biological and computational dimensions, standardizes scores via direction-aware normalization, and generates publication-grade comparative visualizations and leaderboards.'}
+```{r workflow-overview, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 1: Unified benchmarking architecture of scSimEval.** The end-to-end framework ingests reference and simulated single-cell and multiomics count matrices with experimental metadata, evaluates 56 curated evaluation measures across eight biological and computational dimensions, standardizes scores via direction-aware normalization, and generates publication-grade comparative visualizations and leaderboards.'}
 knitr::include_graphics("figures/workflow_diagram.png")
 ```
 
@@ -94,16 +94,16 @@ knitr::include_graphics("figures/workflow_diagram.png")
 
 | Experiment Mode | Uploaded Inputs | Metrics Measured | Active Evaluation Categories & Scope |
 | :--- | :--- | :---: | :--- |
-| **Single-Cell** *(scRNA / scATAC)* | Count Matrix alone *(no metadata)* | **19 Metrics** *(21 with Scalability)* | **Cat I** (Distributional Properties: 7 metrics / 63 instances), **Cat II** (Correlations & Zeroes: 4 metrics), **Cat III** (Cellular Manifolds: 4 metrics), **Cat VI** (Trajectory: 4 metrics), and **Cat VIII** (Scalability: 2 metrics). |
+| **Single-Cell** *(scRNA / scATAC)* | Count Matrix alone *(no metadata)* | **19 Metrics (scRNA) / 14 (scATAC)** | **Cat I** (Distributional Properties), **Cat II** (Sparsity & Zeroes), **Cat III** (Cellular Manifolds), **Cat VII** (dynverse Trajectory: 5 metrics, **scRNA-seq only**), and **Cat VIII** (Scalability). |
 | **Single-Cell** *(scRNA / scATAC)* | Matrix + Cell Types | **33 Metrics** | *Adds +12 metrics:* Unlocks **Cat III** (Clustering: ARI, NMI, Silhouette, Davies-Bouldin) and **Cat V** (Biological Signal & Differential Fidelity: DE/DA score, p-value distribution score, true proportion, accuracy, precision, recall, F1, AUC). |
 | **Single-Cell** *(scRNA / scATAC)* | Matrix + Batch Info | **27 Metrics** | *Adds +6 metrics:* Unlocks **Cat IV** (Batch Effects: Batch Silhouette, PCR $R^2$, CMS, ISI, Seurat mixing metric, cross-batch F1). |
 | **Single-Cell** *(scRNA / scATAC)* | **Full Metadata** *(Matrix + Cell Types + Batch)* | **39 Metrics** | Unlocks the complete unimodal suite across **Categories I, II, III, IV, V, VI, and VIII**. |
-| **Paired Multiomics** *(scRNA + scATAC - Rice Bud)* | RNA + ATAC Matrices alone | **33 Metrics** | Both unimodal distributions, correlations, manifolds, trajectories (172 instances) PLUS **Cat VII** (Paired Cross-Modal Coupling: FOSCTTM, Match@1, cell Pearson correlation, regulatory coupling correlation, $R_V$ coefficient, module fidelity, peak co-accessibility, network Jaccard, and Scalability). |
-| **Paired Multiomics** *(scRNA + scATAC - Rice Bud)* | Matrices + Cell Types | **41 Metrics** | Unlocks Cat III clustering and Cat V biological signal fidelity across both modalities (180 instances). |
-| **Paired Multiomics** *(scRNA + scATAC - Rice Bud)* | Matrices + Batch Info | **39 Metrics** | Unlocks Cat IV batch effects and confounder integration (178 instances). |
-| **Paired Multiomics** *(scRNA + scATAC - Rice Bud)* | **Full Metadata** *(RNA + ATAC + Cell Types + Batch)* | **All 48 Metrics** | Complete multiomics benchmark suite across all 8 canonical categories (**Categories I–VIII**, 187 instances). |
-| **Unpaired Multiomics** *(Independent cells - Soybean Root)* | RNA + ATAC Matrices alone | **27 Metrics** | Both unimodal distributions plus population-level cross-modal coupling (module preservation fidelity, peak co-accessibility fidelity, and Scalability; 166 instances). |
-| **Unpaired Multiomics** *(Independent cells - Soybean Root)* | **Full Metadata** *(RNA + ATAC + Cell Types + Batch)* | **41 Metrics** | *Complete unpaired multiomics suite:* Unlocks cross-modal label transfer accuracy, network Jaccard overlap, cluster concordance, donor batch integration, and biological signals (180 instances). Cell-level pairing metrics (FOSCTTM, Match@1) are omitted because cells are independent. |
+| **Paired Multiomics** *(scRNA + scATAC - Rice Bud)* | RNA + ATAC Matrices alone | **33 Metrics** | Both unimodal distributions, correlations, manifolds, trajectories PLUS **Cat VI** (Multiomics Integration: Batch ASW, Cell-Type ASW, Graph Connectivity, ARI, NMI, and Scalability). |
+| **Paired Multiomics** *(scRNA + scATAC - Rice Bud)* | Matrices + Cell Types | **41 Metrics** | Unlocks Cat III clustering and Cat V biological signal fidelity across both modalities. |
+| **Paired Multiomics** *(scRNA + scATAC - Rice Bud)* | Matrices + Batch Info | **39 Metrics** | Unlocks Cat IV batch effects and confounder integration. |
+| **Paired Multiomics** *(scRNA + scATAC - Rice Bud)* | **Full Metadata** *(RNA + ATAC + Cell Types + Batch)* | **All 56 Measures** | Complete multiomics benchmark suite across all 8 canonical categories (**Categories I–VIII**). |
+| **Unpaired Multiomics** *(Independent cells - Soybean Root)* | RNA + ATAC Matrices alone | **27 Metrics** | Both unimodal distributions plus population-level integration and Scalability. |
+| **Unpaired Multiomics** *(Independent cells - Soybean Root)* | **Full Metadata** *(RNA + ATAC + Cell Types + Batch)* | **41 Metrics** | *Complete unpaired multiomics suite:* Unlocks cluster concordance, donor batch integration, biological signals, and integration metrics. |
 
 ---
 
@@ -235,18 +235,26 @@ cat("Cross-Batch Transfer F1:", round(batch_res$cross_batch_F1, 4), "\n")
 
 ## 8. Evaluating Cell Lineages and Trajectory Topology (Category VII)
 
-`scSimEval` automatically infers differentiation pseudotime directly from count matrices and evaluates lineage fidelity without requiring external pseudotime labels:
+`scSimEval` implements the standardized *dynverse* trajectory evaluation workflow (*Saelens et al., Nature Biotechnology, 2019*) specifically within Category VII (`preprocess_trajectory_hvgs()` + `evaluate_trajectory_metrics()`). Because this workflow models HVG transcriptomic expression dynamics, Category VII is evaluated on **scRNA-seq only** and automatically skipped for `scATAC-seq`:
+
+1. **Outlier Cell & Low-Expression QC**: 3-MAD outlier cell removal on library size, detected genes, and mitochondrial fraction; retains genes expressed in $\ge 5\%$ of cells with average expression $> 0.02$.
+2. **HVG Selection & Zero-Convergence**: Decomposes log-variance via `scran::modelGeneVar` (`FDR < 0.05`, biological variance $> 0.5$, with adaptive fallback on sparse test sets) and iteratively removes all-zero cells/features.
+3. **Trajectory & `wcor_features`**: Infers continuous Minimum Spanning Tree (MST) milestone graphs, evaluates `him`, `edge_flip`, `geodesic_correlation`, and `F1_branches`, and trains `ranger` Random Forests (`num_trees = 10000`, `mtry = 1%` of HVGs, `importance = "impurity"`) predicting cell-to-milestone geodesic distances to compute reference-weighted `wcor_features`.
 
 ```{r trajectory-eval}
 traj_res <- evaluate_trajectory_metrics(
   ref_data = example_scrna$ref,
   sim_data = example_scrna$sim,
   cell_types_ref = example_scrna$cell_types,
-  cell_types_sim = example_scrna$cell_types
+  cell_types_sim = example_scrna$cell_types,
+  num_trees = 500L
 )
 
-cat("Pseudotime Spearman Correlation:", round(traj_res$pseudotime_correlation, 4), "\n")
-cat("Lineage Tree Branch Height RMSE:", round(as.numeric(traj_res$tree_height_rmse), 4), "\n")
+cat("HIM Topology Similarity:", round(traj_res$him, 4), "\n")
+cat("Edge Flip Similarity:", round(traj_res$edge_flip, 4), "\n")
+cat("Geodesic Distance Correlation:", round(traj_res$geodesic_correlation, 4), "\n")
+cat("Branch Assignment F1:", round(traj_res$F1_branches, 4), "\n")
+cat("Dynamic Feature Importance wCor:", round(traj_res$wcor_features, 4), "\n")
 ```
 
 ---
@@ -270,9 +278,9 @@ knitr::kable(head(deg_res$deg_summary_table, 6), digits = 4)
 
 ## 10. Evaluating Computational Scalability & Efficiency (Category VIII)
 
-`plot_scalability_benchmark()` generates a comprehensive dashboard comparing runtime, memory usage (in **MiB**), runtime-memory Pareto frontiers, and cell throughput:
+`plot_scalability_benchmark()` generates a comprehensive dashboard comparing core-normalized CPU execution time (**Core-Seconds**, $\text{Elapsed Time} \times N_{\text{cores}}$), per-core memory demand (**Peak RAM per Allocated Core**, $\text{Peak RAM} / N_{\text{cores}}$ in **MiB/core** or **GiB/core**), Bivariate Core-Seconds vs. Memory per Core tradeoff frontiers, and normalized resource cost:
 
-```{r plot-scalability-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 4: Computational scalability benchmark suite.** Multi-panel dashboard comparing execution runtime (seconds), peak RAM (MiB), runtime-memory tradeoffs, and throughput across simulation methods.'}
+```{r plot-scalability-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 4: Computational scalability benchmark suite.** Multi-panel dashboard comparing cumulative CPU work (Core-Seconds), per-core peak RAM footprint (MiB/core), resource tradeoff frontiers, and normalized resource cost across simulation methods.'}
 knitr::include_graphics("figures/scalability_benchmark.png")
 ```
 
@@ -300,7 +308,7 @@ master_eval <- evaluate_multiomics_accuracy(
   verbose      = FALSE
 )
 
-# Tidy summary table containing all 48 curated evaluation metrics
+# Tidy summary table containing the evaluated benchmark metrics
 head(master_eval$metrics_summary_table)
 ```
 
@@ -316,7 +324,7 @@ head(master_eval$metrics_summary_table)
 
 The flagship visualization **`plot_benchmark_bubble_matrix()`** summarizes multi-simulator performance across the 8 evaluation categories. Bubble sizes represent standardized simulation quality ($0.00$ to $1.00$; larger is better), and top performers for each metric are highlighted with bold circular outlines:
 
-```{r plot-bubble-matrix-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 5: Flagship multi-dimensional benchmarking bubble matrix.** Ranks simulation methods top-to-bottom across the 8 evaluation categories based on the 48 curated evaluation metric analysis. Bubble sizes indicate standardized fidelity scores ($0.00$ to $1.00$), and top performers for each metric are highlighted with bold circular outlines.'}
+```{r plot-bubble-matrix-fig, echo=FALSE, fig.align='center', out.width='100%', fig.cap='**Figure 5: Flagship multi-dimensional benchmarking bubble matrix.** Ranks simulation methods top-to-bottom across the 8 evaluation categories based on the 56 curated evaluation metric analysis. Bubble sizes indicate standardized fidelity scores ($0.00$ to $1.00$), and top performers for each metric are highlighted with bold circular outlines.'}
 knitr::include_graphics("figures/benchmark_bubble_matrix.png")
 ```
 
@@ -325,7 +333,7 @@ knitr::include_graphics("figures/benchmark_bubble_matrix.png")
 plot_benchmark_bubble_matrix(
   data = demo_benchmark_results,
   bubble_size_range = c(2, 7.5),
-  title = "Benchmarking Single-Cell Simulation Methods (48 Curated Evaluation Suite)",
+  title = "Benchmarking Single-Cell Simulation Methods (56 Curated Evaluation Suite)",
   subtitle = "Comparative performance across 8 evaluation categories"
 )
 ```
@@ -420,14 +428,15 @@ For researchers who prefer a graphical interface, `launch_scSimEval_app()` opens
 launch_scSimEval_app()
 ```
 
-The studio is organized into 7 modular tabs:
-1. **Home**: Overview of the 48 curated evaluation measures and interactive tour.
+The studio is organized into 8 modular tabs:
+1. **Home**: Overview of the 56 curated evaluation measures and interactive tour.
 2. **Data Hub**: 4 ingestion modes (Demo benchmark data, Single-cell evaluation, Multi-omics co-assays, and Upload saved results) with QC inspection and automated SLURM script generation.
-3. **Comparative Bubble Matrix & Leaderboard**: 48-metric matrix with multi-dataset selectors, step-by-step zoom, podium rankings, and standalone R script download.
+3. **Comparative Bubble Matrix & Leaderboard**: 56-metric matrix with multi-dataset selectors, step-by-step zoom, podium rankings, and standalone R script download.
 4. **Visualizations**: Diagnostic panels for Evaluation Summary, Distribution QC, Scalability, Metric Boxplots, Heatmaps, PCA/MDS, and Cell Embeddings.
 5. **Results & Export**: Dual-value table reporting (`Score_Raw` and normalized `Score`) with Excel, CSV, RDS, and ZIP export handlers.
 6. **Help & Manual**: Formula glossary, hardware recommendations, and input templates.
 7. **Logs & Diagnostics**: Real-time event streaming and diagnostic tracebacks.
+8. **About & Authors**: Complete author team profiles, institutional details, and academic citation links.
 
 ---
 
@@ -446,16 +455,15 @@ The studio is organized into 7 modular tabs:
 
 | Evaluation Dimension & Metric Group | Paired Multiomics | Unpaired Multiomics | Unimodal (scRNA / scATAC) |
 |---|:---:|:---:|:---:|
-| **(I) Distributional Properties** (Wasserstein, KS, MAD, Bhattacharyya, Runs test, NN mismatch, Silhouette) | ✅ (All 7) | ✅ (All 7) | ✅ (All 7) |
-| **(II) Sparsity & Zero-Inflation Dynamics** (Dropout midpoint/slope error, $R^2$ discrepancy, excess zero weights) | ✅ (All 4) | ✅ (All 4) | ✅ (All 4) |
-| **(III) Cellular Structure & Concordance** (ARI, NMI, Silhouette width, Davies-Bouldin, MMD, Fréchet SC, Precision, Recall) | ✅ (All 8) | ✅ (All 8) | ✅ (All 8) |
+| **(I) Distributional Properties** (10 univariate + 4 bivariate across 7 cell, 7 feature, and 4 bivariate pairs) | ✅ (All 14) | ✅ (All 14) | ✅ (All 14) |
+| **(II) Sparsity & Zero-Inflation Dynamics** (Logistic dropout midpoint/slope/$R^2$, accessibility-sparsity RMSE/$R^2$, excess zero weights) | ✅ (All 5) | ✅ (All 5) | ✅ (3 scRNA / 3 scATAC) |
+| **(III) Cellular Manifold & Clustering Concordance** (MMD, Generative Precision/Recall, Silhouette ASW, CDI, Neighborhood Purity, ARI, NMI) | ✅ (All 8) | ✅ (All 8) | ✅ (All 8) |
 | **(IV) Technical Variation & Batch Mixing Dynamics** (Batch Silhouette, PCR $R^2$, CMS, ISI, Cross-batch F1) | ✅ (All 5) | ✅ (All 5) | ✅ (All 5) |
-| **(V) Biological Signal & Differential Fidelity** (Simpipe / Libra DE/DA score, p-value distribution score, true proportion, accuracy, precision, recall, F1, AUC) | ✅ (All 8) | ✅ (All 8) | ✅ (All 8) |
-| **(VI) Cross-Modal Modularity & Overlap** (Module preservation fidelity, Peak co-accessibility, Label transfer, Network Jaccard) | ✅ (All 4) | ✅ (All 4) | ❌ *(Single modality)* |
-| **(VI) Joint Cell-Level Coupling** (FOSCTTM, Match@1, Cross-modal generation PCC, Regulatory coupling, $R_V$ coefficient) | ✅ (All 5) | ❌ *(Unlinked cells)* | ❌ *(Single modality)* |
-| **(VII) Trajectory & Lineage Topology** (Pseudotime correlation, Tree height RMSE, Graph alignment, Lineage expression fidelity) | ✅ (All 4) | ✅ (All 4) | ✅ (All 4) |
-| **(VIII) Computational Scalability & Efficiency** (Elapsed time seconds, Peak memory MiB) | ✅ (Both 2) | ✅ (Both 2) | ✅ (Both 2) |
-| **Total Evaluation Capacity** | **All 47 Metrics** | **40 Metrics** | **38 Metrics** |
+| **(V) Biological Signal & Differential Fidelity** (Parallel scRNA-seq DE [6] and scATAC-seq DA [6] pseudobulk `edgeR-QLF` suites) | ✅ (All 12) | ✅ (All 12) | ✅ (6 per modality) |
+| **(VI) Multiomics Integration & Alignment** (`batch_asw`, `cell_type_asw`, `graph_connectivity`, `ari`, `nmi`) | ✅ (All 5) | ✅ (All 5) | ❌ *(Multiomics only)* |
+| **(VII) Trajectory & Lineage Topology** (`him`, `edge_flip`, `geodesic_correlation`, `F1_branches`, `wcor_features`) | ✅ *(All 5, scRNA-seq)* | ✅ *(All 5, scRNA-seq)* | ✅ *(5 scRNA / ❌ scATAC)* |
+| **(VIII) Computational Scalability & Efficiency** (`core_seconds`, `memory_per_core_mib`) | ✅ (Both 2) | ✅ (Both 2) | ✅ (Both 2) |
+| **Total Evaluation Capacity** | **All 56 Measures** | **All 56 Measures** | **40 (scRNA) / 35 (scATAC)** |
 | **Direct Pipeline Support** | `evaluate_multiomics_accuracy(..., pairing="paired")` | `evaluate_multiomics_accuracy(..., pairing="unpaired")` | `evaluate_simulation_accuracy()` |
 
 ### 15.3 Recommended Workflows by Data Type
@@ -507,18 +515,22 @@ plot_benchmark_bubble_matrix(mset_bench)
 
 ## 17. Summary
 
-`scSimEval` provides a unified, objective, and reference-based evaluation framework for benchmarking single-cell and multiomics simulation methods. With **48 curated evaluation metrics across 8 foundational categories**, automated score normalization, and publication-quality visualizations, it enables researchers to rigorously validate simulation tools with confidence.
+`scSimEval` provides a unified, objective, and reference-based evaluation framework for benchmarking single-cell and multiomics simulation methods. With **56 curated evaluation measures across 8 foundational categories**, automated score normalization, and publication-quality visualizations, it enables researchers to rigorously validate simulation tools with confidence.
 
 ---
 
 ## 18. Authors and Maintainers
 
-* **Kabilan S** (Ph.D Student and Maintainer, ICAR-IASRI) — `kabilan151414@gmail.com`
-* **Dr. Dwijesh Chandra Mishra** (Author & Thesis Guide, ICAR-IASRI) — `dwij.mishra@gmail.com`
-* **Dr. Shashi Bhushan Lal** (Author, ICAR-IASRI) — `sblall16@gmail.com`
-* **Dr. Sudhir Srivastava** (Author, ICAR-IASRI) — `sudhir0401bm@gmail.com`
-* **Dr. Krishna Kumar Chaturvedi** (Author, ICAR-IASRI) — `kkcchaturvedi@gmail.com`
-* **Dr. Sharanbasappa** (Contributor, ICAR-IASRI) — `smadival509@gmail.com`
+* **Kabilan Sakthivel** (Ph.D. Scholar & Maintainer, ICAR-IASRI) — `kabilan151414@gmail.com`
+* **Dr. Dwijesh Chandra Mishra** (Principal Scientist & Thesis Guide, ICAR-IASRI) — `dwij.mishra@gmail.com`
+* **Dr. Shashi Bhushan Lal** (Principal Scientist, ICAR-IASRI) — `sblall16@gmail.com`
+* **Dr. Ulavappa Angadi** (Principal Scientist, ICAR-IASRI) — `ubaangadi.iasri@icar.org.in`
+* **Dr. Sudhir Srivastava** (Senior Scientist, ICAR-IASRI) — `sudhir0401bm@gmail.com`
+* **Dr. Neeraj Budhlakoti** (Senior Scientist, ICAR-IASRI) — `neeraj35669@gmail.com`
+* **Dr. Krishna Kumar Chaturvedi** (Principal Scientist, ICAR-IASRI) — `kkcchaturvedi@gmail.com`
+* **Dr. Ranjeet Ranjan Kumar** (Senior Scientist, ICAR-IARI) — `ranjeetranjaniari@gmail.com`
+* **Dr. Navin Chandra Gupta** (Senior Scientist, ICAR-NIPB) — `navinbtc@gmail.com`
+* **Dr. Sharanbasappa** (Scientist & Contributor, ICAR-IASRI) — `smadival509@gmail.com`
 
 * **GitHub Repository:** [https://github.com/kabilanbio/scSimEval](https://github.com/kabilanbio/scSimEval)
 * **Bug Reports & Issues:** [https://github.com/kabilanbio/scSimEval/issues](https://github.com/kabilanbio/scSimEval/issues)

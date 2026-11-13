@@ -2,32 +2,40 @@
 
 ## Authors
 
-- **Kabilan S**. Author, maintainer.
+- **Kabilan Sakthivel**. Author, maintainer.
 
-- **Dr Dwijesh Chandra Mishra**. Author, thesis advisor.
+- **Dr. Dwijesh Chandra Mishra**. Author.
 
-- **Dr Shashi Bhushan Lal**. Author.
+- **Dr. Shashi Bhushan Lal**. Author.
 
-- **Dr Sudhir Srivastava**. Author.
+- **Dr. Ulavappa Angadi**. Author.
 
-- **Dr Krishna Kumar Chaturvedi**. Author.
+- **Dr. Sudhir Srivastava**. Author.
 
-- **Dr Sharanbasappa**. Contributor.
+- **Dr. Neeraj Budhlakoti**. Author.
+
+- **Dr. Krishna Kumar Chaturvedi**. Author.
+
+- **Dr. Ranjeet Ranjan Kumar**. Author.
+
+- **Dr. Navin Chandra Gupta**. Author.
+
+- **Dr. Sharanbasappa**. Contributor.
 
 ## Citation
 
 Source:
 [`DESCRIPTION`](https://github.com/kabilanbio/scSimEval/blob/HEAD/DESCRIPTION)
 
-S K, Dwijesh Chandra Mishra D, Shashi Bhushan Lal D, Sudhir Srivastava
-D, Krishna Kumar Chaturvedi D (2026). *scSimEval: Unified Benchmarking
+Sakthivel K, Mishra D, Lal D, Angadi D, Srivastava D, Budhlakoti D,
+Chaturvedi D, Kumar D, Gupta D (2026). *scSimEval: Unified Benchmarking
 and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods*.
-R package version 0.99.5, <https://kabilanbio.github.io/scSimEval>.
+R package version 0.99.10, <https://kabilanbio.github.io/scSimEval/>.
 
 @Manual{,\
   title = {scSimEval: Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods},\
-  author = {Kabilan S and Dr {Dwijesh Chandra Mishra} and Dr {Shashi Bhushan Lal} and Dr {Sudhir Srivastava} and Dr {Krishna Kumar Chaturvedi}},\
+  author = {Kabilan Sakthivel and Dr. Dwijesh Chandra Mishra and Dr. Shashi Bhushan Lal and Dr. Ulavappa Angadi and Dr. Sudhir Srivastava and Dr. Neeraj Budhlakoti and Dr. Krishna Kumar Chaturvedi and Dr. Ranjeet Ranjan Kumar and Dr. Navin Chandra Gupta},\
   year = {2026},\
-  note = {R package version 0.99.5},\
-  url = {https://kabilanbio.github.io/scSimEval},\
+  note = {R package version 0.99.10},\
+  url = {https://kabilanbio.github.io/scSimEval/},\
 }

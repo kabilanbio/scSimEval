@@ -84,15 +84,38 @@ test_that("plot_scalability_benchmark returns valid ggplot and patchwork objects
     Method = rep(c("Splatter", "scDesign3", "SymSim"), each = 2),
     Category = "(VIII) Computational Scalability & Efficiency",
     Metric = rep(c("elapsed_time_seconds", "peak_memory_mb"), 3),
-    Score = c(30, 700, 65, 1300, 45, 800)
+    Score = c(30, 700, 65, 1300, 45, 800),
+    Sim_Cores = rep(c(1L, 4L, 8L), each = 2)
   )
   p_run <- plot_scalability_benchmark(demo_sc, type = "runtime")
   expect_s3_class(p_run, "ggplot")
 
+  p_run_min <- plot_scalability_benchmark(demo_sc, type = "runtime", time_unit = "minutes")
+  expect_s3_class(p_run_min, "ggplot")
+  expect_true(grepl("Minutes", p_run_min$labels$x, fixed = TRUE))
+
   p_mem <- plot_scalability_benchmark(demo_sc, type = "memory")
   expect_s3_class(p_mem, "ggplot")
 
-  p_comp <- plot_scalability_benchmark(demo_sc, type = "composite", layout = "4panel")
+  p_mem_mb <- plot_scalability_benchmark(demo_sc, type = "memory", memory_unit = "MB")
+  expect_s3_class(p_mem_mb, "ggplot")
+  expect_true(grepl("Peak RAM.*MB", p_mem_mb$labels$x))
+
+  # Aliased inputs in minutes and decimal MB ingest cleanly
+  alias_sc <- data.frame(
+    Method = rep(c("SimA", "SimB"), each = 2),
+    Category = "(VIII) Computational Scalability & Efficiency",
+    Metric = rep(c("Runtime_Minutes", "PeakRAM_MB"), 2),
+    Score = c(2, 1000, 3, 2000),
+    Sim_Cores = rep(c(2L, 4L), each = 2)
+  )
+  filtered_alias <- filter_gold_standard_metrics(alias_sc)
+  expect_equal(filtered_alias$Score[filtered_alias$Metric == "elapsed_time_seconds"], c(120, 180))
+  expect_equal(filtered_alias$Score[filtered_alias$Metric == "peak_memory_mb"],
+               c(1000, 2000) * (1000^2 / 1024^2), tolerance = 1e-4)
+
+  p_comp <- plot_scalability_benchmark(demo_sc, type = "composite", layout = "4panel",
+                                       time_unit = "minutes", memory_unit = "MB")
   expect_true(inherits(p_comp, "ggplot") || inherits(p_comp, "patchwork"))
 })
 
@@ -156,6 +179,13 @@ test_that("plot_benchmark_bubble_matrix returns a valid ggplot object with data.
   
   p1 <- plot_benchmark_bubble_matrix(demo_df, method_classes = classes)
   expect_s3_class(p1, "ggplot")
+  expect_s3_class(ggplot2::ggplotGrob(p1), "gtable")
+  expect_equal(p1$theme$legend.box, "horizontal")
+
+  p1_nobars <- plot_benchmark_bubble_matrix(demo_df, method_classes = classes, show_category_bars = FALSE)
+  expect_s3_class(p1_nobars, "ggplot")
+  expect_s3_class(ggplot2::ggplotGrob(p1_nobars), "gtable")
+  expect_true(length(p1$layers) > length(p1_nobars$layers))
   
   p2 <- plot_bubble_matrix(demo_df)
   expect_s3_class(p2, "ggplot")
@@ -232,7 +262,7 @@ test_that("plot_benchmark_bubble_matrix returns a valid ggplot object with data.
   p_af1 <- plot_benchmark_bubble_matrix(af1_filt)
   expect_s3_class(p_af1, "ggplot")
   expect_true(all(c("KDE ISE", "2D EMD", "Runs Statistic", "Accessibility Sparsity RMSE",
-                    "Null P-Value Uniformity", "DE/DA ROC-AUC", "Batch ASW",
+                    "DE/DA Null P-Value Uniformity", "DE/DA ROC-AUC", "Batch ASW",
                     "Integration ARI", "Integration NMI") %in% as.character(p_af1$data$Display_Metric)))
   runs_a <- p_af1$data$Score_Norm[p_af1$data$Metric == "Runs_Statistic" & p_af1$data$Method == "SimA"]
   runs_b <- p_af1$data$Score_Norm[p_af1$data$Metric == "Runs_Statistic" & p_af1$data$Method == "SimB"]
@@ -240,6 +270,14 @@ test_that("plot_benchmark_bubble_matrix returns a valid ggplot object with data.
   auc_a <- p_af1$data$Score_Norm[p_af1$data$Metric == "auc" & p_af1$data$Method == "SimA"]
   auc_b <- p_af1$data$Score_Norm[p_af1$data$Metric == "auc" & p_af1$data$Method == "SimB"]
   expect_gt(auc_a, auc_b)
+
+  p_rna <- plot_benchmark_bubble_matrix(af1_filt, assay_modality = "RNA")
+  expect_true("DE Null P-Value Uniformity" %in% as.character(p_rna$data$Display_Metric))
+  expect_true("DE ROC-AUC" %in% as.character(p_rna$data$Display_Metric))
+
+  p_atac <- plot_benchmark_bubble_matrix(af1_filt, assay_modality = "ATAC")
+  expect_true("DA Null P-Value Uniformity" %in% as.character(p_atac$data$Display_Metric))
+  expect_true("DA ROC-AUC" %in% as.character(p_atac$data$Display_Metric))
 })
 
 test_that("compute_dataset_embeddings, plot_dataset_embeddings and compute_embedding_quality_metrics execute properly", {

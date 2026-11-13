@@ -10,11 +10,13 @@ must preserve not only the distinct statistical properties of each
 individual modality, but also the biological coupling and regulatory
 relationships between them.
 
-`scSimEval` is designed to evaluate simulation fidelity across **three
-distinct multiomics experimental designs**, each with a different level
-of cell-level pairing between modalities. Understanding which design
-your simulated data belongs to is essential for selecting the correct
-evaluation functions.
+`scSimEval` is designed to evaluate simulation fidelity across **two
+primary multiomics experimental designs**, each tailored to the level of
+cell-level pairing between modalities: **Paired Multiomics** (co-assay
+profiling of identical individual cells) and **Unpaired Multiomics**
+(independent profiling of separate cells from the same biological
+system). Understanding which design your simulated data belongs to is
+essential for selecting the correct evaluation functions.
 
 ------------------------------------------------------------------------
 
@@ -35,15 +37,17 @@ SymSim2+ATAC, MultiSim
 
 **What scSimEval can evaluate:**
 
-- ✅ Full unimodal evaluation for each modality (Categories 1–6 and 8)
-- ✅ **All** Category 7 cross-modal coupling metrics:
-  - FOSCTTM and <Match@1> (cell alignment in joint embedding space)
-  - Cross-modal generation fidelity (predict ATAC from RNA, or vice
-    versa)
-  - Direct peak-to-gene regulatory linkage (promoter/enhancer
-    accessibility vs. transcription)
-  - Cross-modality feature correlation fidelity
-  - Modality alignment and mixing score in joint latent space
+- ✅ Full unimodal evaluation for each modality (Categories 1–5, 7, and
+  8)
+- ✅ **All** Category 6 multiomics integration & alignment metrics
+  ([`evaluate_multiomics_integration()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_integration.md)):
+  - `batch_asw` (Batch Average Silhouette Width in joint embedding
+    space)
+  - `cell_type_asw` (Cell-Type Average Silhouette Width in joint
+    embedding space)
+  - `graph_connectivity` (Within-cell-type k-NN graph connectivity)
+  - `ari` (Adjusted Rand Index on joint latent clustering)
+  - `nmi` (Normalized Mutual Information on joint latent clustering)
 
 ------------------------------------------------------------------------
 
@@ -59,86 +63,30 @@ different cells.
 experiments on the same tissue, sci-ATAC-seq paired with scRNA-seq on
 sibling aliquots
 
-**Simulators:** Splatter (RNA only) + ArchR (ATAC only) used separately,
-AMULET
+**Simulators:** scDesign3, scMultiSim, scCross
 
 **What scSimEval can evaluate:**
 
 - ✅ Full unimodal evaluation for each modality independently
-  (Categories 1–6 and 8)
-- ✅ **Population-level** cross-modal metrics that do not require
-  cell-by-cell pairing:
-  - Cross-modal label transfer accuracy
-    (`evaluate_cross_modal_prediction`)
-  - Co-expression module fidelity (`calc_coexpression_module_fidelity`)
-  - Peak co-accessibility fidelity
-    (`calc_peak_coaccessibility_fidelity`)
-  - Network topology similarity (`calc_network_jaccard`)
-  - Chromatin accessibility profile concordance
-    (`calc_accessibility_profile_concordance`)
-- ❌ **NOT applicable** (require 1-to-1 cell pairing):
-  - FOSCTTM and <Match@1> (`calc_foscttm`)
-  - Cross-modal generation fidelity (`calc_cross_modal_generation`)
-  - Peak-to-gene regulatory coupling (`calc_atac_rna_coupling`)
-  - Cross-modality correlation (`calc_cross_modality_correlation`)
-
-> **Note:** Using
-> [`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md)
-> directly on unpaired data is NOT recommended because it internally
-> calls paired metrics. Instead, use
-> [`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md)
-> per modality plus the population-level functions listed above, and
-> combine results with
-> [`evaluate_multiple_datasets()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiple_datasets.md).
+  (Categories 1–5, 7, and 8)
+- ✅ Joint-embedding multiomics integration metrics (Category 6) when
+  pre-integrated embeddings (`integrated` or `pca`) are supplied on the
+  combined multiomics object via `pairing = "unpaired"` in
+  [`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md).
 
 ------------------------------------------------------------------------
 
-### 1.3 Mosaic Multiomics (Partial co-measurement)
+### 1.3 Metric Compatibility Summary
 
-**Definition:** A **subset of cells** has measurements in both
-modalities, while the remaining cells have measurements in only one
-modality. This arises from experimental designs that pool paired and
-unpaired samples, or from modality dropout in co-assay experiments.
-
-**Technologies:** DOGMA-seq (DNA + RNA + protein + ATAC, but with high
-dropout), mosaic pooling designs (mixing Multiome cells with scRNA-only
-or scATAC-only cells), partially overlapping patient cohorts
-
-**Simulators:** MultiVI (Lopez et al., *Nat Methods* 2023), Cobolt,
-MOFA+ imputation
-
-**What scSimEval can evaluate:**
-
-- ✅ Full unimodal evaluation on the **complete** single-modality
-  matrices (Categories 1–6, 8)
-- ✅ Paired Category 7 coupling metrics on the **co-assayed cell subset
-  only**
-- ✅ Population-level cross-modal metrics on the full matrices
-- ⚠️ Recommendation: Extract the co-assayed subset first, then call
-  paired metrics on it
-
-------------------------------------------------------------------------
-
-### 1.4 Metric Compatibility Summary
-
-| Metric / Function | Paired | Unpaired | Mosaic (paired subset) |
-|----|:--:|:--:|:--:|
-| [`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md) per modality | ✅ | ✅ | ✅ |
-| [`evaluate_clustering_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_clustering_metrics.md) | ✅ | ✅ | ✅ |
-| [`evaluate_batch_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_batch_metrics.md) | ✅ | ✅ | ✅ |
-| [`evaluate_deg_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_deg_fidelity.md) | ✅ | ✅ | ✅ |
-| [`evaluate_trajectory_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_trajectory_metrics.md) | ✅ | ✅ | ✅ |
-| [`calc_coexpression_module_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/calc_coexpression_module_fidelity.md) | ✅ | ✅ | ✅ |
-| [`calc_peak_coaccessibility_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/calc_peak_coaccessibility_fidelity.md) | ✅ | ✅ | ✅ |
-| [`calc_accessibility_profile_concordance()`](https://kabilanbio.github.io/scSimEval/reference/calc_accessibility_profile_concordance.md) | ✅ | ✅ | ✅ |
-| [`calc_network_jaccard()`](https://kabilanbio.github.io/scSimEval/reference/calc_network_jaccard.md) | ✅ | ✅ | ✅ |
-| [`evaluate_cross_modal_prediction()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_cross_modal_prediction.md) | ✅ | ✅ | ✅ |
-| [`calc_modality_alignment()`](https://kabilanbio.github.io/scSimEval/reference/calc_modality_alignment.md) | ✅ | ⚠️ needs integration first | ✅ on subset |
-| **[`calc_foscttm()`](https://kabilanbio.github.io/scSimEval/reference/calc_foscttm.md)** | ✅ | ❌ | ✅ on subset |
-| **[`calc_cross_modal_generation()`](https://kabilanbio.github.io/scSimEval/reference/calc_cross_modal_generation.md)** | ✅ | ❌ | ✅ on subset |
-| **[`calc_atac_rna_coupling()`](https://kabilanbio.github.io/scSimEval/reference/calc_atac_rna_coupling.md)** | ✅ | ❌ | ✅ on subset |
-| **[`calc_cross_modality_correlation()`](https://kabilanbio.github.io/scSimEval/reference/calc_cross_modality_correlation.md)** | ✅ | ❌ | ✅ on subset |
-| **[`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md)** | ✅ | ❌ direct use | ✅ on subset |
+| Metric / Function | Paired | Unpaired |
+|----|:--:|:--:|
+| [`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md) per modality | ✅ | ✅ |
+| [`evaluate_clustering_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_clustering_metrics.md) | ✅ | ✅ |
+| [`evaluate_batch_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_batch_metrics.md) | ✅ | ✅ |
+| [`evaluate_deg_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_deg_fidelity.md) | ✅ | ✅ |
+| [`evaluate_trajectory_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_trajectory_metrics.md) *(scRNA-seq only)* | ✅ | ✅ |
+| [`evaluate_multiomics_integration()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_integration.md) | ✅ | ✅ (via joint embedding) |
+| **[`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md)** | ✅ (`pairing = "paired"`) | ✅ (`pairing = "unpaired"`) |
 
 ------------------------------------------------------------------------
 
@@ -151,7 +99,7 @@ MOFA+ imputation
 to the same cell in the ATAC matrix:
 
 \
-[`library`](https://rdrr.io/r/base/library.html)`(`[`scSimEval`](https://kabilanbio.github.io/scSimEval)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`scSimEval`](https://kabilanbio.github.io/scSimEval/)`)`\
 \
 `# Load packaged paired multiomics example dataset`\
 [`data`](https://rdrr.io/r/utils/data.html)`(``example_multiomics``)`\
@@ -179,49 +127,38 @@ The dataset contains:
 
 ------------------------------------------------------------------------
 
-### 2.2 Alignment in Joint Embedding Space (FOSCTTM & <Match@1>)
+### 2.2 Multiomics Integration & Alignment (Category VI)
 
-FOSCTTM (Fraction Of Samples Closer Than The True Match) quantifies
-whether paired cells are each other’s nearest neighbors in joint latent
-space. **Valid only for paired data.**
-
-\
-`# Compute reduced representations (PCA) for RNA and ATAC`\
-`pca_rna``  ``<-`` `[`prcomp`](https://rdrr.io/r/stats/prcomp.html)`(`[`t`](https://rdrr.io/r/base/t.html)`(``example_multiomics``$``ref_multi``$``rna``)``, rank. ``=`` ``5``)``$``x`\
-`pca_atac`` ``<-`` `[`prcomp`](https://rdrr.io/r/stats/prcomp.html)`(`[`t`](https://rdrr.io/r/base/t.html)`(``example_multiomics``$``ref_multi``$``atac``)``, rank. ``=`` ``5``)``$``x`\
-\
-`foscttm_res`` ``<-`` `[`calc_foscttm`](https://kabilanbio.github.io/scSimEval/reference/calc_foscttm.md)`(``x ``=`` ``pca_rna``, y ``=`` ``pca_atac``)`\
-\
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"Bidirectional FOSCTTM score:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``foscttm_res``$``foscttm``, ``4``)``, ``"\n"``)`\
-`#> Bidirectional FOSCTTM score: 0.455`\
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"Top-1 Match Rate (Match@1):"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``foscttm_res``$``match_at_1``, ``4``)``, ``"\n"``)`\
-`#> Top-1 Match Rate (Match@1): 0.0125`
-
-A score of 0.00 indicates perfect alignment; 0.50 represents random
-chance.
-
-------------------------------------------------------------------------
-
-### 2.3 Cross-Modal Cell Type Label Transfer
-
-Tests whether chromatin accessibility profiles in simulated ATAC can
-predict cell types annotated in RNA. This metric works for **all three
-data types** because it uses population-level kNN classification:
+Category VI evaluates multiomics integration and biological preservation
+using gold-standard metrics from `scib`, `scMultiSim`, `scCross`,
+`Matilda`, and `scMoMtF`:
 
 \
-`transfer_res`` ``<-`` `[`evaluate_cross_modal_prediction`](https://kabilanbio.github.io/scSimEval/reference/evaluate_cross_modal_prediction.md)`(`\
-`  mod1_data  ``=`` ``example_multiomics``$``sim_multi``$``atac``,`\
-`  cell_types ``=`` ``example_multiomics``$``cell_types`\
+`int_res`` ``<-`` `[`evaluate_multiomics_integration`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_integration.md)`(`\
+`  ref_multi  ``=`` ``example_multiomics``$``ref_multi``,`\
+`  sim_multi  ``=`` ``example_multiomics``$``sim_multi``,`\
+`  cell_types ``=`` ``example_multiomics``$``cell_types``,`\
+`  batch_info ``=`` ``example_multiomics``$``batch_info``,`\
+`  verbose    ``=`` ``FALSE`\
 `)`\
 \
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"Cross-Modal Prediction Accuracy:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``transfer_res``$``cross_modal_accuracy``, ``4``)``, ``"\n"``)`\
-`#> Cross-Modal Prediction Accuracy: 0.8125`\
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"Cross-Modal Macro F1 Score:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``transfer_res``$``cross_modal_F1``, ``4``)``, ``"\n"``)`\
-`#> Cross-Modal Macro F1 Score: 0.8057`
+[`print`](https://rdrr.io/r/base/print.html)`(``int_res``$``integration_summary_table``)`\
+`#>                                  Category               Property`\
+`#> 1 (VI) Multiomics Integration & Alignment multiomics_integration`\
+`#> 2 (VI) Multiomics Integration & Alignment multiomics_integration`\
+`#> 3 (VI) Multiomics Integration & Alignment multiomics_integration`\
+`#> 4 (VI) Multiomics Integration & Alignment multiomics_integration`\
+`#> 5 (VI) Multiomics Integration & Alignment multiomics_integration`\
+`#>               Metric     Value            Modality`\
+`#> 1          batch_asw 0.9762642 Joint (Cross-Modal)`\
+`#> 2      cell_type_asw 0.5582026 Joint (Cross-Modal)`\
+`#> 3 graph_connectivity 1.0000000 Joint (Cross-Modal)`\
+`#> 4                ari 0.6765538 Joint (Cross-Modal)`\
+`#> 5                nmi 0.5821401 Joint (Cross-Modal)`
 
 ------------------------------------------------------------------------
 
-### 2.4 Master Paired Pipeline: `evaluate_multiomics_accuracy()`
+### 2.3 Master Paired Pipeline: `evaluate_multiomics_accuracy()`
 
 For fully paired data, the master function coordinates all 8 categories:
 
@@ -236,13 +173,18 @@ For fully paired data, the master function coordinates all 8 categories:
 `)`\
 \
 [`head`](https://rdrr.io/r/utils/head.html)`(``master_eval``$``benchmark_summary_table``)`\
-`#>                    Category     Property        Metric        Value Modality`\
-`#> 1 Distributional Properties library_size           MAD 1.500000e+01      rna`\
-`#> 2 Distributional Properties library_size            KS 2.125000e-01      rna`\
-`#> 3 Distributional Properties library_size           MAE 1.506250e+01      rna`\
-`#> 4 Distributional Properties library_size          RMSE 1.571504e+01      rna`\
-`#> 5 Distributional Properties library_size            OV 8.269394e-01      rna`\
-`#> 6 Distributional Properties library_size Bhattacharyya 1.188839e-04      rna`
+`#>                    Category     Property         Metric         Value Modality`\
+`#> 1 Distributional Properties library_size    Wasserstein 15.0625000000      rna`\
+`#> 2 Distributional Properties library_size             KS  0.2125000000      rna`\
+`#> 3 Distributional Properties library_size            MAD 15.0000000000      rna`\
+`#> 4 Distributional Properties library_size  Bhattacharyya  0.0001188839      rna`\
+`#> 5 Distributional Properties library_size Runs_Statistic -1.7447479960      rna`\
+`#> 6 Distributional Properties library_size    NN_Mismatch  0.1750000000      rna`
+
+> **Parallel Multi-Core Acceleration (`threads`):** On multi-core
+> systems or HPC nodes, set `threads = 4` or `threads = 8` to accelerate
+> the dual unimodal layer evaluations and Category 6 cross-modal
+> correlation computations across CPU worker threads via `BiocParallel`.
 
 ------------------------------------------------------------------------
 
@@ -255,7 +197,7 @@ independently and combine results.
 ### 3.1 Step-by-Step Workflow for Unpaired Data
 
 \
-[`library`](https://rdrr.io/r/base/library.html)`(`[`scSimEval`](https://kabilanbio.github.io/scSimEval)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`scSimEval`](https://kabilanbio.github.io/scSimEval/)`)`\
 [`data`](https://rdrr.io/r/utils/data.html)`(``example_scrna``)``   ``# RNA modality`\
 [`data`](https://rdrr.io/r/utils/data.html)`(``example_scatac``)``  ``# ATAC modality (different cells)`\
 \
@@ -274,31 +216,7 @@ independently and combine results.
 `  verbose ``=`` ``FALSE`\
 `)`\
 \
-`# ── Step 2: Population-level cross-modal metrics (no cell pairing needed) ─────`\
-\
-`# 2a. Co-expression module fidelity (RNA only, no pairing needed)`\
-`module_fid`` ``<-`` `[`calc_coexpression_module_fidelity`](https://kabilanbio.github.io/scSimEval/reference/calc_coexpression_module_fidelity.md)`(`\
-`  ref_mat ``=`` ``example_scrna``$``ref``,`\
-`  sim_mat ``=`` ``example_scrna``$``sim`\
-`)`\
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"Module correlation r:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``module_fid``$``module_correlation_r``, ``4``)``, ``"\n"``)`\
-\
-`# 2b. Peak co-accessibility fidelity (ATAC only, no pairing needed)`\
-`coaccess_fid`` ``<-`` `[`calc_peak_coaccessibility_fidelity`](https://kabilanbio.github.io/scSimEval/reference/calc_peak_coaccessibility_fidelity.md)`(`\
-`  ref_atac ``=`` ``example_scatac``$``ref``,`\
-`  sim_atac ``=`` ``example_scatac``$``sim`\
-`)`\
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"RV coefficient:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``coaccess_fid``$``rv_coefficient``, ``4``)``, ``"\n"``)`\
-\
-`# 2c. Cross-modal label transfer (uses ATAC features to predict RNA-based labels)`\
-`# NOTE: cell_types come from the RNA experiment; applied to ATAC data for transfer`\
-`label_transfer`` ``<-`` `[`evaluate_cross_modal_prediction`](https://kabilanbio.github.io/scSimEval/reference/evaluate_cross_modal_prediction.md)`(`\
-`  mod1_data  ``=`` ``example_scatac``$``sim``,`\
-`  cell_types ``=`` ``example_scatac``$``cell_types`\
-`)`\
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"Label transfer accuracy:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``label_transfer``$``cross_modal_accuracy``, ``4``)``, ``"\n"``)`\
-\
-`# ── Step 3: Consolidate and compare across modalities ─────────────────────────`\
+`# ── Step 2: Consolidate and compare across modalities ─────────────────────────`\
 `dataset_collection`` ``<-`` `[`list`](https://rdrr.io/r/base/list.html)`(`\
 `  ``"Method_A-RNA"``  ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``ref ``=`` ``example_scrna``$``ref``,  sim ``=`` ``example_scrna``$``sim``)``,`\
 `  ``"Method_A-ATAC"`` ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``ref ``=`` ``example_scatac``$``ref``, sim ``=`` ``example_scatac``$``sim``)`\
@@ -313,78 +231,9 @@ independently and combine results.
 \
 [`print`](https://rdrr.io/r/base/print.html)`(``consolidated``$``dataset_overview``)`
 
-> **Key point:** Do NOT call
-> [`calc_foscttm()`](https://kabilanbio.github.io/scSimEval/reference/calc_foscttm.md),
-> [`calc_cross_modal_generation()`](https://kabilanbio.github.io/scSimEval/reference/calc_cross_modal_generation.md),
-> [`calc_atac_rna_coupling()`](https://kabilanbio.github.io/scSimEval/reference/calc_atac_rna_coupling.md),
-> or
-> [`calc_cross_modality_correlation()`](https://kabilanbio.github.io/scSimEval/reference/calc_cross_modality_correlation.md)
-> on unpaired data. These functions assume row/column `i` of the RNA
-> matrix matches row/column `i` of the ATAC matrix — an assumption that
-> is biologically false for unpaired experiments.
-
 ------------------------------------------------------------------------
 
-## Part 4: Evaluating Mosaic Multiomics
-
-For mosaic data (where only some cells have both modalities), the
-strategy is:
-
-1.  **Extract co-assayed cells** — the subset that has measurements in
-    both RNA and ATAC.
-2.  **Run paired metrics** on this subset using
-    [`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md)
-    or individual Category 7 functions.
-3.  **Run unimodal metrics** on the full single-modality matrices.
-
-### 4.1 Step-by-Step Workflow for Mosaic Data
-
-\
-`# Suppose your mosaic simulator output looks like this:`\
-`# - sim_rna_full: RNA matrix for ALL cells (including RNA-only cells)`\
-`# - sim_atac_full: ATAC matrix for ALL cells (including ATAC-only cells)`\
-`# - paired_cell_idx: logical or integer index of cells with BOTH modalities`\
-\
-`# ── Step 1: Identify co-assayed cell subset ───────────────────────────────────`\
-`# (This index should come from your simulator's output metadata)`\
-`# Example: first 200 cells are co-assayed, rest are single-modality`\
-`paired_idx``   ``<-`` ``1``:``200`\
-\
-`sim_rna_paired``  ``<-`` ``sim_rna_full``[``, ``paired_idx``]`\
-`sim_atac_paired`` ``<-`` ``sim_atac_full``[``, ``paired_idx``]`\
-`ref_rna_paired``  ``<-`` ``ref_rna_full``[``, ``paired_idx``]`\
-`ref_atac_paired`` ``<-`` ``ref_atac_full``[``, ``paired_idx``]`\
-\
-`# ── Step 2: Paired coupling metrics on the co-assayed subset ──────────────────`\
-`paired_eval`` ``<-`` `[`evaluate_multiomics_accuracy`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md)`(`\
-`  ref_multi  ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``rna ``=`` ``ref_rna_paired``, atac ``=`` ``ref_atac_paired``)``,`\
-`  sim_multi  ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``rna ``=`` ``sim_rna_paired``, atac ``=`` ``sim_atac_paired``)``,`\
-`  cell_types ``=`` ``cell_types_paired``,`\
-`  verbose    ``=`` ``FALSE`\
-`)`\
-\
-`# ── Step 3: Full unimodal evaluation on the complete matrices ─────────────────`\
-`rna_full_eval`` ``<-`` `[`evaluate_simulation_accuracy`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md)`(`\
-`  ref_data ``=`` ``ref_rna_full``,`\
-`  sim_data ``=`` ``sim_rna_full``,`\
-`  compute_bivariate ``=`` ``FALSE``,`\
-`  verbose ``=`` ``FALSE`\
-`)`\
-\
-`atac_full_eval`` ``<-`` `[`evaluate_simulation_accuracy`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md)`(`\
-`  ref_data ``=`` ``ref_atac_full``,`\
-`  sim_data ``=`` ``sim_atac_full``,`\
-`  compute_bivariate ``=`` ``FALSE``,`\
-`  verbose ``=`` ``FALSE`\
-`)`\
-\
-`# ── Step 4: Population-level cross-modal metrics (full matrices) ──────────────`\
-`module_fid`` ``<-`` `[`calc_coexpression_module_fidelity`](https://kabilanbio.github.io/scSimEval/reference/calc_coexpression_module_fidelity.md)`(``ref_rna_full``, ``sim_rna_full``)`\
-`coaccess``   ``<-`` `[`calc_peak_coaccessibility_fidelity`](https://kabilanbio.github.io/scSimEval/reference/calc_peak_coaccessibility_fidelity.md)`(``ref_atac_full``, ``sim_atac_full``)`
-
-------------------------------------------------------------------------
-
-## Part 5: Visualization
+## Part 4: Visualization
 
 `scSimEval` visualization functions work seamlessly across unimodal,
 paired, and unpaired multiomics configurations:
@@ -402,7 +251,7 @@ paired, and unpaired multiomics configurations:
 `  title ``=`` ``"Multiomics Simulator Leaderboard"`\
 `)`
 
-### 5.1 Low-Dimensional Multiomics Cell Embeddings
+### 4.1 Low-Dimensional Multiomics Cell Embeddings
 
 To visually examine whether simulated cells maintain the biological
 manifold of empirical data across modalities, researchers can project
@@ -441,25 +290,18 @@ coordinates:
 
 ------------------------------------------------------------------------
 
-## Part 6: Summary
+## Part 5: Summary
 
-| Data Type | Example Technologies | [`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md) | Category 7 Metrics | Recommended Function |
+| Data Type | Example Technologies | [`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md) | Category 6 Metrics | Recommended Function |
 |----|----|:--:|:--:|----|
-| **Paired** | 10x Multiome, SHARE-seq | ✅ Direct | All 6 metrics | [`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md) |
-| **Unpaired** | Independent scRNA + scATAC | ❌ Not valid | Modularity, label transfer, network only | [`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md) × 2 + [`evaluate_multiple_datasets()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiple_datasets.md) |
-| **Mosaic** | DOGMA-seq, mosaic pooling | ✅ On paired subset | All 6 metrics on paired subset | Subset first, then [`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md) |
-
-The most important rule: **Cell-pairing metrics (FOSCTTM, cross-modal
-generation, peak-to-gene coupling) are only scientifically valid when
-the RNA and ATAC columns correspond to the same physical cells.** For
-unpaired and mosaic data, rely on population-level metrics and
-per-modality unimodal evaluation.
+| **Paired** | 10x Multiome, SHARE-seq | ✅ `pairing = "paired"` | All 5 Category VI integration metrics (`batch_asw`, `cell_type_asw`, `graph_connectivity`, `ari`, `nmi`) | `evaluate_multiomics_accuracy(..., pairing = "paired")` |
+| **Unpaired** | Independent scRNA + scATAC | ✅ `pairing = "unpaired"` | Joint-embedding integration metrics + per-modality unimodal evaluation | `evaluate_multiomics_accuracy(..., pairing = "unpaired")` |
 
 \
 [`sessionInfo`](https://rdrr.io/r/utils/sessionInfo.html)`(``)`\
 `#> R version 4.6.1 (2026-06-24 ucrt)`\
 `#> Platform: x86_64-w64-mingw32/x64`\
-`#> Running under: Windows 11 x64 (build 26200)`\
+`#> Running under: Windows 11 x64 (build 26300)`\
 `#> `\
 `#> Matrix products: default`\
 `#>   LAPACK version 3.12.1`\
@@ -476,55 +318,113 @@ per-modality unimodal evaluation.
 `#> [1] stats     graphics  grDevices utils     datasets  methods   base     `\
 `#> `\
 `#> other attached packages:`\
-`#> [1] scSimEval_0.99.5`\
+`#> [1] scSimEval_0.99.10`\
 `#> `\
 `#> loaded via a namespace (and not attached):`\
-`#>  [1] tidyselect_1.2.1            ade4_1.7-24                `\
-`#>  [3] dplyr_1.2.1                 farver_2.1.2               `\
-`#>  [5] S7_0.2.2                    fastmap_1.2.0              `\
-`#>  [7] SingleCellExperiment_1.34.0 RANN_2.6.2                 `\
-`#>  [9] bluster_1.22.0              digest_0.6.39              `\
-`#> [11] lifecycle_1.0.5             cluster_2.1.8.3            `\
-`#> [13] statmod_1.5.2               magrittr_2.0.5             `\
-`#> [15] kernlab_0.9-33              compiler_4.6.1             `\
-`#> [17] rlang_1.3.0                 sass_0.4.10                `\
-`#> [19] tools_4.6.1                 igraph_2.3.3               `\
-`#> [21] yaml_2.3.12                 knitr_1.51                 `\
-`#> [23] labeling_0.4.3              S4Arrays_1.13.0            `\
-`#> [25] htmlwidgets_1.6.4           mclust_6.1.3               `\
-`#> [27] DelayedArray_0.38.2         RColorBrewer_1.1-3         `\
-`#> [29] abind_1.4-8                 BiocParallel_1.47.0        `\
-`#> [31] withr_3.0.3                 BiocGenerics_0.58.1        `\
-`#> [33] desc_1.4.3                  nnet_7.3-21                `\
-`#> [35] grid_4.6.1                  stats4_4.6.1               `\
-`#> [37] e1071_1.7-17                edgeR_4.10.1               `\
-`#> [39] ggplot2_4.0.3               scales_1.4.0               `\
-`#> [41] fpc_2.2-15                  MASS_7.3-66                `\
-`#> [43] prabclus_2.3-5              dichromat_2.0-1            `\
-`#> [45] SummarizedExperiment_1.42.0 cli_3.6.6                  `\
-`#> [47] rmarkdown_2.31              ragg_1.5.2                 `\
-`#> [49] generics_0.1.4              otel_0.2.0                 `\
-`#> [51] robustbase_0.99-7           cachem_1.1.0               `\
-`#> [53] proxy_0.4-29                modeltools_0.2-24          `\
-`#> [55] splines_4.6.1               clValid_0.7                `\
-`#> [57] parallel_4.6.1              XVector_0.52.0             `\
-`#> [59] vctrs_0.7.3                 matrixStats_1.5.0          `\
-`#> [61] Matrix_1.7-6                jsonlite_2.0.0             `\
-`#> [63] IRanges_2.46.0              S4Vectors_0.50.1           `\
-`#> [65] BiocNeighbors_2.6.0         irlba_2.3.7                `\
-`#> [67] clue_0.3-68                 systemfonts_1.3.2          `\
-`#> [69] locfit_1.5-9.12             diptest_0.77-2             `\
-`#> [71] limma_3.68.4                jquerylib_0.1.4            `\
-`#> [73] glue_1.8.1                  pkgdown_2.2.1              `\
-`#> [75] DEoptimR_1.2-0              codetools_0.2-20           `\
-`#> [77] gtable_0.3.6                GenomicRanges_1.64.0       `\
-`#> [79] tibble_3.3.1                pillar_1.11.1              `\
-`#> [81] htmltools_0.5.9             Seqinfo_1.2.0              `\
-`#> [83] clusterSim_0.51-6           R6_2.6.1                   `\
-`#> [85] textshaping_1.0.5           evaluate_1.0.5             `\
-`#> [87] lattice_0.22-9              Biobase_2.73.2             `\
-`#> [89] bslib_0.12.0                class_7.3-24               `\
-`#> [91] Rcpp_1.1.2                  flexmix_2.3-21             `\
-`#> [93] SparseArray_1.13.2          xfun_0.60                  `\
-`#> [95] fs_2.1.0                    MatrixGenerics_1.24.0      `\
-`#> [97] pkgconfig_2.0.3`
+`#>   [1] fs_2.1.0                    matrixStats_1.5.0          `\
+`#>   [3] spatstat.sparse_3.2-0       httr_1.4.9                 `\
+`#>   [5] RColorBrewer_1.1-3          ggsci_5.2.0                `\
+`#>   [7] tools_4.6.1                 sctransform_0.4.3          `\
+`#>   [9] R6_2.6.1                    uwot_0.2.5                 `\
+`#>  [11] withr_3.0.3                 sp_2.2-3                   `\
+`#>  [13] gridExtra_2.3.1             progressr_1.0.0            `\
+`#>  [15] cli_3.6.6                   Biobase_2.73.2             `\
+`#>  [17] textshaping_1.0.5           spatstat.explore_3.8-3     `\
+`#>  [19] fastDummies_1.7.6           labeling_0.4.3             `\
+`#>  [21] sass_0.4.10                 Seurat_5.5.1               `\
+`#>  [23] S7_0.2.2                    spatstat.data_3.1-9        `\
+`#>  [25] readr_2.2.0                 proxy_0.4-29               `\
+`#>  [27] ggridges_0.5.7              pbapply_1.7-5              `\
+`#>  [29] pkgdown_2.2.1               systemfonts_1.3.2          `\
+`#>  [31] dichromat_2.0-1             scater_1.41.2              `\
+`#>  [33] parallelly_1.48.0           limma_3.99.0               `\
+`#>  [35] MLmetrics_1.1.3             RSQLite_3.53.3             `\
+`#>  [37] generics_0.1.4              ica_1.0-3                  `\
+`#>  [39] spatstat.random_3.5-2       dplyr_1.2.1                `\
+`#>  [41] Matrix_1.7-6                ggbeeswarm_0.7.3           `\
+`#>  [43] S4Vectors_0.51.10           abind_1.4-8                `\
+`#>  [45] lifecycle_1.0.5             yaml_2.3.12                `\
+`#>  [47] edgeR_4.99.6                SummarizedExperiment_1.43.0`\
+`#>  [49] SparseArray_1.13.2          BiocFileCache_3.3.0        `\
+`#>  [51] provenance_4.4              Rtsne_0.17                 `\
+`#>  [53] grid_4.6.1                  blob_1.3.0                 `\
+`#>  [55] dqrng_0.4.1                 promises_1.5.0             `\
+`#>  [57] crayon_1.5.3                miniUI_0.1.2               `\
+`#>  [59] lattice_0.22-9              dynwrap_1.3.0              `\
+`#>  [61] beachmat_2.29.3             cowplot_1.2.0              `\
+`#>  [63] dynfeature_1.0.1            metapod_1.21.0             `\
+`#>  [65] pillar_1.11.1               knitr_1.52                 `\
+`#>  [67] GenomicRanges_1.65.4        boot_1.3-32                `\
+`#>  [69] future.apply_1.20.2         kSamples_1.2-12            `\
+`#>  [71] codetools_0.2-20            glue_1.8.1                 `\
+`#>  [73] spatstat.univar_3.2-0       remotes_2.5.0              `\
+`#>  [75] clusterSim_0.51-6           data.table_1.18.6.1        `\
+`#>  [77] dynparam_1.0.2              vctrs_0.7.3                `\
+`#>  [79] CDI_1.11.0                  png_0.1-9                  `\
+`#>  [81] spam_2.11-4                 Rdpack_2.6.6               `\
+`#>  [83] testthat_3.3.2              gtable_0.3.6               `\
+`#>  [85] assertthat_0.2.1            cachem_1.1.0               `\
+`#>  [87] xfun_0.60                   rbibutils_2.4.1            `\
+`#>  [89] S4Arrays_1.13.0             mime_0.13                  `\
+`#>  [91] Seqinfo_1.3.2               coda_0.19-4.1              `\
+`#>  [93] reformulas_0.4.4            survival_3.8-12            `\
+`#>  [95] SingleCellExperiment_1.35.2 statmod_1.5.2              `\
+`#>  [97] bluster_1.23.1              fitdistrplus_1.2-6         `\
+`#>  [99] ROCR_1.0-12                 nlme_3.1-171               `\
+`#> [101] dynutils_1.0.12             eva_0.2.7                  `\
+`#> [103] bit64_4.8.6                 filelock_1.0.3             `\
+`#> [105] RcppAnnoy_0.0.23            dyneval_0.9.9              `\
+`#> [107] bslib_0.12.0                irlba_2.3.7                `\
+`#> [109] waddR_1.27.0                vipor_0.4.7                `\
+`#> [111] KernSmooth_2.23-26          otel_0.2.0                 `\
+`#> [113] BiocGenerics_0.59.12        DBI_1.3.0                  `\
+`#> [115] ade4_1.7-24                 processx_3.9.0             `\
+`#> [117] carrier_0.3.0.4             tidyselect_1.2.1           `\
+`#> [119] proxyC_0.5.2                bit_4.6.0                  `\
+`#> [121] compiler_4.6.1              curl_8.0.0                 `\
+`#> [123] httr2_1.3.0                 BiocNeighbors_2.7.3        `\
+`#> [125] randtests_1.0.2             desc_1.4.3                 `\
+`#> [127] DelayedArray_0.39.8         plotly_4.12.1              `\
+`#> [129] scales_1.4.0                lmtest_0.9-40              `\
+`#> [131] stringr_1.6.0               digest_0.6.39              `\
+`#> [133] goftest_1.2-3               spatstat.utils_3.2-5       `\
+`#> [135] minqa_1.2.8                 rmarkdown_2.32             `\
+`#> [137] XVector_0.52.0              RhpcBLASctl_0.23-42        `\
+`#> [139] htmltools_0.5.9             pkgconfig_2.0.3            `\
+`#> [141] lme4_2.0-6                  MatrixGenerics_1.25.0      `\
+`#> [143] dbplyr_2.6.0                fastmap_1.2.0              `\
+`#> [145] rlang_1.3.0                 htmlwidgets_1.6.4          `\
+`#> [147] shiny_1.14.0                SuppDists_1.1-9.9          `\
+`#> [149] farver_2.1.2                jquerylib_0.1.4            `\
+`#> [151] zoo_1.9-1                   jsonlite_2.0.0             `\
+`#> [153] BiocParallel_1.47.0         mclust_6.1.3               `\
+`#> [155] BiocSingular_1.29.1         magrittr_2.0.5             `\
+`#> [157] scuttle_1.23.2              dotCall64_1.2              `\
+`#> [159] patchwork_1.3.2             Rcpp_1.1.2                 `\
+`#> [161] viridis_0.6.5               reticulate_1.47.0          `\
+`#> [163] stringi_1.8.9               brio_1.1.5                 `\
+`#> [165] MASS_7.3-66                 plyr_1.8.9                 `\
+`#> [167] parallel_4.6.1              listenv_1.0.0              `\
+`#> [169] ggrepel_0.9.8               deldir_2.0-4               `\
+`#> [171] splines_4.6.1               tensor_1.5.1               `\
+`#> [173] hms_1.1.4                   locfit_1.5-9.12            `\
+`#> [175] ranger_0.18.0               igraph_2.3.3               `\
+`#> [177] babelwhale_1.2.0            spatstat.geom_3.8-3        `\
+`#> [179] RcppHNSW_0.7.0              reshape2_1.4.5             `\
+`#> [181] stats4_4.6.1                ScaledMatrix_1.21.0        `\
+`#> [183] philentropy_0.10.0          evaluate_1.0.5             `\
+`#> [185] SeuratObject_5.4.0          scran_1.41.1               `\
+`#> [187] RcppParallel_6.2.1          IsoplotR_7.0               `\
+`#> [189] tzdb_0.5.0                  nloptr_2.2.1               `\
+`#> [191] httpuv_1.6.17               RANN_2.6.3                 `\
+`#> [193] tidyr_1.3.2                 purrr_1.2.2                `\
+`#> [195] polyclip_1.10-7             future_1.76.0              `\
+`#> [197] scattermore_1.2             ggplot2_4.0.3              `\
+`#> [199] CellMixS_1.29.0             rsvd_1.0.5                 `\
+`#> [201] xtable_1.8-8                e1071_1.7-17               `\
+`#> [203] RSpectra_0.16-2             later_1.4.8                `\
+`#> [205] viridisLite_0.4.3           class_7.3-24               `\
+`#> [207] ragg_1.5.2                  arm_1.15-3                 `\
+`#> [209] tibble_3.3.1                memoise_2.0.1              `\
+`#> [211] beeswarm_0.4.0              IRanges_2.47.5             `\
+`#> [213] cluster_2.1.8.3             globals_0.19.1`

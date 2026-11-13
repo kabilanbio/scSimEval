@@ -98,11 +98,11 @@ head(emb)
 #> 4 Cell_04 -1.8158411 -0.5365884 Reference Reference    Reference     TypeA
 #> 5 Cell_05 -0.3859525  0.9999394 Reference Reference    Reference     TypeA
 #> 6 Cell_06 -0.4865342 -0.7764473 Reference Reference    Reference     TypeA
-#>     Cluster Library_Size Detected_Features  Batch
-#> 1 Cluster_2          225                47 Batch1
-#> 2 Cluster_2          208                49 Batch1
-#> 3 Cluster_1          262                48 Batch1
-#> 4 Cluster_2          227                47 Batch1
-#> 5 Cluster_1          255                51 Batch1
-#> 6 Cluster_1          256                46 Batch1
+#>     Cluster Library_Size Detected_Features   Batch
+#> 1 Cluster_2          225                47 Batch 1
+#> 2 Cluster_2          208                49 Batch 1
+#> 3 Cluster_1          262                48 Batch 1
+#> 4 Cluster_2          227                47 Batch 1
+#> 5 Cluster_1          255                51 Batch 1
+#> 6 Cluster_1          256                46 Batch 1
 ```

@@ -1,12 +1,14 @@
 # Automatically Infer Lineage Tree (hclust) from scRNA-seq Counts & Cell Types
 
 Builds a hierarchical clustering lineage tree between cell-type
-centroids from scRNA-seq expression data.
+centroids from scRNA-seq expression data. If cell types are omitted or
+have fewer than 2 classes, cells are clustered automatically along the
+principal trajectory.
 
 ## Usage
 
 ``` r
-infer_scrna_lineage_tree(data, cell_types, method = "ward.D2")
+infer_scrna_lineage_tree(data, cell_types = NULL, method = "ward.D2")
 ```
 
 ## Arguments
@@ -17,7 +19,7 @@ infer_scrna_lineage_tree(data, cell_types, method = "ward.D2")
 
 - cell_types:
 
-  Factor or vector of cell-type annotations for each cell.
+  Factor or vector of cell-type annotations for each cell (optional).
 
 - method:
 

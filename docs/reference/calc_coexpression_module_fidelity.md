@@ -49,19 +49,19 @@ ratio fidelity.
 data(example_scrna, package = "scSimEval")
 calc_coexpression_module_fidelity(example_scrna$ref, example_scrna$sim)
 #> $module_correlation_r
-#> [1] -0.01457616
+#> [1] -0.03869747
 #> 
 #> $module_correlation_rmse
-#> [1] 0.1690945
+#> [1] 0.176806
 #> 
 #> $module_correlation_mae
-#> [1] 0.1360054
+#> [1] 0.1455605
 #> 
 #> $ref_modularity_ratio
-#> [1] 0.5568422
+#> [1] 0.6242716
 #> 
 #> $sim_modularity_ratio
-#> [1] -0.02798568
+#> [1] -0.1884654
 #> 
 #> $modularity_fidelity
 #> [1] 0

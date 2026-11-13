@@ -30,25 +30,25 @@ Spearman/Pearson correlations, and model fit summary.
 ## Examples
 
 ``` r
-data(example_scrna, package = "scSimEval")
-calc_accessibility_sparsity_curve(example_scrna$ref)
+data(example_scatac, package = "scSimEval")
+calc_accessibility_sparsity_curve(example_scatac$ref)
 #> $c0
-#> [1] 0.5117571
+#> [1] -0.006022981
 #> 
 #> $c1
-#> [1] 0.1032392
+#> [1] 1.076984
 #> 
 #> $c2
-#> [1] -0.006616585
+#> [1] -0.388117
 #> 
 #> $r_squared
-#> [1] 0.7560448
+#> [1] 0.9692997
 #> 
 #> $spearman_cor
-#> [1] 0.8167929
+#> [1] 0.9781859
 #> 
 #> $pearson_cor
-#> [1] 0.8428295
+#> [1] 0.9783617
 #> 
 #> $poly_degree
 #> [1] 2
@@ -61,11 +61,11 @@ calc_accessibility_sparsity_curve(example_scrna$ref)
 #> 
 #> Coefficients:
 #>                                       (Intercept)  
-#>                                          0.511757  
+#>                                         -0.006023  
 #> stats::poly(x, degree = poly_degree, raw = TRUE)1  
-#>                                          0.103239  
+#>                                          1.076984  
 #> stats::poly(x, degree = poly_degree, raw = TRUE)2  
-#>                                         -0.006617  
+#>                                         -0.388117  
 #> 
 #> 
 ```

@@ -16,7 +16,21 @@ evaluate_multiomics_accuracy(
   feature_pairs = NULL,
   compute_bivariate = FALSE,
   threads = 1,
-  verbose = TRUE
+  verbose = TRUE,
+  time_unit = c("seconds", "minutes"),
+  memory_unit = c("MiB", "MB"),
+  sim_cores = NULL,
+  elapsed_time_rna = NULL,
+  elapsed_time_atac = NULL,
+  memory_mb_rna = NULL,
+  memory_mb_atac = NULL,
+  time_unit_rna = NULL,
+  time_unit_atac = NULL,
+  memory_unit_rna = NULL,
+  memory_unit_atac = NULL,
+  sim_cores_rna = NULL,
+  sim_cores_atac = NULL,
+  trajectory_num_trees = 10000L
 )
 }
 \arguments{
@@ -41,9 +55,9 @@ accessibility profile concordance) are computed alongside all unimodal metrics.}
 \item{is_paired}{Optional logical alias for \code{pairing}. If provided,
 \code{TRUE} corresponds to \code{"paired"} and \code{FALSE} to \code{"unpaired"}.}
 
-\item{memory_mb}{Optional numeric value of peak memory allocation in MB.}
+\item{memory_mb}{Optional numeric value of peak memory allocation (in \code{memory_unit}).}
 
-\item{elapsed_time}{Optional numeric value of wall-clock elapsed time in seconds.}
+\item{elapsed_time}{Optional numeric value of wall-clock elapsed time (in \code{time_unit}).}
 
 \item{feature_pairs}{Optional 2-column data.frame of linked feature pairs.}
 
@@ -52,19 +66,46 @@ accessibility profile concordance) are computed alongside all unimodal metrics.}
 \item{threads}{Number of CPU threads. Default is 1.}
 
 \item{verbose}{Logical, whether to print execution progress. Default is TRUE.}
+
+\item{time_unit}{Character string specifying the unit of \code{elapsed_time}:
+\code{"seconds"} (default, or \code{"s"}) or \code{"minutes"} (or \code{"min"}).}
+
+\item{memory_unit}{Character string specifying the unit of \code{memory_mb}:
+\code{"MiB"} (default, binary mebibytes) or \code{"MB"} (decimal megabytes, converted to MiB).}
+
+\item{sim_cores}{Optional positive integer specifying the number of CPU cores used
+by the simulator to generate \code{sim_multi}. Default is NULL.}
+
+\item{elapsed_time_rna, elapsed_time_atac}{Optional separate wall-clock runtimes for RNA and ATAC layers
+when modalities are simulated independently (used if combined \code{elapsed_time} is NULL).}
+
+\item{memory_mb_rna, memory_mb_atac}{Optional separate peak RAM allocations for RNA and ATAC layers
+when modalities are simulated independently (used if combined \code{memory_mb} is NULL).}
+
+\item{time_unit_rna, time_unit_atac}{Optional time units (\code{"seconds"} or \code{"minutes"}) for
+\code{elapsed_time_rna} and \code{elapsed_time_atac}; defaults to \code{time_unit}.}
+
+\item{memory_unit_rna, memory_unit_atac}{Optional memory units (\code{"MiB"} or \code{"MB"}) for
+\code{memory_mb_rna} and \code{memory_mb_atac}; defaults to \code{memory_unit}.}
+
+\item{sim_cores_rna, sim_cores_atac}{Optional positive integers specifying simulation CPU cores for
+separate RNA and ATAC runs (used if combined \code{sim_cores} is NULL).}
+
+\item{trajectory_num_trees}{Number of Random Forest trees for Category VII \code{wcor_features}
+(default \code{10000L}, per Saelens et al. 2019).}
 }
 \value{
 A list containing detailed results and a unified tidy master summary table.
 }
 \description{
-Orchestrates comprehensive benchmarking across all 7 evaluation categories
+Orchestrates comprehensive benchmarking across all 8 evaluation categories
 using strictly the user's provided inputs:
 \itemize{
-  \item \code{ref_multi}: List of reference omics matrices (e.g. \code{list(rna = ..., atac = ...)}).
-  \item \code{sim_multi}: List of simulated omics matrices (e.g. \code{list(rna = ..., atac = ...)}).
+  \item \code{ref_multi}: List of reference omics objects/matrices (e.g. \code{list(RNA = ..., ATAC = ...)}).
+  \item \code{sim_multi}: List of simulated omics objects/matrices (e.g. \code{list(RNA = ..., ATAC = ...)}).
   \item \code{cell_types}: Vector/factor of cell-type identities.
-  \item \code{batch_info}: Vector/factor of batch or donor annotations.
-  \item Computational resource usage: \code{cpu_time}, \code{memory_mb}, \code{system_time}.
+  \item \code{batch_info}: Vector/factor of batch or biological replicate annotations.
+  \item Computational resource usage: \code{elapsed_time}, \code{memory_mb}.
   \item Trajectory features inferred directly from scRNA-seq counts.
 }
 }
@@ -72,24 +113,21 @@ using strictly the user's provided inputs:
 \if{html}{\figure{workflow_diagram.png}{options: width="800" alt="scSimEval Unified Benchmarking Workflow Diagram"}}
 
 
-\strong{Multiomics Metric Measurement Capacity by Experimental Design & Metadata (48 Metrics):}
+\strong{Multiomics Metric Measurement Capacity Across the 56 Evaluation Measures:}
 \itemize{
-  \item \strong{Paired Multiomics (e.g. 10x Chromium Multiome, SHARE-seq, SNARE-seq):}
-    \itemize{
-      \item \emph{Count Matrices Alone (RNA + ATAC):} Measures unimodal distribution layers
-        plus Category VI Cross-Modal Coupling (Wasserstein, KS, FOSCTTM cell alignment score, Match@1,
-        cross-modal generation PCC, RV coefficient, and peak-to-gene regulatory coupling).
-      \item \emph{+ Cell Types:} Unlocks cross-modal label transfer F1, cell-type clustering concordance,
-        and SimBench biological signal fidelity.
-      \item \emph{+ Batch Info:} Unlocks batch confounder integration across both RNA and ATAC modalities.
-      \item \emph{+ Both (Full Metadata):} Unlocks the complete multiomics suite of all 48 curated evaluation metrics
-        across all 8 canonical categories.
-    }
-  \item \strong{Unpaired Multiomics (independent scRNA and scATAC from separate cells):}
-    \itemize{
-      \item Evaluates unimodal distributions for both layers plus population-level modularity metrics
-        (co-expression module fidelity, peak co-accessibility, cross-modal label transfer), totaling up to 43 metrics.
-    }
+  \item \strong{Paired or Unpaired Count Data Alone:} Evaluates unimodal Category I (10 univariate
+    + 4 bivariate metrics when \code{compute_bivariate = TRUE}), Category II (5 sparsity/zero-inflation
+    metrics across RNA & ATAC), Category III manifold metrics (MMD, Generative Precision/Recall),
+    and Category VII trajectory metrics inferred from scRNA-seq via the HVG-filtered dynverse workflow
+    (\code{him}, \code{edge_flip}, \code{geodesic_correlation}, \code{F1_branches}, \code{wcor_features}).
+  \item \strong{+ Cell Types:} Unlocks Category III supervised clustering concordance (Silhouette ASW,
+    CDI, Neighborhood Purity, ARI, NMI) and Category VI (Multiomics Integration & Alignment:
+    Batch ASW, Cell-Type ASW, Graph Connectivity, Integration ARI, Integration NMI).
+  \item \strong{+ Batch / Biological Replicate Annotations:} Unlocks Category IV batch mixing across
+    both layers and Category V (12 differential fidelity metrics: null P-value uniformity, accuracy,
+    precision, recall, F1-score, ROC-AUC across both scRNA-seq DE and scATAC-seq DA).
+  \item \strong{+ Runtime & Memory:} Logs Category VIII (\code{core_seconds}, \code{memory_per_core_mib})
+    to complete the full 56-measure evaluation suite across all 8 canonical categories.
 }
 }
 \examples{

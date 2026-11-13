@@ -2,40 +2,86 @@
 % Please edit documentation in R/06_metrics_trajectory.R
 \name{evaluate_trajectory_metrics}
 \alias{evaluate_trajectory_metrics}
-\title{Full Trajectory Accuracy Evaluation}
+\title{Full Category VII Trajectory & Lineage Topology Evaluation (dynverse Workflow)}
 \usage{
 evaluate_trajectory_metrics(
   ref_data,
   sim_data,
   cell_types_ref = NULL,
-  cell_types_sim = NULL
+  cell_types_sim = NULL,
+  num_trees = 10000L,
+  nmads = 3,
+  min_cell_frac = 0.05,
+  min_mean_expr = 0.02,
+  fdr_threshold = 0.05,
+  bio_var_threshold = 0.5,
+  threads = 1L,
+  seed = 42L,
+  verbose = FALSE
 )
 }
 \arguments{
-\item{ref_data}{Reference count matrix (genes x cells) OR numeric vector of pseudotimes.}
+\item{ref_data}{Reference count matrix, \code{SingleCellExperiment}, or \code{Seurat} object.}
 
-\item{sim_data}{Simulated count matrix (genes x cells) OR numeric vector of pseudotimes.}
+\item{sim_data}{Simulated count matrix, \code{SingleCellExperiment}, or \code{Seurat} object.}
 
-\item{cell_types_ref}{Optional vector of reference cell types (for lineage tree inference).}
+\item{cell_types_ref}{Optional vector of reference cell types.}
 
-\item{cell_types_sim}{Optional vector of simulated cell types (for lineage tree inference).}
+\item{cell_types_sim}{Optional vector of simulated cell types.}
+
+\item{num_trees}{Number of \pkg{ranger} trees per milestone for \code{wcor_features} (default \code{10000L}).}
+
+\item{nmads}{MAD cutoff for outlier cell QC (default \code{3}).}
+
+\item{min_cell_frac}{Minimum cell fraction per gene (default \code{0.05}).}
+
+\item{min_mean_expr}{Minimum average gene count (default \code{0.02}).}
+
+\item{fdr_threshold}{FDR threshold for HVG selection (default \code{0.05}).}
+
+\item{bio_var_threshold}{Biological variance threshold for HVG selection (default \code{0.5}).}
+
+\item{threads}{Number of CPU threads for \pkg{ranger} (default \code{1L}).}
+
+\item{seed}{Random seed (default \code{42L}).}
+
+\item{verbose}{Logical; print progress messages.}
 }
 \value{
-A named list of trajectory accuracy metrics:
+A named list of Category VII \emph{dynverse} trajectory accuracy metrics:
   \describe{
-    \item{pseudotime_correlation}{Spearman correlation between reference and simulated pseudotime.}
-    \item{tree_height_rmse}{Root mean squared error of lineage tree branch heights.}
-    \item{graph_alignment}{Concordance of pairwise graph distances along trajectory landmarks.}
-    \item{lineage_expression_fidelity}{Mean correlation of gene expression trends along lineages.}
+    \item{him}{Hamming-Ipsen-Mikhailov topology similarity (\code{[0, 1]}).}
+    \item{edge_flip}{Edge flip topology similarity (\code{[0, 1]}).}
+    \item{geodesic_correlation}{Spearman correlation of aligned geodesic distances (\code{[0, 1]}).}
+    \item{F1_branches}{Macro F1 overlap of MST branch assignments (\code{[0, 1]}).}
+    \item{wcor_features}{Reference-weighted Pearson correlation of Random Forest gene importances (\code{[0, 1]}).}
+    \item{cor_features}{Unweighted Pearson correlation of Random Forest gene importances.}
+    \item{n_hvgs}{Number of HVGs retained for trajectory evaluation.}
+    \item{ref_trajectory}{Inferred reference milestone trajectory object.}
+    \item{sim_trajectory}{Inferred simulated milestone trajectory object.}
+    \item{preprocessing_summary}{Cell and HVG filtering summary list.}
   }
 }
 \description{
-Evaluates trajectory preservation using pseudotime correlation, branch height
-discrepancy (RMSE), trajectory graph alignment, and gene expression patterns along lineages.
-If raw count matrices are provided, pseudotime, graphs, and lineage trees are automatically
-inferred directly from the scRNA-seq data.
+Evaluates trajectory and lineage preservation using the standardized \emph{dynverse}
+benchmarking framework (\emph{Saelens et al., Nature Biotechnology, 2019}):
+\enumerate{
+  \item Standardized cell outlier QC (3 MADs), low-expression gene filtering
+        (\eqn{\ge 5\%} cells, mean \eqn{> 0.02}), and HVG selection (\code{scran::modelGeneVar}).
+  \item Shared HVG PCA projection and Docker-free Minimum Spanning Tree (MST) milestone
+        trajectory inference with continuous cell-to-milestone geodesic distances.
+  \item Five complementary trajectory metrics: \code{him} (Hamming-Ipsen-Mikhailov similarity),
+        \code{edge_flip} (minimum edge flip similarity), \code{geodesic_correlation},
+        \code{F1_branches}, and \code{wcor_features} (\pkg{ranger} Random Forest feature
+        importance weighted correlation with \code{num_trees = 10000} and 1 percent \code{mtry}).
+}
 }
 \examples{
 data(example_scrna, package = "scSimEval")
-evaluate_trajectory_metrics(example_scrna$ref, example_scrna$sim)
+evaluate_trajectory_metrics(
+  example_scrna$ref, example_scrna$sim,
+  cell_types_ref = example_scrna$cell_types,
+  cell_types_sim = example_scrna$cell_types,
+  num_trees = 500L
+)
 }

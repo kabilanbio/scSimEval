@@ -2,439 +2,206 @@
 
 ## Overview
 
-The **scSimEval Shiny Studio** is a fully self-contained, browser-based
-graphical interface that gives researchers access to all 62 evaluation
-measures and every visualization in the package — without writing a
-single line of R code.
+The **scSimEval Shiny Studio** is a self-contained, browser-based
+graphical interface providing point-and-click access to all 56 curated
+evaluation measures and publication visualizations in the
+package—without requiring R scripting.
 
-Launch it with:
+Launch the studio locally in R:
 
 \
-[`library`](https://rdrr.io/r/base/library.html)`(`[`scSimEval`](https://kabilanbio.github.io/scSimEval)`)`\
-[`launch_scSimEval_app`](https://kabilanbio.github.io/scSimEval/reference/launch_scSimEval_app.md)`(``)``          ``# opens at http://127.0.0.1:<port>`
+[`library`](https://rdrr.io/r/base/library.html)`(`[`scSimEval`](https://kabilanbio.github.io/scSimEval/)`)`\
+[`launch_scSimEval_app`](https://kabilanbio.github.io/scSimEval/reference/launch_scSimEval_app.md)`(``)`
 
-> **File size limit:** The app accepts uploads up to **500 MB** per
-> file, which handles most real-world single-cell datasets.
-
-The studio is organized into **six primary navigation tabs** in the top
-bar, plus an **eight-panel Visualizations module** inside Tab 4. The
-sections below document every tab, every control, and all export options
-in the order they appear in the application.
+- **Capacity:** Handles file uploads up to **10 GB** per matrix for
+  large single-cell datasets.
+- **Theme:** Built with a modern responsive UI featuring an instant
+  **Light/Dark Mode toggle** switch.
+- **Navigation:** Organized into 8 intuitive top-level navigation tabs.
 
 ------------------------------------------------------------------------
 
 ## Tab 1 — Home
 
-The landing page gives a quick orientation and provides **one-click jump
-buttons** to any part of the workflow:
-
-| Button                           | Destination                |
-|----------------------------------|----------------------------|
-| **1. Data Upload & Evaluation**  | Data Hub tab               |
-| **2. Comparative Bubble Matrix** | Bubble Matrix tab          |
-| **3. Diagnostic Visualizations** | Visualizations tab         |
-| **4. Download Results**          | Download Results tab       |
-| **5. Help & Manual**             | Help & Getting Started tab |
-| **6. Team & Contact**            | Team & Contact tab         |
-
-The four **KPI cards** below the hero section display: 62 curated
-evaluation measures, 8 canonical categories, 3 supported modalities, and
-the \[0, 1\] standardized fidelity scale.
+The landing page provides a high-level orientation to **scSimEval
+Studio**: \* **KPI Ribbon:** Summarizes the 56 curated evaluation
+measures, 8 biological dimensions, 3 supported modalities (scRNA-seq,
+scATAC-seq, and paired Multiome), and the standardized $`[0, 1]`$
+fidelity scale. \* **Workflow Cards:** Direct access to load
+pre-computed demo benchmarks, configure single-cell evaluations, launch
+multiomics co-assay analyses, or upload previously saved benchmark
+sessions.
 
 ------------------------------------------------------------------------
 
 ## Tab 2 — Data Hub
 
-Data ingestion and evaluation control centre. Choose one of **four
-evaluation modes** from the radio button panel on the left sidebar.
+The data ingestion and benchmark orchestration centre, featuring three
+functional modules:
 
-### Mode 1 — Explore Demo Benchmark (6 Simulators)
+### 1. Data Ingestion & Benchmark Studio
 
-Click **Load Demo Benchmark (6 Simulators)** to instantly populate the
-app with pre-computed results for **Splatter**, **scDesign3**,
-**SCRIP**, **SymSim**, **dyngen**, and **simATAC** across all 62
-measures. No file uploads required.
-
-### Mode 2 — Single-Cell Evaluation (scRNA-seq / scATAC-seq)
-
-Evaluate one or more unimodal count-matrix simulators.
-
-| Step | Control | Notes |
-|----|----|----|
-| **1** | **Reference Count Matrix** | Real empirical cells. Formats: `.rds`, `.csv`, `.tsv`, `.txt`, `SingleCellExperiment`, `Seurat`. |
-| **2** | **Simulated Count Matrices** (multi-select) | One file per simulator. Same formats. |
-| **3** | **Simulator Name / Runtime (s) / Memory (MiB)** | Enter for each uploaded simulator. |
-| **4** | **Cell Type Labels** (optional) | `.rds` (factor / vector / data.frame) or `.csv`/`.tsv`. |
-| **4** | **Batch Annotations** (optional) | Same formats as cell types. |
-| — | **Append to current benchmark** | Adds new results alongside existing ones. |
-| — | **Evaluate Single-Cell Simulators** | Triggers the full 50+ metric pipeline. |
-
-### Mode 3 — Multiomics Evaluation (scRNA-seq + scATAC-seq)
-
-| Subtype | Description |
-|----|----|
-| **Paired Co-assay** | Same individual cells in both modalities (10x Multiome, SHARE-seq). All 62 metrics including FOSCTTM and <Match@1>. |
-| **Unpaired Profiling** | Separate cells from same tissue. Population-level cross-modal metrics only; cell-pairing metrics safely skipped. |
-
-| Step | Control | Notes |
-|----|----|----|
-| **1** | **Reference RNA Count Matrix** | Genes × cells. |
-| **1** | **Reference ATAC Count Matrix** | Peaks × cells. |
-| **2** | **Number of Multiomics Simulators** | 1 – 5. Generates matching upload fields. |
-| **2** | **Per-Simulator Fields** | Simulated RNA matrix, simulated ATAC matrix, name, runtime (s), memory (MiB). |
-| **3** | **Cell Type Labels / Batch** (optional) | Applied to RNA modality. |
-| — | **Evaluate Multiomics Simulators** | Runs the full 62-metric multiomics pipeline. |
-
-### Mode 4 — Upload Saved Results (.rds / .csv)
-
-Load output previously saved from
-[`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md),
-[`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md),
+Choose between four operational modes: \* **Mode 1 — Pre-Computed
+Benchmark (Demo Data):** Instantly loads a complete multi-dataset
+evaluation across 6 simulation methods (Simulator 1 to Simulator 6) over
+all 56 evaluation measures with zero computational waiting time. \*
+**Mode 2 — Single-Cell Evaluation (scRNA-seq / scATAC-seq):** Upload
+empirical reference count matrices and 1–6 simulated datasets (`.rds`,
+`.csv`, `.tsv`, `.txt`, `.xlsx`). Optionally provide cell type
+annotations (unlocking clustering and biological signal fidelity) and
+batch labels (unlocking technical confounder mixing metrics). Set CPU
+worker threads for parallel evaluation. \* **Mode 3 — Multiomics
+Evaluation (RNA + ATAC):** Benchmark paired co-assays (e.g., 10x
+Multiome, SHARE-seq) or unpaired multiomics datasets to evaluate
+joint-embedding multiomics integration (`batch_asw`, `cell_type_asw`,
+`graph_connectivity`, `ari`, `nmi`) alongside per-modality unimodal
+properties. \* **Mode 4 — Upload Saved Benchmark Table (.rds / .csv):**
+Ingest previously computed benchmark outputs from
+[`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md)
 or
-[`evaluate_multiple_datasets()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiple_datasets.md):
+[`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md).
+Check **“Add to current benchmark results”** to merge multiple datasets
+and automatically calculate cross-dataset simulator average rankings.
 
-\
-`bench`` ``<-`` `[`evaluate_simulation_accuracy`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md)`(``ref``, ``sim``, method_name ``=`` ``"MyTool"``)`\
-[`saveRDS`](https://rdrr.io/r/base/readRDS.html)`(``bench``, ``"my_benchmark.rds"``)`
+### 2. View Uploaded Data & Matrices
 
-Click **Load Saved File** to restore the entire benchmark session.
+Interactive count matrix browser with column filtering, sparsity
+statistics, and cell/gene summary previews.
 
-### Main Panel — Active Benchmark & Dataset Summary
+### 3. Dataset Properties & Batch Script Generator
 
-| Section | Content |
-|----|----|
-| **Status Banner** | Number of simulators loaded and total metrics computed |
-| **Dataset Properties Table** | Per-matrix: Cells (N), Features (P), Sparsity (%), Cell Types, Batches, Median Library Size, Median Detected Features, Mean Expression |
-| **Download Dataset Summary** | Export properties table as CSV |
-| **Benchmark Preview Table** | Searchable / sortable DT table of all raw and normalized metric scores |
-
-------------------------------------------------------------------------
-
-## Tab 3 — Comparative Bubble Matrix
-
-The flagship visualization: every simulator × all 62 metrics in one
-colour-coded matrix. Bubble **diameter** is proportional to the
-normalized fidelity score. Scores ≥ 0.96 are rendered as bold square
-glyphs. Simulators are rank-ordered top-to-bottom by composite average
-score.
-
-The main panel organizes content into two dedicated subtabs: 1.
-**Comparative Bubble Matrix Figure**: Displays the full 62-metric matrix
-figure with smooth horizontal panning at publication resolution. 2.
-**Fidelity Leaderboard**: Positioned right after the figure subtab,
-displaying the complete rankings table (Overall Rank, Method, Average
-Fidelity %, Fidelity Score) with an instant CSV export button.
-
-### Sidebar Controls
-
-| Control | Options | Default |
-|----|----|----|
-| **Category Filter** | All 62 · (I) Distributional Properties · (II) Correlations & Zero-Inflation · (III) Cellular Structure & Concordance · (IV) Batch Effects & Confounder Mixing · (V) Biological Signal & Downstream Fidelity · (VI) Trajectory & Lineage Dynamics · (VII) Cross-Modal Coupling & Modularity · (VIII) Computational Scalability | All |
-| **Method Selector** | Dynamic checkboxes per simulator | All selected |
-| **Matrix Display Width (px)** | 1 200 – 3 200 (step 50) | 2 200 |
-| **Matrix Display Height (px)** | 450 – 1 100 (step 20) | 680 |
-
-> **Tip:** Default 2 200 × 680 px matches the publication format (23 : 7
-> aspect ratio). Use the horizontal scrollbar to inspect all 62 measures
-> without label squishing.
-
-### Exports
-
-| Button | Output |
-|----|----|
-| **Download JPEG (600 DPI)** | Publication-grade `.jpeg` |
-| **Download Vector PDF** | Scalable `.pdf` |
-| **Download Leaderboard (CSV)** | Tidy CSV table of accurate method rankings and fidelity scores |
+- **QC Summary Table:** Displays cell counts, feature dimensions,
+  sparsity percentages, library sizes, and detected feature medians
+  across all uploaded matrices.
+- **HPC Script Generator:** Generates automated SLURM, PBS, or Bash
+  cluster execution scripts for offline benchmarking on high-performance
+  compute nodes.
 
 ------------------------------------------------------------------------
 
-## Tab 4 — Visualizations
+## Tab 3 — Comparative Bubble Matrix & Leaderboard
 
-Eight diagnostic sub-panels accessed via the **pill navigation bar**.
-Every sub-panel exposes individual 600 DPI JPEG and vector PDF export
-buttons.
+### 1. Comparative Bubble Matrix
 
-### Sub-panel 1 — Evaluation Summary
+The flagship visualization displaying candidate simulators against all
+56 curated evaluation measures organized by canonical category: \*
+**Fidelity Sizing:** Bubble diameter reflects direction-aware normalized
+performance ($`0.00`$ to $`1.00`$, where larger indicates higher
+fidelity). \* **Top Performers:** Bold circular outlines highlight the
+best-performing simulator for each individual metric. \* **Multi-Dataset
+Navigation:** Switch between individual experimental datasets or view
+the cross-dataset simulator average. \* **Interactive Step Zoom:**
+Client-side zoom controls (`+`, `-`, `Reset`) allow smooth panning and
+inspection of dense matrices. \* **Export Options:** Download
+publication-ready 600 DPI JPEG, vector PDF, or a complete reproducible R
+ggplot2 script.
 
-[`plot_evaluation_summary()`](https://kabilanbio.github.io/scSimEval/reference/plot_evaluation_summary.md)
-— rank-ordered horizontal bar chart.
+### 2. Method Leaderboard & Weight Modeling
 
-| Control                       | Description                         |
-|-------------------------------|-------------------------------------|
-| **Show Score Labels**         | Toggle numerical scores on each bar |
-| **Normalize Scores \[0, 1\]** | Standardized vs. raw display        |
-
-### Sub-panel 2 — Distribution QC
-
-[`plot_distribution_qc()`](https://kabilanbio.github.io/scSimEval/reference/plot_distribution_qc.md)
-— 14-panel grid comparing expression densities, library sizes, and
-zero-inflation curves between reference and simulated cells.
-
-| Control       | Options                                         |
-|---------------|-------------------------------------------------|
-| **QC Layout** | Comprehensive (14 panels) · Density Curves Only |
-
-### Sub-panel 3 — Scalability Benchmark
-
-[`plot_scalability_benchmark()`](https://kabilanbio.github.io/scSimEval/reference/plot_scalability_benchmark.md)
-— runtime and memory dashboards with Pareto efficiency frontiers.
-
-| Control | Options |
-|----|----|
-| **Scalability View** | 4-Panel Comprehensive · Runtime Only · Peak RAM Only · Runtime vs Memory Trade-Off · Resource Cost Footprint |
-
-### Sub-panel 4 — Metric Plots
-
-[`plot_metric_boxplots()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_boxplots.md)
-/
-[`plot_category_metric_bars()`](https://kabilanbio.github.io/scSimEval/reference/plot_category_metric_bars.md)
-/
-[`plot_individual_metric_bar()`](https://kabilanbio.github.io/scSimEval/reference/plot_individual_metric_bar.md)
-— two view modes.
-
-**Individual Metric mode:**
-
-| Control                | Description                             |
-|------------------------|-----------------------------------------|
-| **1. Choose Category** | Filters the metric dropdown             |
-| **2. Choose Metric**   | Dynamic; populated by selected category |
-| **3. Score Type**      | Normalized \[0, 1\] · Raw Metric Value  |
-
-**Category Group mode:**
-
-| Control | Description |
-|----|----|
-| **Choose Category** | All 8 combined (displays 8-category distribution boxplots via [`plot_metric_boxplots()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_boxplots.md)), or an individual category (displays faceted barplots across all category metrics via [`plot_category_metric_bars()`](https://kabilanbio.github.io/scSimEval/reference/plot_category_metric_bars.md)) |
-| **Score Type** | Normalized \[0, 1\] · Raw Value |
-
-### Sub-panel 5 — Metric Heatmap
-
-[`plot_metric_heatmap()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_heatmap.md)
-— method × metric grid; exact raw scores in bold text with
-direction-aware fill colours.
-
-| Control                 | Options                              | Default |
-|-------------------------|--------------------------------------|---------|
-| **Category Filter**     | All 8 combined · individual category | All     |
-| **Heatmap Height (px)** | 400 – 1 500 (step 50)                | 1 100   |
-| **Heatmap Width (px)**  | 600 – 1 300 (step 20)                | 880     |
-
-### Sub-panel 6 — PCA Ordination
-
-[`plot_metric_pca()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_pca.md)
-— simulators projected into performance space with discriminating metric
-vector loadings.
-
-| Control | Options | Default |
-|----|----|----|
-| **Category Filter** | All Combined · (I) Dist. Props · (II) Corr. & Zero-Inflation · (III) Cellular Structure · (IV) Batch Effects · (V) Bio. Signal · (VII) Cross-Modal | All |
-| **Panel View** | Both (Biplot + Loadings) · Simulators Only · Loadings Only | Both |
-| **Top Metrics (Loadings)** | 4 – 50 (step 1) | 14 |
-| **PCA Height (px)** | 500 – 1 600 (step 50) | 1 100 |
-| **PCA Width (px)** | 650 – 1 400 (step 25) | 950 |
-
-> When **All Categories Combined** is selected, only top-ranked metrics
-> by loading magnitude \[√(PC1² + PC2²)\] are shown to prevent visual
-> clutter.
-
-### Sub-panel 7 — MDS Metric Space
-
-[`plot_metric_mds()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_mds.md)
-— Multi-Dimensional Scaling ordination.
-
-| Control             | Options                             | Default       |
-|---------------------|-------------------------------------|---------------|
-| **Category Filter** | Same six options as PCA             | All           |
-| **MDS Target**      | By Simulators · By Metric Summaries | By Simulators |
-| **MDS Height (px)** | 400 – 1 300 (step 20)               | 620           |
-| **MDS Width (px)**  | 600 – 1 400 (step 20)               | 900           |
-
-### Sub-panel 8 — Cell Embeddings (t-SNE & UMAP)
-
-[`compute_dataset_embeddings()`](https://kabilanbio.github.io/scSimEval/reference/compute_dataset_embeddings.md) +
-[`plot_dataset_embeddings()`](https://kabilanbio.github.io/scSimEval/reference/plot_dataset_embeddings.md).
-
-**Reduction & Layout:**
-
-| Control | Options | Default |
-|----|----|----|
-| **Reduction Technique** | UMAP · t-SNE · PCA | UMAP |
-| **Comparison Layout** | Faceted Grid (All Simulators) · Side-by-Side (vs Single Simulator) | Faceted Grid |
-| **Select Simulator** (side-by-side only) | Dynamic dropdown | — |
-
-**Colour & Simulator:**
-
-| Control | Options | Default |
-|----|----|----|
-| **Simulator Selector** | Dynamic checkboxes | All |
-| **Color Cells By** | Biological Cell Type / Group · Unsupervised Cluster · Sequencing Depth (Library Size) · Technical Batch · Dataset Source | Cell Type |
-
-**Fine-Tuning:**
-
-| Control                           | Range                 | Default |
-|-----------------------------------|-----------------------|---------|
-| **Number of PCs**                 | 5 – 50 (step 5)       | 20      |
-| **t-SNE Perplexity** (t-SNE only) | 5 – 50 (step 5)       | 15      |
-| **UMAP Neighbors** (UMAP only)    | 5 – 50 (step 5)       | 15      |
-| **Point Size**                    | 0.2 – 3.0 (step 0.1)  | 1.0     |
-| **Alpha (transparency)**          | 0.2 – 1.0 (step 0.05) | 0.8     |
-
-**Quantitative Embedding Quality Table** (below the plot):
-
-| Column                 | Description                                    |
-|------------------------|------------------------------------------------|
-| Dataset                | Reference or simulator name                    |
-| Cells                  | Number of cells                                |
-| Mean Silhouette        | Average silhouette width of cell-type clusters |
-| ARI (Cluster Fidelity) | ARI between k-means clusters and known labels  |
-| Mean Library Size      | Mean total UMI / peak count per cell           |
-| Mean Detected Features | Mean genes / peaks detected per cell           |
-| Library Size Diff (%)  | Absolute % difference vs. reference mean       |
+- **Composite Ranking:** Overall performance podium ranking simulators
+  by weighted average score.
+- **Custom Weight Sliders:** Interactively adjust the weight of any
+  category to align rankings with specific research priorities.
+- **Export:** Download the tidy leaderboard as CSV.
 
 ------------------------------------------------------------------------
 
-## Tab 5 — Download Results
+## Tab 4 — Diagnostic Visualizations
 
-### 1. All-in-One Benchmark Archive (.zip)
+Eight specialized diagnostic panels accessed via the sub-navigation
+pills, each equipped with interactive zoom controls, dataset selectors,
+600 DPI image downloads, and reproducible R code exports:
 
-The comprehensive benchmark archive packages all quantitative results,
-tabular summaries, compiled reports, and figures into an organized
-directory structure:
+1.  **Evaluation Summary:** Rank-ordered horizontal bar charts comparing
+    composite and category-level fidelity across simulators.
+2.  **Distribution QC:** Grid comparing reference and simulated
+    distributions across expression moments, ECDF curves, and
+    zero-inflation patterns.
+3.  **Scalability Benchmark:** Core-normalized CPU execution time
+    (`core_seconds` / `core_hours`), peak memory footprint per allocated
+    core (`MiB/core` / `GiB/core`), Pareto efficiency frontiers, and
+    normalized resource cost.
+4.  **Metric Boxplots & Barplots:** Score distributions and
+    category-level comparisons with Raw vs Normalized score toggles.
+5.  **Metric Heatmap:** Comprehensive simulator $`\times`$ metric grid
+    with exact numerical scores and hierarchical clustering.
+6.  **PCA Ordination:** Simulators projected into 2D performance
+    ordination space with discriminating metric vector loadings.
+7.  **MDS Metric Space:** Multi-Dimensional Scaling ordination mapping
+    algorithmic distances among simulators.
+8.  **Cell Embeddings (UMAP / t-SNE):** Side-by-side dimension reduction
+    comparing reference and simulated biological manifolds, supplemented
+    by quantitative low-dimensional embedding quality metrics.
 
-- **Metrics in Multiple Formats (`metrics/` and root):**
-  - **Excel Workbook (`.xlsx`)** — 4 sheets: All Benchmark Metrics,
-    Dataset Properties, Method Rankings, Scalability Metrics
-  - **Master CSV Table (`.csv`)** — All 62 metrics in tidy long format
-  - **Master TXT Table (`.txt`)** — Tab-delimited text export of the
-    complete metric evaluation matrix
-  - **Method Rankings Leaderboard (`.csv` and `.txt`)** — Overall
-    scores, ranks, and category-level rankings
-  - **Dataset Properties Summary (`.csv` and `.txt`)** — Cell counts,
-    feature counts, sparsity, library size, and detected features
-  - **Native R Object (`.rds`)** — Serialized R list containing all
-    benchmark objects for reproducible downstream analysis and custom
-    plotting
-- **Compiled PDF Report (`scSimEval_all_plots_report.pdf`):** Multi-page
-  publication-ready vector report containing all 9 benchmark figures
-- **Grouped Figures (`figures/grouped/`):** Both 600 DPI
-  publication-grade JPEGs and vectorized PDFs for all overview
-  diagnostic figures:
-  1.  Comparative Bubble Matrix (`01_bubble_matrix_comparative`)
-  2.  Overall Evaluation Summary (`02_evaluation_summary_grouped`)
-  3.  Scalability Benchmark (`03_scalability_benchmark_grouped`)
-  4.  Metric Boxplots by Category (`04_metric_boxplots_by_category`)
-  5.  Performance Heatmap (`05_metric_performance_heatmap`)
-  6.  PCA Simulator Ordination (`06_simulator_pca_ordination`)
-  7.  MDS Ordination (`07_simulator_mds_ordination`)
-  8.  Distribution QC Curves (`08_comparative_distribution_qc`)
-  9.  Cell Embeddings UMAP Grid (`09_cell_embeddings_umap_grid`)
-  10. Cell Embeddings t-SNE Grid (`10_cell_embeddings_tsne_grid`)
-  11. Cell Embeddings PCA Grid (`11_cell_embeddings_pca_grid`)
-- **Individual Figures (`figures/individual/`):**
-  - High-resolution bar plots for each individual metric
-    (`metric_bar_<MetricName>.jpeg` & `.pdf`)
-  - Simulator-specific 1-to-1 comparison cell embeddings against
-    empirical reference across all reductions
-    (`cell_embeddings_compare_<reduction>_<SimulatorName>.jpeg` & `.pdf`
-    for UMAP, t-SNE, and PCA)
+------------------------------------------------------------------------
 
-Click **Download Complete Results (.zip)**.
+## Tab 5 — Benchmark Results & Export
 
-### 2. Spreadsheets & Data Files
-
-| Button | Format | Description |
-|----|----|----|
-| Download Excel File (.xlsx) | Multi-sheet workbook (`.xlsx`) | Full benchmark scores, rankings, dataset metadata, and scalability |
-| Download CSV Table (.csv) | Flat tidy table (`.csv`) | Comma-separated values for Python (pandas), Excel, or R |
-| Download TXT Table (.txt) | Tab-delimited table (`.txt`) | Clean TSV/TXT export for command-line workflows and bioinformatics tools |
-| Download R Data File (.rds) | Native R serialized object (`.rds`) | Ready for [`readRDS()`](https://rdrr.io/r/base/readRDS.html) in downstream R pipelines |
-
-### 3. Complete Multi-Page PDF Report
-
-All figures compiled into a single high-quality vector PDF report:
-
-1.  Comparative Bubble Matrix
-2.  Overall Evaluation Summary
-3.  Scalability Benchmark
-4.  Metric Boxplots by Category
-5.  Performance Heatmap
-6.  PCA Simulator Ordination
-7.  MDS Ordination
-8.  Distribution QC Curves
-9.  Cell Embeddings Comparison Grids
-
-Click **Download All Figures (.pdf)**.
-
-### 4. Export Individual Figures (High-Res 600 DPI JPEG & Vector PDF)
-
-Download any single visualization on demand with dedicated format
-controls:
-
-| Control | Description |
-|----|----|
-| **Choose Figure to Export** | Dropdown spanning all 14 benchmark visual types: Comparative Bubble Matrix, Overall Evaluation Summary, Scalability Benchmark, Metric Boxplots, Performance Heatmap, PCA Ordination, MDS Metric Space, Distribution QC, UMAP Comparison Grid, t-SNE Comparison Grid, PCA Comparison Grid, or 1-to-1 side-by-side comparison against reference (UMAP, t-SNE, PCA) |
-| **Select Simulator (for 1-to-1 compare)** | Dynamically populated dropdown to pick the specific simulator to benchmark against the empirical reference |
-| **Download Vector PDF (.pdf)** | Vectorized, infinitely scalable PDF styled to optimal aspect ratio |
-| **Download 600 DPI JPEG (.jpeg)** | Ultra-high-resolution raster JPEG ready for high-impact journal submission |
-
-### Interactive Benchmark Data Table
-
-A full `DT` table with **per-column search boxes** lets you filter by
-Method Name, Category, or Metric before exporting.
+- **Interactive Scores Table:** Full searchable `DT` table displaying
+  both raw unnormalized scores (in physical units such as KS distances,
+  seconds, and MiB RAM) and normalized $`[0, 1]`$ fidelity scores.
+- **Multi-Format Exports:** Export benchmark results as `.rds` (for full
+  R reproducibility), `.xlsx` (Excel workbook with multiple sheets),
+  `.csv`, `.tsv`, or a packaged `.zip` archive.
 
 ------------------------------------------------------------------------
 
 ## Tab 6 — Help & Getting Started
 
-An in-app reference guide structured into seven sections:
+An in-app reference guide providing: 1. Four-step workflow pipeline
+architecture. 2. Summary table of the 8 canonical evaluation categories
+and their active metric scopes. 3. Metric measurement capacity breakdown
+by input metadata availability. 4. Two-step score normalization
+methodology (direction inversion and min-max scaling). 5. Comprehensive
+input file formatting guidelines and metadata templates. 6.
+Computational sizing and RAM guidelines for workstation and cluster
+environments.
 
-1.  **Workflow Architecture** — 4-step pipeline diagram
-2.  **Eight Evaluation Categories** — tabular reference for all 62
-    metrics
-3.  **Score Normalization Pipeline** — direction inversion → min-max
-    scaling diagrams
-4.  **Studio Navigation Guide** — accordion-style guide to each tab
-5.  **Accepted Input Formats** — matrix types, annotation vectors, saved
-    files
-6.  **Frequently Asked Questions**
-7.  **Team, Contact & Citation**
+------------------------------------------------------------------------
 
-The tab also prominently links to the full online documentation at
-<https://kabilanbio.github.io/scSimEval>.
+## Tab 7 — Execution Logs
+
+A live diagnostic console tracking real-time data loading, hardware
+concurrency allocation, metric calculation progress, memory consumption,
+and system notifications.
+
+------------------------------------------------------------------------
+
+## Tab 8 — Contact & Academic Citations
+
+Details regarding the development team at the Division of Agricultural
+Bioinformatics, ICAR-IASRI, New Delhi, citation guidelines, and GitHub
+issue tracker links.
 
 ------------------------------------------------------------------------
 
 ## R API Cross-Reference
 
-Every Shiny control maps directly to a documented R function:
+Every interactive feature in Shiny Studio corresponds directly to a
+documented R function in `scSimEval`:
 
-| Shiny Panel | R Function |
-|----|----|
-| Data Hub → Single-Cell | [`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md) |
-| Data Hub → Multiomics | [`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md) |
-| Data Hub → Multiple Datasets | [`evaluate_multiple_datasets()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiple_datasets.md) |
-| Bubble Matrix | [`plot_benchmark_bubble_matrix()`](https://kabilanbio.github.io/scSimEval/reference/plot_benchmark_bubble_matrix.md) |
-| Evaluation Summary | [`plot_evaluation_summary()`](https://kabilanbio.github.io/scSimEval/reference/plot_evaluation_summary.md) |
-| Distribution QC | [`plot_distribution_qc()`](https://kabilanbio.github.io/scSimEval/reference/plot_distribution_qc.md) |
-| Scalability Benchmark | [`plot_scalability_benchmark()`](https://kabilanbio.github.io/scSimEval/reference/plot_scalability_benchmark.md) |
-| Metric Plots (all categories) | [`plot_metric_boxplots()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_boxplots.md) |
-| Metric Plots (by category) | [`plot_category_metric_bars()`](https://kabilanbio.github.io/scSimEval/reference/plot_category_metric_bars.md) |
-| Metric Plots (individual) | [`plot_individual_metric_bar()`](https://kabilanbio.github.io/scSimEval/reference/plot_individual_metric_bar.md) |
-| Metric Heatmap | [`plot_metric_heatmap()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_heatmap.md) |
-| PCA Ordination | [`plot_metric_pca()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_pca.md) |
-| MDS Metric Space | [`plot_metric_mds()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_mds.md) |
-| Cell Embeddings | [`compute_dataset_embeddings()`](https://kabilanbio.github.io/scSimEval/reference/compute_dataset_embeddings.md) + [`plot_dataset_embeddings()`](https://kabilanbio.github.io/scSimEval/reference/plot_dataset_embeddings.md) |
-| Embedding Quality Metrics | [`compute_embedding_quality_metrics()`](https://kabilanbio.github.io/scSimEval/reference/compute_embedding_quality_metrics.md) |
-
-For complete parameter descriptions see the
-[Reference](https://kabilanbio.github.io/scSimEval/reference/index.md)
-index.
+| Shiny Studio Module | Package Function | Primary Output |
+|:---|:---|:---|
+| Data Hub → Single-Cell | [`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md) | Unimodal benchmark results |
+| Data Hub → Multiomics | [`evaluate_multiomics_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_accuracy.md) | Multiomics benchmark results |
+| Data Hub → Merge Datasets | [`combine_benchmark_results()`](https://kabilanbio.github.io/scSimEval/reference/combine_benchmark_results.md) | Combined multi-dataset object |
+| Bubble Matrix | [`plot_benchmark_bubble_matrix()`](https://kabilanbio.github.io/scSimEval/reference/plot_benchmark_bubble_matrix.md) | Multi-metric comparative bubble matrix |
+| Leaderboard | [`compute_method_leaderboard()`](https://kabilanbio.github.io/scSimEval/reference/compute_method_leaderboard.md) | Ranked composite performance table |
+| Evaluation Summary | [`plot_evaluation_summary()`](https://kabilanbio.github.io/scSimEval/reference/plot_evaluation_summary.md) | Category-level horizontal bar matrix |
+| Distribution QC | [`plot_distribution_qc()`](https://kabilanbio.github.io/scSimEval/reference/plot_distribution_qc.md) | Comparative moment and distribution grid |
+| Scalability Dashboard | [`plot_scalability_benchmark()`](https://kabilanbio.github.io/scSimEval/reference/plot_scalability_benchmark.md) | Runtime and memory Pareto charts |
+| Metric Plots | [`plot_metric_boxplots()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_boxplots.md) | Score distributions across categories |
+| Metric Heatmap | [`plot_metric_heatmap()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_heatmap.md) | Simulator $`\times`$ metric score heatmap |
+| PCA Ordination | [`plot_metric_pca()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_pca.md) | 2D PCA performance ordination |
+| MDS Metric Space | [`plot_metric_mds()`](https://kabilanbio.github.io/scSimEval/reference/plot_metric_mds.md) | Multi-dimensional scaling plot |
+| Cell Embeddings | [`compute_dataset_embeddings()`](https://kabilanbio.github.io/scSimEval/reference/compute_dataset_embeddings.md) | Low-dimensional cell coordinates |
+| Embedding Quality | [`compute_embedding_quality_metrics()`](https://kabilanbio.github.io/scSimEval/reference/compute_embedding_quality_metrics.md) | Quantitative manifold fidelity table |
 
 ------------------------------------------------------------------------
 
     #> R version 4.6.1 (2026-06-24 ucrt)
     #> Platform: x86_64-w64-mingw32/x64
-    #> Running under: Windows 11 x64 (build 26200)
+    #> Running under: Windows 11 x64 (build 26300)
     #> 
     #> Matrix products: default
     #>   LAPACK version 3.12.1
@@ -452,8 +219,8 @@ index.
     #> 
     #> loaded via a namespace (and not attached):
     #>  [1] digest_0.6.39     desc_1.4.3        R6_2.6.1          fastmap_1.2.0    
-    #>  [5] xfun_0.60         cachem_1.1.0      knitr_1.51        htmltools_0.5.9  
-    #>  [9] rmarkdown_2.31    lifecycle_1.0.5   cli_3.6.6         sass_0.4.10      
+    #>  [5] xfun_0.60         cachem_1.1.0      knitr_1.52        htmltools_0.5.9  
+    #>  [9] rmarkdown_2.32    lifecycle_1.0.5   cli_3.6.6         sass_0.4.10      
     #> [13] pkgdown_2.2.1     textshaping_1.0.5 jquerylib_0.1.4   systemfonts_1.3.2
     #> [17] compiler_4.6.1    tools_4.6.1       ragg_1.5.2        bslib_0.12.0     
     #> [21] evaluate_1.0.5    yaml_2.3.12       otel_0.2.0        jsonlite_2.0.0   

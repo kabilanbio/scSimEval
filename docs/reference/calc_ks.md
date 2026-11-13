@@ -28,5 +28,5 @@ Maximum vertical distance between empirical CDFs (between 0 and 1).
 ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_ks(ref, sim)
-#> [1] 0.16
+#> [1] 0.0646207
 ```

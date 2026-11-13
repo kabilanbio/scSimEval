@@ -103,21 +103,21 @@ cat("Cross-Batch Transfer F1:", round(atac_batch$cross_batch_F1, 4), "\n")
 
 ---
 
-# 5. Chromatin Peak Co-Accessibility & Regulatory Coupling
+# 5. Chromatin Accessibility-Sparsity Curve Dynamics (Category 2)
 
-In real biological cells, peaks that are close to each other or regulated by the same transcription factor complexes show correlated accessibility:
+In real scATAC-seq experiments, peak detection proportion follows a quadratic relationship with mean peak accessibility. We evaluate how well the simulated peak matrix reproduces this accessibility-sparsity curve using `evaluate_accessibility_sparsity_curve()`:
 
 ```{r peak-coacc}
-# Evaluate peak co-accessibility fidelity
-coacc_res <- calc_accessibility_sparsity_curve(
-  ref_atac = example_scatac$ref,
-  sim_atac = example_scatac$sim
+# Evaluate quadratic accessibility-sparsity curve fidelity
+sparsity_res <- evaluate_accessibility_sparsity_curve(
+  ref_data = example_scatac$ref,
+  sim_data = example_scatac$sim
 )
 
-cat("Co-Accessibility RV Coefficient:", round(coacc_res$rv_coefficient, 4), "\n")
-cat("Peak Co-Accessibility Pearson Correlation:", round(coacc_res$coaccessibility_pearson, 4), "\n")
-cat("Peak Co-Accessibility Spearman Correlation:", round(coacc_res$coaccessibility_spearman, 4), "\n")
-cat("Frobenius Matrix Distance:", round(coacc_res$frobenius_distance, 4), "\n")
+cat("Accessibility-Sparsity Curve RMSE:", round(sparsity_res$curve_rmse, 4), "\n")
+cat("Quadratic Fit R2 Discrepancy:", round(sparsity_res$r2_discrepancy, 4), "\n")
+cat("Reference Curve R2:", round(sparsity_res$ref_r_squared, 4), "\n")
+cat("Simulated Curve R2:", round(sparsity_res$sim_r_squared, 4), "\n")
 ```
 
 ---
@@ -144,7 +144,7 @@ head(master_atac$metrics_summary_table)
 
 # 7. Conclusion
 
-`scSimEval` effectively benchmarks scATAC-seq simulations, validating peak insertion distributions, extreme sparsity, cell type clustering, batch mixing, and chromatin peak co-accessibility across the 48 curated evaluation measures suite.
+`scSimEval` effectively benchmarks scATAC-seq simulations, validating peak insertion distributions, extreme sparsity, cell type clustering, batch mixing, and chromatin peak co-accessibility across the curated evaluation measures suite.
 
 ```{r session-info}
 sessionInfo()

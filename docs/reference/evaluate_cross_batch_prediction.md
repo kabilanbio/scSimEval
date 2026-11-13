@@ -1,9 +1,9 @@
-# Evaluate Cross-Batch Cell Classification Transfer Accuracy
+# Evaluate Cross-Batch Cell Classification Transfer F1
 
 Evaluates whether simulated or integrated multi-batch single-cell data
 preserve cell-type identity across distinct experimental batches or
-donors. Trains a k-NN classifier on each individual batch and tests
-prediction accuracy and macro F1 score on all other remaining batches.
+donors. Trains a k-NN classifier on each individual batch and tests the
+macro F1 score of predictions on all other remaining batches.
 
 ## Usage
 
@@ -34,10 +34,6 @@ evaluate_cross_batch_prediction(coords, cell_types, batch_info, k = 5)
 
 A list containing:
 
-- mean_cross_batch_accuracy:
-
-  Overall mean classification accuracy across all directed batch pairs
-
 - mean_cross_batch_F1:
 
   Overall mean macro-averaged F1 score across all directed batch pairs
@@ -49,9 +45,6 @@ coords <- matrix(stats::rnorm(100), 50, 2)
 batch <- factor(rep(c("B1", "B2"), length.out = 50))
 ct <- factor(rep(c("TypeA", "TypeB"), length.out = 50))
 evaluate_cross_batch_prediction(coords, ct, batch)
-#> $mean_cross_batch_accuracy
-#> [1] NaN
-#> 
 #> $mean_cross_batch_F1
 #> [1] NaN
 #> 

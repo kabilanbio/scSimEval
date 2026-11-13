@@ -7,8 +7,8 @@ simulated count data is important before testing analysis tools such as
 clustering, batch correction, or differential expression algorithms.
 
 This tutorial shows how to evaluate synthetic scRNA-seq data
-step-by-step using **`scSimEval`** without needing any artificial ground
-truth.
+step-by-step using **`scSimEval`** across the curated evaluation
+measures suite.
 
 ------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@ truth.
 matrices (`example_scrna`):
 
 \
-[`library`](https://rdrr.io/r/base/library.html)`(`[`scSimEval`](https://kabilanbio.github.io/scSimEval)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`scSimEval`](https://kabilanbio.github.io/scSimEval/)`)`\
 \
 `# Load packaged scRNA-seq example data`\
 [`data`](https://rdrr.io/r/utils/data.html)`(``example_scrna``)`\
@@ -56,17 +56,19 @@ match the real reference data using
 `  compute_bivariate ``=`` ``FALSE``,`\
 `  verbose           ``=`` ``FALSE`\
 `)`\
+`#> calcNormFactors has been renamed to normLibSizes`\
+`#> calcNormFactors has been renamed to normLibSizes`\
 \
 `# Inspect statistical distance metrics for library size`\
 `lib_summary`` ``<-`` `[`subset`](https://rdrr.io/r/base/subset.html)`(``unimodal_res``$``metrics_summary_table``, ``Property`` ``==`` ``"library_size"``)`\
 [`head`](https://rdrr.io/r/utils/head.html)`(``lib_summary``, ``6``)`\
-`#>                    Category     Property        Metric        Value`\
-`#> 1 Distributional Properties library_size           MAD 1.500000e+01`\
-`#> 2 Distributional Properties library_size            KS 2.125000e-01`\
-`#> 3 Distributional Properties library_size           MAE 1.506250e+01`\
-`#> 4 Distributional Properties library_size          RMSE 1.571504e+01`\
-`#> 5 Distributional Properties library_size            OV 8.269394e-01`\
-`#> 6 Distributional Properties library_size Bhattacharyya 1.188839e-04`
+`#>                    Category     Property         Metric         Value`\
+`#> 1 Distributional Properties library_size    Wasserstein 15.0625000000`\
+`#> 2 Distributional Properties library_size             KS  0.2125000000`\
+`#> 3 Distributional Properties library_size            MAD 15.0000000000`\
+`#> 4 Distributional Properties library_size  Bhattacharyya  0.0001188839`\
+`#> 5 Distributional Properties library_size Runs_Statistic -1.7447479960`\
+`#> 6 Distributional Properties library_size    NN_Mismatch  0.1750000000`
 
 #### 2.2 Cell Clustering and Concordance (Category 3)
 
@@ -83,13 +85,13 @@ unsupervised and supervised clustering using
 \
 `# Preview clustering concordance metrics`\
 [`cat`](https://rdrr.io/r/base/cat.html)`(``"Average Silhouette Width (Simulated):"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``clust_res``$``silhouette``, ``4``)``, ``"\n"``)`\
-`#> Average Silhouette Width (Simulated): 0.0278`\
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"Davies-Bouldin Index:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``clust_res``$``davies_bouldin``, ``4``)``, ``"\n"``)`\
-`#> Davies-Bouldin Index: 5.1752`\
+`#> Average Silhouette Width (Simulated): 0.0034`\
+[`cat`](https://rdrr.io/r/base/cat.html)`(``"Neighborhood Purity:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``clust_res``$``neighborhood_purity``, ``4``)``, ``"\n"``)`\
+`#> Neighborhood Purity: 0.4775`\
 [`cat`](https://rdrr.io/r/base/cat.html)`(``"Adjusted Rand Index (ARI):"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``clust_res``$``ARI``, ``4``)``, ``"\n"``)`\
-`#> Adjusted Rand Index (ARI): 0.0671`\
+`#> Adjusted Rand Index (ARI): -0.0098`\
 [`cat`](https://rdrr.io/r/base/cat.html)`(``"Normalized Mutual Information (NMI):"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``clust_res``$``NMI``, ``4``)``, ``"\n"``)`\
-`#> Normalized Mutual Information (NMI): 0.0884`
+`#> Normalized Mutual Information (NMI): 0.0019`
 
 #### 2.3 Batch Effects and Confounder Mixing (Category 4)
 
@@ -106,12 +108,12 @@ masking biological differences using
 `)`\
 \
 `# Preview batch mixing metrics`\
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"Batch Shannon Entropy:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``batch_res``$``shannon_entropy``, ``4``)``, ``"\n"``)`\
-`#> Batch Shannon Entropy: 0.9796`\
+[`cat`](https://rdrr.io/r/base/cat.html)`(``"Batch Silhouette:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``batch_res``$``batch_silhouette``, ``4``)``, ``"\n"``)`\
+`#> Batch Silhouette: -0.0027`\
 [`cat`](https://rdrr.io/r/base/cat.html)`(``"Principal Component Regression (PCR R2):"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``batch_res``$``pcr_r2``, ``4``)``, ``"\n"``)`\
-`#> Principal Component Regression (PCR R2): 0.0121`\
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"Cross-Batch Transfer Accuracy:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``batch_res``$``cross_batch_accuracy``, ``4``)``, ``"\n"``)`\
-`#> Cross-Batch Transfer Accuracy: 0.6125`
+`#> Principal Component Regression (PCR R2): 0.0095`\
+[`cat`](https://rdrr.io/r/base/cat.html)`(``"Cross-Batch Transfer F1:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``batch_res``$``cross_batch_F1``, ``4``)``, ``"\n"``)`\
+`#> Cross-Batch Transfer F1: 0.5126`
 
 #### 2.4 Differential Expression (DEG) Fidelity (Category 5)
 
@@ -125,42 +127,39 @@ We assess marker gene effect sizes and top marker overlap using
 `  ref_celltypes ``=`` ``example_scrna``$``cell_types``,`\
 `  sim_celltypes ``=`` ``example_scrna``$``cell_types`\
 `)`\
+`#> Biological replicate annotations ('batch_ref' / 'batch_sim') not provided: skipping scRNA-seq Category V pseudobulk DE analysis.`\
 \
 `# Display DEG summary metrics`\
 [`head`](https://rdrr.io/r/utils/head.html)`(``deg_res``$``deg_summary_table``)`\
-`#>                    Framework                  Metric    Value`\
-`#> 1 Simpipe (Duo et al., 2024)               DEG_Ratio 0.000000`\
-`#> 2 Simpipe (Duo et al., 2024) PValue_Uniformity_Chisq 8.000000`\
-`#> 3 Simpipe (Duo et al., 2024)      Distribution_Score 1.000000`\
-`#> 4 Simpipe (Duo et al., 2024)     Classifier_Accuracy 0.437500`\
-`#> 5 Simpipe (Duo et al., 2024)     Classifier_Macro_F1 0.417004`\
-`#> 6 Simpipe (Duo et al., 2024) Classifier_Macro_Recall 0.468254`\
-`#>                                 Direction`\
-`#> 1          Target = 1.0 (Optimal balance)`\
-`#> 2     Lower is better (closer to Uniform)`\
-`#> 3   Higher is better (1.0 = Uniform null)`\
-`#> 4 Higher is better (Group predictability)`\
-`#> 5          Higher is better (Balanced F1)`\
-`#> 6          Higher is better (Sensitivity)`
+`#> data frame with 0 columns and 0 rows`
 
-#### 2.5 Trajectory and Lineage Dynamics (Category 6)
+#### 2.5 Trajectory and Lineage Topology (Category VII — dynverse Workflow)
 
-We infer developmental pseudotime and lineage branching directly from
-scRNA-seq expression counts using
-[`evaluate_trajectory_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_trajectory_metrics.md):
+Following *Saelens et al. (2019)*,
+[`evaluate_trajectory_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_trajectory_metrics.md)
+runs 3-MAD QC and `scran` HVG filtering before inferring milestone MST
+trajectories and computing `him`, `edge_flip`, `geodesic_correlation`,
+`F1_branches`, and `wcor_features`:
 
 \
 `traj_res`` ``<-`` `[`evaluate_trajectory_metrics`](https://kabilanbio.github.io/scSimEval/reference/evaluate_trajectory_metrics.md)`(`\
 `  ref_data       ``=`` ``example_scrna``$``ref``,`\
 `  sim_data       ``=`` ``example_scrna``$``sim``,`\
 `  cell_types_ref ``=`` ``example_scrna``$``cell_types``,`\
-`  cell_types_sim ``=`` ``example_scrna``$``cell_types`\
+`  cell_types_sim ``=`` ``example_scrna``$``cell_types``,`\
+`  num_trees      ``=`` ``500L`\
 `)`\
 \
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"Pseudotime Spearman Correlation:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``traj_res``$``pseudotime_correlation``, ``4``)``, ``"\n"``)`\
-`#> Pseudotime Spearman Correlation: 1`\
-[`cat`](https://rdrr.io/r/base/cat.html)`(``"Lineage Tree Branch Height RMSE:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(`[`as.numeric`](https://rdrr.io/r/base/numeric.html)`(``traj_res``$``tree_height_rmse``)``, ``4``)``, ``"\n"``)`\
-`#> Lineage Tree Branch Height RMSE: 1.8672`
+[`cat`](https://rdrr.io/r/base/cat.html)`(``"HIM Topology Similarity:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``traj_res``$``him``, ``4``)``, ``"\n"``)`\
+`#> HIM Topology Similarity: 1`\
+[`cat`](https://rdrr.io/r/base/cat.html)`(``"Edge Flip Similarity:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``traj_res``$``edge_flip``, ``4``)``, ``"\n"``)`\
+`#> Edge Flip Similarity: 1`\
+[`cat`](https://rdrr.io/r/base/cat.html)`(``"Geodesic Distance Correlation:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``traj_res``$``geodesic_correlation``, ``4``)``, ``"\n"``)`\
+`#> Geodesic Distance Correlation: 0.4849`\
+[`cat`](https://rdrr.io/r/base/cat.html)`(``"Branch Assignment F1:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``traj_res``$``F1_branches``, ``4``)``, ``"\n"``)`\
+`#> Branch Assignment F1: 1`\
+[`cat`](https://rdrr.io/r/base/cat.html)`(``"Feature Importance wCor:"``, `[`round`](https://rdrr.io/r/base/Round.html)`(``traj_res``$``wcor_features``, ``4``)``, ``"\n"``)`\
+`#> Feature Importance wCor: 0.194`
 
 ------------------------------------------------------------------------
 
@@ -178,16 +177,18 @@ evaluation suite in a single coordinated command:
 `  compute_bivariate ``=`` ``FALSE``,`\
 `  verbose           ``=`` ``FALSE`\
 `)`\
+`#> calcNormFactors has been renamed to normLibSizes`\
+`#> calcNormFactors has been renamed to normLibSizes`\
 \
 `# Preview tidy evaluation summary`\
 [`head`](https://rdrr.io/r/utils/head.html)`(``eval_res``$``metrics_summary_table``)`\
-`#>                    Category     Property        Metric        Value`\
-`#> 1 Distributional Properties library_size           MAD 1.500000e+01`\
-`#> 2 Distributional Properties library_size            KS 2.125000e-01`\
-`#> 3 Distributional Properties library_size           MAE 1.506250e+01`\
-`#> 4 Distributional Properties library_size          RMSE 1.571504e+01`\
-`#> 5 Distributional Properties library_size            OV 8.269394e-01`\
-`#> 6 Distributional Properties library_size Bhattacharyya 1.188839e-04`
+`#>                    Category     Property         Metric         Value`\
+`#> 1 Distributional Properties library_size    Wasserstein 15.0625000000`\
+`#> 2 Distributional Properties library_size             KS  0.2125000000`\
+`#> 3 Distributional Properties library_size            MAD 15.0000000000`\
+`#> 4 Distributional Properties library_size  Bhattacharyya  0.0001188839`\
+`#> 5 Distributional Properties library_size Runs_Statistic -1.7447479960`\
+`#> 6 Distributional Properties library_size    NN_Mismatch  0.1750000000`
 
 ------------------------------------------------------------------------
 
@@ -210,14 +211,14 @@ plotting:
 
 This demonstration illustrates how `scSimEval` comprehensively assesses
 scRNA-seq simulations across distributions, zero patterns, clustering,
-batch integration, marker genes, and trajectory dynamics without
-requiring artificial ground-truth labels.
+batch integration, marker genes, and trajectory dynamics across the
+curated evaluation measures suite.
 
 \
 [`sessionInfo`](https://rdrr.io/r/utils/sessionInfo.html)`(``)`\
 `#> R version 4.6.1 (2026-06-24 ucrt)`\
 `#> Platform: x86_64-w64-mingw32/x64`\
-`#> Running under: Windows 11 x64 (build 26200)`\
+`#> Running under: Windows 11 x64 (build 26300)`\
 `#> `\
 `#> Matrix products: default`\
 `#>   LAPACK version 3.12.1`\
@@ -234,47 +235,113 @@ requiring artificial ground-truth labels.
 `#> [1] stats     graphics  grDevices utils     datasets  methods   base     `\
 `#> `\
 `#> other attached packages:`\
-`#> [1] scSimEval_0.99.5`\
+`#> [1] scSimEval_0.99.10`\
 `#> `\
 `#> loaded via a namespace (and not attached):`\
-`#>  [1] SummarizedExperiment_1.42.0 xfun_0.60                  `\
-`#>  [3] bslib_0.12.0                htmlwidgets_1.6.4          `\
-`#>  [5] Biobase_2.73.2              lattice_0.22-9             `\
-`#>  [7] tools_4.6.1                 generics_0.1.4             `\
-`#>  [9] parallel_4.6.1              clValid_0.7                `\
-`#> [11] stats4_4.6.1                flexmix_2.3-21             `\
-`#> [13] proxy_0.4-29                DEoptimR_1.2-0             `\
-`#> [15] cluster_2.1.8.3             pkgconfig_2.0.3            `\
-`#> [17] BiocNeighbors_2.6.0         Matrix_1.7-6               `\
-`#> [19] RColorBrewer_1.1-3          desc_1.4.3                 `\
-`#> [21] S4Vectors_0.50.1            lifecycle_1.0.5            `\
-`#> [23] clusterSim_0.51-6           compiler_4.6.1             `\
-`#> [25] textshaping_1.0.5           statmod_1.5.2              `\
-`#> [27] bluster_1.22.0              codetools_0.2-20           `\
-`#> [29] Seqinfo_1.2.0               clue_0.3-68                `\
-`#> [31] htmltools_0.5.9             class_7.3-24               `\
-`#> [33] sass_0.4.10                 yaml_2.3.12                `\
-`#> [35] pkgdown_2.2.1               jquerylib_0.1.4            `\
-`#> [37] prabclus_2.3-5              MASS_7.3-66                `\
-`#> [39] BiocParallel_1.47.0         diptest_0.77-2             `\
-`#> [41] SingleCellExperiment_1.34.0 DelayedArray_0.38.2        `\
-`#> [43] cachem_1.1.0                limma_3.68.4               `\
-`#> [45] fpc_2.2-15                  abind_1.4-8                `\
-`#> [47] mclust_6.1.3                robustbase_0.99-7          `\
-`#> [49] locfit_1.5-9.12             digest_0.6.39              `\
-`#> [51] kernlab_0.9-33              splines_4.6.1              `\
-`#> [53] ade4_1.7-24                 fastmap_1.2.0              `\
-`#> [55] grid_4.6.1                  cli_3.6.6                  `\
-`#> [57] SparseArray_1.13.2          magrittr_2.0.5             `\
-`#> [59] S4Arrays_1.13.0             e1071_1.7-17               `\
-`#> [61] edgeR_4.10.1                rmarkdown_2.31             `\
-`#> [63] XVector_0.52.0              matrixStats_1.5.0          `\
-`#> [65] igraph_2.3.3                otel_0.2.0                 `\
-`#> [67] nnet_7.3-21                 RANN_2.6.2                 `\
-`#> [69] ragg_1.5.2                  modeltools_0.2-24          `\
-`#> [71] evaluate_1.0.5              knitr_1.51                 `\
-`#> [73] GenomicRanges_1.64.0        IRanges_2.46.0             `\
-`#> [75] rlang_1.3.0                 Rcpp_1.1.2                 `\
-`#> [77] BiocGenerics_0.58.1         jsonlite_2.0.0             `\
-`#> [79] R6_2.6.1                    MatrixGenerics_1.24.0      `\
-`#> [81] systemfonts_1.3.2           fs_2.1.0`
+`#>   [1] fs_2.1.0                    matrixStats_1.5.0          `\
+`#>   [3] spatstat.sparse_3.2-0       httr_1.4.9                 `\
+`#>   [5] RColorBrewer_1.1-3          ggsci_5.2.0                `\
+`#>   [7] tools_4.6.1                 sctransform_0.4.3          `\
+`#>   [9] R6_2.6.1                    uwot_0.2.5                 `\
+`#>  [11] withr_3.0.3                 sp_2.2-3                   `\
+`#>  [13] gridExtra_2.3.1             progressr_1.0.0            `\
+`#>  [15] cli_3.6.6                   Biobase_2.73.2             `\
+`#>  [17] textshaping_1.0.5           spatstat.explore_3.8-3     `\
+`#>  [19] fastDummies_1.7.6           sass_0.4.10                `\
+`#>  [21] Seurat_5.5.1                S7_0.2.2                   `\
+`#>  [23] spatstat.data_3.1-9         readr_2.2.0                `\
+`#>  [25] proxy_0.4-29                ggridges_0.5.7             `\
+`#>  [27] pbapply_1.7-5               pkgdown_2.2.1              `\
+`#>  [29] systemfonts_1.3.2           dichromat_2.0-1            `\
+`#>  [31] scater_1.41.2               parallelly_1.48.0          `\
+`#>  [33] limma_3.99.0                MLmetrics_1.1.3            `\
+`#>  [35] RSQLite_3.53.3              generics_0.1.4             `\
+`#>  [37] ica_1.0-3                   spatstat.random_3.5-2      `\
+`#>  [39] dplyr_1.2.1                 Matrix_1.7-6               `\
+`#>  [41] ggbeeswarm_0.7.3            S4Vectors_0.51.10          `\
+`#>  [43] abind_1.4-8                 lifecycle_1.0.5            `\
+`#>  [45] yaml_2.3.12                 edgeR_4.99.6               `\
+`#>  [47] SummarizedExperiment_1.43.0 SparseArray_1.13.2         `\
+`#>  [49] BiocFileCache_3.3.0         provenance_4.4             `\
+`#>  [51] Rtsne_0.17                  grid_4.6.1                 `\
+`#>  [53] blob_1.3.0                  promises_1.5.0             `\
+`#>  [55] dqrng_0.4.1                 crayon_1.5.3               `\
+`#>  [57] miniUI_0.1.2                lattice_0.22-9             `\
+`#>  [59] dynwrap_1.3.0               beachmat_2.29.3            `\
+`#>  [61] cowplot_1.2.0               dynfeature_1.0.1           `\
+`#>  [63] metapod_1.21.0              pillar_1.11.1              `\
+`#>  [65] knitr_1.52                  GenomicRanges_1.65.4       `\
+`#>  [67] boot_1.3-32                 future.apply_1.20.2        `\
+`#>  [69] kSamples_1.2-12             codetools_0.2-20           `\
+`#>  [71] glue_1.8.1                  spatstat.univar_3.2-0      `\
+`#>  [73] remotes_2.5.0               clusterSim_0.51-6          `\
+`#>  [75] data.table_1.18.6.1         dynparam_1.0.2             `\
+`#>  [77] vctrs_0.7.3                 CDI_1.11.0                 `\
+`#>  [79] png_0.1-9                   spam_2.11-4                `\
+`#>  [81] Rdpack_2.6.6                testthat_3.3.2             `\
+`#>  [83] gtable_0.3.6                assertthat_0.2.1           `\
+`#>  [85] cachem_1.1.0                xfun_0.60                  `\
+`#>  [87] rbibutils_2.4.1             S4Arrays_1.13.0            `\
+`#>  [89] mime_0.13                   Seqinfo_1.3.2              `\
+`#>  [91] coda_0.19-4.1               reformulas_0.4.4           `\
+`#>  [93] survival_3.8-12             SingleCellExperiment_1.35.2`\
+`#>  [95] statmod_1.5.2               bluster_1.23.1             `\
+`#>  [97] fitdistrplus_1.2-6          ROCR_1.0-12                `\
+`#>  [99] nlme_3.1-171                dynutils_1.0.12            `\
+`#> [101] eva_0.2.7                   bit64_4.8.6                `\
+`#> [103] filelock_1.0.3              RcppAnnoy_0.0.23           `\
+`#> [105] dyneval_0.9.9               bslib_0.12.0               `\
+`#> [107] irlba_2.3.7                 waddR_1.27.0               `\
+`#> [109] vipor_0.4.7                 KernSmooth_2.23-26         `\
+`#> [111] otel_0.2.0                  BiocGenerics_0.59.12       `\
+`#> [113] DBI_1.3.0                   ade4_1.7-24                `\
+`#> [115] processx_3.9.0              carrier_0.3.0.4            `\
+`#> [117] tidyselect_1.2.1            proxyC_0.5.2               `\
+`#> [119] bit_4.6.0                   compiler_4.6.1             `\
+`#> [121] curl_8.0.0                  httr2_1.3.0                `\
+`#> [123] BiocNeighbors_2.7.3         randtests_1.0.2            `\
+`#> [125] desc_1.4.3                  DelayedArray_0.39.8        `\
+`#> [127] plotly_4.12.1               scales_1.4.0               `\
+`#> [129] lmtest_0.9-40               stringr_1.6.0              `\
+`#> [131] digest_0.6.39               goftest_1.2-3              `\
+`#> [133] spatstat.utils_3.2-5        minqa_1.2.8                `\
+`#> [135] rmarkdown_2.32              XVector_0.52.0             `\
+`#> [137] RhpcBLASctl_0.23-42         htmltools_0.5.9            `\
+`#> [139] pkgconfig_2.0.3             lme4_2.0-6                 `\
+`#> [141] MatrixGenerics_1.25.0       dbplyr_2.6.0               `\
+`#> [143] fastmap_1.2.0               rlang_1.3.0                `\
+`#> [145] htmlwidgets_1.6.4           shiny_1.14.0               `\
+`#> [147] SuppDists_1.1-9.9           farver_2.1.2               `\
+`#> [149] jquerylib_0.1.4             zoo_1.9-1                  `\
+`#> [151] jsonlite_2.0.0              mclust_6.1.3               `\
+`#> [153] BiocParallel_1.47.0         BiocSingular_1.29.1        `\
+`#> [155] magrittr_2.0.5              scuttle_1.23.2             `\
+`#> [157] dotCall64_1.2               patchwork_1.3.2            `\
+`#> [159] Rcpp_1.1.2                  viridis_0.6.5              `\
+`#> [161] reticulate_1.47.0           stringi_1.8.9              `\
+`#> [163] brio_1.1.5                  MASS_7.3-66                `\
+`#> [165] plyr_1.8.9                  parallel_4.6.1             `\
+`#> [167] listenv_1.0.0               ggrepel_0.9.8              `\
+`#> [169] deldir_2.0-4                splines_4.6.1              `\
+`#> [171] tensor_1.5.1                hms_1.1.4                  `\
+`#> [173] locfit_1.5-9.12             ranger_0.18.0              `\
+`#> [175] igraph_2.3.3                babelwhale_1.2.0           `\
+`#> [177] spatstat.geom_3.8-3         RcppHNSW_0.7.0             `\
+`#> [179] reshape2_1.4.5              stats4_4.6.1               `\
+`#> [181] ScaledMatrix_1.21.0         philentropy_0.10.0         `\
+`#> [183] evaluate_1.0.5              SeuratObject_5.4.0         `\
+`#> [185] RcppParallel_6.2.1          IsoplotR_7.0               `\
+`#> [187] scran_1.41.1                tzdb_0.5.0                 `\
+`#> [189] nloptr_2.2.1                httpuv_1.6.17              `\
+`#> [191] RANN_2.6.3                  tidyr_1.3.2                `\
+`#> [193] purrr_1.2.2                 polyclip_1.10-7            `\
+`#> [195] future_1.76.0               scattermore_1.2            `\
+`#> [197] ggplot2_4.0.3               CellMixS_1.29.0            `\
+`#> [199] rsvd_1.0.5                  xtable_1.8-8               `\
+`#> [201] e1071_1.7-17                RSpectra_0.16-2            `\
+`#> [203] later_1.4.8                 viridisLite_0.4.3          `\
+`#> [205] class_7.3-24                ragg_1.5.2                 `\
+`#> [207] arm_1.15-3                  tibble_3.3.1               `\
+`#> [209] memoise_2.0.1               beeswarm_0.4.0             `\
+`#> [211] IRanges_2.47.5              cluster_2.1.8.3            `\
+`#> [213] globals_0.19.1`

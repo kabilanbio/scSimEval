@@ -47,19 +47,19 @@ modules <- list(Module_1 = rownames(example_scrna$ref)[seq_len(30)],
                 Module_2 = rownames(example_scrna$ref)[31:60])
 calc_coregulation_fidelity(example_scrna$ref, example_scrna$sim, modules)
 #> $module_correlation_r
-#> [1] -0.002873385
+#> [1] -0.003588998
 #> 
 #> $module_correlation_rmse
-#> [1] 0.1573539
+#> [1] 0.1635834
 #> 
 #> $module_correlation_mae
-#> [1] 0.1248352
+#> [1] 0.1316224
 #> 
 #> $ref_modularity_ratio
-#> [1] -0.02873166
+#> [1] -0.05300986
 #> 
 #> $sim_modularity_ratio
-#> [1] -0.00725975
+#> [1] -0.08805737
 #> 
 #> $modularity_fidelity
 #> [1] 0

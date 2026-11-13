@@ -11,7 +11,8 @@ calc_frechet_singlecell_distance(
   ref_mat,
   sim_mat,
   cells_as_cols = TRUE,
-  n_pcs = 15
+  n_pcs = 15,
+  max_features = 2000
 )
 ```
 
@@ -33,6 +34,10 @@ calc_frechet_singlecell_distance(
 
   Number of principal components to evaluate (default 15).
 
+- max_features:
+
+  Number of top variable features to retain (default 2000).
+
 ## Value
 
 A list with Frechet distance (FSD), mean discrepancy, and covariance
@@ -45,15 +50,15 @@ ref <- matrix(stats::rnorm(100), 50, 2)
 sim <- matrix(stats::rnorm(100), 50, 2)
 calc_frechet_singlecell_distance(ref, sim)
 #> $fsd
-#> [1] 12.23358
+#> [1] 11.53503
 #> 
 #> $fsd_squared
-#> [1] 149.6605
+#> [1] 133.057
 #> 
 #> $mean_discrepancy
-#> [1] 55.32323
+#> [1] 45.31804
 #> 
 #> $cov_discrepancy
-#> [1] 94.33724
+#> [1] 87.73898
 #> 
 ```

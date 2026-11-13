@@ -12,15 +12,17 @@ plot_scalability_benchmark(
   modality = c("total", "rna", "atac"),
   cell_count = 1000,
   palette = NULL,
-  base_size = 11
+  base_size = 11,
+  time_unit = c("core_seconds", "core_hours", "seconds", "minutes"),
+  memory_unit = c("MiB/core", "GiB/core", "MB/core", "GB/core", "MiB", "MB")
 )
 }
 \arguments{
 \item{benchmark_data}{Benchmark summary table or named list containing Category VIII metrics.}
 
 \item{type}{Character. Visualization type: \code{"composite"} (multi-panel dashboard),
-\code{"runtime"} (elapsed wall-clock time barplot), \code{"memory"} (peak RAM barplot),
-\code{"tradeoff"} (runtime vs memory scatter/line curve), \code{"cost"} (combined resource footprint index),
+\code{"runtime"} (core-seconds CPU work barplot), \code{"memory"} (peak RAM per core barplot),
+\code{"tradeoff"} (core-seconds vs memory-per-core scatter curve), \code{"cost"} (combined resource footprint index),
 \code{"throughput"} (cells/sec), or \code{"efficiency"} (CPU/elapsed concurrency ratio if CPU time available).
 Default \code{"composite"}.}
 
@@ -36,23 +38,34 @@ simulation throughput (\code{cells / second}). Default \code{1000}.}
 \item{palette}{Optional named character vector of simulator colors.}
 
 \item{base_size}{Numeric. Base font size. Default \code{11}.}
+
+\item{time_unit}{Character. Display unit for runtime: \code{"core_seconds"} (default), \code{"core_hours"}, \code{"seconds"}, or \code{"minutes"}.}
+
+\item{memory_unit}{Character. Display unit for peak RAM per core: \code{"MiB/core"} (default), \code{"GiB/core"}, \code{"MB/core"}, or \code{"GB/core"}.}
 }
 \value{
 A \code{ggplot} or \code{patchwork} object.
 }
 \description{
-Evaluates computational resource efficiency across single-cell simulators using raw
-benchmarking measurements (elapsed real wall-clock time, total CPU time, peak resident
-Plot Multi-Dimensional Computational Scalability Benchmark
+Evaluates computational resource efficiency across single-cell simulators using
+core-normalized Category VIII benchmarks: \strong{Core-Seconds} (\eqn{\text{Elapsed Time (s)} \times N_{\text{cores}}};
+Lannelongue et al., 2021; Wratten et al., 2021; Grealey et al., 2022) and \strong{Peak RAM per Core}
+(\eqn{\text{Peak RAM} / N_{\text{cores}}}; Holtgrewe et al., 2015; Boisvert et al., 2012; Chen et al., 2022),
+alongside resource tradeoff frontiers, cost footprints, and simulation throughput.
 }
 \details{
-Evaluates computational resource efficiency across single-cell simulators using raw
-benchmarking measurements (elapsed real wall-clock time in seconds and peak resident
-memory consumption in MiB).
-
 \if{html}{\figure{scalability_benchmark.png}{options: width="800" alt="Computational Scalability and Resource Footprint"}}
 }
 \examples{
 data(example_scrna, package = "scSimEval")
 res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
+}
+\references{
+Lannelongue, L., et al. (2021). Green Algorithms: Quantifying the carbon footprint of computation. \emph{Advanced Science}, 8(12), 2100707.
+
+Holtgrewe, M., et al. (2015). Methods for the detection and assembly of novel sequence. \emph{Bioinformatics}, 31(12), 1904–1912.
+
+Boisvert, S., et al. (2012). Ray Meta: scalable de novo metagenome assembly. \emph{Genome Biology}, 13(12), R122.
+
+Chen, W., et al. (2022). STEPS 4.0: Fast and memory-efficient simulations. \emph{Frontiers in Neuroinformatics}, 16, 883742.
 }

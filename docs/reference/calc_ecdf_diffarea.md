@@ -30,5 +30,5 @@ Normalized area between the two eCDFs.
 ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_ecdf_diffarea(ref, sim)
-#> [1] 0.06067074
+#> [1] 0.07100842
 ```

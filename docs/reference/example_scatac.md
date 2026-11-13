@@ -18,13 +18,17 @@ A list with 4 elements:
 
 - ref:
 
-  A numeric matrix of reference peak accessibility counts (60 peaks x 80
-  cells).
+  A `SingleCellExperiment` object containing reference peak
+  accessibility counts (60 peaks x 80 cells), cell types and batch
+  annotations in `colData`, and precomputed PCA reductions in
+  `reducedDims`.
 
 - sim:
 
-  A numeric matrix of simulated peak accessibility counts (60 peaks x 80
-  cells).
+  A `SingleCellExperiment` object containing simulated peak
+  accessibility counts (60 peaks x 80 cells), cell types and batch
+  annotations in `colData`, and precomputed PCA reductions in
+  `reducedDims`.
 
 - cell_types:
 

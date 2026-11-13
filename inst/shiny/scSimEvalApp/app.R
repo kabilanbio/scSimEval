@@ -1,6 +1,6 @@
 # inst/shiny/scSimEvalApp/app.R
 # Simulation Evaluation Studio for scRNA-seq, scATAC-seq, and Single-Cell Multiomics
-# Powered by scSimEval (48 Curated Benchmark Evaluation Measures)
+# Powered by scSimEval (56 Curated Benchmark Evaluation Measures)
 
 library(shiny)
 library(bslib)
@@ -47,12 +47,20 @@ for (fd in fig_dirs) {
   }
 }
 
-# Load demo benchmark data if present
-demo_data_path <- system.file("shiny", "scSimEvalApp", "data", "demo_benchmark_data.rds", package = "scSimEval")
-if (demo_data_path == "" || !file.exists(demo_data_path)) {
-  demo_data_path <- file.path("data", "demo_benchmark_data.rds")
+# Load demo benchmark data if present (prefer local checkout copy over installed library)
+demo_candidates <- c(
+  file.path("data", "demo_benchmark_data.rds"),
+  file.path("inst", "shiny", "scSimEvalApp", "data", "demo_benchmark_data.rds"),
+  system.file("shiny", "scSimEvalApp", "data", "demo_benchmark_data.rds", package = "scSimEval")
+)
+demo_data_path <- ""
+for (dc in demo_candidates) {
+  if (nzchar(dc) && file.exists(dc)) {
+    demo_data_path <- dc
+    break
+  }
 }
-initial_demo <- if (file.exists(demo_data_path)) readRDS(demo_data_path) else NULL
+initial_demo <- if (nzchar(demo_data_path) && file.exists(demo_data_path)) readRDS(demo_data_path) else NULL
 
 # Source local package backend modules (00_utils through 09_evaluate_benchmark) if running in local checkout
 # so internal helpers (e.g. validate_multiomics_input, validate_sc_object, .is_atac_modality) are in scope
@@ -186,8 +194,8 @@ filter_gold_standard_metrics <- function(df) {
                     "nmi", "integration_nmi", "cell_pearson_cor", "rv_coefficient",
                     "module_correlation_r", "cross_modal_F1", "FOSCTTM",
                     "match_at_1", "mean_coupling_cor", "KS", "Wasserstein")
-  cat7_metrics <- c("pseudotime_correlation", "tree_height_rmse", "graph_alignment", "lineage_expression_fidelity")
-  cat8_metrics <- c("elapsed_time_seconds", "peak_memory_mb")
+  cat7_metrics <- c("him", "edge_flip", "geodesic_correlation", "F1_branches", "wcor_features")
+  cat8_metrics <- c("core_seconds", "memory_per_core_mib", "memory_per_core_gib", "elapsed_time_seconds", "peak_memory_mb")
   
   keep_mask <- rep(FALSE, nrow(df))
   is_cat1 <- grepl("^\\(I\\)", df$Category)
@@ -225,7 +233,9 @@ filter_gold_standard_metrics <- function(df) {
   "batch_asw", "cell_type_asw", "graph_connectivity", "integration_ari", "integration_nmi",
   "SimBench_DE_Fidelity_Score", "Log2FC_Pearson_Corr", "Log2FC_Spearman_Corr", "Top_DEG_Jaccard_Overlap", 
   "Distribution_Score", "Classifier_Accuracy", "Classifier_Macro_F1", "Classifier_Macro_Recall", "predictive_macro_F1",
-  "Silhouette_Sim", "PVE_Group_Sim", "pseudotime_correlation", "graph_alignment", "lineage_expression_fidelity",
+  "Silhouette_Sim", "PVE_Group_Sim",
+  "him", "edge_flip", "geodesic_correlation", "F1_branches", "wcor_features",
+  "pseudotime_correlation", "graph_alignment", "lineage_expression_fidelity",
   "cross_modal_accuracy", "cross_modal_F1", "match_at_1", "rv_coefficient", "module_correlation_r", "mean_coupling_cor"
 )
 
@@ -1263,6 +1273,26 @@ ui <- page_navbar(
         box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         border-color: #3B82F6;
         background: #FFFFFF;
+      }
+      .col-contact-5 {
+        flex: 0 0 20%;
+        max-width: 20%;
+        width: 20%;
+        padding: 0 6px;
+      }
+      @media (max-width: 992px) {
+        .col-contact-5 {
+          flex: 0 0 33.333%;
+          max-width: 33.333%;
+          width: 33.333%;
+        }
+      }
+      @media (max-width: 576px) {
+        .col-contact-5 {
+          flex: 0 0 50%;
+          max-width: 50%;
+          width: 50%;
+        }
       }
 
       /* ===== GLOBAL APP-WIDE LOADING INDICATOR ===== */
@@ -3096,7 +3126,7 @@ ui <- page_navbar(
             style = "font-weight: 800; font-size: 2.1rem; letter-spacing: -0.03em; color: #FFFFFF; margin-bottom: 10px;"
           ),
           p(
-            "This application is designed for simulation evaluation of single-cell RNA-seq (scRNA-seq), single-cell ATAC-seq (scATAC-seq), and single-cell multiomics (scRNA-seq + scATAC-seq) datasets by comparing them against real reference datasets across 55 evaluation measures in 8 canonical categories.",
+            "This application is designed for simulation evaluation of single-cell RNA-seq (scRNA-seq), single-cell ATAC-seq (scATAC-seq), and single-cell multiomics (scRNA-seq + scATAC-seq) datasets by comparing them against real reference datasets across 56 evaluation measures in 8 canonical categories.",
             style = "font-size: 1.02rem; color: #CBD5E1; line-height: 1.6; margin-bottom: 0;"
           )
         )
@@ -3105,7 +3135,7 @@ ui <- page_navbar(
       # 2. Minimalist KPI Metrics Ribbon
       fluidRow(
         column(3, div(class = "stat-card", style = "border: 1px solid #E2E8F0; border-left: 3px solid #2563EB; padding: 14px 18px; border-radius: 8px; background: #FFFFFF; margin-bottom: 22px;",
-                      div(class = "stat-number", style = "color: #0F172A; font-size: 1.85rem; font-weight: 800; font-family: monospace;", "55"),
+                      div(class = "stat-number", style = "color: #0F172A; font-size: 1.85rem; font-weight: 800; font-family: monospace;", "56"),
                       div(class = "stat-label", style = "color: #64748B; font-size: 0.74rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px;", "Evaluation Measures"))),
         column(3, div(class = "stat-card", style = "border: 1px solid #E2E8F0; border-left: 3px solid #0D9488; padding: 14px 18px; border-radius: 8px; background: #FFFFFF; margin-bottom: 22px;",
                       div(class = "stat-number", style = "color: #0F172A; font-size: 1.85rem; font-weight: 800; font-family: monospace;", "8"),
@@ -3127,7 +3157,7 @@ ui <- page_navbar(
             card_header(
               div(style = "display: flex; align-items: center; justify-content: space-between;",
                   span(icon("layer-group", class = "me-2 text-primary"), tags$b("Evaluation Framework (8 Canonical Categories)")),
-                  span(class = "badge bg-light text-secondary border", style = "font-size: 0.75rem;", "55 Measures Total"))
+                  span(class = "badge bg-light text-secondary border", style = "font-size: 0.75rem;", "56 Measures Total"))
             ),
             card_body(
               style = "padding: 20px;",
@@ -3153,13 +3183,13 @@ ui <- page_navbar(
                     div("Batch ASW, Cell-Type ASW, Graph Conn., ARI, NMI (5)", style = "font-size: 0.75rem; color: #64748B;")),
                 div(style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px;",
                     div(tags$b("VII. Trajectory & Lineage Topology"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
-                    div("Pseudotime, tree RMSE, graph alignment, lineage dynamics (4)", style = "font-size: 0.75rem; color: #64748B;")),
+                    div("scRNA-seq dynverse: HIM, edge flip, geodesic corr., branch F1, wCor (5)", style = "font-size: 0.75rem; color: #64748B;")),
                 div(style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 9px 12px;",
                     div(tags$b("VIII. Computational Scalability & Efficiency"), style = "font-size: 0.83rem; color: #1E293B; margin-bottom: 2px;"),
-                    div("Elapsed runtime (s) & peak RAM allocation (2)", style = "font-size: 0.75rem; color: #64748B;"))
+                    div("Core-normalized runtime (core_seconds) & memory per core (2)", style = "font-size: 0.75rem; color: #64748B;"))
               ),
               p(
-                "All metrics are standardized onto a direction-aware [0, 1] fidelity scale, where 1.0 represents perfect concordance with empirical biology. This enables unbiased ranking across simulator architectures across all 55 evaluation measures.",
+                "All metrics are standardized onto a direction-aware [0, 1] fidelity scale, where 1.0 represents perfect concordance with empirical biology. This enables unbiased ranking across simulator architectures across all 56 evaluation measures.",
                 style = "font-size: 0.85rem; color: #475569; margin-bottom: 0; line-height: 1.5;"
               )
             )
@@ -3271,13 +3301,13 @@ ui <- page_navbar(
           div(
             style = "font-size: 0.78rem; color: #1E3A8A; background: #EFF6FF; border-left: 3px solid #2563EB; border-radius: 4px; padding: 8px 10px; margin-bottom: 12px;",
             div(style = "font-weight: 700; color: #1E3A8A; margin-bottom: 2px;", icon("layer-group", class = "me-1"), "Custom scRNA-seq Evaluation:"),
-            div("Configure reference matrix, simulations, runtime, and RAM in the Main Panel.")
+            div("Configure reference matrix, simulations, runtime (s/min), peak RAM (MiB/MB), and simulation cores in the Main Panel.")
           ),
           tags$div(style = "font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: #475569; margin-top: 6px; margin-bottom: 4px;", "1. Benchmarking Scope"),
           numericInput("num_uni_datasets", "Number of Datasets:", value = 1, min = 1, max = 50, step = 1),
           numericInput("num_uni_sims", "Number of Simulators:", value = 1, min = 1, max = 10, step = 1),
           tags$div(style = "font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: #475569; margin-top: 10px; margin-bottom: 4px;", "2. Compute & Acceleration"),
-          numericInput("num_uni_cores", "CPU Cores / Threads:", value = default_n_cores, min = 1, max = max_sys_cores, step = 1),
+          numericInput("num_uni_cores", "Evaluation CPU Cores / Threads:", value = default_n_cores, min = 1, max = max_sys_cores, step = 1),
           span(class = "text-muted", style = "font-size: 0.74rem; display: block; margin-top: -6px; margin-bottom: 8px;", sprintf("System detected: %d CPU cores", max_sys_cores)),
           hr(style = "margin: 12px 0;"),
           checkboxInput("chk_append_uni", "Add to current benchmark results", value = FALSE),
@@ -3304,13 +3334,13 @@ ui <- page_navbar(
           div(
             style = "font-size: 0.78rem; color: #0C4A6E; background: #F0F9FF; border-left: 3px solid #0284C7; border-radius: 4px; padding: 8px 10px; margin-bottom: 12px;",
             div(style = "font-weight: 700; color: #0C4A6E; margin-bottom: 2px;", icon("chart-simple", class = "me-1"), "Custom scATAC-seq Evaluation:"),
-            div("Configure reference peak accessibility matrix, simulations, runtime, and RAM in the Main Panel.")
+            div("Configure reference peak accessibility matrix, simulations, runtime (s/min), peak RAM (MiB/MB), and simulation cores in the Main Panel.")
           ),
           tags$div(style = "font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: #475569; margin-top: 6px; margin-bottom: 4px;", "1. Benchmarking Scope"),
           numericInput("num_uni_datasets_atac", "Number of Datasets:", value = 1, min = 1, max = 50, step = 1),
           numericInput("num_uni_sims_atac", "Number of Simulators:", value = 1, min = 1, max = 10, step = 1),
           tags$div(style = "font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: #475569; margin-top: 10px; margin-bottom: 4px;", "2. Compute & Acceleration"),
-          numericInput("num_uni_cores_atac", "CPU Cores / Threads:", value = default_n_cores, min = 1, max = max_sys_cores, step = 1),
+          numericInput("num_uni_cores_atac", "Evaluation CPU Cores / Threads:", value = default_n_cores, min = 1, max = max_sys_cores, step = 1),
           span(class = "text-muted", style = "font-size: 0.74rem; display: block; margin-top: -6px; margin-bottom: 8px;", sprintf("System detected: %d CPU cores", max_sys_cores)),
           hr(style = "margin: 12px 0;"),
           checkboxInput("chk_append_uni_atac", "Add to current benchmark results", value = FALSE),
@@ -3349,13 +3379,13 @@ ui <- page_navbar(
           div(
             style = "font-size: 0.78rem; color: #312E81; background: #EEF2FF; border-left: 3px solid #6366F1; border-radius: 4px; padding: 8px 10px; margin-bottom: 12px;",
             div(style = "font-weight: 700; color: #312E81; margin-bottom: 2px;", icon("dna", class = "me-1"), "Custom Multiomics Evaluation:"),
-            div("Configure paired/unpaired RNA & ATAC matrices, simulations, runtime, and RAM in the Main Panel.")
+            div("Configure paired/unpaired RNA & ATAC matrices, simulations, runtime (s/min), peak RAM (MiB/MB), and simulation cores in the Main Panel.")
           ),
           tags$div(style = "font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: #475569; margin-top: 6px; margin-bottom: 4px;", "1. Benchmarking Scope"),
           numericInput("num_multi_datasets", "Number of Datasets:", value = 1, min = 1, max = 30, step = 1),
           numericInput("num_multi_sims", "Number of Simulators:", value = 1, min = 1, max = 8, step = 1),
           tags$div(style = "font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: #475569; margin-top: 10px; margin-bottom: 4px;", "2. Compute & Acceleration"),
-          numericInput("num_multi_cores", "CPU Cores / Threads:", value = default_n_cores, min = 1, max = max_sys_cores, step = 1),
+          numericInput("num_multi_cores", "Evaluation CPU Cores / Threads:", value = default_n_cores, min = 1, max = max_sys_cores, step = 1),
           span(class = "text-muted", style = "font-size: 0.74rem; display: block; margin-top: -6px; margin-bottom: 8px;", sprintf("System detected: %d CPU cores", max_sys_cores)),
           hr(style = "margin: 12px 0;"),
           checkboxInput("chk_append_multi", "Add to current benchmark results", value = FALSE),
@@ -3413,7 +3443,7 @@ ui <- page_navbar(
         radioButtons(
           "rad_bubble_filter_mode", tags$b("Filter Mode:"),
           choices = c(
-            "All 55 Evaluation Measures" = "all",
+            "All 56 Evaluation Measures" = "all",
             "Custom Selection"           = "custom"
           ),
           selected = "all"
@@ -4073,29 +4103,39 @@ ui <- page_navbar(
           card_body(
             fluidRow(
               column(3, uiOutput("ui_scale_dataset_selector")),
-              column(3, uiOutput("ui_scale_modality_selector")),
+              column(2, uiOutput("ui_scale_modality_selector")),
               column(3,
                      selectInput(
                        "sel_scale_type", "Scalability View:",
                        choices = c(
                          "All 4 Panels Combined" = "composite",
-                         "Runtime (Seconds)" = "runtime",
-                         "Peak RAM Memory (MiB)" = "memory",
+                         "Runtime" = "runtime",
+                         "Peak RAM Memory" = "memory",
                          "Runtime vs Memory Trade-Off" = "tradeoff",
                          "Overall Resource Cost" = "cost"
                        ),
                        selected = "composite"
                      )
               ),
-              column(3,
-                     div(style = "margin-top: 24px;",
-                         actionButton("btn_plot_scale", "Confirm & Plot", class = "btn btn-primary btn-sm w-100", icon = icon("microchip"), style = "font-weight: 600;")
+              column(2,
+                     selectInput(
+                       "sel_scale_time_unit", "Runtime Unit:",
+                       choices = c("Seconds (s)" = "seconds", "Minutes (min)" = "minutes"),
+                       selected = "seconds"
+                     )
+              ),
+              column(2,
+                     selectInput(
+                       "sel_scale_mem_unit", "Peak RAM Unit:",
+                       choices = c("MiB" = "MiB", "MB" = "MB"),
+                       selected = "MiB"
                      )
               )
             ),
             fluidRow(
               column(12,
-                     downloadButton("download_scale_jpeg", "Download JPEG (600 DPI)", class = "btn btn-sm btn-primary me-2 mb-1"),
+                     actionButton("btn_plot_scale", "Confirm & Plot", class = "btn btn-primary btn-sm me-2 mb-1", icon = icon("microchip"), style = "font-weight: 600;"),
+                     downloadButton("download_scale_jpeg", "Download JPEG (600 DPI)", class = "btn btn-sm btn-outline-primary me-2 mb-1"),
                      downloadButton("download_scale_pdf", "Download PDF", class = "btn btn-sm btn-outline-secondary me-2 mb-1"),
                      downloadButton("download_scale_r_script", "Download R Script", class = "btn btn-sm btn-outline-primary mb-1", icon = icon("file-code"))
               )
@@ -4127,7 +4167,7 @@ ui <- page_navbar(
             tags$h5("Benchmark Results Session Export", style = "margin: 0; font-weight: 700; color: #0F172A; font-size: 1.05rem;"),
             span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "Complete R Data Object (.rds)")
           ),
-          p("Download complete benchmarking session object (.rds) to preserve and reproduce all 48 curated evaluation metrics, rankings, and figures in another R session:",
+          p("Download complete benchmarking session object (.rds) to preserve and reproduce all 56 curated evaluation measures, rankings, and figures in another R session:",
             style = "margin: 2px 0 0 0; font-size: 0.82rem; color: #64748B;")
         ),
         div(
@@ -4238,7 +4278,7 @@ ui <- page_navbar(
               ),
               p(
                 tags$b("Figure 1 | The scSimEval Benchmarking Workflow. "),
-                "Step 1: Input real reference and simulated count matrices with metadata. Step 2: Calculate 55 evaluation measures across 8 canonical categories. Step 3: Standardize and consolidate all scores into a unified multi-dataset benchmark table. Step 4: Explore simulator rankings, bubble matrices, and high-resolution figures.",
+                "Step 1: Input real reference and simulated count matrices with metadata. Step 2: Calculate 56 evaluation measures across 8 canonical categories. Step 3: Standardize and consolidate all scores into a unified multi-dataset benchmark table. Step 4: Explore simulator rankings, bubble matrices, and high-resolution figures.",
                 style = "font-size: 0.84rem; color: #64748B; margin-top: 10px; max-width: 960px; margin-left: auto; margin-right: auto;"
               )
             ),
@@ -4257,8 +4297,8 @@ ui <- page_navbar(
                 class = "col-md-6",
                 tags$div(
                   style = "background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px 16px; height: 100%;",
-                  h6(tags$b("Step 2: Calculate 55 Evaluation Measures"), style = "color: #1B4F72; font-size: 0.90rem;"),
-                  p("scSimEval computes 55 quantitative evaluation measures across 8 biological and computational categories, assessing distributional properties, sparsity & zero-inflation dynamics, cellular manifold & clustering concordance, technical batch mixing, differential fidelity, multiomics integration, trajectory topology, and scalability.", style = "font-size: 0.84rem; color: #475569; margin-bottom: 0;")
+                  h6(tags$b("Step 2: Calculate 56 Evaluation Measures"), style = "color: #1B4F72; font-size: 0.90rem;"),
+                  p("scSimEval computes 56 quantitative evaluation measures across 8 biological and computational categories, assessing distributional properties, sparsity & zero-inflation dynamics, cellular manifold & clustering concordance, technical batch mixing, differential fidelity, multiomics integration, trajectory topology, and scalability.", style = "font-size: 0.84rem; color: #475569; margin-bottom: 0;")
                 )
               ),
               tags$div(
@@ -4284,7 +4324,7 @@ ui <- page_navbar(
             # Section 2: The Eight Evaluation Categories
             # ------------------------------------------------------------------
             h4("2. The Eight Evaluation Categories", style = "font-weight: 700; color: #1B4F72; font-size: 1.08rem;"),
-            p("The 48 curated evaluation criteria in scSimEval are structured across eight foundational categories covering statistical, cellular, molecular, and computational dimensions:", style = "color: #475569; font-size: 0.88rem;"),
+            p("The 56 curated evaluation criteria in scSimEval are structured across eight foundational categories covering statistical, cellular, molecular, and computational dimensions:", style = "color: #475569; font-size: 0.88rem;"),
             
             tags$div(
               class = "table-responsive",
@@ -4305,49 +4345,49 @@ ui <- page_navbar(
                     tags$td(style = "text-align: center; font-weight: bold;", "I"),
                     tags$td(tags$b("Distributional Properties")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-primary border", "Statistical")),
-                    tags$td("Moment and distribution divergence across 9 properties via 7 non-parametric measures: Wasserstein distance, Kolmogorov-Smirnov (KS) statistic, Median Absolute Deviation (MAD), Bhattacharyya distance, Runs test, NN mismatch, and Between-dataset silhouette.")
+                    tags$td("Moment and distribution divergence across 7 cell-level, 7 feature-level, and 4 bivariate properties via 10 univariate and 4 bivariate measures: Wasserstein distance, Kolmogorov-Smirnov (KS) statistic, Median Absolute Deviation (MAD), Bhattacharyya distance, Runs test, NN mismatch, Between-dataset silhouette, 2D KS, 2D EMD, 2D NN mismatch, and 2D Silhouette (14 metrics).")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "II"),
                     tags$td(tags$b("Sparsity & Zero-Inflation Dynamics")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-info border", "Sparsity & Dropout")),
-                    tags$td("Zero-probability curve fidelity (dropout midpoint error x0, transition slope error k), chromatin accessibility-sparsity curve RMSE, curve fit R² discrepancy, and posterior excess zero weights.")
+                    tags$td("Logistic dropout curve fidelity (midpoint error x0, transition slope error k, R²), quadratic accessibility-sparsity curve RMSE & R² (scATAC-seq), and posterior excess zero weight discrepancy (5 metrics).")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "III"),
                     tags$td(tags$b("Cellular Manifold & Clustering Concordance")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-success border", "Manifold & Clustering")),
-                    tags$td("Maximum Mean Discrepancy (MMD), Generative Precision and Recall, Average Silhouette Width (ASW), Davies-Bouldin index, Clustering Deviation Index (CDI), Neighborhood Purity, Adjusted Rand Index (ARI), and Normalized Mutual Information (NMI).")
+                    tags$td("Maximum Mean Discrepancy (MMD), Generative Precision and Recall, Average Silhouette Width (ASW), Clustering Deviation Index (CDI), Neighborhood Purity, Adjusted Rand Index (ARI), and Normalized Mutual Information (NMI) (8 metrics).")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "IV"),
                     tags$td(tags$b("Technical Variation & Batch Mixing Dynamics")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-warning border", "Technical")),
-                    tags$td("Batch Silhouette Width, Principal Component Regression (PCR R²), Cell-Specific Mixing Score (CMS), Inverse Simpson's Index (ISI / iLISI), Seurat Mixing Metric, and Cross-Batch F1 Score.")
+                    tags$td("Batch Silhouette Width, Principal Component Regression (PCR R²), Cell-Specific Mixing Score (CMS), Inverse Simpson's Index (ISI), and Cross-Batch F1 Score (5 metrics).")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "V"),
                     tags$td(tags$b("Biological Signal & Differential Fidelity")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-danger border", "Phenotype")),
-                    tags$td("SimBench 5-signal preservation (DE mean shift, DV variance, DD distribution, DP dropout proportion, BD bimodal index), predictive macro-averaged F1, pseudobulk deconvolution RMSE, and delta variance MAE.")
+                    tags$td("Pseudobulk edgeR-QLF differential testing across parallel scRNA-seq DE (Sub-category V-A) and scATAC-seq DA (Sub-category V-B) evaluating p-value uniformity, accuracy, precision, recall, F1-score, and ROC-AUC (12 metrics).")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "VI"),
                     tags$td(tags$b("Multiomics Integration & Alignment")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-indigo border", "Multiomics")),
-                    tags$td("Batch Average Silhouette Width (Batch ASW), Cell-Type Average Silhouette Width (Cell-Type ASW), k-NN Graph Connectivity, and Integration Adjusted Rand Index (ARI).")
+                    tags$td("Joint-embedding integration fidelity: Batch Average Silhouette Width (Batch ASW), Cell-Type Average Silhouette Width (Cell-Type ASW), k-NN Graph Connectivity, Integration ARI, and Integration NMI (5 metrics).")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "VII"),
                     tags$td(tags$b("Trajectory & Lineage Topology")),
-                    tags$td(style = "text-align: center;", span(class = "badge bg-light text-secondary border", "Pseudotime")),
-                    tags$td("Pseudotime Spearman rank correlation with reference, lineage branching tree height RMSE discrepancy, topological trajectory graph alignment, and gene expression pattern fidelity along reconstructed lineages.")
+                    tags$td(style = "text-align: center;", span(class = "badge bg-light text-secondary border", "scRNA-seq (dynverse)")),
+                    tags$td("HVG-filtered dynverse workflow on scRNA-seq only (omitted for scATAC-seq): HIM topology similarity, edge-flip topology similarity, geodesic distance correlation, MST branch assignment F1, and Random Forest feature importance weighted correlation (wcor_features) (5 metrics).")
                   ),
                   tags$tr(
                     tags$td(style = "text-align: center; font-weight: bold;", "VIII"),
                     tags$td(tags$b("Computational Scalability & Efficiency")),
                     tags$td(style = "text-align: center;", span(class = "badge bg-light text-dark border", "Efficiency")),
-                    tags$td("Wall-clock execution runtime (seconds), peak memory consumption (MiB RAM), runtime-memory Pareto trade-offs, and throughput.")
+                    tags$td("Core-normalized runtime (core_seconds) and memory footprint per allocated core (memory_per_core_mib), alongside wall-clock elapsed execution runtime and peak RAM (2 standardized metrics).")
                   )
                 )
               )
@@ -4470,7 +4510,7 @@ ui <- page_navbar(
                     tags$ul(
                       style = "font-size: 0.84rem; color: #475569; padding-left: 16px; margin: 0;",
                       tags$li(tags$b("Pre-Computed Benchmark (Demo Data): "), "Load a precomputed 6-simulator multi-dataset benchmark across Dataset 1 and Dataset 2 for instant exploration."),
-                      tags$li(tags$b("Single-Cell RNA-seq Evaluation: "), "Upload real reference matrices and simulated datasets (.rds, .csv, .tsv, .txt) with optional cell type annotations and batch labels to calculate all 48 curated evaluation metrics (39 unimodal)."),
+                      tags$li(tags$b("Single-Cell RNA-seq Evaluation: "), "Upload real reference matrices and simulated datasets (.rds, .csv, .tsv, .txt) with optional cell type annotations and batch labels to calculate unimodal evaluation metrics across statistical, cellular, biological signal, trajectory, and scalability categories."),
                       tags$li(tags$b("Multi-Omics (RNA + ATAC) Evaluation: "), "Benchmark paired single-cell RNA-seq and ATAC-seq co-assays evaluating cross-modal coupling, peak-to-gene linkages, and feature alignment."),
                       tags$li(tags$b("Upload Pre-Computed Benchmark Table: "), "Directly ingest previously calculated benchmark CSV/RDS tables for instant visualization and leaderboard generation."),
                       tags$li(tags$b("Multi-Dataset Benchmarking: "), "Upload or evaluate across multiple experimental conditions (Dataset 1, Dataset 2, ..., Dataset N) with dynamic simulator renaming."),
@@ -4556,7 +4596,7 @@ ui <- page_navbar(
                       tags$li(tags$b("PCA Ordination: "), "Principal component biplots projecting simulators and metric loadings into reduced metric space."),
                       tags$li(tags$b("MDS Metric Space: "), "Multidimensional scaling mapping simulator algorithmic similarity."),
                       tags$li(tags$b("Cell Embeddings (UMAP, t-SNE & PCA): "), "Dimension reduction (UMAP, t-SNE, PCA) comparing reference cells directly to simulated cells with modality isolation and quantitative fidelity metrics."),
-                      tags$li(tags$b("Scalability Benchmark: "), "Runtime in seconds vs Peak RAM in MiB, throughput (cells/sec), and resource cost index.")
+                      tags$li(tags$b("Scalability Benchmark: "), "Runtime (seconds or minutes) vs Peak RAM (MiB or MB) with simulation core annotations, throughput (cells/sec), and resource cost index.")
                     )
                   )
                 )
@@ -4791,7 +4831,7 @@ Cell_03,Batch1
               div(
                 style = "margin-top: 10px; padding: 10px 14px; background: #F8FAFC; border-left: 3px solid #6366F1; border-radius: 4px; font-size: 0.82rem; color: #475569;",
                 tags$b("Memory Optimization Note: "),
-                "scSimEval utilizes sparse matrix arithmetic (dgCMatrix) and fast low-rank linear algebra to minimize peak memory consumption across all 48 curated evaluation metrics."
+                "scSimEval utilizes sparse matrix arithmetic (dgCMatrix) and fast low-rank linear algebra to minimize peak memory consumption across all 56 curated evaluation measures."
               )
             )
           )
@@ -4821,7 +4861,7 @@ Cell_03,Batch1
               style = "margin: 0; font-weight: 800; color: #FFFFFF; font-size: 1.45rem;"
             ),
             p(
-              "Real-time diagnostic stream capturing data loading, metric computation across 48 curated evaluation criteria, visualization rendering, memory profiling, and live ERRORS, WARNINGS, and NOTES.",
+              "Real-time diagnostic stream capturing data loading, metric computation across 56 curated evaluation measures, visualization rendering, memory profiling, and live ERRORS, WARNINGS, and NOTES.",
               style = "margin: 6px 0 0 0; color: #94A3B8; font-size: 0.88rem;"
             )
           ),
@@ -4836,7 +4876,7 @@ Cell_03,Batch1
             span(
               class = "badge",
               style = "background: rgba(56, 189, 248, 0.15); color: #7DD3FC; border: 1px solid rgba(56, 189, 248, 0.3); padding: 7px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 20px;",
-              "scSimEval v0.99.9"
+              "scSimEval v0.99.10"
             )
           )
         )
@@ -5037,135 +5077,58 @@ Cell_03,Batch1
               )
             ),
             
-            # Author Team Grid: Row 1 (3 Authors)
-            div(
-              class = "row justify-content-center g-3 my-2",
-              
-              # 1. Kabilan Sakthivel
-              div(
-                class = "col-md-4 col-sm-6 text-center",
+            # Author Team Grid (10 Authors arranged into 2 rows of 5 photos each)
+            {
+              author_team_row1 <- list(
+                list(img = "scfigures/kabilan.JPG",             name = "Kabilan Sakthivel",           role = "Ph.D. Bioinformatics", email = "kabilan151414@gmail.com"),
+                list(img = "scfigures/mishra_sir.jpg",          name = "Dr. Dwijesh Chandra Mishra",  role = "Principal Scientist",  email = "dwij.mishra@gmail.com"),
+                list(img = "scfigures/sb_lal_sir.JPG",          name = "Dr. Shashi Bhushan Lal",      role = "Principal Scientist",  email = "sblall16@gmail.com"),
+                list(img = "scfigures/angadi_500.jpg",          name = "Dr. Ulavappa Angadi",         role = "Principal Scientist",  email = "ubaangadi.iasri@icar.org.in"),
+                list(img = "scfigures/sudhir_sir.JPG",          name = "Dr. Sudhir Srivastava",       role = "Senior Scientist",     email = "sudhir0401bm@gmail.com")
+              )
+              author_team_row2 <- list(
+                list(img = "scfigures/neeraj_sir.jpg",          name = "Dr. Neeraj Budhlakoti",       role = "Senior Scientist",     email = "neeraj35669@gmail.com"),
+                list(img = "scfigures/kkcsir.JPG",              name = "Dr. Krishna Kumar Chaturvedi",role = "Principal Scientist",  email = "kkcchaturvedi@gmail.com"),
+                list(img = "scfigures/RANJEET_sir.jpg",         name = "Dr. Ranjeet Ranjan Kumar",    role = "Senior Scientist",     email = "ranjeetranjaniari@gmail.com"),
+                list(img = "scfigures/NAVIN_CHANDRA_GUPTA.jpg", name = "Dr. Navin Chandra Gupta",     role = "Senior Scientist",     email = "navinbtc@gmail.com"),
+                list(img = "scfigures/sharan_photo.jpg",        name = "Dr. Sharanbasappa",           role = "Scientist",            email = "smadival509@gmail.com")
+              )
+              render_author_card <- function(a) {
                 div(
-                  class = "info-card", style = "background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px 12px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.03);",
-                  tags$img(src = "scfigures/kabilan.JPG", height = 165, width = 135, style = "border-radius: 10px; border: 2px solid #E2E8F0; object-fit: cover;"),
-                  p("Kabilan Sakthivel", style = "font-size: 0.96rem; margin-top: 10px; margin-bottom: 2px; font-weight: 700; color: #0F172A;"),
-                  p("Ph.D. Bioinformatics", style = "font-size: 0.82rem; margin-bottom: 6px; font-weight: 600; color: #0284C7;"),
-                  p(
-                    tags$a(
-                      href = "mailto:kabilan151414@gmail.com",
-                      style = "font-size: 0.78rem; color: #64748B; text-decoration: none;",
-                      icon("envelope", class = "me-1 text-primary"),
-                      "kabilan151414@gmail.com"
+                  class = "col-contact-5 text-center my-2",
+                  div(
+                    class = "info-card",
+                    style = "background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 14px 8px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.03); margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: space-between;",
+                    div(
+                      tags$img(src = a$img, height = 150, width = 120, style = "border-radius: 10px; border: 2px solid #E2E8F0; object-fit: cover; max-width: 100%;"),
+                      p(a$name, style = "font-size: 0.88rem; margin-top: 8px; margin-bottom: 2px; font-weight: 700; color: #0F172A; line-height: 1.25;"),
+                      p(a$role, style = "font-size: 0.78rem; margin-bottom: 6px; font-weight: 600; color: #0284C7;")
                     ),
-                    style = "margin-bottom: 0;"
+                    p(
+                      tags$a(
+                        href = paste0("mailto:", a$email),
+                        style = "font-size: 0.74rem; color: #64748B; text-decoration: none; word-break: break-all;",
+                        icon("envelope", class = "me-1 text-primary"),
+                        a$email
+                      ),
+                      style = "margin-bottom: 0;"
+                    )
                   )
                 )
-              ),
-              
-              # 2. Dr Dwijesh Chandra Mishra
-              div(
-                class = "col-md-4 col-sm-6 text-center",
+              }
+              tagList(
+                # Row 1 (5 Photos)
                 div(
-                  class = "info-card", style = "background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px 12px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.03);",
-                  tags$img(src = "scfigures/mishra_sir.jpg", height = 165, width = 135, style = "border-radius: 10px; border: 2px solid #E2E8F0; object-fit: cover;"),
-                  p("Dr Dwijesh Chandra Mishra", style = "font-size: 0.96rem; margin-top: 10px; margin-bottom: 2px; font-weight: 700; color: #0F172A;"),
-                  p("Principal Scientist", style = "font-size: 0.82rem; margin-bottom: 6px; font-weight: 600; color: #0284C7;"),
-                  p(
-                    tags$a(
-                      href = "mailto:dwij.mishra@gmail.com",
-                      style = "font-size: 0.78rem; color: #64748B; text-decoration: none;",
-                      icon("envelope", class = "me-1 text-primary"),
-                      "dwij.mishra@gmail.com"
-                    ),
-                    style = "margin-bottom: 0;"
-                  )
-                )
-              ),
-              
-              # 3. Dr Shashi Bhushan Lal
-              div(
-                class = "col-md-4 col-sm-6 text-center",
+                  class = "row justify-content-center g-2 my-1",
+                  lapply(author_team_row1, render_author_card)
+                ),
+                # Row 2 (5 Photos)
                 div(
-                  class = "info-card", style = "background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px 12px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.03);",
-                  tags$img(src = "scfigures/sb_lal_sir.JPG", height = 165, width = 135, style = "border-radius: 10px; border: 2px solid #E2E8F0; object-fit: cover;"),
-                  p("Dr Shashi Bhushan Lal", style = "font-size: 0.96rem; margin-top: 10px; margin-bottom: 2px; font-weight: 700; color: #0F172A;"),
-                  p("Principal Scientist", style = "font-size: 0.82rem; margin-bottom: 6px; font-weight: 600; color: #0284C7;"),
-                  p(
-                    tags$a(
-                      href = "mailto:sblall16@gmail.com",
-                      style = "font-size: 0.78rem; color: #64748B; text-decoration: none;",
-                      icon("envelope", class = "me-1 text-primary"),
-                      "sblall16@gmail.com"
-                    ),
-                    style = "margin-bottom: 0;"
-                  )
+                  class = "row justify-content-center g-2 my-1",
+                  lapply(author_team_row2, render_author_card)
                 )
               )
-            ),
-            
-            # Author Team Grid: Row 2 (3 Authors)
-            div(
-              class = "row justify-content-center g-3 my-2",
-              
-              # 4. Dr Sudhir Srivastava
-              div(
-                class = "col-md-4 col-sm-6 text-center",
-                div(
-                  class = "info-card", style = "background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px 12px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.03);",
-                  tags$img(src = "scfigures/sudhir_sir.JPG", height = 165, width = 135, style = "border-radius: 10px; border: 2px solid #E2E8F0; object-fit: cover;"),
-                  p("Dr Sudhir Srivastava", style = "font-size: 0.96rem; margin-top: 10px; margin-bottom: 2px; font-weight: 700; color: #0F172A;"),
-                  p("Senior Scientist", style = "font-size: 0.82rem; margin-bottom: 6px; font-weight: 600; color: #0284C7;"),
-                  p(
-                    tags$a(
-                      href = "mailto:sudhir0401bm@gmail.com",
-                      style = "font-size: 0.78rem; color: #64748B; text-decoration: none;",
-                      icon("envelope", class = "me-1 text-primary"),
-                      "sudhir0401bm@gmail.com"
-                    ),
-                    style = "margin-bottom: 0;"
-                  )
-                )
-              ),
-              
-              # 5. Dr Krishna Kumar Chaturvedi
-              div(
-                class = "col-md-4 col-sm-6 text-center",
-                div(
-                  class = "info-card", style = "background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px 12px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.03);",
-                  tags$img(src = "scfigures/kkcsir.JPG", height = 165, width = 135, style = "border-radius: 10px; border: 2px solid #E2E8F0; object-fit: cover;"),
-                  p("Dr Krishna Kumar Chaturvedi", style = "font-size: 0.96rem; margin-top: 10px; margin-bottom: 2px; font-weight: 700; color: #0F172A;"),
-                  p("Principal Scientist", style = "font-size: 0.82rem; margin-bottom: 6px; font-weight: 600; color: #0284C7;"),
-                  p(
-                    tags$a(
-                      href = "mailto:kkcchaturvedi@gmail.com",
-                      style = "font-size: 0.78rem; color: #64748B; text-decoration: none;",
-                      icon("envelope", class = "me-1 text-primary"),
-                      "kkcchaturvedi@gmail.com"
-                    ),
-                    style = "margin-bottom: 0;"
-                  )
-                )
-              ),
-              
-              # 6. Dr Sharanbasappa
-              div(
-                class = "col-md-4 col-sm-6 text-center",
-                div(
-                  class = "info-card", style = "background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 16px 12px; height: 100%; box-shadow: 0 1px 3px rgba(0,0,0,0.03);",
-                  tags$img(src = "scfigures/sharan_photo.jpg", height = 165, width = 135, style = "border-radius: 10px; border: 2px solid #E2E8F0; object-fit: cover;"),
-                  p("Dr Sharanbasappa", style = "font-size: 0.96rem; margin-top: 10px; margin-bottom: 2px; font-weight: 700; color: #0F172A;"),
-                  p("Scientist", style = "font-size: 0.82rem; margin-bottom: 6px; font-weight: 600; color: #0284C7;"),
-                  p(
-                    tags$a(
-                      href = "mailto:smadival509@gmail.com",
-                      style = "font-size: 0.78rem; color: #64748B; text-decoration: none;",
-                      icon("envelope", class = "me-1 text-primary"),
-                      "smadival509@gmail.com"
-                    ),
-                    style = "margin-bottom: 0;"
-                  )
-                )
-              )
-            ),
+            },
             
             # Feedback & GitHub Box
             div(
@@ -5219,7 +5182,7 @@ server <- function(input, output, session) {
   }
   
   # ============================================================================
-  # LIVE RUNNING LOGS & DIAGNOSTIC ENGINE (v0.99.9)
+  # LIVE RUNNING LOGS & DIAGNOSTIC ENGINE (v0.99.10)
   # ============================================================================
   # Session-level log storage container (plain environment for safe context-free reading/writing)
   log_storage <- new.env(parent = emptyenv())
@@ -5254,10 +5217,10 @@ server <- function(input, output, session) {
   }
 
   # Startup Diagnostic Log Sequence
-  sc_log("INFO", "scSimEval Interactive Benchmarking Studio v0.99.9 initialized.", "Startup")
+  sc_log("INFO", "scSimEval Interactive Benchmarking Studio v0.99.10 initialized.", "Startup")
   sc_log("NOTE", paste0("Runtime Environment: R ", getRversion(), " | Platform: ", R.version$platform, " | OS: ", Sys.info()[["sysname"]], " ", Sys.info()[["release"]]), "Environment")
   sc_log("INFO", paste0("System Concurrency: ", parallel::detectCores(), " logical CPU cores detected. Sparse matrix arithmetic (dgCMatrix) enabled."), "Hardware")
-  sc_log("NOTE", "Evaluation Suite: 55 evaluation measures registered across Categories 1 to 8.", "Metrics")
+  sc_log("NOTE", "Evaluation Suite: 56 evaluation measures registered across Categories 1 to 8.", "Metrics")
   
   # Check demo benchmark cache status
   demo_rds_path <- system.file("shiny/scSimEvalApp/demo_benchmark_data.rds", package = "scSimEval")
@@ -5455,68 +5418,68 @@ server <- function(input, output, session) {
                 tags$tr(
                   tags$td(tags$b("1. scRNA-seq")),
                   tags$td("Count Matrix alone (No metadata)"),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #475569 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "22 / 48 Metrics")),
-                  tags$td("Cat I (Distributional Properties, 7 moments & 2D tests), Cat II (Sparsity & Zero-Inflation Dynamics, 4 metrics), Cat III (Unsupervised geometry, 4 metrics), Cat V (Delta variance MAE, 1 metric), Cat VI (Trajectory dynamics, 4 metrics), Cat VIII (Computational Scalability, 2 metrics)")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #475569 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "29 / 45 Metrics")),
+                  tags$td("Cat I (Distributional Properties, 14), Cat II (Sparsity & Dropout, 5), Cat III (Unsupervised manifold, 3), Cat VII (dynverse trajectory topology, 5), and Cat VIII (Computational Scalability, 2)")
                 ),
                 tags$tr(
                   tags$td(tags$b("1. scRNA-seq")),
                   tags$td("Count Matrix + Cell Types"),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #0284C7 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "33 / 48 Metrics")),
-                  tags$td("Adds +11 metrics: Unlocks Cat III (Cellular Structure & Clustering Concordance: Silhouette, DB, ARI, NMI, 4 metrics) and Cat V (Biological Signal Fidelity: SimBench DE, DV, DD, DP, BD, predictive Macro-F1, deconvolution RMSE, 7 metrics)")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #0284C7 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "40 / 45 Metrics")),
+                  tags$td("Adds +11 metrics: Unlocks Cat III (Cellular Structure & Clustering Concordance: Silhouette, CDI, Purity, ARI, NMI, 5 metrics) and Cat V (Pseudobulk edgeR DE Signal Fidelity: uniformity, accuracy, precision, recall, F1, ROC-AUC, 6 metrics)")
                 ),
                 tags$tr(
                   tags$td(tags$b("1. scRNA-seq")),
                   tags$td(tags$b("Full Metadata (Matrix + Cell Types + Batch)")),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #16A34A !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "All 38 / 38 Unimodal Metrics")),
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #16A34A !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "All 45 / 45 Unimodal Metrics")),
                   tags$td("Adds +5 metrics: Unlocks Cat IV (Technical Variation & Batch Mixing Dynamics: Batch Silhouette, PCR R², CMS, ISI, cross-batch F1). Maximum possible for unimodal RNA.")
                 ),
                 tags$tr(
                   tags$td(tags$b("2. scATAC-seq")),
                   tags$td("Count Matrix alone (No metadata)"),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #475569 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "17 / 48 Metrics")),
-                  tags$td("Cat I (Peak accessibility distribution moments, 7 metrics), Cat II (Peak-peak correlations & sparsity curves, 4 metrics), Cat III (Unsupervised geometry, 4 metrics), Cat VIII (Computational Scalability, 2 metrics)")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #475569 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "16 / 32 Metrics")),
+                  tags$td("Cat I (Peak accessibility distribution moments, 7 metrics), Cat II (Accessibility-sparsity dynamics, 4 metrics), Cat III (Unsupervised geometry, 3 metrics), Cat VIII (Computational Scalability, 2 metrics)")
                 ),
                 tags$tr(
                   tags$td(tags$b("2. scATAC-seq")),
                   tags$td("Count Matrix + Cell Types"),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #0284C7 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "28 / 48 Metrics")),
-                  tags$td("Adds +11 metrics: Unlocks Cat III (Epigenomic Cellular Clustering Concordance, 4 metrics) and Cat V (Differential Accessibility signal fidelity, 7 metrics)")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #0284C7 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "27 / 32 Metrics")),
+                  tags$td("Adds +11 metrics: Unlocks Cat III (Epigenomic Cellular Clustering Concordance, 5 metrics) and Cat V (Pseudobulk edgeR DA signal fidelity, 6 metrics)")
                 ),
                 tags$tr(
                   tags$td(tags$b("2. scATAC-seq")),
                   tags$td(tags$b("Full Metadata (Matrix + Cell Types + Batch)")),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #16A34A !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "33 / 47 Metrics")),
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #16A34A !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "All 32 / 32 Unimodal Metrics")),
                   tags$td("Adds +5 metrics: Unlocks Cat IV (Epigenomic Technical Variation & Batch Mixing Dynamics: Batch Silhouette, PCR R², CMS, ISI, cross-batch F1). Maximum possible for unimodal ATAC.")
                 ),
                 tags$tr(
                   tags$td(tags$b("3. Paired Multiomics")),
                   tags$td("RNA + ATAC Matrices alone (No metadata)"),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #4F46E5 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "30 / 48 Metrics")),
-                  tags$td("Measures both unimodal layers simultaneously + Cat VII Cross-Modal Coupling (FOSCTTM cell alignment, Match@1, cell Pearson cor, mean coupling cor, RV coefficient, module correlation, distribution distances, 8 metrics)")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #4F46E5 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "35 / 56 Metrics")),
+                  tags$td("Measures both unimodal layers simultaneously + Cat VI Multiomics Integration (joint embedding Batch ASW, Graph Connectivity, ARI, NMI) + Cat VII (dynverse trajectory) + Cat VIII (Scalability)")
                 ),
                 tags$tr(
                   tags$td(tags$b("3. Paired Multiomics")),
                   tags$td("RNA + ATAC + Cell Types"),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #0284C7 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "42 / 48 Metrics")),
-                  tags$td("Adds +12 metrics: Unlocks Cat III (Dual cellular clustering concordance, 4 metrics), Cat V (Dual DEG/DA signal fidelity, 7 metrics), and Cat VII (Cross-modal label transfer F1, 1 metric)")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #0284C7 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "49 / 56 Metrics")),
+                  tags$td("Adds +14 metrics: Unlocks Cat III (Dual cellular clustering concordance), Cat V (Dual DEG/DA signal fidelity, 12 metrics), and Cat VI (Cell-Type ASW)")
                 ),
                 tags$tr(
                   tags$td(tags$b("3. Paired Multiomics")),
                   tags$td(tags$b("Full Metadata (RNA + ATAC + Cell Types + Batch)")),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #15803D !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "All 47 / 47 Metrics")),
-                  tags$td("Adds +5 metrics: Cat IV Technical Variation & Batch Mixing Dynamics. 100% complete coverage across all 8 biological and computational dimensions (Categories I–VIII)")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #15803D !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "All 56 / 56 Metrics")),
+                  tags$td("Adds +7 metrics: Cat IV Technical Variation & Batch Mixing Dynamics. 100% complete coverage across all 8 biological and computational dimensions (Categories I–VIII)")
                 ),
                 tags$tr(
                   tags$td(tags$b("4. Unpaired Multiomics")),
                   tags$td("RNA + ATAC Matrices alone (Independent cells)"),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #475569 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "26 / 48 Metrics")),
-                  tags$td("Unimodal distributions for both layers + population-level co-expression module fidelity, RV coefficient, and cross-modality correlation")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #475569 !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "30 / 56 Metrics")),
+                  tags$td("Unimodal distributions for both layers + joint-embedding manifold integration, trajectory (RNA), and computational scalability")
                 ),
                 tags$tr(
                   tags$td(tags$b("4. Unpaired Multiomics")),
                   tags$td(tags$b("RNA + ATAC + Cell Types (+ Batch)")),
-                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #16A34A !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "41 / 48 Metrics")),
-                  tags$td("Unlocks cluster-matched cross-modal label transfer accuracy, cell-type regulatory concordance, and technical donor batch alignment")
+                  tags$td(style = "text-align: center;", span(class = "badge", style = "background-color: #16A34A !important; color: #FFFFFF !important; font-weight: 700; font-size: 0.82rem; padding: 5px 10px; border-radius: 6px;", "51 / 56 Metrics")),
+                  tags$td("Unlocks cell-type clustering concordance, dual pseudobulk DEG/DA fidelity, and technical donor batch alignment")
                 )
               )
             )
@@ -5614,15 +5577,15 @@ server <- function(input, output, session) {
     list(time = t_val, mem = m_val)
   }
   
-  # Helper to locate package data files across installation & development roots
+  # Helper to locate package data files across local checkout roots first, then installed package
   get_pkg_data_file <- function(filename) {
     candidates <- c(
-      system.file("shiny", "scSimEvalApp", "data", filename, package = "scSimEval"),
-      system.file("data", filename, package = "scSimEval"),
       file.path("data", filename),
       file.path("inst", "shiny", "scSimEvalApp", "data", filename),
       file.path("..", "data", filename),
-      file.path("..", "..", "inst", "shiny", "scSimEvalApp", "data", filename)
+      file.path("..", "..", "inst", "shiny", "scSimEvalApp", "data", filename),
+      system.file("shiny", "scSimEvalApp", "data", filename, package = "scSimEval"),
+      system.file("data", filename, package = "scSimEval")
     )
     for (f in candidates) {
       if (nzchar(f) && file.exists(f)) return(normalizePath(f, winslash = "/"))
@@ -5730,6 +5693,42 @@ server <- function(input, output, session) {
                     stats::setNames(sim_mats, paste0("[Simulated] ", names(sim_mats), " (Soybean Root scRNA-seq)")))
       bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Soybean Root (Unpaired)" & bm$benchmark_df$Modality %in% c("RNA", "Computation"), ]
       bench_df$Dataset <- "Soybean Root (scRNA-seq)"
+      if (!is.null(sb$scalability_benchmarks) && "RNA_Runtime_Seconds" %in% colnames(sb$scalability_benchmarks)) {
+        for (ri in seq_len(nrow(sb$scalability_benchmarks))) {
+          m_nm <- sb$scalability_benchmarks$Method[ri]
+          t_r <- sb$scalability_benchmarks$RNA_Runtime_Seconds[ri]
+          m_r <- sb$scalability_benchmarks$RNA_PeakRAM_MiB[ri]
+          c_r <- if ("RNA_Sim_Cores" %in% colnames(sb$scalability_benchmarks)) sb$scalability_benchmarks$RNA_Sim_Cores[ri] else NA_integer_
+          c_val <- if (is.finite(c_r) && as.integer(c_r) >= 1L) as.integer(c_r) else 1L
+          if (is.finite(t_r)) {
+            idx_cs <- bench_df$Method == m_nm & bench_df$Metric == "core_seconds"
+            idx_t <- bench_df$Method == m_nm & bench_df$Metric == "elapsed_time_seconds"
+            if (any(idx_cs)) {
+              bench_df$Value[idx_cs] <- t_r * c_val
+              if ("Score_Raw" %in% colnames(bench_df)) bench_df$Score_Raw[idx_cs] <- t_r * c_val
+            }
+            if (any(idx_t)) {
+              bench_df$Value[idx_t] <- t_r
+              if ("Score_Raw" %in% colnames(bench_df)) bench_df$Score_Raw[idx_t] <- t_r
+            }
+          }
+          if (is.finite(m_r)) {
+            idx_mpc <- bench_df$Method == m_nm & bench_df$Metric == "memory_per_core_mib"
+            idx_m <- bench_df$Method == m_nm & bench_df$Metric == "peak_memory_mb"
+            if (any(idx_mpc)) {
+              bench_df$Value[idx_mpc] <- m_r / c_val
+              if ("Score_Raw" %in% colnames(bench_df)) bench_df$Score_Raw[idx_mpc] <- m_r / c_val
+            }
+            if (any(idx_m)) {
+              bench_df$Value[idx_m] <- m_r
+              if ("Score_Raw" %in% colnames(bench_df)) bench_df$Score_Raw[idx_m] <- m_r
+            }
+          }
+          if (is.finite(c_r) && "Sim_Cores" %in% colnames(bench_df)) {
+            bench_df$Sim_Cores[bench_df$Method == m_nm] <- as.integer(c_r)
+          }
+        }
+      }
       summary_df <- bm$dataset_summary_df[bm$dataset_summary_df$Dataset == "Soybean Root (Unpaired)" & bm$dataset_summary_df$Modality == "scRNA-seq", ]
       summary_df$Dataset <- "Soybean Root (scRNA-seq)"
       ct <- get_sb_ct("rna")
@@ -5744,6 +5743,7 @@ server <- function(input, output, session) {
       all_mats <- c(list("[Reference] Rice Bud (scATAC-seq)" = rb$reference$atac),
                     stats::setNames(sim_mats, paste0("[Simulated] ", names(sim_mats), " (Rice Bud scATAC-seq)")))
       bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Rice Bud (Paired)" & bm$benchmark_df$Modality %in% c("ATAC", "Computation"), ]
+      bench_df <- bench_df[!grepl("Trajectory", bench_df$Category, ignore.case = TRUE), , drop = FALSE]
       bench_df$Dataset <- "Rice Bud (scATAC-seq)"
       summary_df <- bm$dataset_summary_df[bm$dataset_summary_df$Dataset == "Rice Bud (Paired)" & bm$dataset_summary_df$Modality == "scATAC-seq", ]
       summary_df$Dataset <- "Rice Bud (scATAC-seq)"
@@ -5759,7 +5759,44 @@ server <- function(input, output, session) {
       all_mats <- c(list("[Reference] Soybean Root (scATAC-seq)" = sb$reference$atac),
                     stats::setNames(sim_mats, paste0("[Simulated] ", names(sim_mats), " (Soybean Root scATAC-seq)")))
       bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Soybean Root (Unpaired)" & bm$benchmark_df$Modality %in% c("ATAC", "Computation"), ]
+      bench_df <- bench_df[!grepl("Trajectory", bench_df$Category, ignore.case = TRUE), , drop = FALSE]
       bench_df$Dataset <- "Soybean Root (scATAC-seq)"
+      if (!is.null(sb$scalability_benchmarks) && "ATAC_Runtime_Seconds" %in% colnames(sb$scalability_benchmarks)) {
+        for (ri in seq_len(nrow(sb$scalability_benchmarks))) {
+          m_nm <- sb$scalability_benchmarks$Method[ri]
+          t_a <- sb$scalability_benchmarks$ATAC_Runtime_Seconds[ri]
+          m_a <- sb$scalability_benchmarks$ATAC_PeakRAM_MiB[ri]
+          c_a <- if ("ATAC_Sim_Cores" %in% colnames(sb$scalability_benchmarks)) sb$scalability_benchmarks$ATAC_Sim_Cores[ri] else NA_integer_
+          c_val <- if (is.finite(c_a) && as.integer(c_a) >= 1L) as.integer(c_a) else 1L
+          if (is.finite(t_a)) {
+            idx_cs <- bench_df$Method == m_nm & bench_df$Metric == "core_seconds"
+            idx_t <- bench_df$Method == m_nm & bench_df$Metric == "elapsed_time_seconds"
+            if (any(idx_cs)) {
+              bench_df$Value[idx_cs] <- t_a * c_val
+              if ("Score_Raw" %in% colnames(bench_df)) bench_df$Score_Raw[idx_cs] <- t_a * c_val
+            }
+            if (any(idx_t)) {
+              bench_df$Value[idx_t] <- t_a
+              if ("Score_Raw" %in% colnames(bench_df)) bench_df$Score_Raw[idx_t] <- t_a
+            }
+          }
+          if (is.finite(m_a)) {
+            idx_mpc <- bench_df$Method == m_nm & bench_df$Metric == "memory_per_core_mib"
+            idx_m <- bench_df$Method == m_nm & bench_df$Metric == "peak_memory_mb"
+            if (any(idx_mpc)) {
+              bench_df$Value[idx_mpc] <- m_a / c_val
+              if ("Score_Raw" %in% colnames(bench_df)) bench_df$Score_Raw[idx_mpc] <- m_a / c_val
+            }
+            if (any(idx_m)) {
+              bench_df$Value[idx_m] <- m_a
+              if ("Score_Raw" %in% colnames(bench_df)) bench_df$Score_Raw[idx_m] <- m_a
+            }
+          }
+          if (is.finite(c_a) && "Sim_Cores" %in% colnames(bench_df)) {
+            bench_df$Sim_Cores[bench_df$Method == m_nm] <- as.integer(c_a)
+          }
+        }
+      }
       summary_df <- bm$dataset_summary_df[bm$dataset_summary_df$Dataset == "Soybean Root (Unpaired)" & bm$dataset_summary_df$Modality == "scATAC-seq", ]
       summary_df$Dataset <- "Soybean Root (scATAC-seq)"
       ct <- get_sb_ct("atac")
@@ -6052,6 +6089,7 @@ server <- function(input, output, session) {
     )
     
     if (is_uni) {
+      uni_mod_str <- if (identical(input$opt_data_mode, "scatac")) "scATAC-seq" else "scRNA-seq"
       for (d in seq_len(n_dsets)) {
         dname_custom <- input[[paste0("uni_dset_name_", d)]]
         dname <- if (!is.null(dname_custom) && trimws(dname_custom) != "") trimws(dname_custom) else sprintf("Dataset %d", d)
@@ -6091,7 +6129,7 @@ server <- function(input, output, session) {
         out <- c(out,
           sprintf("all_dataset_summaries[[length(all_dataset_summaries) + 1]] <- extract_dataset_summary("),
           sprintf("  ref_mat_%d, role = 'Biological Reference', method_name = paste0('Empirical Reference (', dset_name_%d, ')'),", d, d),
-          sprintf("  modality = 'Single-Cell (Counts)', cell_types = ct_vec_%d, batch_info = bt_vec_%d", d, d),
+          sprintf("  modality = '%s', cell_types = ct_vec_%d, batch_info = bt_vec_%d", uni_mod_str, d, d),
           ")",
           ""
         )
@@ -6102,27 +6140,42 @@ server <- function(input, output, session) {
           sim_f <- input[[paste0("file_uni_sim_", s, "_", d)]]$name
           if (is.null(sim_f) || sim_f == "") sim_f <- sprintf("sim_%s_%s.rds", make.names(sname), make.names(dname))
           sim_t <- as.numeric(input[[paste0("uni_sim_time_", s, "_", d)]]) %||% round(20 + s * 10 + d * 5, 1)
+          sim_tu <- input[[paste0("uni_sim_time_unit_", s, "_", d)]] %||% "seconds"
           sim_m <- as.numeric(input[[paste0("uni_sim_mem_", s, "_", d)]]) %||% round(500 + s * 150 + d * 50, 0)
+          sim_mu <- input[[paste0("uni_sim_mem_unit_", s, "_", d)]] %||% "MiB"
+          sim_c <- suppressWarnings(as.integer(input[[paste0("uni_sim_cores_", s, "_", d)]]))
+          if (is.na(sim_c) || length(sim_c) == 0 || sim_c < 1L) sim_c <- 1L
           
           out <- c(out,
             sprintf("  # %s on %s", sname, dname),
-            sprintf("  sim_name_%d_%d <- '%s'", s, d, sname),
-            sprintf("  sim_file_%d_%d <- '%s'", s, d, sim_f),
-            sprintf("  sim_time_%d_%d <- %.1f # Runtime (seconds)", s, d, sim_t),
-            sprintf("  sim_mem_%d_%d  <- %.0f # Peak RAM (MiB)", s, d, sim_m),
+            sprintf("  sim_name_%d_%d  <- '%s'", s, d, sname),
+            sprintf("  sim_file_%d_%d  <- '%s'", s, d, sim_f),
+            sprintf("  sim_time_%d_%d  <- %.3f # Runtime (%s)", s, d, sim_t, sim_tu),
+            sprintf("  sim_tunit_%d_%d <- '%s'", s, d, sim_tu),
+            sprintf("  sim_mem_%d_%d   <- %.2f # Peak RAM (%s)", s, d, sim_m, sim_mu),
+            sprintf("  sim_munit_%d_%d <- '%s'", s, d, sim_mu),
+            sprintf("  sim_cores_%d_%d <- %dL # Simulation CPU cores used", s, d, sim_c),
             sprintf("  cat('[scSimEval]   Evaluating ', sim_name_%d_%d, ' on ', dset_name_%d, '...\n')", s, d, d),
             sprintf("  sim_mat_%d_%d  <- load_matrix_safe(sim_file_%d_%d, placeholder = paste0(sim_name_%d_%d, ' matrix'))", s, d, s, d, s, d),
             "",
             sprintf("  all_dataset_summaries[[length(all_dataset_summaries) + 1]] <- extract_dataset_summary("),
             sprintf("    sim_mat_%d_%d, role = 'Simulated', method_name = paste0(sim_name_%d_%d, ' (', dset_name_%d, ')'),", s, d, s, d, d),
-            sprintf("    modality = 'Single-Cell (Counts)', cell_types = ct_vec_%d, batch_info = bt_vec_%d", d, d),
+            sprintf("    modality = '%s', cell_types = ct_vec_%d, batch_info = bt_vec_%d", uni_mod_str, d, d),
             "  )",
             "",
             sprintf("  res_%d_%d <- evaluate_simulation_accuracy(" , s, d),
             sprintf("    ref_data = ref_mat_%d,", d),
             sprintf("    sim_data = sim_mat_%d_%d,", s, d),
+            sprintf("    cell_types_ref = ct_vec_%d,", d),
+            sprintf("    cell_types_sim = ct_vec_%d,", d),
+            sprintf("    batch_ref = bt_vec_%d,", d),
+            sprintf("    batch_sim = bt_vec_%d,", d),
+            sprintf("    modality = '%s',", uni_mod_str),
             sprintf("    memory_mb = sim_mem_%d_%d,", s, d),
             sprintf("    elapsed_time = sim_time_%d_%d,", s, d),
+            sprintf("    time_unit = sim_tunit_%d_%d,", s, d),
+            sprintf("    memory_unit = sim_munit_%d_%d,", s, d),
+            sprintf("    sim_cores = sim_cores_%d_%d,", s, d),
             "    compute_bivariate = FALSE,",
             sprintf("    threads = %d,", n_cores),
             "    verbose = FALSE",
@@ -6197,16 +6250,73 @@ server <- function(input, output, session) {
           sim_atac_f <- input[[paste0("file_multi_sim_atac_", s, "_", d)]]$name
           if (is.null(sim_rna_f) || sim_rna_f == "") sim_rna_f <- sprintf("sim_rna_%s_%s.rds", make.names(sname), make.names(dname))
           if (is.null(sim_atac_f) || sim_atac_f == "") sim_atac_f <- sprintf("sim_atac_%s_%s.rds", make.names(sname), make.names(dname))
-          sim_t <- as.numeric(input[[paste0("multi_sim_time_", s, "_", d)]]) %||% round(45 + s * 15 + d * 10, 1)
-          sim_m <- as.numeric(input[[paste0("multi_sim_mem_", s, "_", d)]]) %||% round(1200 + s * 250 + d * 100, 0)
+          scal_mode <- input[[paste0("multi_sim_scal_mode_", s, "_", d)]] %||% (if (is_paired) "combined" else "separate")
+          if (identical(scal_mode, "combined")) {
+            sim_t <- as.numeric(input[[paste0("multi_sim_time_", s, "_", d)]]) %||% round(45 + s * 15 + d * 10, 1)
+            sim_tu <- input[[paste0("multi_sim_time_unit_", s, "_", d)]] %||% "seconds"
+            sim_m <- as.numeric(input[[paste0("multi_sim_mem_", s, "_", d)]]) %||% round(1200 + s * 250 + d * 100, 0)
+            sim_mu <- input[[paste0("multi_sim_mem_unit_", s, "_", d)]] %||% "MiB"
+            sim_c <- suppressWarnings(as.integer(input[[paste0("multi_sim_cores_", s, "_", d)]]))
+            if (is.na(sim_c) || length(sim_c) == 0 || sim_c < 1L) sim_c <- 1L
+            scal_var_lines <- c(
+              sprintf("  sim_time_%d_%d      <- %.3f # Combined Runtime (%s)", s, d, sim_t, sim_tu),
+              sprintf("  sim_tunit_%d_%d     <- '%s'", s, d, sim_tu),
+              sprintf("  sim_mem_%d_%d       <- %.2f # Combined Peak RAM (%s)", s, d, sim_m, sim_mu),
+              sprintf("  sim_munit_%d_%d     <- '%s'", s, d, sim_mu),
+              sprintf("  sim_cores_%d_%d     <- %dL # Simulation CPU cores used", s, d, sim_c)
+            )
+            scal_call_lines <- c(
+              sprintf("    memory_mb    = sim_mem_%d_%d,", s, d),
+              sprintf("    elapsed_time = sim_time_%d_%d,", s, d),
+              sprintf("    time_unit    = sim_tunit_%d_%d,", s, d),
+              sprintf("    memory_unit  = sim_munit_%d_%d,", s, d),
+              sprintf("    sim_cores    = sim_cores_%d_%d,", s, d)
+            )
+          } else {
+            tr_val <- as.numeric(input[[paste0("multi_sim_time_rna_", s, "_", d)]]) %||% round((45 + s * 15 + d * 10) * 0.45, 1)
+            ta_val <- as.numeric(input[[paste0("multi_sim_time_atac_", s, "_", d)]]) %||% round((45 + s * 15 + d * 10) * 0.55, 1)
+            tr_u <- input[[paste0("multi_sim_time_unit_rna_", s, "_", d)]] %||% "seconds"
+            ta_u <- input[[paste0("multi_sim_time_unit_atac_", s, "_", d)]] %||% "seconds"
+            mr_val <- as.numeric(input[[paste0("multi_sim_mem_rna_", s, "_", d)]]) %||% round((1200 + s * 250 + d * 100) * 0.85, 0)
+            ma_val <- as.numeric(input[[paste0("multi_sim_mem_atac_", s, "_", d)]]) %||% round((1200 + s * 250 + d * 100) * 0.95, 0)
+            mr_u <- input[[paste0("multi_sim_mem_unit_rna_", s, "_", d)]] %||% "MiB"
+            ma_u <- input[[paste0("multi_sim_mem_unit_atac_", s, "_", d)]] %||% "MiB"
+            cr_val <- suppressWarnings(as.integer(input[[paste0("multi_sim_cores_rna_", s, "_", d)]]))
+            ca_val <- suppressWarnings(as.integer(input[[paste0("multi_sim_cores_atac_", s, "_", d)]]))
+            if (is.na(cr_val) || length(cr_val) == 0 || cr_val < 1L) cr_val <- 1L
+            if (is.na(ca_val) || length(ca_val) == 0 || ca_val < 1L) ca_val <- 1L
+            scal_var_lines <- c(
+              sprintf("  sim_time_rna_%d_%d   <- %.3f # RNA Runtime (%s)", s, d, tr_val, tr_u),
+              sprintf("  sim_tunit_rna_%d_%d  <- '%s'", s, d, tr_u),
+              sprintf("  sim_mem_rna_%d_%d    <- %.2f # RNA Peak RAM (%s)", s, d, mr_val, mr_u),
+              sprintf("  sim_munit_rna_%d_%d  <- '%s'", s, d, mr_u),
+              sprintf("  sim_cores_rna_%d_%d  <- %dL", s, d, cr_val),
+              sprintf("  sim_time_atac_%d_%d  <- %.3f # ATAC Runtime (%s)", s, d, ta_val, ta_u),
+              sprintf("  sim_tunit_atac_%d_%d <- '%s'", s, d, ta_u),
+              sprintf("  sim_mem_atac_%d_%d   <- %.2f # ATAC Peak RAM (%s)", s, d, ma_val, ma_u),
+              sprintf("  sim_munit_atac_%d_%d <- '%s'", s, d, ma_u),
+              sprintf("  sim_cores_atac_%d_%d <- %dL", s, d, ca_val)
+            )
+            scal_call_lines <- c(
+              sprintf("    elapsed_time_rna  = sim_time_rna_%d_%d,", s, d),
+              sprintf("    elapsed_time_atac = sim_time_atac_%d_%d,", s, d),
+              sprintf("    time_unit_rna     = sim_tunit_rna_%d_%d,", s, d),
+              sprintf("    time_unit_atac    = sim_tunit_atac_%d_%d,", s, d),
+              sprintf("    memory_mb_rna     = sim_mem_rna_%d_%d,", s, d),
+              sprintf("    memory_mb_atac    = sim_mem_atac_%d_%d,", s, d),
+              sprintf("    memory_unit_rna   = sim_munit_rna_%d_%d,", s, d),
+              sprintf("    memory_unit_atac  = sim_munit_atac_%d_%d,", s, d),
+              sprintf("    sim_cores_rna     = sim_cores_rna_%d_%d,", s, d),
+              sprintf("    sim_cores_atac    = sim_cores_atac_%d_%d,", s, d)
+            )
+          }
           
           out <- c(out,
             sprintf("  # %s on %s", sname, dname),
             sprintf("  sim_name_%d_%d      <- '%s'", s, d, sname),
             sprintf("  sim_rna_file_%d_%d  <- '%s'", s, d, sim_rna_f),
             sprintf("  sim_atac_file_%d_%d <- '%s'", s, d, sim_atac_f),
-            sprintf("  sim_time_%d_%d      <- %.1f # Runtime (seconds)", s, d, sim_t),
-            sprintf("  sim_mem_%d_%d       <- %.0f # Peak RAM (MiB)", s, d, sim_m),
+            scal_var_lines,
             sprintf("  cat('[scSimEval]   Evaluating ', sim_name_%d_%d, ' on ', dset_name_%d, '...\n')", s, d, d),
             sprintf("  sim_rna_%d_%d   <- load_matrix_safe(sim_rna_file_%d_%d, placeholder = paste0(sim_name_%d_%d, ' RNA'))", s, d, s, d, s, d),
             sprintf("  sim_atac_%d_%d  <- load_matrix_safe(sim_atac_file_%d_%d, placeholder = paste0(sim_name_%d_%d, ' ATAC'))", s, d, s, d, s, d),
@@ -6226,8 +6336,7 @@ server <- function(input, output, session) {
             sprintf("    is_paired    = %s,", if (is_paired) "TRUE" else "FALSE"),
             sprintf("    cell_types   = ct_vec_%d,", d),
             sprintf("    batch_info   = bt_vec_%d,", d),
-            sprintf("    memory_mb    = sim_mem_%d_%d,", s, d),
-            sprintf("    elapsed_time = sim_time_%d_%d,", s, d),
+            scal_call_lines,
             sprintf("    threads      = %d,", n_cores),
             "    verbose      = FALSE",
             "  )",
@@ -6407,6 +6516,11 @@ server <- function(input, output, session) {
         dname_custom <- input[[paste0("uni_dset_name_", d)]]
         dname_disp <- if (!is.null(dname_custom) && trimws(dname_custom) != "") dname_custom else sprintf("Dataset %d", d)
         sim_def <- get_default_sim_scalability(s, d, "unimodal")
+        cur_time   <- isolate(input[[paste0("uni_sim_time_", s, "_", d)]]) %||% sim_def$time
+        cur_t_unit <- isolate(input[[paste0("uni_sim_time_unit_", s, "_", d)]]) %||% "seconds"
+        cur_mem    <- isolate(input[[paste0("uni_sim_mem_", s, "_", d)]]) %||% sim_def$mem
+        cur_m_unit <- isolate(input[[paste0("uni_sim_mem_unit_", s, "_", d)]]) %||% "MiB"
+        cur_cores  <- isolate(input[[paste0("uni_sim_cores_", s, "_", d)]]) %||% 1L
         
         div(
           class = "mb-2 p-3 rounded",
@@ -6415,12 +6529,22 @@ server <- function(input, output, session) {
             class = "d-flex align-items-center mb-2",
             span(class = "badge bg-light text-primary border me-2", sprintf("Dataset %d", d)),
             tags$b(sprintf("Simulated Output for: %s", dname_disp), style = "color: #0F172A; font-size: 0.90rem;"),
-            tags$small(class = "text-muted ms-2", "(specify simulation file, runtime, and Peak RAM (MiB) for this dataset)")
+            tags$small(class = "text-muted ms-2", "(upload simulated file and specify runtime, Peak RAM, and simulation cores used)")
           ),
           fluidRow(
-            column(6, fileInput(paste0("file_uni_sim_", s, "_", d), sprintf("Simulated Dataset for %s (Seurat / SingleCellExperiment .rds):", dname_disp), placeholder = sprintf("Simulated %s Seurat/SCE object...", dname_disp), accept = c(".rds"))),
-            column(3, numericInput(paste0("uni_sim_time_", s, "_", d), "Runtime (s):", value = sim_def$time, min = 0.1, step = 1)),
-            column(3, numericInput(paste0("uni_sim_mem_", s, "_", d), "Peak RAM (MiB):", value = sim_def$mem, min = 1, step = 10))
+            column(12, fileInput(paste0("file_uni_sim_", s, "_", d), sprintf("Simulated Dataset for %s (Seurat / SingleCellExperiment .rds):", dname_disp), placeholder = sprintf("Simulated %s Seurat/SCE object...", dname_disp), accept = c(".rds")))
+          ),
+          div(
+            style = "background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 6px; padding: 8px 12px; margin-top: 2px;",
+            div(style = "font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;",
+                icon("microchip", class = "me-1 text-primary"), "Simulation Scalability & Hardware Metrics:"),
+            fluidRow(
+              column(3, numericInput(paste0("uni_sim_time_", s, "_", d), "Runtime:", value = cur_time, min = 0.001, step = 1)),
+              column(2, selectInput(paste0("uni_sim_time_unit_", s, "_", d), "Time Unit:", choices = c("Seconds (s)" = "seconds", "Minutes (min)" = "minutes"), selected = cur_t_unit)),
+              column(3, numericInput(paste0("uni_sim_mem_", s, "_", d), "Peak RAM:", value = cur_mem, min = 0.1, step = 10)),
+              column(2, selectInput(paste0("uni_sim_mem_unit_", s, "_", d), "RAM Unit:", choices = c("MiB" = "MiB", "MB" = "MB"), selected = cur_m_unit)),
+              column(2, numericInput(paste0("uni_sim_cores_", s, "_", d), "Cores Used:", value = cur_cores, min = 1L, max = 512L, step = 1L))
+            )
           )
         )
       })
@@ -6545,11 +6669,34 @@ server <- function(input, output, session) {
               all_sim_mats[[paste0(sim_name, "_", d_label)]] <- sim_mat_d
 
               sc_def <- get_default_sim_scalability(s_idx, 1L, "unimodal")
-              sim_time <- sc_def$time; sim_mem <- sc_def$mem
+              sim_time <- sc_def$time; sim_t_unit <- "seconds"
+              sim_mem <- sc_def$mem;   sim_m_unit <- "MiB"
+              sim_cores_used <- 1L
               if (!is.null(scal_tbl) && "Method" %in% colnames(scal_tbl) && sim_name %in% scal_tbl$Method) {
                 sc_row <- scal_tbl[scal_tbl$Method == sim_name, , drop = FALSE][1, , drop = FALSE]
-                if ("Runtime_Seconds" %in% colnames(sc_row) && is.finite(sc_row$Runtime_Seconds)) sim_time <- as.numeric(sc_row$Runtime_Seconds)
-                if ("PeakRAM_MiB" %in% colnames(sc_row) && is.finite(sc_row$PeakRAM_MiB)) sim_mem <- as.numeric(sc_row$PeakRAM_MiB)
+                mod_pfx <- if (identical(tolower(mod_key), "atac")) "ATAC_" else "RNA_"
+                t_cands <- c(paste0(mod_pfx, "Runtime_Seconds"), "Runtime_Seconds", "Total_Runtime_Seconds")
+                t_hit <- t_cands[t_cands %in% colnames(sc_row)]
+                t_hit <- t_hit[vapply(t_hit, function(col) is.finite(sc_row[[col]]), logical(1))]
+                if (length(t_hit) > 0) {
+                  sim_time <- as.numeric(sc_row[[t_hit[1]]]); sim_t_unit <- "seconds"
+                } else if ("Runtime_Minutes" %in% colnames(sc_row) && is.finite(sc_row$Runtime_Minutes)) {
+                  sim_time <- as.numeric(sc_row$Runtime_Minutes); sim_t_unit <- "minutes"
+                }
+                m_cands <- c(paste0(mod_pfx, "PeakRAM_MiB"), "PeakRAM_MiB", "Total_PeakRAM_MiB")
+                m_hit <- m_cands[m_cands %in% colnames(sc_row)]
+                m_hit <- m_hit[vapply(m_hit, function(col) is.finite(sc_row[[col]]), logical(1))]
+                if (length(m_hit) > 0) {
+                  sim_mem <- as.numeric(sc_row[[m_hit[1]]]); sim_m_unit <- "MiB"
+                } else if ("PeakRAM_MB" %in% colnames(sc_row) && is.finite(sc_row$PeakRAM_MB)) {
+                  sim_mem <- as.numeric(sc_row$PeakRAM_MB); sim_m_unit <- "MB"
+                }
+                core_cands <- c(paste0(mod_pfx, "Sim_Cores"), "Sim_Cores", "Cores_Used", "Cores", "n_cores")
+                core_hit <- core_cands[core_cands %in% colnames(sc_row)]
+                core_hit <- core_hit[vapply(core_hit, function(col) is.finite(sc_row[[col]]), logical(1))]
+                if (length(core_hit) > 0) {
+                  sim_cores_used <- max(1L, as.integer(sc_row[[core_hit[1]]]))
+                }
               }
 
               ct_s <- get_meta_vec(sim_mat_d, "cell_type") %||% ct_vec
@@ -6564,7 +6711,8 @@ server <- function(input, output, session) {
                 cell_types_ref = ct_vec, cell_types_sim = ct_s,
                 batch_ref = bt_vec, batch_sim = bt_s,
                 modality = mod_label, memory_mb = sim_mem, elapsed_time = sim_time,
-                compute_bivariate = TRUE, threads = n_cores_uni, verbose = FALSE
+                compute_bivariate = TRUE, threads = n_cores_uni, verbose = FALSE,
+                time_unit = sim_t_unit, memory_unit = sim_m_unit, sim_cores = sim_cores_used
               )
               tbl_sd <- res_sd$metrics_summary_table %||% res_sd$benchmark_summary_table %||% res_sd$summary_table
               if (!is.null(tbl_sd) && is.data.frame(tbl_sd) && nrow(tbl_sd) > 0) {
@@ -6615,7 +6763,7 @@ server <- function(input, output, session) {
           
           summary_rows[[length(summary_rows) + 1]] <- extract_dataset_summary(
             ref_mat_d, role = "Biological Reference", method_name = paste0("Empirical Reference (", d_label, ")"),
-            modality = "Single-Cell (Counts)", cell_types = ct_vec, batch_info = bt_vec
+            modality = mod_label, cell_types = ct_vec, batch_info = bt_vec
           )
           
           for (s in seq_len(n_sims)) {
@@ -6624,9 +6772,14 @@ server <- function(input, output, session) {
             
             sim_t_val <- input[[paste0("uni_sim_time_", s, "_", d)]]
             sim_time <- if (!is.null(sim_t_val) && !is.na(as.numeric(sim_t_val))) as.numeric(sim_t_val) else 30.0
+            sim_t_unit <- input[[paste0("uni_sim_time_unit_", s, "_", d)]] %||% "seconds"
             
             sim_m_val <- input[[paste0("uni_sim_mem_", s, "_", d)]]
             sim_mem <- if (!is.null(sim_m_val) && !is.na(as.numeric(sim_m_val))) as.numeric(sim_m_val) else 800.0
+            sim_m_unit <- input[[paste0("uni_sim_mem_unit_", s, "_", d)]] %||% "MiB"
+            
+            sim_c_val <- suppressWarnings(as.integer(input[[paste0("uni_sim_cores_", s, "_", d)]]))
+            sim_cores_used <- if (!is.na(sim_c_val) && length(sim_c_val) > 0 && sim_c_val >= 1L) sim_c_val else 1L
             
             sim_file <- input[[paste0("file_uni_sim_", s, "_", d)]]
             has_upload_sim <- !is.null(sim_file) && nrow(sim_file) > 0
@@ -6646,7 +6799,7 @@ server <- function(input, output, session) {
             
             summary_rows[[length(summary_rows) + 1]] <- extract_dataset_summary(
               sim_mat_d, role = "Simulated", method_name = paste0(sim_name, " (", d_label, ")"),
-              modality = "Single-Cell (Counts)", cell_types = ct_vec, batch_info = bt_vec
+              modality = mod_label, cell_types = ct_vec, batch_info = bt_vec
             )
             
             n_cores_uni <- as.integer(input$num_uni_cores %||% default_n_cores)
@@ -6655,11 +6808,16 @@ server <- function(input, output, session) {
             res_sd <- evaluate_simulation_accuracy(
               ref_data = ref_mat_d,
               sim_data = sim_mat_d,
+              modality = mod_label,
               memory_mb = sim_mem,
               elapsed_time = sim_time,
               compute_bivariate = TRUE,
               threads = n_cores_uni,
-              verbose = FALSE
+              verbose = FALSE,
+              time_unit = sim_t_unit,
+              memory_unit = sim_m_unit,
+              sim_cores = sim_cores_used,
+              include_trajectory = FALSE
             )
             tbl_sd <- if (!is.null(res_sd$metrics_summary_table)) {
               res_sd$metrics_summary_table
@@ -6795,51 +6953,35 @@ server <- function(input, output, session) {
               }, silent = TRUE)
             }
             
-            # Trajectory & Lineage Topology (Category VII)
-            if (!any(grepl("Trajectory", tbl_sd$Category, ignore.case = TRUE))) {
+            # Trajectory & Lineage Topology (Category VII - scRNA-seq only)
+            if (!is_atac_mode && !any(grepl("Trajectory", tbl_sd$Category, ignore.case = TRUE))) {
               try({
                 traj_sd <- evaluate_trajectory_metrics(
                   ref_data = ref_mat_d,
                   sim_data = sim_mat_d,
                   cell_types_ref = ct_ref,
-                  cell_types_sim = ct_sim
+                  cell_types_sim = ct_sim,
+                  threads = n_cores_uni
+                )
+                traj_spec <- list(
+                  list(field = "him", prop = "trajectory_topology"),
+                  list(field = "edge_flip", prop = "trajectory_topology"),
+                  list(field = "geodesic_correlation", prop = "geodesic_ordering"),
+                  list(field = "F1_branches", prop = "branch_concordance"),
+                  list(field = "wcor_features", prop = "dynamic_features")
                 )
                 traj_rows <- list()
-                if (!is.null(traj_sd$pseudotime_correlation) && !is.na(traj_sd$pseudotime_correlation)) {
-                  traj_rows[[length(traj_rows) + 1]] <- data.frame(
-                    Category = "(VII) Trajectory & Lineage Topology",
-                    Property = "pseudotime",
-                    Metric = "pseudotime_correlation",
-                    Value = as.numeric(traj_sd$pseudotime_correlation),
-                    stringsAsFactors = FALSE
-                  )
-                }
-                if (!is.null(traj_sd$tree_height_rmse) && !is.na(traj_sd$tree_height_rmse)) {
-                  traj_rows[[length(traj_rows) + 1]] <- data.frame(
-                    Category = "(VII) Trajectory & Lineage Topology",
-                    Property = "lineage_tree",
-                    Metric = "tree_height_rmse",
-                    Value = as.numeric(traj_sd$tree_height_rmse),
-                    stringsAsFactors = FALSE
-                  )
-                }
-                if (!is.null(traj_sd$graph_alignment) && !is.na(traj_sd$graph_alignment)) {
-                  traj_rows[[length(traj_rows) + 1]] <- data.frame(
-                    Category = "(VII) Trajectory & Lineage Topology",
-                    Property = "trajectory_graph",
-                    Metric = "graph_alignment",
-                    Value = as.numeric(traj_sd$graph_alignment),
-                    stringsAsFactors = FALSE
-                  )
-                }
-                if (!is.null(traj_sd$lineage_expression_fidelity) && !is.na(traj_sd$lineage_expression_fidelity)) {
-                  traj_rows[[length(traj_rows) + 1]] <- data.frame(
-                    Category = "(VII) Trajectory & Lineage Topology",
-                    Property = "lineage_dynamics",
-                    Metric = "lineage_expression_fidelity",
-                    Value = as.numeric(traj_sd$lineage_expression_fidelity),
-                    stringsAsFactors = FALSE
-                  )
+                for (ts_item in traj_spec) {
+                  tval <- traj_sd[[ts_item$field]]
+                  if (!is.null(tval) && length(tval) == 1L && is.finite(tval)) {
+                    traj_rows[[length(traj_rows) + 1]] <- data.frame(
+                      Category = "(VII) Trajectory & Lineage Topology",
+                      Property = ts_item$prop,
+                      Metric = ts_item$field,
+                      Value = as.numeric(tval),
+                      stringsAsFactors = FALSE
+                    )
+                  }
                 }
                 if (length(traj_rows) > 0) tbl_sd <- rbind(tbl_sd, do.call(rbind, traj_rows))
               }, silent = TRUE)
@@ -6847,6 +6989,7 @@ server <- function(input, output, session) {
             
             tbl_sd$Method <- sim_name
             tbl_sd$Dataset <- d_label
+            if (!"Modality" %in% colnames(tbl_sd)) tbl_sd$Modality <- toupper(mod_key)
             if ("Value" %in% colnames(tbl_sd)) tbl_sd$Score_Raw <- tbl_sd$Value
             if (!"Score" %in% colnames(tbl_sd) && "Value" %in% colnames(tbl_sd)) tbl_sd$Score <- tbl_sd$Value
             if (!"Score_Norm" %in% colnames(tbl_sd) && "Score" %in% colnames(tbl_sd)) tbl_sd$Score_Norm <- tbl_sd$Score
@@ -6857,6 +7000,11 @@ server <- function(input, output, session) {
         
         if (length(results_list) == 0) stop("Please upload reference matrix and at least one simulated matrix.")
         
+        all_res_cols <- unique(unlist(lapply(results_list, colnames)))
+        results_list <- lapply(results_list, function(d_item) {
+          for (mc in setdiff(all_res_cols, colnames(d_item))) d_item[[mc]] <- NA
+          d_item[, all_res_cols, drop = FALSE]
+        })
         combined_df <- do.call(rbind, results_list)
         combined_df <- standardize_benchmark_categories(combined_df)
         
@@ -6868,6 +7016,8 @@ server <- function(input, output, session) {
           } else {
             existing_clean <- rv$benchmark_df[!rv$benchmark_df$Method %in% unique(combined_df$Method), , drop = FALSE]
           }
+          if ("Sim_Cores" %in% colnames(combined_df) && !"Sim_Cores" %in% colnames(existing_clean)) existing_clean$Sim_Cores <- NA_integer_
+          if ("Sim_Cores" %in% colnames(existing_clean) && !"Sim_Cores" %in% colnames(combined_df)) combined_df$Sim_Cores <- NA_integer_
           common_cols <- intersect(colnames(existing_clean), colnames(combined_df))
           rv$benchmark_df <- rbind(existing_clean[, common_cols, drop = FALSE], combined_df[, common_cols, drop = FALSE])
         } else {
@@ -7003,7 +7153,26 @@ server <- function(input, output, session) {
       dataset_rows <- lapply(seq_len(n_dsets), function(d) {
         dname_custom <- input[[paste0("multi_dset_name_", d)]]
         dname_disp <- if (!is.null(dname_custom) && trimws(dname_custom) != "") dname_custom else sprintf("Dataset %d", d)
+        scal_mode_id <- paste0("multi_sim_scal_mode_", s, "_", d)
+        cur_scal_mode <- isolate(input[[scal_mode_id]]) %||% (if (is_unpaired) "separate" else "combined")
         sim_def <- get_default_sim_scalability(s, d, "multiomics")
+        cur_t_r  <- isolate(input[[paste0("multi_sim_time_rna_", s, "_", d)]]) %||% round(sim_def$time * 0.45, 1)
+        cur_tu_r <- isolate(input[[paste0("multi_sim_time_unit_rna_", s, "_", d)]]) %||% "seconds"
+        cur_m_r  <- isolate(input[[paste0("multi_sim_mem_rna_", s, "_", d)]]) %||% round(sim_def$mem * 0.85, 0)
+        cur_mu_r <- isolate(input[[paste0("multi_sim_mem_unit_rna_", s, "_", d)]]) %||% "MiB"
+        cur_c_r  <- isolate(input[[paste0("multi_sim_cores_rna_", s, "_", d)]]) %||% 1L
+
+        cur_t_a  <- isolate(input[[paste0("multi_sim_time_atac_", s, "_", d)]]) %||% round(sim_def$time * 0.55, 1)
+        cur_tu_a <- isolate(input[[paste0("multi_sim_time_unit_atac_", s, "_", d)]]) %||% "seconds"
+        cur_m_a  <- isolate(input[[paste0("multi_sim_mem_atac_", s, "_", d)]]) %||% round(sim_def$mem * 0.95, 0)
+        cur_mu_a <- isolate(input[[paste0("multi_sim_mem_unit_atac_", s, "_", d)]]) %||% "MiB"
+        cur_c_a  <- isolate(input[[paste0("multi_sim_cores_atac_", s, "_", d)]]) %||% 1L
+
+        cur_t_p  <- isolate(input[[paste0("multi_sim_time_", s, "_", d)]]) %||% sim_def$time
+        cur_tu_p <- isolate(input[[paste0("multi_sim_time_unit_", s, "_", d)]]) %||% "seconds"
+        cur_m_p  <- isolate(input[[paste0("multi_sim_mem_", s, "_", d)]]) %||% sim_def$mem
+        cur_mu_p <- isolate(input[[paste0("multi_sim_mem_unit_", s, "_", d)]]) %||% "MiB"
+        cur_c_p  <- isolate(input[[paste0("multi_sim_cores_", s, "_", d)]]) %||% 1L
         
         div(
           class = "mb-2 p-3 rounded",
@@ -7012,34 +7181,62 @@ server <- function(input, output, session) {
             class = "d-flex align-items-center mb-2",
             span(class = "badge text-white me-2", style = "background: #4F46E5;", sprintf("Dataset %d", d)),
             tags$b(sprintf("Simulated Multiomics Data for: %s", dname_disp), style = "color: #312E81; font-size: 0.90rem;"),
-            tags$small(class = "text-muted ms-2", "(specify simulated RNA & ATAC, runtime, and Peak RAM (MiB) for this dataset)")
+            tags$small(class = "text-muted ms-2", "(specify simulated RNA & ATAC files, runtime, Peak RAM, and simulation cores used)")
           ),
-          if (is_unpaired) {
-            tagList(
-              fluidRow(
-                column(6, fileInput(paste0("file_multi_sim_rna_", s, "_", d), sprintf("Simulated RNA for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt"))),
-                column(6, fileInput(paste0("file_multi_sim_atac_", s, "_", d), sprintf("Simulated ATAC for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt")))
-              ),
+          fluidRow(
+            column(6, fileInput(paste0("file_multi_sim_rna_", s, "_", d), sprintf("Simulated RNA for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt"))),
+            column(6, fileInput(paste0("file_multi_sim_atac_", s, "_", d), sprintf("Simulated ATAC for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt")))
+          ),
+          div(
+            style = "background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;",
+            div(
+              class = "d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2",
+              div(style = "font-size: 0.76rem; font-weight: 700; color: #475569;",
+                  icon("microchip", class = "me-1 text-primary"),
+                  "Simulation Scalability & Hardware Metrics:"),
               div(
-                style = "background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;",
-                div(style = "font-size: 0.76rem; font-weight: 700; color: #475569; margin-bottom: 4px;",
-                    icon("stopwatch", class = "me-1 text-primary"), "Dual / Flexible Scalability Metrics (Unpaired Simulator):"),
+                style = "font-size: 0.78rem;",
+                radioButtons(
+                  scal_mode_id, NULL,
+                  choices = c(
+                    "Together (RNA + ATAC Combined)" = "combined",
+                    "Separate (RNA & ATAC Independently)" = "separate"
+                  ),
+                  selected = cur_scal_mode,
+                  inline = TRUE
+                )
+              )
+            ),
+            conditionalPanel(
+              condition = sprintf("input['%s'] == 'combined'", scal_mode_id),
+              fluidRow(
+                column(3, numericInput(paste0("multi_sim_time_", s, "_", d), "Combined Runtime:", value = cur_t_p, min = 0.001, step = 1)),
+                column(2, selectInput(paste0("multi_sim_time_unit_", s, "_", d), "Time Unit:", choices = c("Seconds (s)" = "seconds", "Minutes (min)" = "minutes"), selected = cur_tu_p)),
+                column(3, numericInput(paste0("multi_sim_mem_", s, "_", d), "Combined Peak RAM:", value = cur_m_p, min = 0.1, step = 10)),
+                column(2, selectInput(paste0("multi_sim_mem_unit_", s, "_", d), "RAM Unit:", choices = c("MiB" = "MiB", "MB" = "MB"), selected = cur_mu_p)),
+                column(2, numericInput(paste0("multi_sim_cores_", s, "_", d), "Cores Used:", value = cur_c_p, min = 1L, max = 512L, step = 1L))
+              )
+            ),
+            conditionalPanel(
+              condition = sprintf("input['%s'] == 'separate'", scal_mode_id),
+              tagList(
                 fluidRow(
-                  column(3, numericInput(paste0("multi_sim_time_rna_", s, "_", d), "RNA Runtime (s):", value = round(sim_def$time * 0.45, 1), min = 0.1, step = 1)),
-                  column(3, numericInput(paste0("multi_sim_mem_rna_", s, "_", d), "RNA Peak RAM (MiB):", value = round(sim_def$mem * 0.85, 0), min = 1, step = 10)),
-                  column(3, numericInput(paste0("multi_sim_time_atac_", s, "_", d), "ATAC Runtime (s):", value = round(sim_def$time * 0.55, 1), min = 0.1, step = 1)),
-                  column(3, numericInput(paste0("multi_sim_mem_atac_", s, "_", d), "ATAC Peak RAM (MiB):", value = round(sim_def$mem * 0.95, 0), min = 1, step = 10))
+                  column(3, numericInput(paste0("multi_sim_time_rna_", s, "_", d), "RNA Runtime:", value = cur_t_r, min = 0.001, step = 1)),
+                  column(2, selectInput(paste0("multi_sim_time_unit_rna_", s, "_", d), "Time Unit:", choices = c("Seconds (s)" = "seconds", "Minutes (min)" = "minutes"), selected = cur_tu_r)),
+                  column(3, numericInput(paste0("multi_sim_mem_rna_", s, "_", d), "RNA Peak RAM:", value = cur_m_r, min = 0.1, step = 10)),
+                  column(2, selectInput(paste0("multi_sim_mem_unit_rna_", s, "_", d), "RAM Unit:", choices = c("MiB" = "MiB", "MB" = "MB"), selected = cur_mu_r)),
+                  column(2, numericInput(paste0("multi_sim_cores_rna_", s, "_", d), "RNA Cores:", value = cur_c_r, min = 1L, max = 512L, step = 1L))
+                ),
+                fluidRow(
+                  column(3, numericInput(paste0("multi_sim_time_atac_", s, "_", d), "ATAC Runtime:", value = cur_t_a, min = 0.001, step = 1)),
+                  column(2, selectInput(paste0("multi_sim_time_unit_atac_", s, "_", d), "Time Unit:", choices = c("Seconds (s)" = "seconds", "Minutes (min)" = "minutes"), selected = cur_tu_a)),
+                  column(3, numericInput(paste0("multi_sim_mem_atac_", s, "_", d), "ATAC Peak RAM:", value = cur_m_a, min = 0.1, step = 10)),
+                  column(2, selectInput(paste0("multi_sim_mem_unit_atac_", s, "_", d), "RAM Unit:", choices = c("MiB" = "MiB", "MB" = "MB"), selected = cur_mu_a)),
+                  column(2, numericInput(paste0("multi_sim_cores_atac_", s, "_", d), "ATAC Cores:", value = cur_c_a, min = 1L, max = 512L, step = 1L))
                 )
               )
             )
-          } else {
-            fluidRow(
-              column(4, fileInput(paste0("file_multi_sim_rna_", s, "_", d), sprintf("Simulated RNA for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt"))),
-              column(4, fileInput(paste0("file_multi_sim_atac_", s, "_", d), sprintf("Simulated ATAC for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt"))),
-              column(2, numericInput(paste0("multi_sim_time_", s, "_", d), "Runtime (s):", value = sim_def$time, min = 0.1, step = 1)),
-              column(2, numericInput(paste0("multi_sim_mem_", s, "_", d), "Peak RAM (MiB):", value = sim_def$mem, min = 1, step = 10))
-            )
-          }
+          )
         )
       })
       
@@ -7194,12 +7391,33 @@ server <- function(input, output, session) {
               all_sim_mats[[paste0(sim_name, "_ATAC_", d_label)]] <- sim_atac_d
 
               sc_def <- get_default_sim_scalability(s_idx, 1L, "multiomics")
-              sim_time <- sc_def$time
-              sim_mem <- sc_def$mem
+              sim_time <- sc_def$time; sim_t_unit <- "seconds"
+              sim_mem <- sc_def$mem;   sim_m_unit <- "MiB"
+              sim_cores_used <- 1L
               if (!is.null(scal_tbl) && "Method" %in% colnames(scal_tbl) && sim_name %in% scal_tbl$Method) {
                 sc_row <- scal_tbl[scal_tbl$Method == sim_name, , drop = FALSE][1, , drop = FALSE]
-                if ("Runtime_Seconds" %in% colnames(sc_row) && is.finite(sc_row$Runtime_Seconds)) sim_time <- as.numeric(sc_row$Runtime_Seconds)
-                if ("PeakRAM_MiB" %in% colnames(sc_row) && is.finite(sc_row$PeakRAM_MiB)) sim_mem <- as.numeric(sc_row$PeakRAM_MiB)
+                t_cands <- c("Total_Runtime_Seconds", "Runtime_Seconds")
+                t_hit <- t_cands[t_cands %in% colnames(sc_row)]
+                t_hit <- t_hit[vapply(t_hit, function(col) is.finite(sc_row[[col]]), logical(1))]
+                if (length(t_hit) > 0) {
+                  sim_time <- as.numeric(sc_row[[t_hit[1]]]); sim_t_unit <- "seconds"
+                } else if ("Runtime_Minutes" %in% colnames(sc_row) && is.finite(sc_row$Runtime_Minutes)) {
+                  sim_time <- as.numeric(sc_row$Runtime_Minutes); sim_t_unit <- "minutes"
+                }
+                m_cands <- c("Total_PeakRAM_MiB", "PeakRAM_MiB")
+                m_hit <- m_cands[m_cands %in% colnames(sc_row)]
+                m_hit <- m_hit[vapply(m_hit, function(col) is.finite(sc_row[[col]]), logical(1))]
+                if (length(m_hit) > 0) {
+                  sim_mem <- as.numeric(sc_row[[m_hit[1]]]); sim_m_unit <- "MiB"
+                } else if ("PeakRAM_MB" %in% colnames(sc_row) && is.finite(sc_row$PeakRAM_MB)) {
+                  sim_mem <- as.numeric(sc_row$PeakRAM_MB); sim_m_unit <- "MB"
+                }
+                core_cands <- c("Sim_Cores", "Cores_Used", "Cores", "n_cores")
+                core_hit <- core_cands[core_cands %in% colnames(sc_row)]
+                core_hit <- core_hit[vapply(core_hit, function(col) is.finite(sc_row[[col]]), logical(1))]
+                if (length(core_hit) > 0) {
+                  sim_cores_used <- max(1L, as.integer(sc_row[[core_hit[1]]]))
+                }
               }
 
               incProgress(0.8 / max(1, length(sim_names_vec)), detail = sprintf("Evaluating %s on %s...", sim_name, d_label))
@@ -7224,7 +7442,10 @@ server <- function(input, output, session) {
                 elapsed_time = sim_time,
                 compute_bivariate = TRUE,
                 threads = n_cores_multi,
-                verbose = FALSE
+                verbose = FALSE,
+                time_unit = sim_t_unit,
+                memory_unit = sim_m_unit,
+                sim_cores = sim_cores_used
               )
               tbl_m_sd <- res_multi_sd$metrics_summary_table %||% res_multi_sd$benchmark_summary_table %||% res_multi_sd$summary_table
               if (!is.null(tbl_m_sd) && is.data.frame(tbl_m_sd) && nrow(tbl_m_sd) > 0) {
@@ -7315,20 +7536,58 @@ server <- function(input, output, session) {
             sim_atac_file <- input[[paste0("file_multi_sim_atac_", s, "_", d)]]
             if (is.null(sim_rna_file) || is.null(sim_atac_file)) next
             
+            scal_mode <- input[[paste0("multi_sim_scal_mode_", s, "_", d)]] %||% (if (is_paired) "combined" else "separate")
             t_r <- input[[paste0("multi_sim_time_rna_", s, "_", d)]]
             t_a <- input[[paste0("multi_sim_time_atac_", s, "_", d)]]
+            tu_r <- input[[paste0("multi_sim_time_unit_rna_", s, "_", d)]] %||% "seconds"
+            tu_a <- input[[paste0("multi_sim_time_unit_atac_", s, "_", d)]] %||% "seconds"
             m_r <- input[[paste0("multi_sim_mem_rna_", s, "_", d)]]
             m_a <- input[[paste0("multi_sim_mem_atac_", s, "_", d)]]
-            
-            sim_time <- if (!is_paired && !is.null(t_r) && !is.null(t_a)) {
-              as.numeric(t_r) + as.numeric(t_a)
+            mu_r <- input[[paste0("multi_sim_mem_unit_rna_", s, "_", d)]] %||% "MiB"
+            mu_a <- input[[paste0("multi_sim_mem_unit_atac_", s, "_", d)]] %||% "MiB"
+            c_r <- suppressWarnings(as.integer(input[[paste0("multi_sim_cores_rna_", s, "_", d)]]))
+            c_a <- suppressWarnings(as.integer(input[[paste0("multi_sim_cores_atac_", s, "_", d)]]))
+
+            if (identical(scal_mode, "separate") && (!is.null(t_r) || !is.null(t_a) || !is.null(m_r) || !is.null(m_a))) {
+              t_r_val <- if (!is.null(t_r) && !is.na(as.numeric(t_r))) as.numeric(t_r) else 0
+              t_a_val <- if (!is.null(t_a) && !is.na(as.numeric(t_a))) as.numeric(t_a) else 0
+              m_r_val <- if (!is.null(m_r) && !is.na(as.numeric(m_r))) as.numeric(m_r) else NA_real_
+              m_a_val <- if (!is.null(m_a) && !is.na(as.numeric(m_a))) as.numeric(m_a) else NA_real_
+              c_r_val <- if (!is.na(c_r) && length(c_r) > 0 && c_r >= 1L) c_r else 1L
+              c_a_val <- if (!is.na(c_a) && length(c_a) > 0 && c_a >= 1L) c_a else 1L
+
+              sim_time <- .convert_time_to_seconds(t_r_val, tu_r) + .convert_time_to_seconds(t_a_val, tu_a)
+              sim_t_unit <- "seconds"
+              m_parts <- c(
+                if (!is.na(m_r_val)) .convert_memory_to_mib(m_r_val, mu_r) else NA_real_,
+                if (!is.na(m_a_val)) .convert_memory_to_mib(m_a_val, mu_a) else NA_real_
+              )
+              m_parts <- m_parts[!is.na(m_parts)]
+              sim_mem <- if (length(m_parts) > 0) max(m_parts) else 1500.0
+              sim_m_unit <- "MiB"
+              sim_cores_used <- max(c(1L, c_r_val, c_a_val))
+              sep_scal_args <- list(
+                elapsed_time_rna = t_r_val, elapsed_time_atac = t_a_val,
+                time_unit_rna = tu_r, time_unit_atac = tu_a,
+                memory_mb_rna = if (!is.na(m_r_val)) m_r_val else NULL,
+                memory_mb_atac = if (!is.na(m_a_val)) m_a_val else NULL,
+                memory_unit_rna = mu_r, memory_unit_atac = mu_a,
+                sim_cores_rna = c_r_val, sim_cores_atac = c_a_val
+              )
             } else {
-              as.numeric(input[[paste0("multi_sim_time_", s, "_", d)]]) %||% 60.0
-            }
-            sim_mem <- if (!is_paired && !is.null(m_r) && !is.null(m_a)) {
-              max(as.numeric(m_r), as.numeric(m_a))
-            } else {
-              as.numeric(input[[paste0("multi_sim_mem_", s, "_", d)]]) %||% 1500.0
+              sim_time <- as.numeric(input[[paste0("multi_sim_time_", s, "_", d)]]) %||% 60.0
+              sim_t_unit <- input[[paste0("multi_sim_time_unit_", s, "_", d)]] %||% "seconds"
+              sim_mem <- as.numeric(input[[paste0("multi_sim_mem_", s, "_", d)]]) %||% 1500.0
+              sim_m_unit <- input[[paste0("multi_sim_mem_unit_", s, "_", d)]] %||% "MiB"
+              c_p <- suppressWarnings(as.integer(input[[paste0("multi_sim_cores_", s, "_", d)]]))
+              sim_cores_used <- if (!is.na(c_p) && length(c_p) > 0 && c_p >= 1L) c_p else 1L
+              sep_scal_args <- list(
+                elapsed_time_rna = NULL, elapsed_time_atac = NULL,
+                time_unit_rna = NULL, time_unit_atac = NULL,
+                memory_mb_rna = NULL, memory_mb_atac = NULL,
+                memory_unit_rna = NULL, memory_unit_atac = NULL,
+                sim_cores_rna = NULL, sim_cores_atac = NULL
+              )
             }
             
             incProgress(0.7 / (n_sims * n_dsets), detail = sprintf("Evaluating %s on %s...", sim_name, d_label))
@@ -7362,7 +7621,20 @@ server <- function(input, output, session) {
               elapsed_time = sim_time,
               compute_bivariate = TRUE,
               threads = n_cores_multi,
-              verbose = FALSE
+              verbose = FALSE,
+              time_unit = sim_t_unit,
+              memory_unit = sim_m_unit,
+              sim_cores = sim_cores_used,
+              elapsed_time_rna = sep_scal_args$elapsed_time_rna,
+              elapsed_time_atac = sep_scal_args$elapsed_time_atac,
+              memory_mb_rna = sep_scal_args$memory_mb_rna,
+              memory_mb_atac = sep_scal_args$memory_mb_atac,
+              time_unit_rna = sep_scal_args$time_unit_rna,
+              time_unit_atac = sep_scal_args$time_unit_atac,
+              memory_unit_rna = sep_scal_args$memory_unit_rna,
+              memory_unit_atac = sep_scal_args$memory_unit_atac,
+              sim_cores_rna = sep_scal_args$sim_cores_rna,
+              sim_cores_atac = sep_scal_args$sim_cores_atac
             )
             tbl_m_sd <- if (!is.null(res_multi_sd$metrics_summary_table)) {
               res_multi_sd$metrics_summary_table
@@ -7386,6 +7658,11 @@ server <- function(input, output, session) {
         
         if (length(results_list) == 0) stop("Please upload reference RNA/ATAC and simulated files.")
         
+        all_res_cols <- unique(unlist(lapply(results_list, colnames)))
+        results_list <- lapply(results_list, function(d_item) {
+          for (mc in setdiff(all_res_cols, colnames(d_item))) d_item[[mc]] <- NA
+          d_item[, all_res_cols, drop = FALSE]
+        })
         combined_df <- do.call(rbind, results_list)
         combined_df <- standardize_benchmark_categories(combined_df)
         
@@ -7397,6 +7674,8 @@ server <- function(input, output, session) {
           } else {
             existing_clean <- rv$benchmark_df[!rv$benchmark_df$Method %in% unique(combined_df$Method), , drop = FALSE]
           }
+          if ("Sim_Cores" %in% colnames(combined_df) && !"Sim_Cores" %in% colnames(existing_clean)) existing_clean$Sim_Cores <- NA_integer_
+          if ("Sim_Cores" %in% colnames(existing_clean) && !"Sim_Cores" %in% colnames(combined_df)) combined_df$Sim_Cores <- NA_integer_
           common_cols <- intersect(colnames(existing_clean), colnames(combined_df))
           rv$benchmark_df <- rbind(existing_clean[, common_cols, drop = FALSE], combined_df[, common_cols, drop = FALSE])
         } else {
@@ -7566,6 +7845,13 @@ server <- function(input, output, session) {
       if (!"Method" %in% colnames(df) && "Simulator" %in% colnames(df)) df$Method <- df$Simulator
       if (!"Score" %in% colnames(df) && "Value" %in% colnames(df)) df$Score <- df$Value
       if (!"Score_Raw" %in% colnames(df) && "Score" %in% colnames(df)) df$Score_Raw <- df$Score
+      if (!"Sim_Cores" %in% colnames(df)) {
+        ch <- intersect(c("Cores_Used", "Cores", "n_cores"), colnames(df))
+        if (length(ch) > 0) df$Sim_Cores <- suppressWarnings(as.integer(df[[ch[1]]]))
+      }
+      if (exists(".standardize_scalability_rows", mode = "function")) {
+        df <- .standardize_scalability_rows(df)
+      }
       df <- filter_gold_standard_metrics(df)
       df <- standardize_benchmark_categories(df)
 
@@ -7793,64 +8079,35 @@ server <- function(input, output, session) {
     }
   })
   
+  has_inspectable_matrices <- function() {
+    (!is.null(rv$all_matrices) && length(rv$all_matrices) > 0) ||
+      !is.null(rv$toy_ref) ||
+      (!is.null(rv$sim_matrices) && length(rv$sim_matrices) > 0) ||
+      (!is.null(rv$ref_matrices) && length(rv$ref_matrices) > 0)
+  }
+
+  is_dual_modality_view <- function() {
+    mode <- input$opt_data_mode %||% "demo"
+    has_mats <- has_inspectable_matrices()
+    has_dual_mats <- has_mats &&
+      any(grepl("RNA", names(rv$all_matrices %||% rv$sim_matrices), ignore.case = TRUE)) &&
+      any(grepl("ATAC", names(rv$all_matrices %||% rv$sim_matrices), ignore.case = TRUE))
+    has_dual_summary <- !is.null(rv$dataset_summary_df) &&
+      any(grepl("RNA", rv$dataset_summary_df$Modality, ignore.case = TRUE)) &&
+      any(grepl("ATAC", rv$dataset_summary_df$Modality, ignore.case = TRUE))
+    identical(mode, "multiomics") || has_dual_mats || has_dual_summary
+  }
+
   filtered_dataset_summary_df <- reactive({
     req(rv$dataset_summary_df)
     df <- rv$dataset_summary_df
-    filt <- input$opt_props_modality_filter %||% "all"
+    filt <- if (is_dual_modality_view()) (input$opt_props_modality_filter %||% "all") else "all"
     if (filt == "rna") {
       df <- df[grepl("RNA", df$Modality, ignore.case = TRUE), , drop = FALSE]
     } else if (filt == "atac") {
       df <- df[grepl("ATAC", df$Modality, ignore.case = TRUE), , drop = FALSE]
     }
     df
-  })
-
-  output$ui_dataset_summary_kpis <- renderUI({
-    if (is.null(rv$dataset_summary_df) || nrow(rv$dataset_summary_df) == 0) {
-      return(p("Dataset properties will appear here once matrices are ingested.", style = "font-size: 0.85rem; color: #94A3B8; font-style: italic;"))
-    }
-    df <- filtered_dataset_summary_df()
-    if (nrow(df) == 0) {
-      return(div(class = "alert alert-warning py-2 px-3 my-2", style = "font-size: 0.84rem;",
-                 icon("circle-info", class = "me-1"), "No datasets match the selected modality filter."))
-    }
-    filt <- input$opt_props_modality_filter %||% "all"
-    ref_idx <- which(grepl("Reference", df$Role, ignore.case = TRUE))
-    row_pick <- if (length(ref_idx) > 0) df[ref_idx[1], ] else df[1, ]
-    
-    feats_str <- if (filt == "all" && length(ref_idx) >= 2 && any(grepl("RNA", df$Modality, ignore.case = TRUE)) && any(grepl("ATAC", df$Modality, ignore.case = TRUE))) {
-      rna_idx <- which(grepl("Reference", df$Role, ignore.case = TRUE) & grepl("RNA", df$Modality, ignore.case = TRUE))[1]
-      atac_idx <- which(grepl("Reference", df$Role, ignore.case = TRUE) & grepl("ATAC", df$Modality, ignore.case = TRUE))[1]
-      if (!is.na(rna_idx) && !is.na(atac_idx)) {
-        paste0(df[rna_idx, "Features (P)"], " (RNA) + ", df[atac_idx, "Features (P)"], " (ATAC)")
-      } else {
-        row_pick[["Features (P)"]]
-      }
-    } else if (filt == "rna") {
-      paste0(row_pick[["Features (P)"]], " (RNA)")
-    } else if (filt == "atac") {
-      paste0(row_pick[["Features (P)"]], " (ATAC)")
-    } else {
-      row_pick[["Features (P)"]]
-    }
-    
-    fluidRow(
-      column(2, div(class = "stat-card", style = "border: 1px solid #E2E8F0; border-left: 3px solid #1E3A8A; padding: 10px 12px; margin-bottom: 0; background: #FFFFFF; border-radius: 6px;",
-                    div(class = "stat-number", style = "color: #0F172A; font-size: 1.35rem; font-family: monospace; font-weight: 700;", row_pick[["Cells (N)"]]),
-                    div(class = "stat-label", style = "font-size: 0.72rem; letter-spacing: 0.05em; color: #64748B;", "Cells (N)"))),
-      column(3, div(class = "stat-card", style = "border: 1px solid #E2E8F0; border-left: 3px solid #0D9488; padding: 10px 12px; margin-bottom: 0; background: #FFFFFF; border-radius: 6px;",
-                    div(class = "stat-number", style = "color: #0F172A; font-size: 1.35rem; font-family: monospace; font-weight: 700;", feats_str),
-                    div(class = "stat-label", style = "font-size: 0.72rem; letter-spacing: 0.05em; color: #64748B;", "Features (P)"))),
-      column(2, div(class = "stat-card", style = "border: 1px solid #E2E8F0; border-left: 3px solid #D97706; padding: 10px 12px; margin-bottom: 0; background: #FFFFFF; border-radius: 6px;",
-                    div(class = "stat-number", style = "color: #0F172A; font-size: 1.35rem; font-family: monospace; font-weight: 700;", row_pick[["Sparsity"]]),
-                    div(class = "stat-label", style = "font-size: 0.72rem; letter-spacing: 0.05em; color: #64748B;", "Sparsity (S%)"))),
-      column(3, div(class = "stat-card", style = "border: 1px solid #E2E8F0; border-left: 3px solid #6366F1; padding: 10px 12px; margin-bottom: 0; background: #FFFFFF; border-radius: 6px;",
-                    div(class = "stat-number", style = "color: #0F172A; font-size: 1.35rem; font-family: monospace; font-weight: 700;", row_pick[["Cell Types (Groups)"]]),
-                    div(class = "stat-label", style = "font-size: 0.72rem; letter-spacing: 0.05em; color: #64748B;", "Biological Groups (K)"))),
-      column(2, div(class = "stat-card", style = "border: 1px solid #E2E8F0; border-left: 3px solid #0284C7; padding: 10px 12px; margin-bottom: 0; background: #FFFFFF; border-radius: 6px;",
-                    div(class = "stat-number", style = "color: #0F172A; font-size: 1.35rem; font-family: monospace; font-weight: 700;", row_pick[["Batches"]]),
-                    div(class = "stat-label", style = "font-size: 0.72rem; letter-spacing: 0.05em; color: #64748B;", "Batches (B)")))
-    )
   })
   
   output$table_dataset_summary <- renderDT({
@@ -8184,7 +8441,7 @@ server <- function(input, output, session) {
           class = "mb-3",
           p(
             "This section provides real Option B (Strict S4 Seurat v5) plant single-cell multiomics demo datasets and pre-computed benchmarks across ",
-            tags$strong("48 curated evaluation metrics"), " in 8 scientific categories. ",
+            tags$strong("56 curated evaluation measures"), " in 8 scientific categories. ",
             "Each demo object stores raw sparse integer ", tags$code("counts"), " (200 genes / 200 peaks), harmonized ",
             tags$code("cell_type"), " (4 clusters, 25 cells each), ", tags$code("batch"), " (2 replicates), and joint dimensional reductions (", tags$code("integrated"), " / ", tags$code("pca"), ").",
             style = "font-size: 0.88rem; color: #334155; line-height: 1.6;"
@@ -8223,7 +8480,7 @@ server <- function(input, output, session) {
             div(
               icon("check-circle", class = "text-success me-2", style = "font-size: 1.25rem;"),
               span(style = "color: #166534; font-weight: 600; font-size: 0.90rem;",
-                   "Option B Demo benchmark loaded: Rice Bud (Paired, 6 simulators) & Soybean Root (Unpaired, 3 simulators) across 48 curated metrics."),
+                   "Option B Demo benchmark loaded: Rice Bud (Paired, 6 simulators) & Soybean Root (Unpaired, 3 simulators) across 56 curated evaluation measures."),
               div(style = "color: #15803D; font-size: 0.82rem; margin-top: 2px;", 
                   "Inspect matrices in 'View Uploaded Data' or examine properties and rankings in 'Dataset properties':")
             ),
@@ -8272,7 +8529,7 @@ server <- function(input, output, session) {
           div(
             style = "color: #0369A1; line-height: 1.55;",
             tags$b(icon("circle-info", class = "me-1 text-info"), "Exact Single-Cell Metric Measurement Capacity: ", style = "color: #0C4A6E;"),
-            "Count matrix alone measures ", tags$b("24 metrics (scRNA)", style = "color: #0C4A6E;"), " / ", tags$b("22 metrics (scATAC)", style = "color: #0C4A6E;"), " (Distributional properties, correlations, zero-inflation curves, trajectory). ",
+            "Count matrix alone measures ", tags$b("24 metrics (scRNA)", style = "color: #0C4A6E;"), " / ", tags$b("18 metrics (scATAC)", style = "color: #0C4A6E;"), " (Distributional properties, correlations, zero-inflation curves; plus scRNA-seq dynverse trajectory metrics). ",
             "Uploading ", tags$span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "+ Cell Types"), 
             " unlocks ", tags$b("44 metrics (scRNA)", style = "color: #0C4A6E;"), " / ", tags$b("36 metrics (scATAC)", style = "color: #0C4A6E;"), " (clustering concordance, ARI, NMI, SimBench biological signal fidelity). ",
             "Uploading ", tags$span(class = "badge bg-warning-subtle text-warning border border-warning-subtle", "+ Batch Info"), 
@@ -8316,7 +8573,7 @@ server <- function(input, output, session) {
           )
         ),
         card_body(
-          p("For each simulator, upload the simulated count matrix corresponding to each dataset above, along with observed runtime and Peak RAM (MiB):",
+          p("For each simulator, upload the simulated count matrix corresponding to each dataset above, along with runtime (s or min), Peak RAM (MiB or MB), and cores used:",
             style = "font-size: 0.82rem; color: #64748B; margin-bottom: 12px;"),
           uiOutput("ui_uni_sim_cards")
         )
@@ -8383,12 +8640,12 @@ server <- function(input, output, session) {
           div(
             style = "color: #3730A3; line-height: 1.55;",
             tags$b(icon("circle-info", class = "me-1 text-indigo"), "Exact Multiomics Metric Measurement Capacity: ", style = "color: #1E1B4B;"),
-            "Paired RNA + ATAC matrices alone evaluate ", tags$b("30 / 48 metrics", style = "color: #1E1B4B;"), " (unimodal properties for both layers + Category VI Cross-Modal Coupling, FOSCTTM alignment, Match@1, cell Pearson cor, and regulatory linkages). ",
+            "Paired RNA + ATAC matrices alone evaluate ", tags$b("35 / 56 metrics", style = "color: #1E1B4B;"), " (unimodal properties for both layers + Category VI Multiomics Integration, Category VII dynverse trajectory, and Category VIII Scalability). ",
             "Including ", tags$span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "+ Cell Types"), " unlocks ",
-            tags$b("42 / 48 metrics", style = "color: #1E1B4B;"), ". Adding ",
+            tags$b("49 / 56 metrics", style = "color: #1E1B4B;"), ". Adding ",
             tags$span(class = "badge bg-warning-subtle text-warning border border-warning-subtle", "+ Batch Info"), 
-            " unlocks ", tags$b("all 48 / 48 metrics across all 8 categories", style = "color: #1E1B4B;"), ". ",
-            "In Unpaired mode: 26 / 48 metrics (counts alone) and up to 41 / 48 metrics (with cell types and batches)."
+            " unlocks ", tags$b("all 56 / 56 metrics across all 8 categories", style = "color: #1E1B4B;"), ". ",
+            "In Unpaired mode: 30 / 56 metrics (counts alone) and up to 51 / 56 metrics (with cell types and batches)."
           ),
           actionLink(
             "btn_show_metadata_format_multi_hint",
@@ -8428,7 +8685,7 @@ server <- function(input, output, session) {
           )
         ),
         card_body(
-          p("For each simulator, upload simulated RNA and ATAC count matrices corresponding to each dataset above, along with runtime and Peak RAM (MiB):",
+          p("For each simulator, upload simulated RNA and ATAC count matrices corresponding to each dataset above, along with runtime (s or min), Peak RAM (MiB or MB), and cores used:",
             style = "font-size: 0.82rem; color: #64748B; margin-bottom: 12px;"),
           uiOutput("ui_multi_sim_cards")
         )
@@ -8490,7 +8747,7 @@ server <- function(input, output, session) {
                 ),
                 card_body(
                   style = "padding: 24px;",
-                  p("Upload a previously saved benchmark result session (.rds or .csv) from scSimEval to instantly reproduce all leaderboards, bubble matrices, diagnostic figures, and master tables without rerunning heavy evaluations. Check 'Add to current benchmark results' to combine multiple datasets and compute cross-dataset simulator average fidelity across all 48 curated evaluation metrics.",
+                  p("Upload a previously saved benchmark result session (.rds or .csv) from scSimEval to instantly reproduce all leaderboards, bubble matrices, diagnostic figures, and master tables without rerunning heavy evaluations. Check 'Add to current benchmark results' to combine multiple datasets and compute cross-dataset simulator average fidelity across all 56 curated evaluation measures.",
                     style = "color: #475569; font-size: 0.88rem; line-height: 1.5; margin-bottom: 16px;"),
                   div(
                     style = "max-width: 600px;",
@@ -8599,7 +8856,7 @@ server <- function(input, output, session) {
             if (mode != "demo") actionButton("btn_back_to_upload", "Upload & Configure Data", class = "btn btn-sm btn-outline-secondary", icon = icon("sliders"))
           )
         ),
-        if (mode == "multiomics" || (!is.null(rv$dataset_summary_df) && any(grepl("RNA", rv$dataset_summary_df$Modality, ignore.case = TRUE)) && any(grepl("ATAC", rv$dataset_summary_df$Modality, ignore.case = TRUE)))) {
+        if (is_dual_modality_view()) {
           div(
             style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 14px; margin-top: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;",
             div(
@@ -8614,17 +8871,50 @@ server <- function(input, output, session) {
             )
           )
         },
-        uiOutput("ui_dataset_summary_kpis"),
-        div(style = "margin-top: 14px; border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px; background: #FFFFFF;",
+        div(style = "margin-top: 10px; border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px; background: #FFFFFF;",
             DTOutput("table_dataset_summary"))
       ),
-      uiOutput("ui_datahub_annotations_breakdown")
+      if (has_inspectable_matrices()) {
+        div(
+          class = "dataset-stats-box mt-4",
+          div(
+            class = "mb-2",
+            h6(tags$b("Cell & Feature Statistics"), style = "color: #0F172A; margin: 0; font-size: 0.98rem;"),
+            p("Per-cell library metrics and per-feature expression and dropout distributions across reference and simulated datasets:",
+              style = "font-size: 0.82rem; color: #64748B; margin: 0;")
+          ),
+          div(
+            style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px 16px; margin-bottom: 12px;",
+            fluidRow(
+              column(
+                5,
+                uiOutput("ui_props_stats_dataset_selector")
+              ),
+              column(
+                5,
+                radioButtons(
+                  "opt_props_stats_view_mode", "View Format:",
+                  choices = c("Cell Statistics" = "cell_stats", "Feature Statistics" = "feature_stats"),
+                  inline = TRUE, selected = "cell_stats"
+                )
+              ),
+              column(
+                2,
+                div(class = "text-end mt-3",
+                    downloadButton("download_props_stats_csv", "Export (CSV)", class = "btn btn-sm btn-outline-primary", icon = icon("download")))
+              )
+            )
+          ),
+          div(style = "border: 1px solid #E2E8F0; border-radius: 6px; padding: 6px; background: #FFFFFF;",
+              DTOutput("table_props_cell_feature_stats"))
+        )
+      }
     )
   })
 
   # Subtab 2 Renderer: View Uploaded Data
   output$ui_datahub_view_data_subtab <- renderUI({
-    has_mats <- (!is.null(rv$all_matrices) && length(rv$all_matrices) > 0) || !is.null(rv$toy_ref) || (!is.null(rv$sim_matrices) && length(rv$sim_matrices) > 0)
+    has_mats <- has_inspectable_matrices()
     mode <- input$opt_data_mode %||% "demo"
     if (!has_mats) {
       return(
@@ -8635,7 +8925,7 @@ server <- function(input, output, session) {
           h5("No Matrices Available for Inspection", style = "font-weight: 700; color: #1E293B; margin-bottom: 8px;"),
           if (mode == "demo") {
             tagList(
-              p("Load the pre-computed demo datasets (2 reference datasets and 6 simulators) to inspect count matrices (Head values, cell statistics, and feature statistics) across empirical references and simulated datasets.",
+              p("Load the pre-computed demo datasets (2 reference datasets and 6 simulators) to inspect raw count matrix previews (head values) across empirical references and simulated datasets.",
                 style = "font-size: 0.90rem; color: #64748B; margin-bottom: 20px; line-height: 1.5;"),
               actionButton("btn_empty_load_demo_view", "Load Example Benchmark (2 Datasets x 6 Simulators)", class = "btn btn-primary px-4 py-2", icon = icon("play"))
             )
@@ -8643,7 +8933,7 @@ server <- function(input, output, session) {
             tagList(
               p("Upload your reference and simulated RNA & ATAC count matrices in the ", tags$strong("Upload & Configure Data"),
                 " subtab, then click ", tags$b("Inspect & View Dataset Properties"),
-                " to inspect matrix heads, library size distributions, and gene/peak statistics.",
+                " to inspect raw count matrix previews (head values) for your RNA & ATAC datasets.",
                 style = "font-size: 0.90rem; color: #64748B; margin-bottom: 20px; line-height: 1.5;"),
               actionButton("btn_jump_to_upload_tab2", "Go to Upload & Configure Data", class = "btn btn-primary px-4 py-2", icon = icon("sliders"))
             )
@@ -8658,7 +8948,7 @@ server <- function(input, output, session) {
             tagList(
               p("Upload count matrices in the ", tags$strong("Upload & Configure Data"),
                 " subtab, then click ", tags$b("Inspect & View Dataset Properties"),
-                " to inspect raw count head values, library size distributions, and gene detection statistics across your single-cell datasets.",
+                " to inspect raw count head values across your single-cell datasets.",
                 style = "font-size: 0.90rem; color: #64748B; margin-bottom: 20px; line-height: 1.5;"),
               actionButton("btn_jump_to_upload_tab2", "Go to Upload & Configure Data", class = "btn btn-primary px-4 py-2", icon = icon("sliders"))
             )
@@ -8666,7 +8956,7 @@ server <- function(input, output, session) {
         )
       )
     }
-    is_multi_view <- identical(mode, "multiomics") || (has_mats && any(grepl("RNA", names(rv$all_matrices %||% rv$sim_matrices), ignore.case = TRUE)) && any(grepl("ATAC", names(rv$all_matrices %||% rv$sim_matrices), ignore.case = TRUE)))
+    is_multi_view <- is_dual_modality_view()
     
     div(
       div(
@@ -8674,7 +8964,7 @@ server <- function(input, output, session) {
         fluidRow(
           if (is_multi_view) {
             column(
-              3,
+              4,
               radioButtons(
                 "opt_inspect_modality_filter", tags$b(icon("filter", class = "me-1 text-primary"), "Modality:"),
                 choices = c("All" = "all", "scRNA-seq" = "rna", "scATAC-seq" = "atac"),
@@ -8683,19 +8973,11 @@ server <- function(input, output, session) {
             )
           },
           column(
-            if (is_multi_view) 4 else 5,
+            if (is_multi_view) 5 else 8,
             uiOutput("ui_inspect_dataset_selector")
           ),
           column(
             if (is_multi_view) 3 else 4,
-            radioButtons(
-              "opt_inspect_view_mode", "View Format:",
-              choices = c("Raw Values (Head)" = "matrix_head", "Cell Statistics" = "cell_stats", "Feature Statistics" = "feature_stats"),
-              inline = TRUE, selected = "matrix_head"
-            )
-          ),
-          column(
-            2,
             div(class = "text-end mt-3",
                 actionButton("btn_goto_props_from_view", "Dataset properties", class = "btn btn-sm btn-outline-secondary me-1", icon = icon("table-cells")),
                 downloadButton("download_inspect_data_csv", "Export (CSV)", class = "btn btn-sm btn-outline-primary", icon = icon("download"))
@@ -8708,46 +8990,9 @@ server <- function(input, output, session) {
           DTOutput("table_matrix_inspect"))
     )
   })
-  output$ui_datahub_annotations_breakdown <- renderUI({
-    has_ct <- !is.null(rv$cell_types) && length(rv$cell_types) > 0
-    has_bt <- !is.null(rv$batch) && length(rv$batch) > 0
-    if (!has_ct && !has_bt) return(NULL)
-    
-    fluidRow(
-      style = "margin-top: 14px;",
-      if (has_ct) {
-        ct_tbl <- as.data.frame(table(Cell_Type = rv$cell_types))
-        ct_tbl$Percentage <- sprintf("%.1f%%", ct_tbl$Freq / sum(ct_tbl$Freq) * 100)
-        colnames(ct_tbl) <- c("Cell Type / Cluster", "Cell Count", "Percentage")
-        column(
-          if (has_bt) 6 else 12,
-          div(
-            style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px;",
-            h6(tags$b(icon("layer-group", class = "me-1"), " Biological Group Distribution"), style = "color: #1E3A8A; margin-bottom: 8px; font-size: 0.88rem;"),
-            renderTable(ct_tbl, striped = TRUE, hover = TRUE, bordered = TRUE, spacing = "s")
-          )
-        )
-      },
-      if (has_bt) {
-        bt_tbl <- as.data.frame(table(Batch = rv$batch))
-        bt_tbl$Percentage <- sprintf("%.1f%%", bt_tbl$Freq / sum(bt_tbl$Freq) * 100)
-        colnames(bt_tbl) <- c("Technical Batch", "Cell Count", "Percentage")
-        column(
-          if (has_ct) 6 else 12,
-          div(
-            style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px;",
-            h6(tags$b(icon("boxes-stacked", class = "me-1"), " Technical Batch Distribution"), style = "color: #0D9488; margin-bottom: 8px; font-size: 0.88rem;"),
-            renderTable(bt_tbl, striped = TRUE, hover = TRUE, bordered = TRUE, spacing = "s")
-          )
-        )
-      }
-    )
-  })
 
-  output$ui_inspect_dataset_selector <- renderUI({
+  get_filtered_matrix_choices <- function(filt = "all") {
     choices <- list()
-    filt <- input$opt_inspect_modality_filter %||% "all"
-    
     if (!is.null(rv$all_matrices) && length(rv$all_matrices) > 0) {
       for (mname in names(rv$all_matrices)) {
         if (filt == "rna" && !grepl("RNA", mname, ignore.case = TRUE)) next
@@ -8775,25 +9020,25 @@ server <- function(input, output, session) {
       }
     }
     if (length(choices) == 0) choices[["No Matching Matrix Available"]] <- "none"
-    selectInput("sel_inspect_matrix_choice", "Select Uploaded Dataset / Matrix:", choices = choices, selected = choices[[1]])
-  })
+    choices
+  }
 
-  active_inspect_data <- reactive({
-    choice <- input$sel_inspect_matrix_choice
+  resolve_matrix_choice <- function(choice) {
     if (is.null(choice) || identical(choice, "none")) return(NULL)
-    mode <- input$opt_inspect_view_mode %||% "matrix_head"
-    
     mat <- NULL
-    if (!is.null(choice) && !is.null(rv$all_matrices) && choice %in% names(rv$all_matrices)) {
+    if (!is.null(rv$all_matrices) && choice %in% names(rv$all_matrices)) {
       mat <- rv$all_matrices[[choice]]
     } else if (identical(choice, "ref") && !is.null(rv$toy_ref)) {
       mat <- rv$toy_ref
     } else if (identical(choice, "toy_sim") && !is.null(rv$toy_sim)) {
       mat <- rv$toy_sim
-    } else if (!is.null(choice) && startsWith(choice, "sim_") && !is.null(rv$sim_matrices)) {
+    } else if (startsWith(choice, "ref_") && !is.null(rv$ref_matrices)) {
+      rname <- sub("^ref_", "", choice)
+      mat <- rv$ref_matrices[[rname]]
+    } else if (startsWith(choice, "sim_") && !is.null(rv$sim_matrices)) {
       sname <- sub("^sim_", "", choice)
       mat <- rv$sim_matrices[[sname]]
-    } else if (!is.null(choice) && !is.null(rv$sim_matrices) && choice %in% names(rv$sim_matrices)) {
+    } else if (!is.null(rv$sim_matrices) && choice %in% names(rv$sim_matrices)) {
       mat <- rv$sim_matrices[[choice]]
     } else if (!is.null(rv$toy_ref)) {
       mat <- rv$toy_ref
@@ -8806,7 +9051,11 @@ server <- function(input, output, session) {
     if (inherits(mat, "sparseMatrix") && !inherits(mat, "dgCMatrix")) {
       mat <- methods::as(mat, "dgCMatrix")
     }
-    
+    mat
+  }
+
+  compute_matrix_view_df <- function(mat, mode = "matrix_head") {
+    if (is.null(mat)) return(NULL)
     if (mode %in% c("matrix_head", "raw", "lognorm")) {
       nr <- min(50, nrow(mat))
       nc <- min(25, ncol(mat))
@@ -8862,8 +9111,74 @@ server <- function(input, output, session) {
       rownames(df) <- NULL
       list(df = df, mat = mat, type = "cell_stats")
     }
+  }
+
+  render_formatted_inspect_dt <- function(df) {
+    dt <- datatable(
+      df,
+      options = list(
+        pageLength = 10,
+        scrollX = TRUE,
+        autoWidth = TRUE,
+        dom = "ftip"
+      ),
+      rownames = FALSE,
+      class = "compact stripe hover border"
+    )
+    num_cols <- which(sapply(df, is.numeric))
+    if (length(num_cols) > 0) {
+      dt <- dt %>% formatStyle(num_cols, fontFamily = "monospace", textAlign = "right")
+    }
+    dt
+  }
+
+  output$ui_props_stats_dataset_selector <- renderUI({
+    filt <- if (is_dual_modality_view()) (input$opt_props_modality_filter %||% "all") else "all"
+    choices <- get_filtered_matrix_choices(filt)
+    selectInput("sel_props_stats_matrix_choice", "Select Dataset / Matrix:", choices = choices, selected = choices[[1]])
   })
+
+  active_props_stats_data <- reactive({
+    mat <- resolve_matrix_choice(input$sel_props_stats_matrix_choice)
+    if (is.null(mat)) return(NULL)
+    mode <- input$opt_props_stats_view_mode %||% "cell_stats"
+    compute_matrix_view_df(mat, mode)
+  })
+
+  output$table_props_cell_feature_stats <- renderDT({
+    res <- active_props_stats_data()
+    req(res, res$df)
+    render_formatted_inspect_dt(res$df)
+  })
+
+  output$download_props_stats_csv <- downloadHandler(
+    filename = function() {
+      mode <- input$opt_props_stats_view_mode %||% "cell_stats"
+      paste0("scSimEval_", mode, "_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv")
+    },
+    content = function(file) {
+      res <- active_props_stats_data()
+      req(res, res$df)
+      utils::write.csv(res$df, file, row.names = FALSE)
+    }
+  )
+
+  output$ui_inspect_dataset_selector <- renderUI({
+    filt <- if (is_dual_modality_view()) (input$opt_inspect_modality_filter %||% "all") else "all"
+    choices <- get_filtered_matrix_choices(filt)
+    selectInput("sel_inspect_matrix_choice", "Select Uploaded Dataset / Matrix:", choices = choices, selected = choices[[1]])
+  })
+
+  active_inspect_data <- reactive({
+    mat <- resolve_matrix_choice(input$sel_inspect_matrix_choice)
+    if (is.null(mat)) return(NULL)
+    compute_matrix_view_df(mat, "matrix_head")
+  })
+
   output$ui_inspect_matrix_kpis <- renderUI({
+    if (is_dual_modality_view() && identical(input$opt_inspect_modality_filter %||% "all", "all")) {
+      return(NULL)
+    }
     res <- active_inspect_data()
     if (is.null(res) || is.null(res$mat)) return(NULL)
     mat <- res$mat
@@ -8895,28 +9210,12 @@ server <- function(input, output, session) {
   output$table_matrix_inspect <- renderDT({
     res <- active_inspect_data()
     req(res, res$df)
-    dt <- datatable(
-      res$df,
-      options = list(
-        pageLength = 10,
-        scrollX = TRUE,
-        autoWidth = TRUE,
-        dom = "ftip"
-      ),
-      rownames = FALSE,
-      class = "compact stripe hover border"
-    )
-    num_cols <- which(sapply(res$df, is.numeric))
-    if (length(num_cols) > 0) {
-      dt <- dt %>% formatStyle(num_cols, fontFamily = "monospace", textAlign = "right")
-    }
-    dt
+    render_formatted_inspect_dt(res$df)
   })
 
   output$download_inspect_data_csv <- downloadHandler(
     filename = function() {
-      mode <- input$opt_inspect_view_mode %||% "view"
-      paste0("scSimEval_inspect_", mode, "_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv")
+      paste0("scSimEval_inspect_matrix_head_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv")
     },
     content = function(file) {
       res <- active_inspect_data()
@@ -9290,11 +9589,12 @@ server <- function(input, output, session) {
     mod_choice <- input$sel_bubble_modality %||% (input$sel_viz_modality %||% "all")
     if ("Modality" %in% colnames(df) && !identical(mod_choice, "all")) {
       if (identical(mod_choice, "RNA")) {
-        df <- df[df$Modality %in% c("RNA", "Computation"), , drop = FALSE]
+        df <- df[grepl("RNA", df$Modality, ignore.case = TRUE) | grepl("Comp|Scalability", df$Modality, ignore.case = TRUE) | grepl("^\\(VIII\\)", df$Category), , drop = FALSE]
       } else if (identical(mod_choice, "ATAC")) {
-        df <- df[df$Modality %in% c("ATAC", "Computation"), , drop = FALSE]
+        df <- df[grepl("ATAC", df$Modality, ignore.case = TRUE) | grepl("Comp|Scalability", df$Modality, ignore.case = TRUE) | grepl("^\\(VIII\\)", df$Category), , drop = FALSE]
+        df <- df[!grepl("^\\(VII\\)|Trajectory", df$Category, ignore.case = TRUE), , drop = FALSE]
       } else if (identical(mod_choice, "Joint")) {
-        df <- df[df$Modality %in% c("Joint (Cross-Modal)", "Computation"), , drop = FALSE]
+        df <- df[grepl("Joint|Cross|Multiomics", df$Modality, ignore.case = TRUE) | grepl("Comp|Scalability", df$Modality, ignore.case = TRUE) | grepl("^\\(VIII\\)", df$Category), , drop = FALSE]
       }
     }
     
@@ -9349,6 +9649,7 @@ server <- function(input, output, session) {
       incProgress(0.5, detail = "Generating ggplot bubble matrix...")
       p <- plot_benchmark_bubble_matrix(
         data              = df,
+        assay_modality    = input$sel_bubble_modality %||% (input$sel_viz_modality %||% "all"),
         base_size         = 11,
         compact_strips    = TRUE,
         show_missing_dots = FALSE,
@@ -9622,6 +9923,7 @@ server <- function(input, output, session) {
     }
     
     filter_mode <- input$rad_bubble_filter_mode %||% "all"
+    mod_choice <- input$sel_bubble_modality %||% (input$sel_viz_modality %||% "all")
     selected_cat <- input$sel_custom_cat %||% "all"
     selected_metrics <- input$chk_custom_metrics
     
@@ -9716,13 +10018,24 @@ server <- function(input, output, session) {
       "}",
       "",
       "# ------------------------------------------------------------------------------",
-      "# WORKFLOW STEP 4: Analytical Subsetting (Simulators & Evaluation Categories)",
+      "# WORKFLOW STEP 4: Analytical Subsetting (Simulators, Modality & Evaluation Categories)",
       "# ------------------------------------------------------------------------------",
       sprintf("selected_sims <- %s", methods_code),
       sprintf("filter_mode   <- '%s'", filter_mode),
       sprintf("selected_cat  <- '%s'", selected_cat),
       sprintf("selected_mets <- %s", metrics_code),
+      sprintf("mod_choice    <- '%s'", mod_choice),
       "",
+      "if ('Modality' %in% colnames(df) && !identical(mod_choice, 'all')) {",
+      "  if (identical(mod_choice, 'RNA')) {",
+      "    df <- df[grepl('RNA', df$Modality, ignore.case = TRUE) | grepl('Comp|Scalability', df$Modality, ignore.case = TRUE) | grepl('^\\\\(VIII\\\\)', df$Category), , drop = FALSE]",
+      "  } else if (identical(mod_choice, 'ATAC')) {",
+      "    df <- df[grepl('ATAC', df$Modality, ignore.case = TRUE) | grepl('Comp|Scalability', df$Modality, ignore.case = TRUE) | grepl('^\\\\(VIII\\\\)', df$Category), , drop = FALSE]",
+      "    df <- df[!grepl('^\\\\(VII\\\\)|Trajectory', df$Category, ignore.case = TRUE), , drop = FALSE]",
+      "  } else if (identical(mod_choice, 'Joint')) {",
+      "    df <- df[grepl('Joint|Cross|Multiomics', df$Modality, ignore.case = TRUE) | grepl('Comp|Scalability', df$Modality, ignore.case = TRUE) | grepl('^\\\\(VIII\\\\)', df$Category), , drop = FALSE]",
+      "  }",
+      "}",
       "if (!is.null(selected_sims) && length(selected_sims) > 0) {",
       "  df <- df[df$Method %in% selected_sims, , drop = FALSE]",
       "}",
@@ -9746,6 +10059,7 @@ server <- function(input, output, session) {
       "cat('[scSimEval Workflow] Step 5: Rendering publication comparative bubble matrix...\n')",
       "p <- plot_benchmark_bubble_matrix(",
       "  data              = df,",
+      sprintf("  assay_modality    = '%s',", mod_choice),
       "  base_size         = 11,",
       "  compact_strips    = TRUE,",
       "  show_missing_dots = FALSE,",
@@ -9869,6 +10183,13 @@ server <- function(input, output, session) {
       if ("Modality" %in% colnames(df)) {
         agg_mod <- stats::aggregate(df$Modality, by = list(Method = df$Method, Category = df$Category, Metric = df$Metric), FUN = function(x) x[1])
         agg_score$Modality <- agg_mod[[4]]
+      }
+      if ("Sim_Cores" %in% colnames(df)) {
+        agg_cores <- stats::aggregate(df$Sim_Cores, by = list(Method = df$Method, Category = df$Category, Metric = df$Metric), FUN = function(x) {
+          x_ok <- x[!is.na(x) & x >= 1L]
+          if (length(x_ok) > 0) x_ok[1] else NA_integer_
+        })
+        agg_score$Sim_Cores <- agg_cores[[4]]
       }
       return(agg_score)
     } else if (!identical(choice, "all_avg") && choice %in% all_dsets) {
@@ -10219,7 +10540,10 @@ server <- function(input, output, session) {
       "scale" = c(
         "  # Step 4: Computational Efficiency & Scalability Dashboard",
         "  cat('[scSimEval Workflow] Generating scalability benchmark dashboard...\n')",
-        sprintf("  p <- plot_scalability_benchmark(benchmark_data = df, type = '%s', base_size = 13)", input$sel_scale_type %||% "composite"),
+        sprintf("  p <- plot_scalability_benchmark(benchmark_data = df, type = '%s', time_unit = '%s', memory_unit = '%s', base_size = 13)",
+                input$sel_scale_type %||% "composite",
+                input$sel_scale_time_unit %||% "seconds",
+                input$sel_scale_mem_unit %||% "MiB"),
         "",
         "  pdf_file  <- file.path(output_dir, 'scSimEval_scalability_benchmark.pdf')",
         "  jpeg_file <- file.path(output_dir, 'scSimEval_scalability_benchmark.jpeg')",
@@ -10856,7 +11180,7 @@ server <- function(input, output, session) {
       return(
         ggplot2::ggplot() +
           ggplot2::annotate("text", x = 0.5, y = 0.58, label = "Count Matrices Not Bundled in Uploaded Summary", fontface = "bold", size = 5.2, color = "#1E293B") +
-          ggplot2::annotate("text", x = 0.5, y = 0.42, label = "This uploaded session contains complete evaluation metrics across all 48 criteria.\nRaw and simulated count matrices were not included in this summary table export.\n\nAll Leaderboards, Bubble Matrices, and Metric Summary charts (Tabs 3, 5, and 6) are fully active.", size = 3.8, color = "#64748B", lineheight = 1.3) +
+          ggplot2::annotate("text", x = 0.5, y = 0.42, label = "This uploaded session contains complete evaluation metrics across all 56 criteria.\nRaw and simulated count matrices were not included in this summary table export.\n\nAll Leaderboards, Bubble Matrices, and Metric Summary charts (Tabs 3, 5, and 6) are fully active.", size = 3.8, color = "#64748B", lineheight = 1.3) +
           ggplot2::theme_void() +
           ggplot2::theme(plot.background = ggplot2::element_rect(fill = "#F8FAFC", color = "#CBD5E1", linewidth = 1))
       )
@@ -10922,7 +11246,7 @@ server <- function(input, output, session) {
     if (rv_plot_triggers$scale == 0) {
       return(render_plot_placeholder(
         title = "Scalability Benchmark Ready to Plot",
-        desc = "Click below to confirm and visualize runtime (seconds) and peak memory usage (MiB) across simulators.",
+        desc = "Click below to confirm and visualize runtime (seconds/minutes), peak memory usage (MiB/MB), and simulation cores across simulators.",
         button_id = "btn_plot_scale_inline",
         btn_label = "Confirm & Plot Scalability",
         icon_name = "microchip"
@@ -10943,6 +11267,8 @@ server <- function(input, output, session) {
         benchmark_data = df,
         type = input$sel_scale_type,
         modality = scale_mod,
+        time_unit = input$sel_scale_time_unit %||% "seconds",
+        memory_unit = input$sel_scale_mem_unit %||% "MiB",
         base_size = 13
       )
     })
@@ -11634,7 +11960,7 @@ server <- function(input, output, session) {
       datasets                = rv$datasets,
       source_name             = rv$source_name,
       timestamp               = Sys.time(),
-      version                 = "0.99.9"
+      version                 = "0.99.10"
     )
   }
 
@@ -11942,7 +12268,7 @@ server <- function(input, output, session) {
         " scSimEval: Single-Cell Multiomics Simulation Benchmarking Studio",
         " Interactive Execution & Diagnostic Runtime Log Export",
         paste0(" Generated At:    ", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
-        paste0(" Package Version: scSimEval v0.99.9"),
+        paste0(" Package Version: scSimEval v0.99.10"),
         paste0(" R Version:       ", R.version.string),
         paste0(" Platform:        ", R.version$platform),
         paste0(" Total Entries:   ", length(entries)),

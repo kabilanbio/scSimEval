@@ -19,7 +19,8 @@ plot_benchmark_bubble_matrix(
   title = NULL,
   subtitle = NULL,
   base_size = 11,
-  show_score_labels = FALSE
+  show_score_labels = FALSE,
+  show_category_bars = TRUE
 )
 
 plot_bubble_matrix(
@@ -36,7 +37,8 @@ plot_bubble_matrix(
   title = NULL,
   subtitle = NULL,
   base_size = 11,
-  show_score_labels = FALSE
+  show_score_labels = FALSE,
+  show_category_bars = TRUE
 )
 }
 \arguments{
@@ -74,6 +76,9 @@ E.g. \code{list("scRNA-seq" = c("Splatter", "SymSim"), "Multiomics" = c("scDesig
 \item{base_size}{Numeric. Base font size. Default \code{11}.}
 
 \item{show_score_labels}{Logical. Annotate bubbles with numeric score. Default \code{FALSE}.}
+
+\item{show_category_bars}{Logical. Append a compact horizontal summary bar (normalized
+category mean score) at the right end of each category panel. Default \code{TRUE}.}
 }
 \value{
 A \code{ggplot} object rendering the multi-dimensional bubble matrix.

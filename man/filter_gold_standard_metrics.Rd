@@ -2,7 +2,7 @@
 % Please edit documentation in R/10_visualizations.R
 \name{filter_gold_standard_metrics}
 \alias{filter_gold_standard_metrics}
-\title{Filter Benchmark Data to the 48 Curated Evaluation Metrics}
+\title{Filter Benchmark Data to the Curated Evaluation Measures Suite}
 \usage{
 filter_gold_standard_metrics(df)
 }
@@ -10,12 +10,12 @@ filter_gold_standard_metrics(df)
 \item{df}{A data.frame of benchmark metrics or a scSimEval benchmark session object.}
 }
 \value{
-Cleaned data.frame containing strictly the 48 curated evaluation metrics.
+Cleaned data.frame containing the curated evaluation measures.
 }
 \description{
-Filters any benchmark results table (whether containing 72, 62, or 48 metrics)
-to the curated, non-redundant 48 evaluation metrics, eliminating
-collinear duplicate metrics ($r = 1.000$) to prevent distortion of overall
+Filters any benchmark results table to the curated 56 evaluation measures across
+all 8 canonical categories (while preserving legacy benchmark table compatibility),
+eliminating unrequested or collinear duplicate metrics to prevent distortion of
 simulator fidelity leaderboards.
 }
 \examples{

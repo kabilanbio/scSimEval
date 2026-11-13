@@ -1,9 +1,12 @@
-# Calculate Nearest-Neighbor Label Mismatch Proportion
+# Calculate Nearest-Neighbor Composition / Local Neighborhood Similarity (NN Mismatch)
 
-Integrated from countsimQC (Soneson & Robinson). Evaluates whether the
-dataset label composition in k-NN neighborhoods departs significantly
-from the overall global dataset proportion using Chi-squared tests.
-Works for both 1D numeric vectors and 2D matrices.
+Integrated from countsimQC (Soneson & Robinson). Evaluates local
+neighborhood composition by pooling reference and simulated observations
+(1D vector or 2D matrix), finding the \\k\\ nearest neighbors for each
+observation, and performing a Pearson Chi-squared goodness-of-fit test
+comparing the local neighborhood dataset proportions against the global
+dataset proportions. Returns the fraction of observations with \\p \le
+0.05\\.
 
 ## Usage
 
@@ -15,24 +18,29 @@ calc_nn_mismatch(ref, sim, k = NULL, subsample_size = 300)
 
 - ref:
 
-  Vector or matrix for reference dataset.
+  Numeric vector (1D) or 2-column matrix/data.frame (2D) of reference
+  values.
 
 - sim:
 
-  Vector or matrix for simulated dataset.
+  Numeric vector (1D) or 2-column matrix/data.frame (2D) of simulated
+  values.
 
 - k:
 
-  Number of nearest neighbors (default max(5, 0.05 \* N)).
+  Integer number of nearest neighbors. If NULL, defaults to
+  `max(5, round(0.05 * N))`.
 
 - subsample_size:
 
-  Number of subsampled points to test (default 300).
+  Maximum number of observations per dataset to subsample for speed
+  (default 300).
 
 ## Value
 
-Fraction of points with significant neighbor composition mismatch (p \<=
-0.05).
+Numeric scalar in `[0, 1]` representing the fraction of local
+neighborhoods with significant dataset composition mismatch (0 =
+well-mixed, 1 = completely separated).
 
 ## Examples
 
@@ -40,5 +48,5 @@ Fraction of points with significant neighbor composition mismatch (p \<=
 ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_nn_mismatch(ref, sim)
-#> [1] 0.03
+#> [1] 0.07
 ```

@@ -14,7 +14,8 @@ calc_cross_modality_correlation(
   sim_mod1,
   sim_mod2,
   feature_pairs = NULL,
-  method = c("spearman", "pearson")
+  method = c("spearman", "pearson"),
+  threads = 1
 )
 ```
 
@@ -44,6 +45,10 @@ calc_cross_modality_correlation(
 
   Correlation method: "spearman" (default) or "pearson".
 
+- threads:
+
+  Number of threads for parallel computation. Default is 1.
+
 ## Value
 
 A named list of the 7 univariate accuracy metrics comparing the
@@ -57,42 +62,42 @@ m <- example_multiomics
 calc_cross_modality_correlation(m$ref_multi$rna, m$ref_multi$atac,
                                 m$sim_multi$rna, m$sim_multi$atac)
 #> $cross_modality_cor_MAD
-#> [1] 0.06236202
+#> [1] 0.06554139
 #> 
 #> $cross_modality_cor_KS
-#> [1] 0.3166667
+#> [1] 0.3046283
 #> 
 #> $cross_modality_cor_MAE
-#> [1] 0.06352891
+#> [1] 0.06561941
 #> 
 #> $cross_modality_cor_RMSE
-#> [1] 0.06626403
+#> [1] 0.06804485
 #> 
 #> $cross_modality_cor_OV
-#> [1] 0.7340243
+#> [1] 0.749796
 #> 
 #> $cross_modality_cor_Bhattacharyya
-#> [1] 0.001537345
+#> [1] 0.001541849
 #> 
 #> $cross_modality_cor_Wasserstein
-#> [1] 0.06352891
+#> [1] 0.06561941
 #> 
 #> $cross_modality_cor_ECDF_DiffArea
-#> [1] 0.1199979
+#> [1] 0.1187037
 #> 
 #> $cross_modality_cor_Runs_Statistic
-#> [1] -3.300231
+#> [1] -1.466769
 #> 
 #> $cross_modality_cor_Runs_PValue
-#> [1] 0.0004830262
+#> [1] 0.0712194
 #> 
 #> $cross_modality_cor_NN_Mismatch
-#> [1] 0.1166667
+#> [1] 0.08333333
 #> 
 #> $cross_modality_cor_Between_Dataset_Silh_Global
-#> [1] 0.05927015
+#> [1] 0.06413406
 #> 
 #> $cross_modality_cor_Between_Dataset_Silh_Local
-#> [1] 0.1521508
+#> [1] 0.1401296
 #> 
 ```

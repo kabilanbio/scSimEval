@@ -1,10 +1,10 @@
 # Calculate Batch Integration Metrics
 
 Evaluates how realistically simulated technical batches mix or separate,
-computing kBET, LISI, Batch Silhouette, Shannon Entropy, PC Regression,
-CMS (Cell-Specific Mixing Score), Inverse Simpson Index (ISI), Seurat
-Mixing Metric, and optionally Local Density Differences (ldfDiff) and
-Local Structure Preservation.
+computing the five canonical Category IV (Technical Variation & Batch
+Mixing Dynamics) metrics: Batch Silhouette, PC Regression R2, CMS
+(Cell-Specific Mixing Score), Inverse Simpson Index (ISI), and
+cross-batch cell type classification macro F1.
 
 ## Usage
 
@@ -14,7 +14,6 @@ evaluate_batch_metrics(
   batch_info,
   k = NULL,
   n_pcs = 30,
-  pre_data = NULL,
   cell_types = NULL,
   verbose = FALSE
 )
@@ -40,11 +39,6 @@ evaluate_batch_metrics(
   Number of principal components for embedding evaluation. Default is
   30.
 
-- pre_data:
-
-  Optional matrix of pre-integration / reference expression data (for
-  ldfDiff and local structure).
-
 - cell_types:
 
   Optional factor or character vector of cell types for cross-batch
@@ -62,10 +56,6 @@ A named list of batch metrics:
 
   Average silhouette width using batch labels (lower is better mixed)
 
-- shannon_entropy:
-
-  Entropy of batch frequencies in local neighborhoods
-
 - pcr_r2:
 
   Total variance explained by batch in principal components (PCR)
@@ -78,30 +68,6 @@ A named list of batch metrics:
 
   Mean Inverse Simpson Index for batch mixing (CellMixS)
 
-- seurat_mixing_metric:
-
-  Mean Seurat mixing metric (Stuart et al. / CellMixS)
-
-- ldf_diff:
-
-  Mean Local Density Factor difference (if pre_data supplied)
-
-- local_structure:
-
-  Mean Local structure preservation overlap (if pre_data supplied)
-
-- kbet_rejection:
-
-  kBET rejection rate (if kBET installed)
-
-- lisi_batch:
-
-  Average batch LISI (if lisi installed)
-
-- cross_batch_accuracy:
-
-  Mean cross-batch cell type transfer accuracy (if cell_types supplied)
-
 - cross_batch_F1:
 
   Mean cross-batch cell type transfer macro F1 (if cell_types supplied)
@@ -113,39 +79,18 @@ data(example_scrna, package = "scSimEval")
 evaluate_batch_metrics(example_scrna$ref, example_scrna$batch_info,
                        cell_types = example_scrna$cell_types)
 #> $batch_silhouette
-#> [1] 0.0005078404
-#> 
-#> $shannon_entropy
-#> [1] 0.9782351
+#> [1] -0.001626347
 #> 
 #> $pcr_r2
-#> [1] 0.01241228
+#> [1] 0.01058094
 #> 
 #> $cms
-#> [1] 0.52044
+#> [1] 0
 #> 
 #> $isi
-#> [1] 1.945591
-#> 
-#> $seurat_mixing_metric
-#> [1] 9.79375
-#> 
-#> $ldf_diff
-#> [1] NA
-#> 
-#> $local_structure
-#> [1] NA
-#> 
-#> $kbet_rejection
-#> [1] NA
-#> 
-#> $lisi_batch
-#> [1] NA
-#> 
-#> $cross_batch_accuracy
-#> [1] 0.575
+#> [1] 1.923783
 #> 
 #> $cross_batch_F1
-#> [1] 0.5238095
+#> [1] 0.4460483
 #> 
 ```

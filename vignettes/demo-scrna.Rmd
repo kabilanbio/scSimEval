@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 In single-cell RNA sequencing (scRNA-seq), evaluating the quality of simulated count data is important before testing analysis tools such as clustering, batch correction, or differential expression algorithms.
 
-This tutorial shows how to evaluate synthetic scRNA-seq data step-by-step using **`scSimEval`** across the 48 curated evaluation measures suite (39 for unimodal scRNA-seq).
+This tutorial shows how to evaluate synthetic scRNA-seq data step-by-step using **`scSimEval`** across the curated evaluation measures suite.
 
 ---
 
@@ -120,20 +120,24 @@ deg_res <- evaluate_deg_fidelity(
 head(deg_res$deg_summary_table)
 ```
 
-### 2.5 Trajectory and Lineage Dynamics (Category 7)
+### 2.5 Trajectory and Lineage Topology (Category VII — dynverse Workflow)
 
-We infer developmental pseudotime and lineage branching directly from scRNA-seq expression counts using `evaluate_trajectory_metrics()`:
+Following *Saelens et al. (2019)*, `evaluate_trajectory_metrics()` runs 3-MAD QC and `scran` HVG filtering before inferring milestone MST trajectories and computing `him`, `edge_flip`, `geodesic_correlation`, `F1_branches`, and `wcor_features`:
 
 ```{r traj-eval}
 traj_res <- evaluate_trajectory_metrics(
   ref_data       = example_scrna$ref,
   sim_data       = example_scrna$sim,
   cell_types_ref = example_scrna$cell_types,
-  cell_types_sim = example_scrna$cell_types
+  cell_types_sim = example_scrna$cell_types,
+  num_trees      = 500L
 )
 
-cat("Pseudotime Spearman Correlation:", round(traj_res$pseudotime_correlation, 4), "\n")
-cat("Lineage Tree Branch Height RMSE:", round(as.numeric(traj_res$tree_height_rmse), 4), "\n")
+cat("HIM Topology Similarity:", round(traj_res$him, 4), "\n")
+cat("Edge Flip Similarity:", round(traj_res$edge_flip, 4), "\n")
+cat("Geodesic Distance Correlation:", round(traj_res$geodesic_correlation, 4), "\n")
+cat("Branch Assignment F1:", round(traj_res$F1_branches, 4), "\n")
+cat("Feature Importance wCor:", round(traj_res$wcor_features, 4), "\n")
 ```
 
 ---
@@ -175,7 +179,7 @@ plot_distribution_qc(
 
 # 5. Conclusion
 
-This demonstration illustrates how `scSimEval` comprehensively assesses scRNA-seq simulations across distributions, zero patterns, clustering, batch integration, marker genes, and trajectory dynamics across the 48 curated evaluation measures suite (39 for unimodal scRNA-seq).
+This demonstration illustrates how `scSimEval` comprehensively assesses scRNA-seq simulations across distributions, zero patterns, clustering, batch integration, marker genes, and trajectory dynamics across the curated evaluation measures suite.
 
 ```{r session-info}
 sessionInfo()

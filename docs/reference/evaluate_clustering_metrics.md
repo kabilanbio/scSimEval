@@ -1,10 +1,8 @@
 # Full Clustering Performance Evaluation
 
-Evaluates both unsupervised cluster separation (ASW, Dunn, Connectivity,
-DB, CH, Neighborhood Purity, CDI) and supervised concordance against
-ground truth labels (Clustering Accuracy ACC, Hungarian
-F1/Precision/Recall, ARI, NMI, AMI, FMI, Homogeneity, Completeness,
-V-measure).
+Evaluates both unsupervised cluster separation (ASW, DB, Neighborhood
+Purity, CDI) and supervised concordance against ground truth labels
+(ARI, NMI).
 
 ## Usage
 
@@ -15,7 +13,10 @@ evaluate_clustering_metrics(
   pred_clusters = NULL,
   dist_mat = NULL,
   cell_types = NULL,
-  ref_data = NULL
+  ref_data = NULL,
+  ref_cell_types = NULL,
+  batch_info = NULL,
+  threads = 1L
 )
 ```
 
@@ -46,6 +47,22 @@ evaluate_clustering_metrics(
 
   Optional reference data to compute reference clustering quality.
 
+- ref_cell_types:
+
+  Optional reference cell type labels (if ref_data has different cells
+  than data).
+
+- batch_info:
+
+  Optional batch labels per cell passed to
+  [`calc_cdi`](https://kabilanbio.github.io/scSimEval/reference/calc_cdi.md).
+
+- threads:
+
+  Integer number of parallel CPU threads passed to
+  [`calc_cdi`](https://kabilanbio.github.io/scSimEval/reference/calc_cdi.md)
+  (default `1L`).
+
 ## Value
 
 A named list of all clustering metrics.
@@ -53,106 +70,46 @@ A named list of all clustering metrics.
 ## Examples
 
 ``` r
-data <- matrix(stats::rnorm(200), 20, 10)
+data <- matrix(stats::rpois(200, lambda = 3), 20, 10)
 cl <- factor(rep(c("A", "B"), each = 5))
-dist_mat <- stats::dist(data)
+dist_mat <- stats::dist(t(data))
 evaluate_clustering_metrics(data, cl)
-#> Warning: NaNs produced
 #> $silhouette_sim
-#> [1] 0.0251254
+#> [1] 0.07265493
 #> 
 #> $silhouette
-#> [1] 0.0251254
-#> 
-#> $dunn_sim
-#> [1] 0.5719799
-#> 
-#> $dunn
-#> [1] 0.5719799
-#> 
-#> $connectivity_sim
-#> [1] NA
-#> 
-#> $connectivity
-#> [1] NA
-#> 
-#> $davies_bouldin_sim
-#> [1] 2.529681
+#> [1] 0.07265493
 #> 
 #> $davies_bouldin
-#> [1] 2.529681
+#> [1] 2.682595
 #> 
-#> $calinski_harabasz_sim
-#> [1] 1.249101
-#> 
-#> $calinski_harabasz
-#> [1] 1.249101
+#> $davies_bouldin_sim
+#> [1] 2.682595
 #> 
 #> $neighborhood_purity
-#> [1] 0.48
+#> [1] 0.46
 #> 
 #> $cdi
-#> [1] -5.460536
+#> [1] 4.292815
 #> 
 #> $CDI_AIC
-#> [1] -5.460536
+#> [1] 4.292815
 #> 
 #> $CDI_BIC
-#> [1] -5.400018
-#> 
-#> $clustering_accuracy
-#> [1] 0.7
-#> 
-#> $accuracy
-#> [1] 0.7
-#> 
-#> $hungarian_F1
-#> [1] 0.6969697
-#> 
-#> $hungarian_precision
-#> [1] 0.7083333
-#> 
-#> $hungarian_recall
-#> [1] 0.7
+#> [1] 4.413849
 #> 
 #> $ari
-#> [1] 0.05970149
+#> [1] 0
 #> 
 #> $ARI
-#> [1] 0.05970149
+#> [1] 0
 #> 
 #> $nmi
 #>         1 
-#> 0.1263464 
+#> 0.1470822 
 #> 
 #> $NMI
 #>         1 
-#> 0.1263464 
-#> 
-#> $ami
-#> [1] 0.0403207
-#> 
-#> $AMI
-#> [1] 0.0403207
-#> 
-#> $fmi
-#> [1] 0.48795
-#> 
-#> $FMI
-#> [1] 0.48795
-#> 
-#> $homogeneity
-#> [1] 0.1245112
-#> 
-#> $completeness
-#> [1] 0.1282364
-#> 
-#> $v_measure
-#> [1] 0.1263464
-#> 
-#> $matched_pairs
-#>   pred truth precision recall        F1
-#> 1    1     A 0.7500000    0.6 0.6666667
-#> 2    2     B 0.6666667    0.8 0.7272727
+#> 0.1470822 
 #> 
 ```

@@ -32,5 +32,5 @@ Statistical divergence between discrete probability measures.
 ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_bhattacharyya(ref, sim)
-#> [1] 0.002866129
+#> [1] 0.004823546
 ```

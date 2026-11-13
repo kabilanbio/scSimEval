@@ -29,5 +29,5 @@ data <- matrix(stats::rnorm(200), 20, 10)
 cl <- factor(rep(c("A", "B"), each = 5))
 dist_mat <- stats::dist(data)
 calc_calinski_harabasz(data, cl)
-#> [1] 0.5077945
+#> [1] 0.8093449
 ```

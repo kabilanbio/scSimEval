@@ -70,16 +70,19 @@ export(run_edger_qlf_da)
 export(evaluate_atac_da_fidelity)
 
 # 06_metrics_trajectory
-export(infer_scrna_pseudotime)
-export(infer_scrna_lineage_tree)
-export(calc_pseudotime_correlation)
-export(calc_tree_height_discrepancy)
-export(calc_trajectory_graph_alignment)
-export(calc_lineage_expression_fidelity)
+export(preprocess_trajectory_hvgs)
+export(infer_dynverse_trajectory)
+export(calc_dynverse_him)
+export(calc_dynverse_edge_flip)
+export(calc_dynverse_geodesic_correlation)
+export(calc_dynverse_f1_branches)
+export(calc_wcor_features)
 export(evaluate_trajectory_metrics)
 
 # 08_metrics_scalability
 export(benchmark_resource_usage)
+export(compute_core_seconds)
+export(compute_memory_per_core)
 
 # 09_evaluate_benchmark
 export(evaluate_simulation_accuracy)

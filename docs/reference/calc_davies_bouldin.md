@@ -29,5 +29,5 @@ data <- matrix(stats::rnorm(200), 20, 10)
 cl <- factor(rep(c("A", "B"), each = 5))
 dist_mat <- stats::dist(data)
 calc_davies_bouldin(data, cl)
-#> [1] 2.249869
+#> [1] 3.091148
 ```

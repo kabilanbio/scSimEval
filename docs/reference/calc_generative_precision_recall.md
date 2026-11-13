@@ -12,7 +12,8 @@ calc_generative_precision_recall(
   sim_mat,
   cells_as_cols = TRUE,
   k = 5,
-  max_cells = 500
+  max_cells = 500,
+  max_features = 1000
 )
 ```
 
@@ -39,6 +40,10 @@ calc_generative_precision_recall(
 
   Maximum number of cells to subsample (default 500).
 
+- max_features:
+
+  Maximum number of features to retain for speed (default 1000).
+
 ## Value
 
 A list containing Generative Precision, Generative Recall, and
@@ -47,17 +52,16 @@ Generative F1.
 ## Examples
 
 ``` r
-data <- matrix(stats::rnorm(200), 20, 10)
-cl <- factor(rep(c("A", "B"), each = 10))
-dist_mat <- stats::dist(data)
-calc_generative_precision_recall(data, cl)
+ref <- matrix(stats::rnorm(200), 20, 10)
+sim <- matrix(stats::rnorm(200), 20, 10)
+calc_generative_precision_recall(ref, sim)
 #> $generative_precision
-#> [1] NA
+#> [1] 1
 #> 
 #> $generative_recall
-#> [1] NA
+#> [1] 1
 #> 
 #> $generative_f1
-#> [1] NA
+#> [1] 1
 #> 
 ```

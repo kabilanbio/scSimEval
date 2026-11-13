@@ -4,17 +4,27 @@
 \alias{benchmark_resource_usage}
 \title{Benchmark Execution Runtime and Memory Usage}
 \usage{
-benchmark_resource_usage(expr)
+benchmark_resource_usage(expr, sim_cores = NULL)
 }
 \arguments{
 \item{expr}{Expression or function to benchmark.}
+
+\item{sim_cores}{Optional positive integer specifying CPU cores used during execution (default \code{1L}).}
 }
 \value{
-A list with elapsed seconds and peak memory allocated (MB).
+A list with elapsed seconds/minutes, peak memory allocated (MiB and MB),
+  \code{core_seconds}, \code{core_hours}, \code{memory_per_core_mib}, \code{memory_per_core_gib},
+  and \code{sim_cores}.
 }
 \description{
-Times an expression and measures change in memory allocation.
+Times an expression and measures change in memory allocation, computing both raw
+runtime/memory metrics and core-normalized Category VIII scalability indicators
+(\code{core_seconds} and \code{memory_per_core_mib}).
 }
 \examples{
 benchmark_resource_usage({ Sys.sleep(0.01); 1 + 1 })
+}
+\references{
+Lannelongue, L., et al. (2021). Green Algorithms. \emph{Advanced Science}, 8(12), 2100707.
+Holtgrewe, M., et al. (2015). \emph{Bioinformatics}, 31(12), 1904–1912.
 }

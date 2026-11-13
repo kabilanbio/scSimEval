@@ -8,12 +8,12 @@ MDS space for benchmarking single-cell simulation methods.
 ``` r
 plot_metric_mds(
   benchmark_data,
-  ordination_by = c("summaries", "simulators"),
+  ordination_by = c("simulators", "summaries"),
   by_category = FALSE,
   as_list = FALSE,
   category = NULL,
-  exclude_categories = c("(VI) Trajectory & Lineage Dynamics",
-    "(VIII) Computational Scalability"),
+  exclude_categories = c("(VII) Trajectory & Lineage Topology",
+    "(VIII) Computational Scalability & Efficiency"),
   metrics = NULL,
   normalize_scores = TRUE,
   palette = NULL,
@@ -56,8 +56,8 @@ plot_metric_mds(
 
   Character vector of categories to exclude from the ordination. Default
   is
-  `c("(VI) Trajectory & Lineage Dynamics", "(VIII) Computational Scalability")`
-  because these two categories contain only two measures each, leaving
+  `c("(VII) Trajectory & Lineage Topology", "(VIII) Computational Scalability & Efficiency")`
+  because these two categories contain only a few measures each, leaving
   the 6 canonical categories.
 
 - metrics:
@@ -110,7 +110,12 @@ res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
 #> [1/5] Extracting cell-level properties...
 #> [2/5] Extracting feature-level properties...
 #> [3/5] Computing univariate accuracy metrics...
-#> [4/5] Computing bivariate metrics (Fasano-Franceschini, Peacock, KDE zstat, 2D EMD)...
+#> [4/5] Computing bivariate metrics (Fasano-Franceschini, KDE zstat, 2D EMD)...
 #> [5/5] Computing zero-probability and manifold distances...
+#> Evaluating batch integration & confounder mixing...
+#> Evaluating scRNA-seq biological signal fidelity (Libra Pseudobulk edgeR-QLF)...
+#> calcNormFactors has been renamed to normLibSizes
+#> calcNormFactors has been renamed to normLibSizes
+#> [6/7] Evaluating trajectory and lineage topology (HVG + dynverse, scRNA-seq only)...
 #> Unimodal accuracy evaluation complete.
 ```

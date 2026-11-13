@@ -37,9 +37,9 @@ ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_runs_test(ref, sim)
 #> $runs_statistic
-#> [1] 0.8040713
+#> [1] 1.608143
 #> 
 #> $runs_pvalue
-#> [1] 0.7893221
+#> [1] 0.946098
 #> 
 ```

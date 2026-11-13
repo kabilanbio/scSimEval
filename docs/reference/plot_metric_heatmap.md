@@ -5,8 +5,8 @@ x-axis and evaluated biological/computational measures on the y-axis,
 grouped by the 8 canonical evaluation categories. Displays the exact
 original raw evaluation score in text inside every cell, with cell fill
 colors scaled by relative fidelity (direction-aware, ensuring balanced
-visual contrast across all 62 measures without scale distortion from
-high-magnitude metrics like RAM or runtime).
+visual contrast across all 48 curated evaluation measures without scale
+distortion from high-magnitude metrics like RAM or runtime).
 
 ## Usage
 
@@ -45,9 +45,9 @@ plot_metric_heatmap(
 
   Character. Cell color fill scaling: `"relative"` (default;
   direction-aware min-max normalized fidelity in \[0, 1\] across methods
-  per metric, ensuring balanced color contrast across all 62 measures
-  while cell text displays exact raw numbers) or `"raw"` (direct numeric
-  values).
+  per metric, ensuring balanced color contrast across all 48 curated
+  evaluation measures while cell text displays exact raw numbers) or
+  `"raw"` (direct numeric values).
 
 - top_n_properties:
 
@@ -93,7 +93,12 @@ res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
 #> [1/5] Extracting cell-level properties...
 #> [2/5] Extracting feature-level properties...
 #> [3/5] Computing univariate accuracy metrics...
-#> [4/5] Computing bivariate metrics (Fasano-Franceschini, Peacock, KDE zstat, 2D EMD)...
+#> [4/5] Computing bivariate metrics (Fasano-Franceschini, KDE zstat, 2D EMD)...
 #> [5/5] Computing zero-probability and manifold distances...
+#> Evaluating batch integration & confounder mixing...
+#> Evaluating scRNA-seq biological signal fidelity (Libra Pseudobulk edgeR-QLF)...
+#> calcNormFactors has been renamed to normLibSizes
+#> calcNormFactors has been renamed to normLibSizes
+#> [6/7] Evaluating trajectory and lineage topology (HVG + dynverse, scRNA-seq only)...
 #> Unimodal accuracy evaluation complete.
 ```

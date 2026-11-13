@@ -2,8 +2,8 @@
 
 ## Master Benchmarking Workflows
 
-Unified end-to-end evaluation pipelines executing the 62 canonical
-metrics across unimodal and multiomics simulations.
+Unified end-to-end evaluation pipelines executing the 56 curated
+evaluation metrics across unimodal and multiomics simulations.
 
 - [`evaluate_simulation_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simulation_accuracy.md)
   : Evaluate Comprehensive Simulation Accuracy (Unimodal Omics Layer)
@@ -11,6 +11,11 @@ metrics across unimodal and multiomics simulations.
   : Master Multiomics Simulation Benchmarking Pipeline
 - [`evaluate_multiple_datasets()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiple_datasets.md)
   : Evaluate Multiple Single-Cell Datasets Simultaneously
+- [`benchmark_simulation_suite()`](https://kabilanbio.github.io/scSimEval/reference/benchmark_simulation_suite.md)
+  : Benchmark Simulation Methods Across Multiple Single-Cell Datasets
+- [`combine_benchmark_results()`](https://kabilanbio.github.io/scSimEval/reference/combine_benchmark_results.md)
+  [`append_benchmark_results()`](https://kabilanbio.github.io/scSimEval/reference/combine_benchmark_results.md)
+  : Combine and Append Multiple Single-Cell Benchmark Results
 
 ## High-Resolution Visualization Suite (600 DPI)
 
@@ -55,6 +60,8 @@ cross-simulator benchmarking.
   Embeddings
 - [`compute_method_leaderboard()`](https://kabilanbio.github.io/scSimEval/reference/compute_method_leaderboard.md)
   : Compute Simulator Method Performance Leaderboard
+- [`zoom_plot()`](https://kabilanbio.github.io/scSimEval/reference/zoom_plot.md)
+  : Interactive Step-by-Step Zoom In and Zoom Out for Plots
 
 ## Interactive Graphical Interface (Shiny App Studio)
 
@@ -74,21 +81,20 @@ Targeted evaluation functions executing specialized metric pipelines.
 - [`evaluate_clustering_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_clustering_metrics.md)
   : Full Clustering Performance Evaluation
 - [`evaluate_trajectory_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_trajectory_metrics.md)
-  : Full Trajectory Accuracy Evaluation
+  : Full Category VII Trajectory & Lineage Topology Evaluation (dynverse
+  Workflow)
 - [`evaluate_cross_batch_prediction()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_cross_batch_prediction.md)
-  : Evaluate Cross-Batch Cell Classification Transfer Accuracy
-- [`evaluate_cross_modal_prediction()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_cross_modal_prediction.md)
-  : Cross-Modal Cell-Type Label Transfer Accuracy
+  : Evaluate Cross-Batch Cell Classification Transfer F1
+- [`evaluate_multiomics_integration()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_integration.md)
+  : Evaluate Multiomics Integration & Cross-Modal Alignment Fidelity
+  (Category VI)
 - [`evaluate_deg_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_deg_fidelity.md)
-  : Evaluate Differentially Expressed Gene (DEG) Fidelity
+  [`evaluate_rna_de_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_deg_fidelity.md)
+  : Evaluate scRNA-seq Differential Expression (DE) Fidelity
+  (Sub-category V-A)
 - [`evaluate_predictive_de_model()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_predictive_de_model.md)
-  : Predictive Cell Identity Classification Using DE / Top Variable
-  Features
-- [`evaluate_simbench_signals()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_simbench_signals.md)
-  : Evaluate the 5 SimBench Biological Signal Proportions
-- [`evaluate_epigenomic_annotation()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_epigenomic_annotation.md)
-  : Evaluate Epigenomic Supervised Cell-Type Annotation (EpiAnno /
-  SCAN-ATAC-Sim)
+  : Predictive Cell Identity Classification Using Simulated DEGs
+  (Simpipe Approach 3)
 - [`evaluate_zero_probability_curve()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_zero_probability_curve.md)
   : Evaluate Zero-Probability Dropout Curve Fidelity (Splatter &
   ZINB-WaVE)
@@ -108,10 +114,10 @@ Extraction of feature-level and cell-level empirical properties.
 - [`extract_dataset_summary()`](https://kabilanbio.github.io/scSimEval/reference/extract_dataset_summary.md)
   : Extract Dataset Dimensional Properties and Summary Statistics
 
-## Example Multiomics Datasets
+## Example Multiomics Datasets & Metadata
 
 Pre-packaged synthetic and empirical single-cell multiomics benchmark
-datasets.
+datasets and metadata annotation templates.
 
 - [`example_scrna`](https://kabilanbio.github.io/scSimEval/reference/example_scrna.md)
   : Synthetic Example scRNA-seq Benchmarking Dataset
@@ -119,14 +125,61 @@ datasets.
   : Synthetic Example scATAC-seq Benchmarking Dataset
 - [`example_multiomics`](https://kabilanbio.github.io/scSimEval/reference/example_multiomics.md)
   : Synthetic Example Multiomics Benchmarking Dataset
+- [`example_rice_bud`](https://kabilanbio.github.io/scSimEval/reference/example_rice_bud.md)
+  : Real Paired Single-Cell Multiomics Benchmark Dataset (Rice Bud,
+  Seurat v5 Option B)
+- [`example_soybean_root`](https://kabilanbio.github.io/scSimEval/reference/example_soybean_root.md)
+  : Real Unpaired Single-Cell Multiomics Benchmark Dataset (Soybean
+  Root, Seurat v5 Option B)
+- [`example_cell_types`](https://kabilanbio.github.io/scSimEval/reference/example_cell_types.md)
+  : Example Cell-Type Annotations Vector
+- [`example_batch_info`](https://kabilanbio.github.io/scSimEval/reference/example_batch_info.md)
+  : Example Batch Annotations Vector
+
+## Computational Utilities & Fast Kernels
+
+High-performance matrix calculation helpers, input validation, and
+internal dimension-reduction utilities.
+
+- [`standardize_benchmark_categories()`](https://kabilanbio.github.io/scSimEval/reference/standardize_benchmark_categories.md)
+  : Standardize Category Names in Benchmark Tables
+- [`filter_gold_standard_metrics()`](https://kabilanbio.github.io/scSimEval/reference/filter_gold_standard_metrics.md)
+  : Filter Benchmark Data to the Curated Evaluation Measures Suite
+- [`validate_sc_object()`](https://kabilanbio.github.io/scSimEval/reference/validate_sc_object.md)
+  : Validate and Standardize Single-Cell Input Objects
+- [`validate_multiomics_input()`](https://kabilanbio.github.io/scSimEval/reference/validate_multiomics_input.md)
+  : Validate and Standardize Multiomics Input Objects
+- [`calc_outlier_proportion()`](https://kabilanbio.github.io/scSimEval/reference/calc_outlier_proportion.md)
+  : Calculate Proportion of Outliers in a Numeric Vector
+- [`fast_row_vars()`](https://kabilanbio.github.io/scSimEval/reference/fast_row_vars.md)
+  : Fast Row-Wise Variances for Dense or Sparse Single-Cell Matrices
+- [`fast_col_vars()`](https://kabilanbio.github.io/scSimEval/reference/fast_col_vars.md)
+  : Fast Column-Wise Variances for Dense or Sparse Single-Cell Matrices
+- [`fast_sparse_zero_fraction_cell()`](https://kabilanbio.github.io/scSimEval/reference/fast_sparse_zero_fraction_cell.md)
+  : Fast Zero Fraction per Cell (Column-wise)
+- [`fast_sparse_zero_fraction_feature()`](https://kabilanbio.github.io/scSimEval/reference/fast_sparse_zero_fraction_feature.md)
+  : Fast Zero Fraction per Feature (Row-wise)
+- [`fast_cross_distance_sq()`](https://kabilanbio.github.io/scSimEval/reference/fast_cross_distance_sq.md)
+  : Fast BLAS-Accelerated Cross-Distance Squared Matrix
+- [`fast_pca()`](https://kabilanbio.github.io/scSimEval/reference/fast_pca.md)
+  : Fast Truncated PCA on Top Highly Variable Features
+- [`normalize_counts()`](https://kabilanbio.github.io/scSimEval/reference/normalize_counts.md)
+  : Fast Count Normalization (Log2-CPM or TF-IDF)
+- [`tfidf_transform()`](https://kabilanbio.github.io/scSimEval/reference/tfidf_transform.md)
+  : Perform TF-IDF Normalization for scATAC-seq Peak Matrices
+- [`subsample_dist_vector()`](https://kabilanbio.github.io/scSimEval/reference/subsample_dist_vector.md)
+  : Subsample Large Vectors for Accelerated Distributional Distance
+  Estimation
 
 ## Category 1: Global & Marginal Distributions
 
 Evaluation functions assessing univariate and bivariate distribution
-divergence.
+divergence across single-cell feature spaces.
 
 - [`calc_ks()`](https://kabilanbio.github.io/scSimEval/reference/calc_ks.md)
   : Calculate Kolmogorov-Smirnov Distance (1D KS)
+- [`calc_overlap()`](https://kabilanbio.github.io/scSimEval/reference/calc_overlap.md)
+  : Calculate Kernel Density Overlap Value (OV)
 - [`calc_wasserstein_1d()`](https://kabilanbio.github.io/scSimEval/reference/calc_wasserstein_1d.md)
   : Calculate 1D Wasserstein Metric / Earth Mover's Distance (WS)
 - [`calc_mad()`](https://kabilanbio.github.io/scSimEval/reference/calc_mad.md)
@@ -135,63 +188,45 @@ divergence.
   : Calculate Mean Absolute Error (MAE)
 - [`calc_rmse()`](https://kabilanbio.github.io/scSimEval/reference/calc_rmse.md)
   : Calculate Root Mean Squared Error (RMSE)
-- [`calc_overlap()`](https://kabilanbio.github.io/scSimEval/reference/calc_overlap.md)
-  : Calculate Distribution Overlapping Index (OV)
 - [`calc_bhattacharyya()`](https://kabilanbio.github.io/scSimEval/reference/calc_bhattacharyya.md)
   : Calculate Bhattacharyya Distance (BH)
-- [`calc_ecdf_diffarea()`](https://kabilanbio.github.io/scSimEval/reference/calc_ecdf_diffarea.md)
-  : Calculate Area Between Empirical Cumulative Distribution Functions
-  (eCDFs)
 - [`calc_runs_test()`](https://kabilanbio.github.io/scSimEval/reference/calc_runs_test.md)
   : Calculate Wald-Wolfowitz Runs Test on Pooled Distributions
 - [`calc_nn_mismatch()`](https://kabilanbio.github.io/scSimEval/reference/calc_nn_mismatch.md)
-  : Calculate Nearest-Neighbor Label Mismatch Proportion
+  : Calculate Nearest-Neighbor Composition / Local Neighborhood
+  Similarity (NN Mismatch)
 - [`calc_between_dataset_silhouette()`](https://kabilanbio.github.io/scSimEval/reference/calc_between_dataset_silhouette.md)
-  : Calculate Between-Dataset Silhouette Width
+  : Calculate Overall Clustering-Like Separation of Datasets via
+  Silhouette-Based Measures
+- [`calc_kde_ise()`](https://kabilanbio.github.io/scSimEval/reference/calc_kde_ise.md)
+  : Calculate 1D Kernel Density Estimation Integrated Squared Error
+  (KDE-ISE)
 - [`calc_fasano_franceschini()`](https://kabilanbio.github.io/scSimEval/reference/calc_fasano_franceschini.md)
   : Calculate Fasano-Franceschini 2D Kolmogorov-Smirnov Test Statistic
-- [`calc_peacock_2d()`](https://kabilanbio.github.io/scSimEval/reference/calc_peacock_2d.md)
-  : Calculate Peacock 2D Kolmogorov-Smirnov Test Statistic
 - [`calc_kde_test()`](https://kabilanbio.github.io/scSimEval/reference/calc_kde_test.md)
   : Calculate 2D Bivariate Kernel Density Estimation (KDE) Test
   Statistic
 - [`calc_emd_2d()`](https://kabilanbio.github.io/scSimEval/reference/calc_emd_2d.md)
   : Calculate 2D Earth Mover's Distance (2D EMD)
-- [`calc_mmd()`](https://kabilanbio.github.io/scSimEval/reference/calc_mmd.md)
-  : Maximum Mean Discrepancy (MMD) with Gaussian RBF Kernel
-- [`calc_frechet_singlecell_distance()`](https://kabilanbio.github.io/scSimEval/reference/calc_frechet_singlecell_distance.md)
-  : Frechet Single-Cell Distance (FSD)
-- [`calc_model_aic_bic()`](https://kabilanbio.github.io/scSimEval/reference/calc_model_aic_bic.md)
-  : Compute Model Information Criteria (AIC and BIC)
-- [`calc_marginal_aic_bic()`](https://kabilanbio.github.io/scSimEval/reference/calc_marginal_aic_bic.md)
-  : Marginal Model Goodness of Fit and Information Criteria for
-  Single-Cell Simulators
-- [`calc_likelihood_ratio_test()`](https://kabilanbio.github.io/scSimEval/reference/calc_likelihood_ratio_test.md)
-  : Perform Likelihood Ratio Test for Comparing Nested Single-Cell
-  Simulation Models
-- [`calc_outlier_proportion()`](https://kabilanbio.github.io/scSimEval/reference/calc_outlier_proportion.md)
-  : Calculate Proportion of Outliers in a Numeric Vector
 - [`calc_all_univariate_metrics()`](https://kabilanbio.github.io/scSimEval/reference/calc_all_univariate_metrics.md)
   : Compute All Univariate Distance & Accuracy Metrics for a Feature
 - [`calc_all_bivariate_metrics()`](https://kabilanbio.github.io/scSimEval/reference/calc_all_bivariate_metrics.md)
   : Compute All Bivariate (2D) Distance & Accuracy Metrics for Joint
   Distributions
 
-## Category 2: Cellular & Feature-Level Properties
+## Category 2: Sparsity & Zero-Inflation Dynamics
 
-Assessment of zero-inflation dynamics, library size distributions, and
-kinetic noise decomposition.
+Assessment of zero-inflation dynamics, dropout probability curves, and
+chromatin accessibility sparsity.
 
 - [`calc_zero_probability_curve()`](https://kabilanbio.github.io/scSimEval/reference/calc_zero_probability_curve.md)
   : Fit Zero-Probability Dropout Curve (Splatter & ZINB-WaVE)
 - [`calc_excess_zero_weights()`](https://kabilanbio.github.io/scSimEval/reference/calc_excess_zero_weights.md)
   : Calculate Posterior Excess Zero Weights (zingeR & ZINB-WaVE)
-- [`calc_kinetic_noise_decomposition()`](https://kabilanbio.github.io/scSimEval/reference/calc_kinetic_noise_decomposition.md)
-  : Kinetic Noise Decomposition (SymSim & Elowitz et al.)
 - [`calc_accessibility_sparsity_curve()`](https://kabilanbio.github.io/scSimEval/reference/calc_accessibility_sparsity_curve.md)
   : Fit Chromatin Accessibility-Sparsity Polynomial Curve (simATAC)
 
-## Category 3: Cell Identity & Clustering Concordance
+## Category 3: Cellular Manifold & Clustering Concordance
 
 Concordance of unsupervised cluster definitions, cluster separation, and
 latent manifold recovery.
@@ -200,133 +235,120 @@ latent manifold recovery.
   : Calculate Adjusted Rand Index (ARI)
 - [`calc_nmi()`](https://kabilanbio.github.io/scSimEval/reference/calc_nmi.md)
   : Calculate Normalized Mutual Information (NMI)
-- [`calc_ami()`](https://kabilanbio.github.io/scSimEval/reference/calc_ami.md)
-  : Calculate Adjusted Mutual Information (AMI)
-- [`calc_clustering_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/calc_clustering_accuracy.md)
-  : Calculate Clustering Accuracy (ACC)
-- [`calc_fmi()`](https://kabilanbio.github.io/scSimEval/reference/calc_fmi.md)
-  : Calculate Fowlkes-Mallows Index (FMI)
 - [`calc_silhouette()`](https://kabilanbio.github.io/scSimEval/reference/calc_silhouette.md)
   : Calculate Average Silhouette Width (ASW)
-- [`calc_dunn()`](https://kabilanbio.github.io/scSimEval/reference/calc_dunn.md)
-  : Calculate Dunn Index
-- [`calc_connectivity()`](https://kabilanbio.github.io/scSimEval/reference/calc_connectivity.md)
-  : Calculate Cluster Connectivity
 - [`calc_davies_bouldin()`](https://kabilanbio.github.io/scSimEval/reference/calc_davies_bouldin.md)
   : Calculate Davies-Bouldin Index (DB)
-- [`calc_calinski_harabasz()`](https://kabilanbio.github.io/scSimEval/reference/calc_calinski_harabasz.md)
-  : Calculate Calinski-Harabasz Index (CH)
-- [`calc_homogeneity()`](https://kabilanbio.github.io/scSimEval/reference/calc_homogeneity.md)
-  : Calculate Homogeneity Score
-- [`calc_completeness()`](https://kabilanbio.github.io/scSimEval/reference/calc_completeness.md)
-  : Calculate Completeness Score
-- [`calc_v_measure()`](https://kabilanbio.github.io/scSimEval/reference/calc_v_measure.md)
-  : Calculate V-Measure
-- [`calc_homogeneity_completeness_v_measure()`](https://kabilanbio.github.io/scSimEval/reference/calc_homogeneity_completeness_v_measure.md)
-  : Calculate Homogeneity, Completeness, and V-Measure
-- [`calc_neighborhood_purity()`](https://kabilanbio.github.io/scSimEval/reference/calc_neighborhood_purity.md)
-  : Calculate Neighborhood Purity
 - [`calc_cdi()`](https://kabilanbio.github.io/scSimEval/reference/calc_cdi.md)
   : Compute Clustering Deviation Index (CDI) for Single-Cell Clustering
   Evaluation
+- [`calc_neighborhood_purity()`](https://kabilanbio.github.io/scSimEval/reference/calc_neighborhood_purity.md)
+  : Calculate Neighborhood Purity
+- [`calc_mmd()`](https://kabilanbio.github.io/scSimEval/reference/calc_mmd.md)
+  : Calculate Maximum Mean Discrepancy (MMD) on Single-Cell PCA
+  Manifolds
 - [`calc_generative_precision_recall()`](https://kabilanbio.github.io/scSimEval/reference/calc_generative_precision_recall.md)
   : Generative Precision and Recall for Single-Cell Manifolds
 
-## Category 4: Batch Effect & Confounder Dynamics
+## Category 4: Technical Variation & Batch Mixing Dynamics
 
-Quantification of technical variation, batch mixing, and local density
-factor conservation.
+Quantification of technical variation, batch mixing, and local
+neighborhood confounder integration.
 
 - [`calc_cms()`](https://kabilanbio.github.io/scSimEval/reference/calc_cms.md)
   : Cell-Specific Mixing Score (CMS)
 - [`calc_isi()`](https://kabilanbio.github.io/scSimEval/reference/calc_isi.md)
   : Inverse Simpson Index (ISI) for Batch Mixing
-- [`calc_seurat_mixing_metric()`](https://kabilanbio.github.io/scSimEval/reference/calc_seurat_mixing_metric.md)
-  : Seurat Mixing Metric
-- [`calc_ldf()`](https://kabilanbio.github.io/scSimEval/reference/calc_ldf.md)
-  : Local Density Factor (LDF)
-- [`calc_ldf_diff()`](https://kabilanbio.github.io/scSimEval/reference/calc_ldf_diff.md)
-  : Local Density Differences (ldfDiff)
-- [`calc_local_structure_metric()`](https://kabilanbio.github.io/scSimEval/reference/calc_local_structure_metric.md)
-  : Local Structure Preservation Metric
 
-## Category 5: Differential Expression & Signal Preservation
+## Category 5: Biological Signal & Differential Fidelity
 
-Recovery of biological contrast, differential gene detection accuracy,
-and cell-cycle phase fidelity.
+Evaluation of differentially expressed genes (Simpipe framework; Duo et
+al., Genome Biology 2024) and differentially accessible regions via
+pseudobulk edgeR-QLF (Libra framework; Squair et al., Nature
+Communications 2021; Teo et al., Nature Communications 2024).
 
-- [`calc_signal_de()`](https://kabilanbio.github.io/scSimEval/reference/calc_signal_de.md)
-  : Detect Differential Expression (DE) Genes (Mean Shift via Limma or
-  T-Test)
-- [`calc_signal_dv()`](https://kabilanbio.github.io/scSimEval/reference/calc_signal_dv.md)
-  : Detect Differential Variability (DV) Genes (Bartlett Test)
-- [`calc_signal_dd()`](https://kabilanbio.github.io/scSimEval/reference/calc_signal_dd.md)
-  : Detect Differential Distribution (DD) Genes (Kolmogorov-Smirnov
-  Test)
-- [`calc_signal_dp()`](https://kabilanbio.github.io/scSimEval/reference/calc_signal_dp.md)
-  : Detect Differential Proportion / Zero-Inflation (DP) Genes (Chisq
-  Test)
-- [`calc_signal_bd()`](https://kabilanbio.github.io/scSimEval/reference/calc_signal_bd.md)
-  : Detect Bimodal Distribution (BD) Genes (Bimodal Separation Index)
-- [`calc_delta_variance()`](https://kabilanbio.github.io/scSimEval/reference/calc_delta_variance.md)
-  : Calculate Delta Variance (Pseudoreplication Bias Metric)
-- [`calc_cell_cycle_phase_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/calc_cell_cycle_phase_fidelity.md)
-  : Evaluate Cell Cycle Phase Distribution Fidelity
-- [`calc_deconvolution_accuracy()`](https://kabilanbio.github.io/scSimEval/reference/calc_deconvolution_accuracy.md)
-  : Evaluate Cell-Type Deconvolution & Mixture Proportion Accuracy
-- [`calc_variance_decomposition()`](https://kabilanbio.github.io/scSimEval/reference/calc_variance_decomposition.md)
-  : Variance Component Decomposition (BASiCS & muscat)
-- [`calc_intraclass_correlation()`](https://kabilanbio.github.io/scSimEval/reference/calc_intraclass_correlation.md)
-  : Calculate Intraclass Correlation Coefficient (ICC) (hierarchicell &
-  rescueSim)
-- [`calc_expected_mi()`](https://kabilanbio.github.io/scSimEval/reference/calc_expected_mi.md)
-  : Expected Mutual Information for Cluster Comparison
+- [`run_edger_qlf_detrate()`](https://kabilanbio.github.io/scSimEval/reference/run_edger_qlf_detrate.md)
+  : Run edgeR QLF Differential Expression with Cellular Detection Rate
+  (edgeRQLFDetRate)
+- [`calc_simpipe_deg_ratio()`](https://kabilanbio.github.io/scSimEval/reference/calc_simpipe_deg_ratio.md)
+  : Calculate Simpipe Simulated DEG Ratio and True DEG Recovery
+  (Approach 1)
+- [`calc_simpipe_distribution_score()`](https://kabilanbio.github.io/scSimEval/reference/calc_simpipe_distribution_score.md)
+  : Calculate Simpipe P-value Uniformity Distribution Score (Approach 2)
+- [`evaluate_predictive_de_model()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_predictive_de_model.md)
+  : Predictive Cell Identity Classification Using Simulated DEGs
+  (Simpipe Approach 3)
+- [`evaluate_deg_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_deg_fidelity.md)
+  [`evaluate_rna_de_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_deg_fidelity.md)
+  : Evaluate scRNA-seq Differential Expression (DE) Fidelity
+  (Sub-category V-A)
+- [`binarize_matrix()`](https://kabilanbio.github.io/scSimEval/reference/binarize_matrix.md)
+  : Binarize Single-Cell Count Matrix (scATAC-seq Feature Binarization)
+- [`to_pseudobulk()`](https://kabilanbio.github.io/scSimEval/reference/to_pseudobulk.md)
+  : Construct Pseudobulk Count Matrices from Single-Cell Data (Libra
+  Engine)
+- [`run_edger_qlf_da()`](https://kabilanbio.github.io/scSimEval/reference/run_edger_qlf_da.md)
+  : Run edgeR-QLF Differential Accessibility (DA) Analysis on Pseudobulk
+  Data (Libra Engine)
+- [`evaluate_atac_da_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_atac_da_fidelity.md)
+  : Evaluate scATAC-seq Differential Accessibility (DA) Fidelity
+  (Sub-category V-B)
 
-## Category 6: Trajectory & Lineage Dynamics
+## Category 6: Multiomics Integration & Alignment
 
-Inference and benchmarking of differentiation pseudotime trajectories
-and lineage branching topologies.
+Gold-standard multiomics integration, batch mixing, and biological
+conservation metrics (scib, scMultiSim, scCross, Matilda, scMoMtF).
 
-- [`infer_scrna_pseudotime()`](https://kabilanbio.github.io/scSimEval/reference/infer_scrna_pseudotime.md)
-  : Automatically Infer Pseudotime Trajectory from scRNA-seq Counts
-- [`infer_scrna_lineage_tree()`](https://kabilanbio.github.io/scSimEval/reference/infer_scrna_lineage_tree.md)
-  : Automatically Infer Lineage Tree (hclust) from scRNA-seq Counts &
-  Cell Types
-- [`calc_pseudotime_correlation()`](https://kabilanbio.github.io/scSimEval/reference/calc_pseudotime_correlation.md)
-  : Calculate Correlation of Geodesic Pseudotime Distances
-- [`calc_tree_height_discrepancy()`](https://kabilanbio.github.io/scSimEval/reference/calc_tree_height_discrepancy.md)
-  : Calculate Lineage Tree Branch Height Discrepancy (RMSE)
+- [`calc_batch_asw()`](https://kabilanbio.github.io/scSimEval/reference/calc_batch_asw.md)
+  : Calculate Batch Average Silhouette Width (Batch ASW)
+- [`calc_cell_type_asw()`](https://kabilanbio.github.io/scSimEval/reference/calc_cell_type_asw.md)
+  : Calculate Cell-Type Average Silhouette Width (Cell-Type ASW)
+- [`calc_graph_connectivity()`](https://kabilanbio.github.io/scSimEval/reference/calc_graph_connectivity.md)
+  : Calculate KNN Graph Connectivity
+- [`calc_integration_ari()`](https://kabilanbio.github.io/scSimEval/reference/calc_integration_ari.md)
+  : Calculate Integration Adjusted Rand Index (ARI)
+- [`calc_integration_nmi()`](https://kabilanbio.github.io/scSimEval/reference/calc_integration_nmi.md)
+  : Calculate Integration Normalized Mutual Information (NMI)
+- [`evaluate_multiomics_integration()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_multiomics_integration.md)
+  : Evaluate Multiomics Integration & Cross-Modal Alignment Fidelity
+  (Category VI)
 
-## Category 7: Multiomics Cross-Modality Coupling
+## Category 7: Trajectory & Lineage Topology
 
-Inter-modality regulatory coupling, peak-to-gene linkages, and joint
-chromatin-expression modularity.
+HVG-filtered dynverse trajectory inference benchmarking (Saelens et al.,
+Nature Biotechnology 2019) across milestone networks, geodesic
+distances, branch assignments, and Random Forest feature importances.
 
-- [`calc_cross_modality_correlation()`](https://kabilanbio.github.io/scSimEval/reference/calc_cross_modality_correlation.md)
-  : Calculate Cross-Modality Correlation Fidelity
-- [`calc_foscttm()`](https://kabilanbio.github.io/scSimEval/reference/calc_foscttm.md)
-  : Fraction of Samples Closer Than The True Match (FOSCTTM)
-- [`calc_cross_modal_generation()`](https://kabilanbio.github.io/scSimEval/reference/calc_cross_modal_generation.md)
-  : Cross-Modality In Silico Generation & Translation Fidelity
-- [`calc_modality_alignment()`](https://kabilanbio.github.io/scSimEval/reference/calc_modality_alignment.md)
-  : Modality Alignment & Omics Layer Mixing in Joint Latent Space
-- [`calc_network_jaccard()`](https://kabilanbio.github.io/scSimEval/reference/calc_network_jaccard.md)
-  : Jaccard Similarity of Predicted Regulatory Networks / Links
-- [`calc_atac_rna_coupling()`](https://kabilanbio.github.io/scSimEval/reference/calc_atac_rna_coupling.md)
-  : Chromatin Accessibility to RNA Regulatory Effect Coupling
-- [`calc_coregulation_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/calc_coregulation_fidelity.md)
-  : Multi-Omics Co-Regulation & Modularity Fidelity
-- [`calc_peak_coaccessibility_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/calc_peak_coaccessibility_fidelity.md)
-  : Evaluate Single-Cell ATAC Peak Co-Accessibility Fidelity (SCRIP)
-- [`calc_coexpression_module_fidelity()`](https://kabilanbio.github.io/scSimEval/reference/calc_coexpression_module_fidelity.md)
-  : Evaluate Gene Co-Expression Module Fidelity (ESCO)
-- [`calc_accessibility_profile_concordance()`](https://kabilanbio.github.io/scSimEval/reference/calc_accessibility_profile_concordance.md)
-  : Evaluate Chromatin Accessibility Profile Concordance (DiTSim)
+- [`preprocess_trajectory_hvgs()`](https://kabilanbio.github.io/scSimEval/reference/preprocess_trajectory_hvgs.md)
+  : Preprocess and Select Highly Variable Genes for Trajectory
+  Evaluation (Saelens et al., 2019)
+- [`infer_dynverse_trajectory()`](https://kabilanbio.github.io/scSimEval/reference/infer_dynverse_trajectory.md)
+  : Infer Docker-Free dynwrap Milestone Trajectory from Normalized
+  Expression
+- [`calc_dynverse_him()`](https://kabilanbio.github.io/scSimEval/reference/calc_dynverse_him.md)
+  : Compute dynverse Hamming-Ipsen-Mikhailov (HIM) Trajectory Topology
+  Similarity
+- [`calc_dynverse_edge_flip()`](https://kabilanbio.github.io/scSimEval/reference/calc_dynverse_edge_flip.md)
+  : Compute dynverse Edge Flip Trajectory Topology Similarity
+- [`calc_dynverse_geodesic_correlation()`](https://kabilanbio.github.io/scSimEval/reference/calc_dynverse_geodesic_correlation.md)
+  : Compute dynverse Geodesic Distance Ordering Correlation
+- [`calc_dynverse_f1_branches()`](https://kabilanbio.github.io/scSimEval/reference/calc_dynverse_f1_branches.md)
+  : Compute dynverse Branch Assignment Overlap (F1_branches)
+- [`calc_wcor_features()`](https://kabilanbio.github.io/scSimEval/reference/calc_wcor_features.md)
+  : Compute Weighted Feature Importance Correlation (wcor_features,
+  Saelens et al., 2019)
+- [`evaluate_trajectory_metrics()`](https://kabilanbio.github.io/scSimEval/reference/evaluate_trajectory_metrics.md)
+  : Full Category VII Trajectory & Lineage Topology Evaluation (dynverse
+  Workflow)
 
-## Category 8: Computational Scalability & Resource Footprint
+## Category 8: Computational Scalability & Efficiency
 
-Empirical benchmarking of CPU runtime, peak RAM consumption, and
-execution efficiency.
+Core-normalized benchmarking of CPU execution work (Core-Seconds) and
+per-core peak RAM footprint (MiB/core and GiB/core).
 
 - [`benchmark_resource_usage()`](https://kabilanbio.github.io/scSimEval/reference/benchmark_resource_usage.md)
   : Benchmark Execution Runtime and Memory Usage
+- [`compute_core_seconds()`](https://kabilanbio.github.io/scSimEval/reference/compute_core_seconds.md)
+  : Compute Core-Seconds Runtime Metric
+- [`compute_memory_per_core()`](https://kabilanbio.github.io/scSimEval/reference/compute_memory_per_core.md)
+  : Compute Peak RAM per Allocated CPU Core

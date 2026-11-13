@@ -11,14 +11,14 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" sizes="any" href="favicon.ico">
 <link rel="manifest" href="site.webmanifest">
-<script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script src="lightswitch.js"></script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><script src="lightswitch.js"></script><link href="extra.css" rel="stylesheet">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
 <meta property="og:title" content="scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations">
-<meta name="description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Curated Evaluation Measures.">
-<meta property="og:description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Curated Evaluation Measures.">
+<meta name="description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 56 Curated Evaluation Measures.">
+<meta property="og:description" content="Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 56 Curated Evaluation Measures.">
 <meta property="og:image" content="https://kabilanbio.github.io/scSimEval/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,11 +28,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
     <li><a class="dropdown-item" href="articles/demo-saved-rds.html">4. Analyzing Pre-Saved Benchmark (.rds)</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/metrics-catalog.html">Metric Catalog (56 Metrics)</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -61,14 +61,6 @@
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/kabilanbio/scSimEval" aria-label="GitHub repository"><span class="fa fa-github fa-lg"></span></a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Toggle theme"><span class="fa-solid fa-sun fa-fw"></span></button>
-  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
-    <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-bs-theme-value="light" aria-pressed="false"><span class="fa-solid fa-sun fa-fw"></span>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-bs-theme-value="dark" aria-pressed="false"><span class="fa-solid fa-moon fa-fw"></span>Dark</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-bs-theme-value="auto" aria-pressed="false"><span class="fa-solid fa-circle-half-stroke fa-fw"></span>Auto</button></li>
-  </ul>
-</li>
       </ul>
 </div>
 
@@ -82,7 +74,7 @@
 <a class="anchor" aria-label="anchor" href="#scsimeval-unified-benchmarking-and-accuracy-evaluation-for-single-cell-multiomics-simulation-methods-"></a>
 </h1>
 </div>
-<p><a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a> <a href="https://kabilanbio.github.io/scSimEval/"><img src="https://img.shields.io/badge/docs-pkgdown-blue.svg" alt="Documentation"></a> <a href="https://github.com/BiocStaging/scSimEval" class="external-link"><img src="https://img.shields.io/badge/Bioconductor-submission%20v0.99.9-brightgreen.svg" alt="Bioconductor submission"></a></p>
+<p><a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a> <a href="https://kabilanbio.github.io/scSimEval/"><img src="https://img.shields.io/badge/docs-pkgdown-blue.svg" alt="Documentation"></a> <a href="https://github.com/BiocStaging/scSimEval" class="external-link"><img src="https://img.shields.io/badge/Bioconductor-submission%20v0.99.10-brightgreen.svg" alt="Bioconductor submission"></a></p>
 <p><strong><code>scSimEval</code></strong> is a unified evaluation and benchmarking toolkit designed to systematically quantify how faithfully single-cell simulation methods reproduce empirical biological experiments.</p>
 <p>The package supports: - <strong>scRNA-seq</strong> (Single-cell transcriptomic count matrices) - <strong>scATAC-seq</strong> (Single-cell chromatin accessibility peak matrices) - <strong>Paired Multiomics</strong> (Simultaneous co-assays across identical cells, e.g., 10x Multiome, SHARE-seq) - <strong>Unpaired Multiomics</strong> (Independent scRNA-seq and scATAC-seq profiled from separate cells of the same biological system)</p>
 <hr>
@@ -98,24 +90,24 @@
 </h2>
 <ul>
 <li>
-<strong>48 Curated Evaluation Measures</strong>: Systematically organized into 8 canonical categories (39 for unimodal scRNA-seq / scATAC-seq alone, 48 for paired multiomics):
+<strong>56 Curated Evaluation Measures Across 8 Canonical Categories</strong>:
 <ol style="list-style-type: decimal">
 <li>
-<em>Distributional Properties</em> (statistical distances on library size, CPM expression, zero fractions, MMD, Fréchet distance)</li>
+<em>Distributional Properties</em> (14 metrics: 10 univariate—Wasserstein, KS, MAD, MAE, RMSE, Bhattacharyya, KDE-ISE, Runs statistic, NN mismatch, Inter-dataset silhouette—and 4 bivariate—Fasano-Franceschini 2D KS, 2D EMD, 2D NN mismatch, 2D Inter-dataset silhouette—across 7 cell-level, 7 feature-level, and 4 bivariate property pairs)</li>
 <li>
-<em>Correlations &amp; Zero-Inflation</em> (logistic dropout curves, mean-variance fit, excess zero weights)</li>
+<em>Sparsity &amp; Zero-Inflation Dynamics</em> (5 metrics: logistic dropout midpoint/slope/R² for scRNA-seq, quadratic accessibility-sparsity curve RMSE/R² for scATAC-seq, and posterior excess zero weight discrepancy)</li>
 <li>
-<em>Cellular Structure &amp; Concordance</em> (unsupervised clustering fidelity, ARI, NMI, Silhouette, Davies-Bouldin, Generative Precision/Recall)</li>
+<em>Cellular Manifold &amp; Clustering Concordance</em> (8 primary metrics: MMD, Generative Precision, Generative Recall, Silhouette ASW, Clustering Deviation Index [CDI], Neighborhood Purity, ARI, NMI, plus auxiliary Davies-Bouldin Index)</li>
 <li>
-<em>Batch &amp; Technical Confounders</em> (batch ASW, PCR <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>, CMS, LISI, Seurat mixing, cross-batch F1)</li>
+<em>Technical Variation &amp; Batch Mixing Dynamics</em> (5 metrics: Batch Silhouette, PCR <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>, CMS, Inverse Simpson Index [ISI], Cross-Batch F1)</li>
 <li>
-<em>Biological Signals &amp; Marker Genes</em> (SimBench 5-signal DE/DV/DD/DP/BD, predictive Macro-F1, deconvolution RMSE, delta variance MAE)</li>
+<em>Biological Signal &amp; Differential Fidelity</em> (12 metrics: parallel scRNA-seq DE and scATAC-seq DA suites assessing null P-value uniformity, accuracy, precision, recall, F1-score, and ROC-AUC via pseudobulk edgeR-QLF)</li>
 <li>
-<em>Trajectory &amp; Lineage Dynamics</em> (pseudotime rank correlation, tree height RMSE, graph alignment, lineage expression fidelity)</li>
+<em>Multiomics Integration &amp; Alignment</em> (5 metrics: joint-embedding Batch ASW, Cell-Type ASW, Graph Connectivity, Integration ARI, and Integration NMI)</li>
 <li>
-<em>Cross-Modal Coupling &amp; Modularity</em> (FOSCTTM alignment, <a href="mailto:Match@1" class="email">Match@1</a>, joint cell correlation, peak-to-gene <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mi>V</mi></msub><annotation encoding="application/x-tex">R_V</annotation></semantics></math> linkage, co-regulatory modules)</li>
+<em>Trajectory &amp; Lineage Topology</em> (5 metrics: HVG-filtered <em>dynverse</em> benchmark [Saelens et al., 2019] comprising HIM topology similarity [<code>him</code>], edge flip similarity [<code>edge_flip</code>], geodesic distance correlation [<code>geodesic_correlation</code>], branch assignment F1 [<code>F1_branches</code>], and Random Forest feature importance weighted correlation [<code>wcor_features</code>])</li>
 <li>
-<em>Computational Scalability</em> (execution runtime in seconds and peak RAM in MiB)</li>
+<em>Computational Scalability &amp; Efficiency</em> (2 metrics: core-normalized execution time in core-seconds [<code>core_seconds</code>] and peak memory footprint per allocated core in MiB [<code>memory_per_core_mib</code>], with automated multi-core scaling and unified <code>memory_mb</code> resource benchmarking)</li>
 </ol>
 </li>
 <li>
@@ -167,14 +159,14 @@
 <h3 id="id_2-multiomics-accuracy-evaluation-paired--unpaired">2. Multiomics Accuracy Evaluation (Paired / Unpaired)<a class="anchor" aria-label="anchor" href="#id_2-multiomics-accuracy-evaluation-paired--unpaired"></a>
 </h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Load packaged real paired multiomics dataset (Rice Bud)</span></span>
+<code class="sourceCode R"><span><span class="co"># Load packaged Option B Seurat v5 paired multiomics dataset (Rice Bud)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">example_rice_bud</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Benchmark scMultiSim against empirical reference</span></span>
+<span><span class="co"># Benchmark scMultiSim against empirical reference (cell_type, batch, and reductions are auto-extracted)</span></span>
 <span><span class="va">res_multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy</a></span><span class="op">(</span></span>
-<span>  ref_multi  <span class="op">=</span> <span class="va">example_rice_bud</span><span class="op">$</span><span class="va">reference</span>,</span>
-<span>  sim_multi  <span class="op">=</span> <span class="va">example_rice_bud</span><span class="op">$</span><span class="va">simulated</span><span class="op">$</span><span class="va">scMultiSim</span>,</span>
-<span>  cell_types <span class="op">=</span> <span class="va">example_rice_bud</span><span class="op">$</span><span class="va">reference</span><span class="op">$</span><span class="va">cell_types</span>,</span>
+<span>  ref_multi  <span class="op">=</span> <span class="va">example_rice_bud</span><span class="op">$</span><span class="va">reference</span><span class="op">$</span><span class="va">combined</span>,</span>
+<span>  sim_multi  <span class="op">=</span> <span class="va">example_rice_bud</span><span class="op">$</span><span class="va">simulated</span><span class="op">$</span><span class="va">scMultiSim</span><span class="op">$</span><span class="va">combined</span>,</span>
+<span>  pairing    <span class="op">=</span> <span class="st">"paired"</span>,</span>
 <span>  verbose    <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -204,14 +196,14 @@
 </div>
 </div>
 <div class="section level2">
-<h2 id="built-in-real-biological-datasets">Built-in Real Biological Datasets<a class="anchor" aria-label="anchor" href="#built-in-real-biological-datasets"></a>
+<h2 id="built-in-real-biological-datasets-option-b-standardized-seurat-v5">Built-in Real Biological Datasets (Option B Standardized <code>Seurat</code> v5)<a class="anchor" aria-label="anchor" href="#built-in-real-biological-datasets-option-b-standardized-seurat-v5"></a>
 </h2>
-<p><code>scSimEval</code> includes standardized empirical benchmarks extracted from published studies:</p>
+<p><code>scSimEval</code> includes standardized empirical benchmarks extracted from published studies, complete with raw integer <code>counts</code>, harmonized <code>cell_type</code> and <code>batch</code> metadata, and dimensional reductions (<code>integrated</code>, <code>pca</code>):</p>
 <ul>
 <li>
-<strong><code>example_rice_bud</code></strong>: Real paired single-cell multiomics dataset from rice (<em>Oryza sativa</em>) bud tissue (100 cells, 200 genes, 200 peaks, 8 cell types, 2 batches) evaluated across 6 simulators (<code>scMultiSim</code>, <code>scDesign3</code>, <code>MOSim</code>, <code>scCross</code>, <code>scMoMtF</code>, <code>Matilda</code>).</li>
+<strong><code>example_rice_bud</code></strong>: Real paired single-cell multiomics dataset from rice (<em>Oryza sativa</em>) bud tissue (100 paired cells, 200 genes, 200 peaks, 4 cell types, 2 batches) evaluated across 6 simulators (<code>scMultiSim</code>, <code>scDesign3</code>, <code>MOSim</code>, <code>scCross</code>, <code>scMoMtF</code>, <code>Matilda</code>). Includes <code>$combined</code>, <code>$rna</code>, and <code>$atac</code> <code>Seurat</code> objects.</li>
 <li>
-<strong><code>example_soybean_root</code></strong>: Real unpaired single-cell multiomics dataset from soybean (<em>Glycine max</em>) root tissue (100 RNA cells, 100 ATAC cells, 200 genes, 200 peaks) evaluated across 3 simulators (<code>scMultiSim</code>, <code>scDesign3</code>, <code>scCross</code>).</li>
+<strong><code>example_soybean_root</code></strong>: Real unpaired single-cell multiomics dataset from soybean (<em>Glycine max</em>) root tissue (100 RNA cells, 100 ATAC cells, 200 genes, 200 peaks, 4 cell types, 2 batches) evaluated across 3 simulators (<code>scMultiSim</code>, <code>scDesign3</code>, <code>scCross</code>). Includes <code>$combined</code>, <code>$rna</code>, and <code>$atac</code> <code>Seurat</code> objects.</li>
 <li>
 <strong><code>example_scrna</code></strong> &amp; <strong><code>example_scatac</code></strong>: Lightweight unimodal benchmarks for rapid exploratory prototyping.</li>
 </ul>
@@ -232,10 +224,14 @@
 <ul>
 <li><p><strong>Kabilan Sakthivel</strong> (Maintainer &amp; Ph.D Scholar) — <code>kabilan151414@gmail.com</code></p></li>
 <li><p><strong>Dr. Dwijesh Chandra Mishra</strong> (Principal Scientist &amp; Thesis Guide) — <code>dwij.mishra@gmail.com</code></p></li>
-<li><p><strong>Dr. Shashi Bhushan Lal</strong> (Author) — <code>sblall16@gmail.com</code></p></li>
-<li><p><strong>Dr. Sudhir Srivastava</strong> (Author) — <code>sudhir0401bm@gmail.com</code></p></li>
-<li><p><strong>Dr. Krishna Kumar Chaturvedi</strong> (Author) — <code>kkcchaturvedi@gmail.com</code></p></li>
-<li><p><strong>Dr. Sharanbasappa</strong> (Contributor) — <code>smadival509@gmail.com</code></p></li>
+<li><p><strong>Dr. Shashi Bhushan Lal</strong> (Principal Scientist) — <code>sblall16@gmail.com</code></p></li>
+<li><p><strong>Dr. Ulavappa Angadi</strong> (Principal Scientist) — <code>ubaangadi.iasri@icar.org.in</code></p></li>
+<li><p><strong>Dr. Sudhir Srivastava</strong> (Senior Scientist) — <code>sudhir0401bm@gmail.com</code></p></li>
+<li><p><strong>Dr. Neeraj Budhlakoti</strong> (Senior Scientist) — <code>neeraj35669@gmail.com</code></p></li>
+<li><p><strong>Dr. Krishna Kumar Chaturvedi</strong> (Principal Scientist) — <code>kkcchaturvedi@gmail.com</code></p></li>
+<li><p><strong>Dr. Ranjeet Ranjan Kumar</strong> (Senior Scientist) — <code>ranjeetranjaniari@gmail.com</code></p></li>
+<li><p><strong>Dr. Navin Chandra Gupta</strong> (Senior Scientist) — <code>navinbtc@gmail.com</code></p></li>
+<li><p><strong>Dr. Sharanbasappa</strong> (Scientist) — <code>smadival509@gmail.com</code></p></li>
 <li><p><strong>Bug Reports &amp; Issues:</strong> <a href="https://github.com/kabilanbio/scSimEval/issues" class="external-link">https://github.com/kabilanbio/scSimEval/issues</a></p></li>
 </ul>
 <hr>
@@ -270,10 +266,14 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Kabilan Sakthivel <br><small class="roles"> Author, maintainer </small>   </li>
-<li>Dr Dwijesh Chandra Mishra <br><small class="roles"> Author, thesis advisor </small>   </li>
-<li>Dr Shashi Bhushan Lal <br><small class="roles"> Author </small>   </li>
-<li>Dr Sudhir Srivastava <br><small class="roles"> Author </small>   </li>
-<li>Dr Krishna Kumar Chaturvedi <br><small class="roles"> Author </small>   </li>
+<li>Dr. Dwijesh Chandra Mishra <br><small class="roles"> Author </small>   </li>
+<li>Dr. Shashi Bhushan Lal <br><small class="roles"> Author </small>   </li>
+<li>Dr. Ulavappa Angadi <br><small class="roles"> Author </small>   </li>
+<li>Dr. Sudhir Srivastava <br><small class="roles"> Author </small>   </li>
+<li>Dr. Neeraj Budhlakoti <br><small class="roles"> Author </small>   </li>
+<li>Dr. Krishna Kumar Chaturvedi <br><small class="roles"> Author </small>   </li>
+<li>Dr. Ranjeet Ranjan Kumar <br><small class="roles"> Author </small>   </li>
+<li>Dr. Navin Chandra Gupta <br><small class="roles"> Author </small>   </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
@@ -285,7 +285,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Kabilan Sakthivel, Dr Dwijesh Chandra Mishra, Dr Shashi Bhushan Lal, Dr Sudhir Srivastava, Dr Krishna Kumar Chaturvedi.</p>
+  <p>Developed by Kabilan Sakthivel, Dr. Dwijesh Chandra Mishra, Dr. Shashi Bhushan Lal, Dr. Ulavappa Angadi, Dr. Sudhir Srivastava, Dr. Neeraj Budhlakoti, Dr. Krishna Kumar Chaturvedi, Dr. Ranjeet Ranjan Kumar, Dr. Navin Chandra Gupta.</p>
 </div>
 
 <div class="pkgdown-footer-right">

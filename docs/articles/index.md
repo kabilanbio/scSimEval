@@ -16,8 +16,10 @@
   Evaluation](https://kabilanbio.github.io/scSimEval/articles/demo-scatac.md):
 - [Demonstration 3: Multiomics (scRNA-seq + scATAC-seq) Simulation
   Evaluation](https://kabilanbio.github.io/scSimEval/articles/demo-multiomics.md):
+- [Demonstration 4: Analyzing Pre-Saved Benchmark Results
+  (.rds)](https://kabilanbio.github.io/scSimEval/articles/demo-saved-rds.md):
 
 ### Reference Materials
 
-- [Comprehensive Catalog of the 62 Evaluation
-  Metrics](https://kabilanbio.github.io/scSimEval/articles/metrics-catalog.md):
+- [Comprehensive Catalog of the 56 Evaluation
+  Measures](https://kabilanbio.github.io/scSimEval/articles/metrics-catalog.md):

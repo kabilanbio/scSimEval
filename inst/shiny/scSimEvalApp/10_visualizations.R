@@ -94,12 +94,24 @@ utils::globalVariables(c(
   "cross_batch_accuracy"             = "Cross-Batch Accuracy",
 
   # (V) Biological Signal & Differential Fidelity (#33-#44 + legacy aliases)
-  "pval_dist_score"                  = "Null P-Value Uniformity",
+  "pval_dist_score"                  = "DE/DA Null P-Value Uniformity",
   "accuracy"                         = "DE/DA Accuracy",
   "precision"                        = "DE/DA Precision",
   "recall"                           = "DE/DA Recall",
   "f1_score"                         = "DE/DA F1-Score",
   "auc"                              = "DE/DA ROC-AUC",
+  "rna_de_pval_dist_score"           = "RNA DE P-Val Uniformity",
+  "rna_de_accuracy"                  = "RNA DE Accuracy",
+  "rna_de_precision"                 = "RNA DE Precision",
+  "rna_de_recall"                    = "RNA DE Recall",
+  "rna_de_f1"                        = "RNA DE F1-Score",
+  "rna_de_auc"                       = "RNA DE ROC-AUC",
+  "atac_da_pval_dist_score"          = "ATAC DA P-Val Uniformity",
+  "atac_da_accuracy"                 = "ATAC DA Accuracy",
+  "atac_da_precision"                = "ATAC DA Precision",
+  "atac_da_recall"                   = "ATAC DA Recall",
+  "atac_da_f1"                       = "ATAC DA F1-Score",
+  "atac_da_auc"                      = "ATAC DA ROC-AUC",
   "DE (Mean Shift)_abs_error"        = "DE (Mean Shift) Error",
   "DV (Variability)_abs_error"       = "DV (Variability) Error",
   "DD (Distribution)_abs_error"      = "DD (Distribution) Error",
@@ -141,13 +153,21 @@ utils::globalVariables(c(
   "mean_coupling_cor"                = "Mean Coupling Corr.",
   "module_correlation_r"             = "Module Corr. (r)",
 
-  # (VII) Trajectory & Lineage Topology (4 Gold-Standard)
+  # (VII) Trajectory & Lineage Topology (5 Gold-Standard dynverse)
+  "him"                              = "HIM Topology Sim.",
+  "edge_flip"                        = "Edge Flip Sim.",
+  "geodesic_correlation"             = "Geodesic Distance Corr.",
+  "F1_branches"                      = "Branch Assignment F1",
+  "wcor_features"                    = "Feature Imp. wCor",
   "pseudotime_correlation"           = "Pseudotime Corr. (rho)",
   "tree_height_rmse"                 = "Lineage Tree RMSE",
   "graph_alignment"                  = "Trajectory Graph Alignment",
   "lineage_expression_fidelity"      = "Lineage Expression Fidelity",
 
   # (VIII) Computational Scalability & Efficiency (2 Gold-Standard)
+  "core_seconds"                     = "Core-Seconds (core·s)",
+  "memory_per_core_mib"              = "Peak RAM / Core (MiB/core)",
+  "memory_per_core_gib"              = "Peak RAM / Core (GiB/core)",
   "elapsed_time_seconds"             = "Elapsed Time (s)",
   "peak_memory_mb"                   = "Peak RAM (MiB)"
 )
@@ -250,6 +270,18 @@ utils::globalVariables(c(
   "Silhouette_Discrepancy"           = "(V) Biological Signal & Differential Fidelity",
   "PVE_Group_Sim"                    = "(V) Biological Signal & Differential Fidelity",
   "PVE_Discrepancy"                  = "(V) Biological Signal & Differential Fidelity",
+  "rna_de_pval_dist_score"           = "(V) Biological Signal & Differential Fidelity",
+  "rna_de_accuracy"                  = "(V) Biological Signal & Differential Fidelity",
+  "rna_de_precision"                 = "(V) Biological Signal & Differential Fidelity",
+  "rna_de_recall"                    = "(V) Biological Signal & Differential Fidelity",
+  "rna_de_f1"                        = "(V) Biological Signal & Differential Fidelity",
+  "rna_de_auc"                       = "(V) Biological Signal & Differential Fidelity",
+  "atac_da_pval_dist_score"          = "(V) Biological Signal & Differential Fidelity",
+  "atac_da_accuracy"                 = "(V) Biological Signal & Differential Fidelity",
+  "atac_da_precision"                = "(V) Biological Signal & Differential Fidelity",
+  "atac_da_recall"                   = "(V) Biological Signal & Differential Fidelity",
+  "atac_da_f1"                       = "(V) Biological Signal & Differential Fidelity",
+  "atac_da_auc"                      = "(V) Biological Signal & Differential Fidelity",
 
   # (VI) Multiomics Integration & Alignment (scib, scMultiSim, scCross, Matilda, scMoMtF)
   "batch_asw"                        = "(VI) Multiomics Integration & Alignment",
@@ -266,17 +298,25 @@ utils::globalVariables(c(
   "module_correlation_r"             = "(VI) Multiomics Integration & Alignment",
 
   # (VII) Trajectory & Lineage Topology
+  "him"                              = "(VII) Trajectory & Lineage Topology",
+  "edge_flip"                        = "(VII) Trajectory & Lineage Topology",
+  "geodesic_correlation"             = "(VII) Trajectory & Lineage Topology",
+  "F1_branches"                      = "(VII) Trajectory & Lineage Topology",
+  "wcor_features"                    = "(VII) Trajectory & Lineage Topology",
   "pseudotime_correlation"           = "(VII) Trajectory & Lineage Topology",
   "tree_height_rmse"                 = "(VII) Trajectory & Lineage Topology",
   "graph_alignment"                  = "(VII) Trajectory & Lineage Topology",
   "lineage_expression_fidelity"      = "(VII) Trajectory & Lineage Topology",
 
   # (VIII) Computational Scalability & Efficiency
+  "core_seconds"                     = "(VIII) Computational Scalability & Efficiency",
+  "memory_per_core_mib"              = "(VIII) Computational Scalability & Efficiency",
+  "memory_per_core_gib"              = "(VIII) Computational Scalability & Efficiency",
   "elapsed_time_seconds"             = "(VIII) Computational Scalability & Efficiency",
   "peak_memory_mb"                   = "(VIII) Computational Scalability & Efficiency"
 )
 
-#' Canonical 55 Curated Evaluation Measures Specification (with Legacy Compatibility)
+#' Canonical 56 Curated Evaluation Measures Specification (with Legacy Compatibility)
 #' @keywords internal
 .GOLD_STANDARD_48_SPEC <- list(
   "(I) Distributional Properties" = list(
@@ -308,6 +348,8 @@ utils::globalVariables(c(
     props = c("simbench_signal", "cell_identity_prediction", "cell_mixture", "pseudoreplication",
               "scRNA_differential_expression", "scATAC_differential_accessibility"),
     metrics = c("pval_dist_score", "accuracy", "precision", "recall", "f1_score", "auc",
+                "rna_de_pval_dist_score", "rna_de_accuracy", "rna_de_precision", "rna_de_recall", "rna_de_f1", "rna_de_auc",
+                "atac_da_pval_dist_score", "atac_da_accuracy", "atac_da_precision", "atac_da_recall", "atac_da_f1", "atac_da_auc",
                 "DE (Mean Shift)_abs_error", "DV (Variability)_abs_error", "DD (Distribution)_abs_error",
                 "DP (Proportion/Dropout)_abs_error", "BD (Bimodal Index)_abs_error",
                 "predictive_macro_F1", "deconvolution_RMSE", "delta_variance_MAE")
@@ -323,18 +365,18 @@ utils::globalVariables(c(
                 "match_at_1", "mean_coupling_cor", "KS", "Wasserstein")
   ),
   "(VII) Trajectory & Lineage Topology" = list(
-    props = c("pseudotime", "lineage_tree", "trajectory_graph", "lineage_dynamics"),
-    metrics = c("pseudotime_correlation", "tree_height_rmse", "graph_alignment", "lineage_expression_fidelity")
+    props = c("trajectory_topology", "geodesic_ordering", "branch_concordance", "dynamic_features"),
+    metrics = c("him", "edge_flip", "geodesic_correlation", "F1_branches", "wcor_features")
   ),
   "(VIII) Computational Scalability & Efficiency" = list(
     props = c("resource_usage"),
-    metrics = c("elapsed_time_seconds", "peak_memory_mb")
+    metrics = c("core_seconds", "memory_per_core_mib", "memory_per_core_gib", "elapsed_time_seconds", "peak_memory_mb")
   )
 )
 
 #' Filter Benchmark Data to the Curated Evaluation Measures Suite
 #'
-#' Filters any benchmark results table to the curated 55 evaluation measures across
+#' Filters any benchmark results table to the curated 56 evaluation measures across
 #' all 8 canonical categories (while preserving legacy benchmark table compatibility),
 #' eliminating unrequested or collinear duplicate metrics to prevent distortion of
 #' simulator fidelity leaderboards.
@@ -350,7 +392,8 @@ filter_gold_standard_metrics <- function(df) {
   target_df <- if (is_session) (df$benchmark_df %||% df$benchmark_summary_table) else df
   if (!is.data.frame(target_df) || nrow(target_df) == 0) return(df)
 
-  # Standardize categories first
+  # Standardize unit-variant scalability rows (minutes->seconds, MB->MiB) and categories
+  target_df <- .standardize_scalability_rows(target_df)
   target_df <- standardize_benchmark_categories(target_df)
 
   keep_rows <- rep(FALSE, nrow(target_df))
@@ -420,7 +463,7 @@ filter_gold_standard_metrics <- function(df) {
   "(III) Cellular Manifold & Clustering Concordance"= "#C0392B",
   "(IV) Technical Variation & Batch Mixing Dynamics"= "#D4AC0D",
   "(V) Biological Signal & Differential Fidelity"   = "#CA6F1E",
-  "(VI) Multiomics Integration & Alignment"         = "#2E4057",
+  "(VI) Multiomics Integration & Alignment"         = "#7DD3FC",
   "(VII) Trajectory & Lineage Topology"             = "#7D3C98",
   "(VIII) Computational Scalability & Efficiency"   = "#1E8449"
 )
@@ -487,6 +530,11 @@ filter_gold_standard_metrics <- function(df) {
   "v_measure"                   = "global",
   "dunn_sim"                    = "global",
   "calinski_harabasz_sim"       = "global",
+  "him"                         = "global",
+  "edge_flip"                   = "global",
+  "geodesic_correlation"        = "global",
+  "F1_branches"                 = "global",
+  "wcor_features"               = "global",
   "pseudotime_correlation"      = "global",
   "tree_height_rmse"            = "global",
   "graph_alignment"             = "global",
@@ -499,6 +547,9 @@ filter_gold_standard_metrics <- function(df) {
   "PVE_Group_Sim"               = "global",
   "PVE_Discrepancy"             = "global",
   "Classifier_Accuracy"         = "global",
+  "core_seconds"                = "global",
+  "memory_per_core_mib"         = "global",
+  "memory_per_core_gib"         = "global",
   "elapsed_time_seconds"        = "global",
   "peak_memory_mb"              = "global"
 )
@@ -549,12 +600,20 @@ filter_gold_standard_metrics <- function(df) {
   "batch_silhouette"            = "batch silhouette",
   "shannon_entropy"             = "batch entropy",
   "seurat_mixing_metric"        = "mixing metric",
+  "him"                         = "HIM topology similarity",
+  "edge_flip"                   = "edge flip similarity",
+  "geodesic_correlation"        = "geodesic distance correlation",
+  "F1_branches"                 = "branch assignment F1",
+  "wcor_features"               = "feature importance wCor",
   "pseudotime_correlation"      = "pseudotime correlation",
   "tree_height_rmse"            = "tree height RMSE",
   "graph_alignment"             = "trajectory graph alignment",
   "lineage_expression_fidelity" = "lineage expression patterns",
   "FOSCTTM"                     = "FOSCTTM cross-modality",
   "rv_coefficient"              = "RV coefficient",
+  "core_seconds"                = "core-seconds (core·s)",
+  "memory_per_core_mib"         = "peak RAM / core (MiB/core)",
+  "memory_per_core_gib"         = "peak RAM / core (GiB/core)",
   "elapsed_time_seconds"        = "elapsed time (s)",
   "peak_memory_mb"              = "peak RAM (MiB)"
 )
@@ -651,16 +710,19 @@ standardize_benchmark_categories <- function(df) {
 #' @keywords internal
 .HIGHER_IS_BETTER_METRICS <- c(
   "mean_variance_r2", "cell_pearson_cor", "feature_pearson_cor",
-  "silhouette_sim", "dunn_sim", "calinski_harabasz_sim", "ari", "nmi", "ami", "v_measure", "neighborhood_purity",
-  "Generative_Precision", "Generative_Recall",
+  "silhouette_sim", "silhouette", "dunn_sim", "calinski_harabasz_sim", "ari", "ARI", "nmi", "NMI", "ami", "v_measure", "neighborhood_purity",
+  "Generative_Precision", "Generative_Recall", "generative_precision", "generative_recall",
   "cms", "isi", "shannon_entropy", "cross_batch_F1", "cross_batch_accuracy",
   "pval_dist_score", "accuracy", "precision", "recall", "f1_score", "auc",
+  "rna_de_pval_dist_score", "rna_de_accuracy", "rna_de_precision", "rna_de_recall", "rna_de_f1", "rna_de_auc",
+  "atac_da_pval_dist_score", "atac_da_accuracy", "atac_da_precision", "atac_da_recall", "atac_da_f1", "atac_da_auc",
   "SimBench_DE_Fidelity_Score", "Log2FC_Pearson_Corr", "Log2FC_Spearman_Corr", "Top_DEG_Jaccard_Overlap",
   "Distribution_Score", "Classifier_Accuracy", "Classifier_Macro_F1", "Classifier_Macro_Recall",
   "predictive_macro_F1",
   "Silhouette_Sim", "PVE_Group_Sim",
   "batch_asw", "cell_type_asw", "graph_connectivity", "integration_ari", "integration_nmi",
   "cross_modal_F1", "match_at_1", "rv_coefficient", "module_correlation_r", "mean_coupling_cor",
+  "him", "edge_flip", "geodesic_correlation", "F1_branches", "wcor_features",
   "pseudotime_correlation", "graph_alignment", "lineage_expression_fidelity"
 )
 
@@ -1879,22 +1941,100 @@ plot_category_metric_bars <- function(
 # 2b. plot_scalability_benchmark()
 # ============================================================================
 
+#' Normalize Scalability Unit Aliases in Benchmark Data Frames
+#' @keywords internal
+.standardize_scalability_rows <- function(df) {
+  if (is.null(df) || !is.data.frame(df) || nrow(df) == 0 || !"Metric" %in% colnames(df)) {
+    return(df)
+  }
+  val_cols <- intersect(c("Value", "Score", "Score_Raw"), colnames(df))
+  scale_rows <- function(idx, factor) {
+    if (length(idx) == 0 || !any(idx)) return()
+    for (vc in val_cols) {
+      df[[vc]][idx] <<- as.numeric(df[[vc]][idx]) * factor
+    }
+  }
+  m_lower <- tolower(trimws(as.character(df$Metric)))
+
+  # 1. Runtime / Elapsed Time / Core-Seconds aliases
+  idx_core_hr <- m_lower %in% c("core_hours", "core_hour", "corehours", "core_hr", "core_hrs")
+  if (any(idx_core_hr)) {
+    scale_rows(idx_core_hr, 3600)
+    df$Metric[idx_core_hr] <- "core_seconds"
+  }
+  idx_core_s <- m_lower %in% c("core_seconds", "core_second", "coreseconds", "core_s", "cores_seconds", "core_secs")
+  if (any(idx_core_s)) {
+    df$Metric[idx_core_s] <- "core_seconds"
+  }
+
+  idx_min <- m_lower %in% c("elapsed_time_minutes", "elapsed_minutes", "runtime_minutes", "elapsed_time_min")
+  if (any(idx_min)) {
+    scale_rows(idx_min, 60)
+    df$Metric[idx_min] <- "elapsed_time_seconds"
+  }
+  idx_sec_alias <- m_lower %in% c("elapsed_time", "runtime_seconds", "elapsed_seconds", "elapsed_time_s", "runtime_s")
+  if (any(idx_sec_alias)) {
+    df$Metric[idx_sec_alias] <- "elapsed_time_seconds"
+  }
+
+  # 2. Peak RAM / Memory per Core aliases
+  m_raw <- trimws(as.character(df$Metric))
+  idx_mb_si <- m_raw %in% c("peak_memory_mb_si", "PeakRAM_MB", "peak_memory_MB", "memory_mb_si", "RAM_MB")
+  if (any(idx_mb_si)) {
+    scale_rows(idx_mb_si, 1000^2 / 1024^2)
+    df$Metric[idx_mb_si] <- "peak_memory_mb"
+  }
+  idx_mib_alias <- m_lower %in% c("memory_mb", "peak_memory_mib", "peakram_mib", "memory_mib", "ram_mib", "peak_memory")
+  if (any(idx_mib_alias)) {
+    df$Metric[idx_mib_alias] <- "peak_memory_mb"
+  }
+
+  idx_mpc_gib <- m_lower %in% c("memory_per_core_gib", "mem_per_core_gib", "peak_ram_per_core_gib", "gib_per_core", "gb_per_core")
+  if (any(idx_mpc_gib)) {
+    scale_rows(idx_mpc_gib, 1024)
+    df$Metric[idx_mpc_gib] <- "memory_per_core_mib"
+  }
+  idx_mpc_mib <- m_lower %in% c("memory_per_core_mib", "memory_per_core", "mem_per_core", "peak_ram_per_core",
+                                "peak_ram_per_core_mib", "ram_per_core", "ram_per_core_mib", "mib_per_core", "mb_per_core")
+  if (any(idx_mpc_mib)) {
+    df$Metric[idx_mpc_mib] <- "memory_per_core_mib"
+  }
+
+  df
+}
+
+#' @keywords internal
+.safe_norm_time_unit <- function(time_unit = "core_seconds") {
+  if (exists(".normalize_time_unit", mode = "function")) {
+    return(.normalize_time_unit(time_unit))
+  }
+  u <- tolower(trimws(as.character(time_unit[1] %||% "core_seconds")))
+  if (u %in% c("m", "min", "mins", "minute", "minutes")) "minutes" else "seconds"
+}
+
+#' @keywords internal
+.safe_norm_mem_unit <- function(memory_unit = "MiB/core") {
+  if (exists(".normalize_memory_unit", mode = "function")) {
+    return(.normalize_memory_unit(memory_unit))
+  }
+  u <- tolower(trimws(as.character(memory_unit[1] %||% "mib/core")))
+  if (u %in% c("mb", "megabyte", "megabytes", "mb/core")) "MB" else "MiB"
+}
+
 #' Plot Multi-Dimensional Computational Scalability Benchmark
 #'
-#' Evaluates computational resource efficiency across single-cell simulators using raw
-#' benchmarking measurements (elapsed real wall-clock time, total CPU time, peak resident
-#' Plot Multi-Dimensional Computational Scalability Benchmark
-#'
-#' Evaluates computational resource efficiency across single-cell simulators using raw
-#' benchmarking measurements (elapsed real wall-clock time in seconds and peak resident
-#' memory consumption in MiB).
+#' Evaluates computational resource efficiency across single-cell simulators using
+#' core-normalized Category VIII benchmarks: \strong{Core-Seconds} (\eqn{\text{Elapsed Time (s)} \times N_{\text{cores}}};
+#' Lannelongue et al., 2021; Wratten et al., 2021; Grealey et al., 2022) and \strong{Peak RAM per Core}
+#' (\eqn{\text{Peak RAM} / N_{\text{cores}}}; Holtgrewe et al., 2015; Boisvert et al., 2012; Chen et al., 2022),
+#' alongside resource tradeoff frontiers, cost footprints, and simulation throughput.
 #'
 #' \if{html}{\figure{scalability_benchmark.png}{options: width="800" alt="Computational Scalability and Resource Footprint"}}
 #'
 #' @param benchmark_data Benchmark summary table or named list containing Category VIII metrics.
 #' @param type Character. Visualization type: \code{"composite"} (multi-panel dashboard),
-#'   \code{"runtime"} (elapsed wall-clock time barplot), \code{"memory"} (peak RAM barplot),
-#'   \code{"tradeoff"} (runtime vs memory scatter/line curve), \code{"cost"} (combined resource footprint index),
+#'   \code{"runtime"} (core-seconds CPU work barplot), \code{"memory"} (peak RAM per core barplot),
+#'   \code{"tradeoff"} (core-seconds vs memory-per-core scatter curve), \code{"cost"} (combined resource footprint index),
 #'   \code{"throughput"} (cells/sec), or \code{"efficiency"} (CPU/elapsed concurrency ratio if CPU time available).
 #'   Default \code{"composite"}.
 #' @param layout Character. For composite dashboards: \code{"4panel"} (runtime, memory, tradeoff, cost footprint)
@@ -1905,33 +2045,45 @@ plot_category_metric_bars <- function(
 #'   simulation throughput (\code{cells / second}). Default \code{1000}.
 #' @param palette Optional named character vector of simulator colors.
 #' @param base_size Numeric. Base font size. Default \code{11}.
+#' @param time_unit Character. Display unit for runtime: \code{"core_seconds"} (default), \code{"core_hours"}, \code{"seconds"}, or \code{"minutes"}.
+#' @param memory_unit Character. Display unit for peak RAM per core: \code{"MiB/core"} (default), \code{"GiB/core"}, \code{"MB/core"}, or \code{"GB/core"}.
 #'
 #' @return A \code{ggplot} or \code{patchwork} object.
+#' @references
+#' Lannelongue, L., et al. (2021). Green Algorithms: Quantifying the carbon footprint of computation. \emph{Advanced Science}, 8(12), 2100707.
+#'
+#' Holtgrewe, M., et al. (2015). Methods for the detection and assembly of novel sequence. \emph{Bioinformatics}, 31(12), 1904–1912.
+#'
+#' Boisvert, S., et al. (2012). Ray Meta: scalable de novo metagenome assembly. \emph{Genome Biology}, 13(12), R122.
+#'
+#' Chen, W., et al. (2022). STEPS 4.0: Fast and memory-efficient simulations. \emph{Frontiers in Neuroinformatics}, 16, 883742.
 #' @examples
 #' data(example_scrna, package = "scSimEval")
 #' res <- evaluate_simulation_accuracy(example_scrna$ref, example_scrna$sim)
 #' @export
 plot_scalability_benchmark <- function(
   benchmark_data,
-  type       = c("composite", "runtime", "memory", "tradeoff", "cost", "throughput", "efficiency"),
-  layout     = c("4panel", "6panel"),
-  modality   = c("total", "rna", "atac"),
-  cell_count = 1000,
-  palette    = NULL,
-  base_size  = 11
+  type        = c("composite", "runtime", "memory", "tradeoff", "cost", "throughput", "efficiency"),
+  layout      = c("4panel", "6panel"),
+  modality    = c("total", "rna", "atac"),
+  cell_count  = 1000,
+  palette     = NULL,
+  base_size   = 11,
+  time_unit   = c("core_seconds", "core_hours", "seconds", "minutes"),
+  memory_unit = c("MiB/core", "GiB/core", "MB/core", "GB/core", "MiB", "MB")
 ) {
-  type     <- match.arg(type)
-  layout   <- match.arg(layout)
-  modality <- if (!is.null(modality)) match.arg(modality) else "total"
+  type      <- match.arg(type)
+  layout    <- match.arg(layout)
+  modality  <- if (!is.null(modality)) match.arg(modality) else "total"
 
   df <- .ingest_bubble_data(benchmark_data)
+  df <- .standardize_scalability_rows(df)
   if ("Modality" %in% colnames(df)) {
     if (modality == "rna") {
       df <- df[grepl("RNA", df$Modality, ignore.case = TRUE), , drop = FALSE]
     } else if (modality == "atac") {
       df <- df[grepl("ATAC", df$Modality, ignore.case = TRUE), , drop = FALSE]
     } else if (modality == "total") {
-      # Use total or computation, fall back to whole df if neither present
       has_total <- any(df$Modality %in% c("Computation", "Total", "Combined"))
       if (has_total) {
         df <- df[df$Modality %in% c("Computation", "Total", "Combined"), , drop = FALSE]
@@ -1939,10 +2091,48 @@ plot_scalability_benchmark <- function(
     }
   }
 
-  df$Metric[df$Metric == "elapsed_time"] <- "elapsed_time_seconds"
-  df$Metric[df$Metric == "memory_mb"] <- "peak_memory_mb"
-  sc_mets <- c("elapsed_time_seconds", "peak_memory_mb")
+  sc_mets <- c("core_seconds", "memory_per_core_mib", "elapsed_time_seconds", "peak_memory_mb")
   sc_df <- df[df$Metric %in% sc_mets, , drop = FALSE]
+
+  # Fallback for layer-specific ("rna" / "atac") plots when benchmark_data is a
+  # consolidated object or named list containing resource_usage[[modality]]
+  if (nrow(sc_df) == 0 && modality %in% c("rna", "atac") &&
+      is.list(benchmark_data) && !is.data.frame(benchmark_data)) {
+    res_list <- if (!is.null(benchmark_data$dataset_results) && is.list(benchmark_data$dataset_results)) {
+      benchmark_data$dataset_results
+    } else {
+      benchmark_data
+    }
+    res_names <- names(res_list)
+    layer_rows <- list()
+    for (idx in seq_along(res_list)) {
+      item <- res_list[[idx]]
+      if (!is.list(item) || is.null(item$resource_usage) || is.null(item$resource_usage[[modality]])) next
+      ru <- item$resource_usage[[modality]]
+      m_name <- if (!is.null(res_names) && nzchar(res_names[idx])) res_names[idx] else paste0("Method_", idx)
+      c_val <- if (!is.null(ru$sim_cores) && is.finite(ru$sim_cores)) as.integer(ru$sim_cores) else 1L
+      c_sec <- if (!is.null(ru$core_seconds)) as.numeric(ru$core_seconds) else (if (!is.null(ru$elapsed_time)) as.numeric(ru$elapsed_time) * c_val else NA_real_)
+      m_core <- if (!is.null(ru$memory_per_core_mib)) as.numeric(ru$memory_per_core_mib) else (if (!is.null(ru$memory_mb)) as.numeric(ru$memory_mb) / c_val else NA_real_)
+      if (is.finite(c_sec)) {
+        layer_rows[[length(layer_rows) + 1L]] <- data.frame(
+          Method = m_name, Metric = "core_seconds",
+          Score_Raw = c_sec, Sim_Cores = c_val,
+          stringsAsFactors = FALSE
+        )
+      }
+      if (is.finite(m_core)) {
+        layer_rows[[length(layer_rows) + 1L]] <- data.frame(
+          Method = m_name, Metric = "memory_per_core_mib",
+          Score_Raw = m_core, Sim_Cores = c_val,
+          stringsAsFactors = FALSE
+        )
+      }
+    }
+    if (length(layer_rows) > 0) {
+      sc_df <- do.call(rbind, layer_rows)
+    }
+  }
+
   if (nrow(sc_df) == 0) stop("No computational scalability metrics (Category VIII) found in benchmark_data.")
 
   mod_tag <- switch(modality,
@@ -1960,14 +2150,75 @@ plot_scalability_benchmark <- function(
   )
   colnames(wide_sc) <- gsub("^Score_Raw\\.", "", colnames(wide_sc))
 
-  for (m_req in c("elapsed_time_seconds", "peak_memory_mb")) {
+  for (m_req in c("core_seconds", "memory_per_core_mib", "elapsed_time_seconds", "peak_memory_mb")) {
     if (!m_req %in% colnames(wide_sc)) wide_sc[[m_req]] <- NA_real_
   }
 
-  wide_sc$resource_cost        <- (wide_sc$elapsed_time_seconds * wide_sc$peak_memory_mb) / 1000
-  wide_sc$throughput_cells_sec <- cell_count / pmax(0.1, wide_sc$elapsed_time_seconds)
+  # Extract optional simulation CPU cores per Method
+  cores_col <- intersect(c("Sim_Cores", "Cores_Used", "Cores", "n_cores", "cores"), colnames(sc_df))
+  wide_sc$Sim_Cores <- NA_integer_
+  if (length(cores_col) > 0) {
+    c_vals <- stats::aggregate(
+      suppressWarnings(as.integer(sc_df[[cores_col[1]]])),
+      by = list(Method = sc_df$Method),
+      FUN = function(x) { x_ok <- x[!is.na(x) & x >= 1L]; if (length(x_ok) > 0) x_ok[1] else NA_integer_ }
+    )
+    m_c <- match(wide_sc$Method, c_vals$Method)
+    wide_sc$Sim_Cores <- c_vals$x[m_c]
+  } else if (any(tolower(df$Metric) %in% c("sim_cores", "cores_used", "n_cores"))) {
+    c_rows <- df[tolower(df$Metric) %in% c("sim_cores", "cores_used", "n_cores"), , drop = FALSE]
+    m_c <- match(wide_sc$Method, c_rows$Method)
+    wide_sc$Sim_Cores <- suppressWarnings(as.integer(c_rows$Score_Raw[m_c]))
+  }
+
+  cores_vec <- ifelse(!is.na(wide_sc$Sim_Cores) & wide_sc$Sim_Cores >= 1L, wide_sc$Sim_Cores, 1L)
+
+  # Fallback: compute core_seconds and memory_per_core_mib from legacy columns if needed
+  needs_cs <- is.na(wide_sc$core_seconds) & !is.na(wide_sc$elapsed_time_seconds)
+  if (any(needs_cs)) {
+    wide_sc$core_seconds[needs_cs] <- wide_sc$elapsed_time_seconds[needs_cs] * cores_vec[needs_cs]
+  }
+  needs_mpc <- is.na(wide_sc$memory_per_core_mib) & !is.na(wide_sc$peak_memory_mb)
+  if (any(needs_mpc)) {
+    wide_sc$memory_per_core_mib[needs_mpc] <- wide_sc$peak_memory_mb[needs_mpc] / cores_vec[needs_mpc]
+  }
+
+  # Convert canonical (core_seconds, memory_per_core_mib) to requested display units
+  t_u_raw <- tolower(trimws(as.character(time_unit[1])))
+  if (t_u_raw %in% c("core_hours", "core_hour", "hours", "hour", "hr", "hrs")) {
+    wide_sc$display_time <- as.numeric(wide_sc$core_seconds) / 3600
+    t_label <- "Core-Hours"
+    t_abbr  <- "core-h"
+  } else if (t_u_raw %in% c("minutes", "min", "mins", "minute", "core_minutes")) {
+    wide_sc$display_time <- as.numeric(wide_sc$core_seconds) / 60
+    t_label <- "Core-Minutes"
+    t_abbr  <- "core-min"
+  } else {
+    wide_sc$display_time <- as.numeric(wide_sc$core_seconds)
+    t_label <- "Core-Seconds"
+    t_abbr  <- "core·s"
+  }
+
+  m_u_raw <- tolower(trimws(as.character(memory_unit[1])))
+  if (m_u_raw %in% c("gib", "gib/core", "gib_per_core", "gb_bin")) {
+    wide_sc$display_mem <- as.numeric(wide_sc$memory_per_core_mib) / 1024
+    m_abbr <- "GiB/core"
+  } else if (m_u_raw %in% c("mb", "mb/core", "mb_per_core", "megabyte")) {
+    wide_sc$display_mem <- as.numeric(wide_sc$memory_per_core_mib) * (1024^2 / 1000^2)
+    m_abbr <- "MB/core"
+  } else if (m_u_raw %in% c("gb", "gb/core", "gb_per_core", "gigabyte")) {
+    wide_sc$display_mem <- (as.numeric(wide_sc$memory_per_core_mib) * (1024^2 / 1000^2)) / 1000
+    m_abbr <- "GB/core"
+  } else {
+    wide_sc$display_mem <- as.numeric(wide_sc$memory_per_core_mib)
+    m_abbr <- "MiB/core"
+  }
+
+  wide_sc$resource_cost        <- (wide_sc$display_time * wide_sc$display_mem) / 1000
+  raw_wall_sec <- pmax(0.1, wide_sc$core_seconds / cores_vec)
+  wide_sc$throughput_cells_sec <- cell_count / raw_wall_sec
   if ("cpu_time_seconds" %in% colnames(wide_sc)) {
-    wide_sc$cpu_efficiency     <- wide_sc$cpu_time_seconds / pmax(0.1, wide_sc$elapsed_time_seconds)
+    wide_sc$cpu_efficiency     <- wide_sc$cpu_time_seconds / raw_wall_sec
   } else {
     wide_sc$cpu_efficiency     <- NA_real_
   }
@@ -1993,23 +2244,36 @@ plot_scalability_benchmark <- function(
     active_pal <- palette
   }
 
-  # Order methods by elapsed time (fastest first)
-  wide_sc <- wide_sc[order(wide_sc$elapsed_time_seconds, decreasing = FALSE), ]
+  # Order methods by core-seconds (fastest total CPU work first)
+  wide_sc <- wide_sc[order(wide_sc$core_seconds, decreasing = FALSE), ]
   wide_sc$Method <- factor(wide_sc$Method, levels = rev(wide_sc$Method))
 
-  # 1. Panel A: Elapsed Wall-Clock Runtime Barplot
-  p_runtime <- ggplot2::ggplot(wide_sc, ggplot2::aes(x = .data$elapsed_time_seconds, y = .data$Method, fill = .data$Method)) +
+  has_cores <- any(!is.na(wide_sc$Sim_Cores) & wide_sc$Sim_Cores >= 1L)
+  core_tag <- ifelse(!is.na(wide_sc$Sim_Cores) & wide_sc$Sim_Cores >= 1L,
+                     sprintf(" [%dc]", wide_sc$Sim_Cores), "")
+  time_num_str <- if (t_u_raw %in% c("core_hours", "core_hour", "hours", "hour", "hr", "hrs")) {
+    sprintf("%.3f %s", wide_sc$display_time, t_abbr)
+  } else if (t_u_raw %in% c("minutes", "min", "mins", "minute", "core_minutes")) {
+    sprintf("%.2f %s", wide_sc$display_time, t_abbr)
+  } else {
+    sprintf("%.1f %s", wide_sc$display_time, t_abbr)
+  }
+  wide_sc$time_label <- paste0(time_num_str, core_tag)
+
+  # 1. Panel A: Core-Seconds (Elapsed Time * Cores) Barplot
+  p_runtime <- ggplot2::ggplot(wide_sc, ggplot2::aes(x = .data$display_time, y = .data$Method, fill = .data$Method)) +
     ggplot2::geom_col(width = 0.65, color = "#1E293B", linewidth = 0.4, alpha = 0.9) +
     ggplot2::geom_text(
-      ggplot2::aes(label = sprintf("%.1f s", .data$elapsed_time_seconds)),
-      hjust = -0.15, size = base_size * 0.28, fontface = "bold", color = "#1E293B"
+      ggplot2::aes(label = .data$time_label),
+      hjust = -0.12, size = base_size * 0.28, fontface = "bold", color = "#1E293B"
     ) +
     ggplot2::scale_fill_manual(values = active_pal, guide = "none") +
-    ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.24))) +
+    ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, if (has_cores) 0.30 else 0.24))) +
     ggplot2::labs(
-      title    = paste0("A. Elapsed Execution Time", mod_tag),
-      subtitle = paste0("Wall-clock simulation elapsed time in seconds (lower is faster)", mod_tag),
-      x        = "Elapsed Time (Seconds, Lower = Faster)",
+      title    = paste0("A. Cumulative CPU Work (Core-Seconds)", mod_tag),
+      subtitle = paste0("Core-Seconds (Elapsed Time * Cores) in ", tolower(t_label), " (lower is faster)",
+                        if (has_cores) " | [Nc] = sim cores" else "", mod_tag),
+      x        = sprintf("Core-Seconds (%s, Lower = Faster)", t_label),
       y        = "Simulator"
     ) +
     .pub_theme(base_size = base_size) +
@@ -2017,19 +2281,26 @@ plot_scalability_benchmark <- function(
 
   if (type == "runtime") return(p_runtime)
 
-  # 2. Panel B: Peak Memory Barplot
-  p_memory <- ggplot2::ggplot(wide_sc, ggplot2::aes(x = .data$peak_memory_mb, y = .data$Method, fill = .data$Method)) +
+  # 2. Panel B: Peak Memory per Core Barplot
+  mem_label_str <- if (grepl("gib|gb", m_abbr, ignore.case = TRUE)) {
+    sprintf("%.2f %s", wide_sc$display_mem, m_abbr)
+  } else {
+    sprintf("%.1f %s", wide_sc$display_mem, m_abbr)
+  }
+  wide_sc$mem_label <- mem_label_str
+
+  p_memory <- ggplot2::ggplot(wide_sc, ggplot2::aes(x = .data$display_mem, y = .data$Method, fill = .data$Method)) +
     ggplot2::geom_col(width = 0.65, color = "#1E293B", linewidth = 0.4, alpha = 0.9) +
     ggplot2::geom_text(
-      ggplot2::aes(label = sprintf("%.0f MiB", .data$peak_memory_mb)),
+      ggplot2::aes(label = .data$mem_label),
       hjust = -0.15, size = base_size * 0.28, fontface = "bold", color = "#1E293B"
     ) +
     ggplot2::scale_fill_manual(values = active_pal, guide = "none") +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.24))) +
     ggplot2::labs(
-      title    = paste0("B. Peak Memory Usage", mod_tag),
-      subtitle = paste0("Maximum resident memory consumption in MiB (lower is better)", mod_tag),
-      x        = "Peak RAM (MiB, Lower = More Efficient)",
+      title    = paste0("B. Peak Memory per Core", mod_tag),
+      subtitle = paste0("Peak RAM normalized by allocated CPU cores in ", m_abbr, " (lower is better)", mod_tag),
+      x        = sprintf("Peak RAM per Core (%s, Lower = More Efficient)", m_abbr),
       y        = NULL
     ) +
     .pub_theme(base_size = base_size) +
@@ -2038,10 +2309,10 @@ plot_scalability_benchmark <- function(
   if (type == "memory") return(p_memory)
 
   # 3. Panel C: Runtime vs Memory Tradeoff
-  med_x <- stats::median(wide_sc$elapsed_time_seconds, na.rm = TRUE)
-  med_y <- stats::median(wide_sc$peak_memory_mb, na.rm = TRUE)
+  med_x <- stats::median(wide_sc$display_time, na.rm = TRUE)
+  med_y <- stats::median(wide_sc$display_mem, na.rm = TRUE)
 
-  p_tradeoff <- ggplot2::ggplot(wide_sc, ggplot2::aes(x = .data$elapsed_time_seconds, y = .data$peak_memory_mb, color = .data$Method)) +
+  p_tradeoff <- ggplot2::ggplot(wide_sc, ggplot2::aes(x = .data$display_time, y = .data$display_mem, color = .data$Method)) +
     ggplot2::geom_vline(xintercept = med_x, linetype = "dashed", color = "#CBD5E1", linewidth = 0.5) +
     ggplot2::geom_hline(yintercept = med_y, linetype = "dashed", color = "#CBD5E1", linewidth = 0.5) +
     ggplot2::geom_point(size = 4.5, alpha = 0.9) +
@@ -2050,10 +2321,10 @@ plot_scalability_benchmark <- function(
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.12, 0.18))) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0.12, 0.18))) +
     ggplot2::labs(
-      title    = "C. Runtime vs. Memory Trade-Off",
-      subtitle = "Bivariate resource consumption frontier (dashed lines = medians)",
-      x        = "Elapsed Time (Seconds, Lower = Faster)",
-      y        = "Peak RAM (MiB, Lower = Less Memory)"
+      title    = "C. Scalability Trade-Off Frontier",
+      subtitle = "Bivariate resource consumption: Core-Seconds vs. Peak RAM/Core (dashed lines = medians)",
+      x        = sprintf("Core-Seconds (%s, Lower = Faster)", t_label),
+      y        = sprintf("Peak RAM per Core (%s, Lower = Less Memory)", m_abbr)
     ) +
     .pub_theme(base_size = base_size) +
     ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0), plot.subtitle = ggplot2::element_text(hjust = 0))
@@ -2064,15 +2335,16 @@ plot_scalability_benchmark <- function(
   p_cost <- ggplot2::ggplot(wide_sc, ggplot2::aes(x = .data$resource_cost, y = .data$Method, fill = .data$Method)) +
     ggplot2::geom_col(width = 0.65, color = "#1E293B", linewidth = 0.4, alpha = 0.9) +
     ggplot2::geom_text(
-      ggplot2::aes(label = sprintf("%.1f kMiB-s", .data$resource_cost)),
+      ggplot2::aes(label = sprintf(ifelse(.data$resource_cost < 10, "%.2f k%s-%s", "%.1f k%s-%s"),
+                                   .data$resource_cost, m_abbr, t_abbr)),
       hjust = -0.15, size = base_size * 0.28, fontface = "bold", color = "#1E293B"
     ) +
     ggplot2::scale_fill_manual(values = active_pal, guide = "none") +
-    ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.25))) +
+    ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0, 0.28))) +
     ggplot2::labs(
-      title    = "D. Resource Cost Footprint",
-      subtitle = "Combined time-memory footprint: (Elapsed Time * Peak RAM) / 1000",
-      x        = "Resource Footprint (kilo-MiB-seconds, Lower = Cheaper)",
+      title    = "D. Normalized Resource Cost Footprint",
+      subtitle = "Combined scalability footprint: (Core-Seconds * Peak RAM/Core) / 1000",
+      x        = sprintf("Scalability Footprint (kilo-%s-%s, Lower = Cheaper)", m_abbr, t_abbr),
       y        = NULL
     ) +
     .pub_theme(base_size = base_size) +
@@ -2135,7 +2407,7 @@ plot_scalability_benchmark <- function(
     composite <- (p_runtime | p_memory) / (p_tradeoff | p_cost) / (p_thru | patchwork::plot_spacer()) +
       patchwork::plot_annotation(
         title    = "Computational Scalability & Resource Utilization Benchmark",
-        subtitle = "Multi-panel profiling of execution runtime, peak memory footprint, trade-off frontier, and computational cost",
+        subtitle = "Multi-panel profiling of cumulative CPU work (core-seconds), peak memory per core, trade-off frontier, and cost footprint",
         theme    = ggplot2::theme(
           plot.title    = ggplot2::element_text(face = "bold", size = base_size * 1.35, hjust = 0.5, color = "#0F172A"),
           plot.subtitle = ggplot2::element_text(size = base_size * 0.95, hjust = 0.5, color = "#475569", margin = ggplot2::margin(b = 10))
@@ -2145,7 +2417,7 @@ plot_scalability_benchmark <- function(
     composite <- (p_runtime | p_memory) / (p_tradeoff | p_cost) +
       patchwork::plot_annotation(
         title    = "Computational Scalability & Resource Utilization Benchmark",
-        subtitle = "Multi-panel profiling of elapsed execution time, peak resident RAM, and resource tradeoff frontier",
+        subtitle = "Multi-panel profiling of cumulative CPU work (core-seconds), peak memory per core, and resource tradeoff frontier",
         theme    = ggplot2::theme(
           plot.title    = ggplot2::element_text(face = "bold", size = base_size * 1.30, hjust = 0.5, color = "#0F172A"),
           plot.subtitle = ggplot2::element_text(size = base_size * 0.95, hjust = 0.5, color = "#475569", margin = ggplot2::margin(b = 10))
@@ -3280,6 +3552,9 @@ plot_metric_pca <- function(
 #'     \item A tidy \code{data.frame} with columns: \code{Method}, \code{Metric}, \code{Category},
 #'           and \code{Score} (or \code{Value}).
 #'   }
+#' @param assay_modality Optional character scalar ("all", "RNA", or "ATAC") specifying
+#'   the assay modality scope to dynamically format Category V metrics with the appropriate
+#'   differential prefix ("DE/DA ", "DE ", or "DA "). If \code{NULL}, auto-detected from data.
 #' @param method_classes Optional named list mapping method names to row group labels.
 #'   E.g. \code{list("scRNA-seq" = c("Splatter", "SymSim"), "Multiomics" = c("scDesign3", "dyngen"))}.
 #' @param category_colors Optional named character vector to override the canonical palette.
@@ -3294,6 +3569,8 @@ plot_metric_pca <- function(
 #' @param subtitle Character. Plot subtitle.
 #' @param base_size Numeric. Base font size. Default \code{11}.
 #' @param show_score_labels Logical. Annotate bubbles with numeric score. Default \code{FALSE}.
+#' @param show_category_bars Logical. Append a compact horizontal summary bar (normalized
+#'   category mean score) at the right end of each category panel. Default \code{TRUE}.
 #'
 #' @return A \code{ggplot} object rendering the multi-dimensional bubble matrix.
 #' @export
@@ -3326,19 +3603,21 @@ plot_metric_pca <- function(
 #' }
 plot_benchmark_bubble_matrix <- function(
   data,
-  method_classes    = NULL,
-  category_colors   = NULL,
-  metrics_order     = NULL,
-  methods_order     = NULL,
-  rank_methods      = TRUE,
-  compact_strips    = TRUE,
-  normalize_scores  = TRUE,
-  show_missing_dots = TRUE,
-  bubble_size_range = c(2.0, 7.8),
-  title             = NULL,
-  subtitle          = NULL,
-  base_size         = 11,
-  show_score_labels = FALSE
+  assay_modality     = NULL,
+  method_classes     = NULL,
+  category_colors    = NULL,
+  metrics_order      = NULL,
+  methods_order      = NULL,
+  rank_methods       = TRUE,
+  compact_strips     = TRUE,
+  normalize_scores   = TRUE,
+  show_missing_dots  = TRUE,
+  bubble_size_range  = c(2.0, 7.8),
+  title              = NULL,
+  subtitle           = NULL,
+  base_size          = 11,
+  show_score_labels  = FALSE,
+  show_category_bars = TRUE
 ) {
   # --- 1. Ingest ---------------------------------------------------------
   df <- .ingest_bubble_data(data)
@@ -3362,6 +3641,57 @@ plot_benchmark_bubble_matrix <- function(
       (if ("Modality" %in% colnames(df)) grepl("Joint|Cross", as.character(df$Modality), ignore.case = TRUE) else FALSE)
     idx <- !is.na(mc_override) & !is_cross_modal_row
     df$Display_Category[idx] <- mc_override[idx]
+  }
+
+  # Harmonize Category V raw metric names to canonical keys so cross-modality scores aggregate cleanly
+  if ("Metric" %in% colnames(df)) {
+    is_cat5_raw <- grepl("^\\(V\\)|Biological Signal|Bio-Signal", df$Display_Category)
+    cat5_harmonize <- c(
+      "rna_de_accuracy"         = "accuracy",
+      "rna_de_precision"        = "precision",
+      "rna_de_recall"           = "recall",
+      "rna_de_f1"               = "f1_score",
+      "rna_de_auc"              = "auc",
+      "rna_de_pval_dist_score"  = "pval_dist_score",
+      "atac_da_accuracy"        = "accuracy",
+      "atac_da_precision"       = "precision",
+      "atac_da_recall"          = "recall",
+      "atac_da_f1"              = "f1_score",
+      "atac_da_auc"             = "auc",
+      "atac_da_pval_dist_score" = "pval_dist_score"
+    )
+    idx_h <- is_cat5_raw & df$Metric %in% names(cat5_harmonize)
+    if (any(idx_h)) {
+      df$Metric[idx_h] <- cat5_harmonize[df$Metric[idx_h]]
+    }
+  }
+
+  # Determine modality prefix for Category V metrics (DE / DA / DE/DA)
+  if (!is.null(assay_modality) && nzchar(trimws(as.character(assay_modality)[1L]))) {
+    mod_str <- tolower(trimws(as.character(assay_modality)[1L]))
+    if (grepl("rna", mod_str) && !grepl("atac|all|multi|joint", mod_str)) {
+      cat5_prefix <- "DE "
+    } else if (grepl("atac", mod_str) && !grepl("rna|all|multi|joint", mod_str)) {
+      cat5_prefix <- "DA "
+    } else {
+      cat5_prefix <- "DE/DA "
+    }
+  } else {
+    if ("Modality" %in% colnames(df)) {
+      cat5_sub <- df[grepl("^\\(V\\)|Biological Signal|Bio-Signal", df$Display_Category), , drop = FALSE]
+      cand_mod <- if (nrow(cat5_sub) > 0) cat5_sub$Modality else df$Modality[!grepl("Comp|Scalability|^\\(VIII\\)", df$Display_Category, ignore.case = TRUE)]
+      has_rna  <- any(grepl("RNA", cand_mod, ignore.case = TRUE))
+      has_atac <- any(grepl("ATAC", cand_mod, ignore.case = TRUE))
+      if (has_rna && !has_atac) {
+        cat5_prefix <- "DE "
+      } else if (has_atac && !has_rna) {
+        cat5_prefix <- "DA "
+      } else {
+        cat5_prefix <- "DE/DA "
+      }
+    } else {
+      cat5_prefix <- "DE/DA "
+    }
   }
 
   # --- 2b. Modality scope detection (distinguish scRNA vs scATAC metrics) -
@@ -3441,6 +3771,16 @@ plot_benchmark_bubble_matrix <- function(
   if ("Metric" %in% colnames(df)) {
     lbl_map <- .METRIC_DISPLAY_LABELS[df$Metric]
     df$Display_Metric <- ifelse(!is.na(lbl_map), lbl_map, df$Metric)
+
+    # Category V dynamic prefix (DE / DA / DE/DA)
+    is_cat5 <- grepl("^\\(V\\)|Biological Signal|Bio-Signal", as.character(df$Display_Category))
+    df$Display_Metric[is_cat5 & df$Metric %in% c("accuracy", "rna_de_accuracy", "atac_da_accuracy")] <- paste0(cat5_prefix, "Accuracy")
+    df$Display_Metric[is_cat5 & df$Metric %in% c("precision", "rna_de_precision", "atac_da_precision")] <- paste0(cat5_prefix, "Precision")
+    df$Display_Metric[is_cat5 & df$Metric %in% c("recall", "rna_de_recall", "atac_da_recall")] <- paste0(cat5_prefix, "Recall")
+    df$Display_Metric[is_cat5 & df$Metric %in% c("f1_score", "f1", "rna_de_f1", "atac_da_f1")] <- paste0(cat5_prefix, "F1-Score")
+    df$Display_Metric[is_cat5 & df$Metric %in% c("auc", "roc_auc", "rna_de_auc", "atac_da_auc")] <- paste0(cat5_prefix, "ROC-AUC")
+    df$Display_Metric[is_cat5 & df$Metric %in% c("pval_dist_score", "rna_de_pval_dist_score", "atac_da_pval_dist_score")] <- paste0(cat5_prefix, "Null P-Value Uniformity")
+
     is_cat6 <- grepl("^\\(VI\\)|Multiomics Integration", as.character(df$Display_Category))
     df$Display_Metric[is_cat6 & df$Metric == "ari"] <- "Integration ARI"
     df$Display_Metric[is_cat6 & df$Metric == "nmi"] <- "Integration NMI"
@@ -3525,10 +3865,29 @@ plot_benchmark_bubble_matrix <- function(
       }
     }
   }
-  df$Metric_Key <- factor(df$Metric_Key, levels = unique(ord_keys))
+  real_metric_keys <- unique(ord_keys)
+  cat_bar_meta <- list()
+  all_x_levels <- character(0)
+  if (isTRUE(show_category_bars)) {
+    for (ct in levels(df$Display_Category)) {
+      ct_keys <- real_metric_keys[real_metric_keys %in% unique(df$Metric_Key[df$Display_Category == ct])]
+      if (length(ct_keys) == 0) next
+      bar1_k <- paste0(ct, "|||__CAT_AVG_BAR1__")
+      bar2_k <- paste0(ct, "|||__CAT_AVG_BAR2__")
+      cat_bar_meta[[ct]] <- list(
+        n_real = length(ct_keys),
+        bar1_k = bar1_k,
+        bar2_k = bar2_k
+      )
+      all_x_levels <- c(all_x_levels, ct_keys, bar1_k, bar2_k)
+    }
+  } else {
+    all_x_levels <- real_metric_keys
+  }
+  df$Metric_Key <- factor(df$Metric_Key, levels = unique(all_x_levels))
   df$Display_Metric <- factor(
     df$Display_Metric,
-    levels = unique(as.character(df$Display_Metric[match(levels(df$Metric_Key), df$Metric_Key)]))
+    levels = unique(as.character(df$Display_Metric[match(real_metric_keys, df$Metric_Key)]))
   )
 
   if (!is.null(method_classes)) {
@@ -3585,14 +3944,47 @@ plot_benchmark_bubble_matrix <- function(
     color = "#F1F5F9", linewidth = 0.5
   )
 
+  # Scaffold all discrete X factor levels in exact facet order FIRST so ggplot2
+  # free_x preserves [metrics 1..k, CatAvgBar] regardless of layer order
+  if (isTRUE(show_category_bars) && length(cat_bar_meta) > 0) {
+    sc_rows <- list()
+    for (ct in names(cat_bar_meta)) {
+      ct_keys_full <- all_x_levels[grepl(paste0("^", gsub("([.|()\\^{}+$*?\\[\\]])", "\\\\\\1", ct), "\\|\\|\\|"), all_x_levels)]
+      ref_m <- df[as.character(df$Display_Category) == ct, , drop = FALSE]
+      if (nrow(ref_m) > 0 && length(ct_keys_full) > 0) {
+        sc_ct <- data.frame(
+          Metric_Key       = factor(ct_keys_full, levels = levels(df$Metric_Key)),
+          Method           = factor(rep(as.character(ref_m$Method[1L]), length(ct_keys_full)), levels = y_levels),
+          Display_Category = factor(rep(ct, length(ct_keys_full)), levels = levels(df$Display_Category)),
+          stringsAsFactors = FALSE
+        )
+        if ("Method_Class" %in% colnames(df)) {
+          sc_ct$Method_Class <- factor(rep(as.character(ref_m$Method_Class[1L]), length(ct_keys_full)),
+                                       levels = levels(factor(df$Method_Class)))
+        }
+        sc_rows[[ct]] <- sc_ct
+      }
+    }
+    if (length(sc_rows) > 0) {
+      scaffold_df <- do.call(rbind, sc_rows)
+      scaffold_df <- scaffold_df[order(scaffold_df$Display_Category, scaffold_df$Metric_Key), , drop = FALSE]
+      p <- p + ggplot2::geom_blank(
+        data = scaffold_df,
+        ggplot2::aes(x = .data$Metric_Key, y = .data$Method),
+        inherit.aes = FALSE
+      )
+    }
+  }
+
   # Background grey grid dots for missing metric combinations
   if (show_missing_dots) {
-    grid_df <- expand.grid(Method = ordered_m, Metric_Key = levels(df$Metric_Key),
+    grid_df <- expand.grid(Method = ordered_m, Metric_Key = real_metric_keys,
                             stringsAsFactors = FALSE)
-    mc_map  <- unique(df[!is.na(df$Metric_Key) & !is.na(df$Display_Category), c("Metric_Key", "Display_Category")])
+    mc_map  <- unique(df[df$Metric_Key %in% real_metric_keys & !is.na(df$Display_Category), c("Metric_Key", "Display_Category")])
     grid_df <- merge(grid_df, mc_map, by = "Metric_Key", all.x = TRUE)
     grid_df <- grid_df[!is.na(grid_df$Display_Category) & grid_df$Display_Category != "NA", , drop = FALSE]
     grid_df$Method <- factor(grid_df$Method, levels = y_levels)
+    grid_df$Metric_Key <- factor(grid_df$Metric_Key, levels = levels(df$Metric_Key))
     p <- p + ggplot2::geom_point(
       data = grid_df, ggplot2::aes(x = .data$Metric_Key, y = .data$Method),
       shape = 16, size = 0.85, color = "#D5D8DC", alpha = 0.60, inherit.aes = FALSE
@@ -3613,6 +4005,11 @@ plot_benchmark_bubble_matrix <- function(
       unname(modality_scope_pal[as.character(key_scope_df$Modality_Scope)]),
       as.character(key_scope_df$Metric_Key)
     )
+    if (isTRUE(show_category_bars) && length(cat_bar_meta) > 0) {
+      for (meta_ct in cat_bar_meta) {
+        key_label_colors[c(meta_ct$bar1_k, meta_ct$bar2_k)] <- "#0F172A"
+      }
+    }
     present_scopes <- scope_lvls[scope_lvls %in% unique(as.character(df$Modality_Scope))]
     mod_leg_df <- data.frame(
       Metric_Key       = df$Metric_Key[1L],
@@ -3634,7 +4031,7 @@ plot_benchmark_bubble_matrix <- function(
         name   = "Metric Name Color (Modality Scope)",
         drop   = TRUE,
         guide  = ggplot2::guide_legend(
-          nrow = 1, title.position = "top", order = 3,
+          nrow = 1, title.position = "top", order = 1,
           override.aes = list(shape = 15, size = 4.2, alpha = 1)
         )
       ) +
@@ -3642,7 +4039,13 @@ plot_benchmark_bubble_matrix <- function(
   }
 
   x_label_map <- stats::setNames(as.character(df$Display_Metric), as.character(df$Metric_Key))
+  if (isTRUE(show_category_bars) && length(cat_bar_meta) > 0) {
+    for (meta_ct in cat_bar_meta) {
+      x_label_map[c(meta_ct$bar1_k, meta_ct$bar2_k)] <- ""
+    }
+  }
   p <- p + ggplot2::scale_x_discrete(
+    breaks = function(lims) lims[!grepl("__CAT_AVG_BAR[12]__$", lims)],
     labels = function(k) ifelse(k %in% names(x_label_map), unname(x_label_map[k]), k)
   )
 
@@ -3670,6 +4073,102 @@ plot_benchmark_bubble_matrix <- function(
       size = 2.1, color = "#1A252F", fontface = "bold"
     )
 
+  # Category-average numeric score + horizontal bar at the right end of each category panel
+  if (isTRUE(show_category_bars) && length(cat_bar_meta) > 0) {
+    df_real_scores <- df[!is.na(df$Score_Norm), , drop = FALSE]
+    if (nrow(df_real_scores) > 0) {
+      cat_avg_df <- stats::aggregate(
+        Score_Norm ~ Method + Method_Class + Display_Category,
+        data = df_real_scores,
+        FUN  = mean,
+        na.rm = TRUE
+      )
+      cat_avg_df$Method <- factor(cat_avg_df$Method, levels = y_levels)
+      if ("Method_Class" %in% colnames(df) && is.factor(df$Method_Class)) {
+        cat_avg_df$Method_Class <- factor(cat_avg_df$Method_Class, levels = levels(df$Method_Class))
+      }
+      cat_avg_df$Display_Category <- factor(cat_avg_df$Display_Category, levels = levels(df$Display_Category))
+
+      # Compute local row y-index inside each Method_Class panel
+      cat_avg_df$y_idx <- NA_real_
+      for (mc_lvl in unique(as.character(cat_avg_df$Method_Class))) {
+        idx_mc <- as.character(cat_avg_df$Method_Class) == mc_lvl
+        m_present <- y_levels[y_levels %in% as.character(df$Method[as.character(df$Method_Class) == mc_lvl])]
+        cat_avg_df$y_idx[idx_mc] <- match(as.character(cat_avg_df$Method[idx_mc]), m_present)
+      }
+
+      n_real_vec <- vapply(as.character(cat_avg_df$Display_Category), function(ct) {
+        m <- cat_bar_meta[[ct]]
+        if (is.null(m)) NA_real_ else as.numeric(m$n_real)
+      }, numeric(1))
+      cat_avg_df <- cat_avg_df[!is.na(n_real_vec) & !is.na(cat_avg_df$y_idx), , drop = FALSE]
+      n_real_vec <- n_real_vec[!is.na(n_real_vec)]
+
+      # Bar height matched to diameter of max (1.00) bubble; pure white background
+      bar_half_h <- max(0.16, min(0.28, 0.22 * (bubble_size_range[2] / 7.8)))
+      cat_avg_df$sep_x      <- n_real_vec + 0.50
+      cat_avg_df$track_xmin <- n_real_vec + 0.54
+      cat_avg_df$track_xmax <- n_real_vec + 2.46
+      cat_avg_df$bar_xmin   <- n_real_vec + 0.58
+      cat_avg_df$bar_xmax   <- n_real_vec + 0.58 + 1.80 * pmax(0, pmin(1, cat_avg_df$Score_Norm))
+      cat_avg_df$row_ymin   <- cat_avg_df$y_idx - 0.44
+      cat_avg_df$row_ymax   <- cat_avg_df$y_idx + 0.44
+      cat_avg_df$bar_ymin   <- cat_avg_df$y_idx - bar_half_h
+      cat_avg_df$bar_ymax   <- cat_avg_df$y_idx + bar_half_h
+      cat_avg_df$track_fill <- "#FFFFFF"
+
+      cat_top_tbl <- stats::aggregate(Score_Norm ~ Display_Category,
+                                      data = cat_avg_df, FUN = max, na.rm = TRUE)
+      colnames(cat_top_tbl)[2] <- "Cat_Top"
+      cat_avg_df <- merge(cat_avg_df, cat_top_tbl, by = "Display_Category", all.x = TRUE)
+      cat_avg_df$Is_Cat_Top <- !is.na(cat_avg_df$Score_Norm) & !is.na(cat_avg_df$Cat_Top) &
+        (cat_avg_df$Score_Norm >= cat_avg_df$Cat_Top - 1e-5) & (cat_avg_df$Score_Norm > 0)
+
+      cat_avg_reg <- cat_avg_df[!cat_avg_df$Is_Cat_Top, , drop = FALSE]
+      cat_avg_top <- cat_avg_df[cat_avg_df$Is_Cat_Top, , drop = FALSE]
+      sep_df <- unique(cat_avg_df[, c("Display_Category", "Method_Class", "sep_x"), drop = FALSE])
+
+      p <- p +
+        ggplot2::geom_rect(
+          data = cat_avg_df,
+          ggplot2::aes(
+            xmin = .data$track_xmin, xmax = .data$track_xmax,
+            ymin = .data$row_ymin,   ymax = .data$row_ymax
+          ),
+          fill = "#FFFFFF", color = NA, inherit.aes = FALSE
+        ) +
+        ggplot2::geom_vline(
+          data = sep_df,
+          ggplot2::aes(xintercept = .data$sep_x),
+          color = "#94A3B8", linewidth = 0.45
+        )
+      if (nrow(cat_avg_reg) > 0) {
+        p <- p + ggplot2::geom_rect(
+          data = cat_avg_reg,
+          ggplot2::aes(
+            xmin = .data$bar_xmin, xmax = .data$bar_xmax,
+            ymin = .data$bar_ymin, ymax = .data$bar_ymax,
+            fill = .data$Display_Category
+          ),
+          color = "#64748B", linewidth = 0.45, alpha = 0.88,
+          inherit.aes = FALSE, show.legend = FALSE
+        )
+      }
+      if (nrow(cat_avg_top) > 0) {
+        p <- p + ggplot2::geom_rect(
+          data = cat_avg_top,
+          ggplot2::aes(
+            xmin = .data$bar_xmin, xmax = .data$bar_xmax,
+            ymin = .data$bar_ymin, ymax = .data$bar_ymax,
+            fill = .data$Display_Category
+          ),
+          color = "#0F172A", linewidth = 1.45, alpha = 1.0,
+          inherit.aes = FALSE, show.legend = FALSE
+        )
+      }
+    }
+  }
+
   # --- 9. Scales ---------------------------------------------------------
   p <- p +
     ggplot2::scale_fill_manual(
@@ -3678,7 +4177,7 @@ plot_benchmark_bubble_matrix <- function(
       name   = "Evaluation Category (Full Provenance Mapping)",
       guide  = ggplot2::guide_legend(
         override.aes = list(size = 5.0, shape = 21), nrow = 2,
-        title.position = "top", order = 1
+        title.position = "top", order = 2
       )
     ) +
     ggplot2::scale_size_continuous(
@@ -3688,7 +4187,7 @@ plot_benchmark_bubble_matrix <- function(
       name   = "Fidelity Score (Larger Bubble = Higher Fidelity)",
       guide  = ggplot2::guide_legend(
         override.aes = list(fill = "#94A3B8", shape = 21, color = "#1E293B"),
-        nrow = 1, title.position = "top", order = 2
+        nrow = 1, title.position = "top", order = 3
       )
     )
 
@@ -3725,10 +4224,11 @@ plot_benchmark_bubble_matrix <- function(
       x        = NULL,
       y        = y_title,
       caption  = paste0(
-        "Circle: standard performance  |  Bold circle outline: top-performing simulator for the metric",
+        "Circle/bar: standard performance  |  Bold outline: top-performing simulator for the metric or category",
         if (show_missing_dots) "  |  Grey dot: metric not computed." else ".\n",
         if (show_missing_dots) "\n" else "",
-        "All ", length(levels(df$Metric_Key)), " metrics direction-normalized: for error/distance metrics, scores are inverted as 1 - norm(x) so 1.0 always indicates closest agreement to empirical reference."
+        "All ", length(real_metric_keys), " metrics direction-normalized: for error/distance metrics, scores are inverted as 1 - norm(x) so 1.0 always indicates closest agreement to empirical reference.",
+        if (isTRUE(show_category_bars)) " Right-hand bars show category mean scores [0.00-1.00]." else ""
       )
     ) +
     ggplot2::theme_bw(base_size = base_size) +
@@ -3756,10 +4256,12 @@ plot_benchmark_bubble_matrix <- function(
       strip.text.y       = ggplot2::element_text(angle = 0, face = "bold",
                                                  size = base_size * 0.83, color = "#0F172A"),
       legend.position    = "bottom",
-      legend.box         = "vertical",
-      legend.margin      = ggplot2::margin(t = 6, b = 2),
-      legend.title       = ggplot2::element_text(face = "bold", size = base_size * 0.86),
-      legend.text        = ggplot2::element_text(size = base_size * 0.77),
+      legend.box         = "horizontal",
+      legend.box.just    = "top",
+      legend.spacing.x   = grid::unit(34, "pt"),
+      legend.margin      = ggplot2::margin(t = 4, b = 2, l = 8, r = 8),
+      legend.title       = ggplot2::element_text(face = "bold", size = base_size * 0.84),
+      legend.text        = ggplot2::element_text(size = base_size * 0.75),
       plot.title         = ggplot2::element_text(face = "bold", size = base_size * 1.36,
                                                  color = "#0F172A", hjust = 0.5,
                                                  margin = ggplot2::margin(b = 4)),
@@ -3856,10 +4358,20 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
                                   Metric = tbl$Metric, Score_Raw = val,
                                   stringsAsFactors = FALSE)
         if ("Modality" %in% colnames(tbl)) rows[[nm]]$Modality <- tbl$Modality
+        if ("Sim_Cores" %in% colnames(tbl)) {
+          rows[[nm]]$Sim_Cores <- tbl$Sim_Cores
+        } else if (is.list(item) && !is.null(item$resource_usage$sim_cores)) {
+          rows[[nm]]$Sim_Cores <- as.integer(item$resource_usage$sim_cores)
+        }
       }
     }
     if (length(rows) == 0) stop("No valid benchmark tables found in the named list.")
-    return(do.call(rbind, rows))
+    all_cols <- unique(unlist(lapply(rows, colnames)))
+    rows <- lapply(rows, function(r) {
+      for (mc in setdiff(all_cols, colnames(r))) r[[mc]] <- NA
+      r[, all_cols, drop = FALSE]
+    })
+    return(.standardize_scalability_rows(do.call(rbind, rows)))
   }
 
   # Pre-formed tidy data.frame
@@ -3881,7 +4393,7 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
     missing <- setdiff(c("Method", "Metric", "Score_Raw"), colnames(df))
     if (length(missing) > 0)
       stop(paste("data.frame missing required columns:", paste(missing, collapse = ", ")))
-    return(df)
+    return(.standardize_scalability_rows(df))
   }
 
   stop("Unsupported `data` format. See ?plot_benchmark_bubble_matrix for accepted inputs.")
@@ -4181,13 +4693,16 @@ plot_evaluation_summary <- function(
 
   # 8. Colors (earlier pleasant tinted palette)
   default_colors <- c(
-    "(I)\nDistribution"   = "#60A5FA",  # Sky Blue
-    "(II)\nCorrelation"    = "#34D399",  # Emerald Green
-    "(III)\nCell Structure"= "#A78BFA",  # Purple / Lavender
+    "(I)\nDistribution"    = "#60A5FA",  # Sky Blue
+    "(II)\nSparsity & Zero"= "#34D399",  # Emerald Green
+    "(II)\nCorrelation"    = "#34D399",  # Emerald Green (legacy)
+    "(III)\nCell Manifold" = "#A78BFA",  # Purple / Lavender
+    "(III)\nCell Structure"= "#A78BFA",  # Purple / Lavender (legacy)
     "(IV)\nBatch Mixing"   = "#FBBF24",  # Amber / Warm Yellow
     "(V)\nBio-Signal & DE" = "#FB923C",  # Coral / Orange
-    "(VI)\nTraj."          = "#2DD4BF",  # Teal / Mint
-    "(VI)\nMultiomics"     = "#2E4057",  # Indigo
+    "(VI)\nMultiomics"     = "#7DD3FC",  # Light Sky Blue
+    "(VII)\nTrajectory"    = "#2DD4BF",  # Teal / Mint
+    "(VI)\nTraj."          = "#2DD4BF",  # Teal / Mint (legacy)
     "(VIII)\nScalability"  = "#4ADE80",  # Light Green
     "Overall\nScore"       = "#94A3B8"   # Slate Grey
   )
@@ -5103,6 +5618,14 @@ combine_benchmark_results <- function(
     } else {
       unique_dsets <- c(unique_dsets, orig_d)
     }
+  }
+
+  # Preserve optional Sim_Cores across partially-annotated inputs
+  if (any(vapply(ingested_dfs, function(x) "Sim_Cores" %in% colnames(x), logical(1)))) {
+    ingested_dfs <- lapply(ingested_dfs, function(x) {
+      if (!"Sim_Cores" %in% colnames(x)) x$Sim_Cores <- NA_integer_
+      x
+    })
   }
 
   # Find common columns to rbind

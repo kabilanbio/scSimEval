@@ -11,11 +11,11 @@
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
-<script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><script src="../lightswitch.js"></script><link href="../extra.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Interactive Shiny Studio — Complete User Guide">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,11 +25,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +50,7 @@
     <li><a class="dropdown-item" href="../articles/demo-saved-rds.html">4. Analyzing Pre-Saved Benchmark (.rds)</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (48 Metrics)</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/metrics-catalog.html">Metric Catalog (56 Metrics)</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -58,14 +58,6 @@
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/kabilanbio/scSimEval" aria-label="GitHub repository"><span class="fa fa-github fa-lg"></span></a></li>
-<li class="nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Toggle theme"><span class="fa-solid fa-sun fa-fw"></span></button>
-  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
-    <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-bs-theme-value="light" aria-pressed="false"><span class="fa-solid fa-sun fa-fw"></span>Light</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-bs-theme-value="dark" aria-pressed="false"><span class="fa-solid fa-moon fa-fw"></span>Dark</button></li>
-    <li><button type="button" class="dropdown-item d-flex align-items-center gap-2" data-bs-theme-value="auto" aria-pressed="false"><span class="fa-solid fa-circle-half-stroke fa-fw"></span>Auto</button></li>
-  </ul>
-</li>
       </ul>
 </div>
 
@@ -92,7 +84,7 @@
 </h2>
 <p>The <strong>scSimEval Shiny Studio</strong> is a self-contained,
 browser-based graphical interface providing point-and-click access to
-all 48 curated evaluation measures and publication visualizations in the
+all 56 curated evaluation measures and publication visualizations in the
 package—without requiring R scripting.</p>
 <p>Launch the studio locally in R:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -116,7 +108,7 @@ navigation tabs.</li>
 </h2>
 <p>The landing page provides a high-level orientation to
 <strong>scSimEval Studio</strong>: * <strong>KPI Ribbon:</strong>
-Summarizes the 48 curated evaluation measures, 8 biological dimensions,
+Summarizes the 56 curated evaluation measures, 8 biological dimensions,
 3 supported modalities (scRNA-seq, scATAC-seq, and paired Multiome), and
 the standardized
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>
@@ -137,7 +129,7 @@ three functional modules:</p>
 <p>Choose between four operational modes: * <strong>Mode 1 —
 Pre-Computed Benchmark (Demo Data):</strong> Instantly loads a complete
 multi-dataset evaluation across 6 simulation methods (Simulator 1 to
-Simulator 6) over all 48 evaluation measures with zero computational
+Simulator 6) over all 56 evaluation measures with zero computational
 waiting time. * <strong>Mode 2 — Single-Cell Evaluation (scRNA-seq /
 scATAC-seq):</strong> Upload empirical reference count matrices and 1–6
 simulated datasets (<code>.rds</code>, <code>.csv</code>,
@@ -146,12 +138,13 @@ provide cell type annotations (unlocking clustering and biological
 signal fidelity) and batch labels (unlocking technical confounder mixing
 metrics). Set CPU worker threads for parallel evaluation. * <strong>Mode
 3 — Multiomics Evaluation (RNA + ATAC):</strong> Benchmark paired
-co-assays (e.g., 10x Multiome, SHARE-seq) to evaluate cross-modality
-coupling (FOSCTTM, <a href="mailto:Match@1" class="email">Match@1</a>,
-peak-to-gene correlations) alongside unimodal properties, or evaluate
-unpaired multiomics datasets. * <strong>Mode 4 — Upload Saved Benchmark
-Table (.rds / .csv):</strong> Ingest previously computed benchmark
-outputs from <code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code> or
+co-assays (e.g., 10x Multiome, SHARE-seq) or unpaired multiomics
+datasets to evaluate joint-embedding multiomics integration
+(<code>batch_asw</code>, <code>cell_type_asw</code>,
+<code>graph_connectivity</code>, <code>ari</code>, <code>nmi</code>)
+alongside per-modality unimodal properties. * <strong>Mode 4 — Upload
+Saved Benchmark Table (.rds / .csv):</strong> Ingest previously computed
+benchmark outputs from <code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code> or
 <code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code>. Check <strong>“Add to
 current benchmark results”</strong> to merge multiple datasets and
 automatically calculate cross-dataset simulator average rankings.</p>
@@ -185,7 +178,7 @@ high-performance compute nodes.</li>
 <h3 id="comparative-bubble-matrix">1. Comparative Bubble Matrix<a class="anchor" aria-label="anchor" href="#comparative-bubble-matrix"></a>
 </h3>
 <p>The flagship visualization displaying candidate simulators against
-all 48 curated evaluation measures organized by canonical category: *
+all 56 curated evaluation measures organized by canonical category: *
 <strong>Fidelity Sizing:</strong> Bubble diameter reflects
 direction-aware normalized performance
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.00</mn><annotation encoding="application/x-tex">0.00</annotation></semantics></math>
@@ -235,9 +228,11 @@ simulators.</li>
 simulated distributions across expression moments, ECDF curves, and
 zero-inflation patterns.</li>
 <li>
-<strong>Scalability Benchmark:</strong> Wall-clock runtime
-(seconds), peak memory consumption (MiB RAM), Pareto efficiency
-frontiers, and throughput (cells/second).</li>
+<strong>Scalability Benchmark:</strong> Core-normalized CPU
+execution time (<code>core_seconds</code> / <code>core_hours</code>),
+peak memory footprint per allocated core (<code>MiB/core</code> /
+<code>GiB/core</code>), Pareto efficiency frontiers, and normalized
+resource cost.</li>
 <li>
 <strong>Metric Boxplots &amp; Barplots:</strong> Score distributions
 and category-level comparisons with Raw vs Normalized score
@@ -436,7 +431,7 @@ metric score heatmap</td>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Kabilan Sakthivel, Dr Dwijesh Chandra Mishra, Dr Shashi Bhushan Lal, Dr Sudhir Srivastava, Dr Krishna Kumar Chaturvedi.</p>
+  <p>Developed by Kabilan Sakthivel, Dr. Dwijesh Chandra Mishra, Dr. Shashi Bhushan Lal, Dr. Ulavappa Angadi, Dr. Sudhir Srivastava, Dr. Neeraj Budhlakoti, Dr. Krishna Kumar Chaturvedi, Dr. Ranjeet Ranjan Kumar, Dr. Navin Chandra Gupta.</p>
 </div>
 
 <div class="pkgdown-footer-right">

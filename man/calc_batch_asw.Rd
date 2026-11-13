@@ -20,8 +20,8 @@ Numeric scalar between 0 and 1, where 1 indicates optimal batch mixing.
 Evaluates batch mixing within each cell type in integrated or joint multiomics
 embedding space, following the definitions in \code{scib} and \code{scMultiSim}.
 For each cell type, the silhouette width of cells with respect to batch labels
-is computed ($s_i \in [-1, 1]$), where values near 0 indicate well-mixed batches.
-The per-cell-type score is $1 - |s_i|$, averaged across all cells and cell types.
+is computed (\eqn{-1 \le s_i \le 1}), where values near 0 indicate well-mixed batches.
+The per-cell-type score is \eqn{1 - |s_i|}, averaged across all cells and cell types.
 }
 \examples{
 set.seed(42)

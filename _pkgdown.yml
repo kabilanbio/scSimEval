@@ -34,7 +34,7 @@ template:
 
 home:
   title: "scSimEval: Unified Benchmarking for Single-Cell Multiomics Simulations"
-  description: "Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 48 Curated Evaluation Measures."
+  description: "Unified Benchmarking and Accuracy Evaluation for Single-Cell Multiomics Simulation Methods across 56 Curated Evaluation Measures."
 
 navbar:
   title: "scSimEval"
@@ -55,7 +55,7 @@ navbar:
           href: articles/demo-multiomics.html
         - text: "4. Analyzing Pre-Saved Benchmark (.rds)"
           href: articles/demo-saved-rds.html
-    - text: "Metric Catalog (48 Metrics)"
+    - text: "Metric Catalog (56 Metrics)"
       href: articles/metrics-catalog.html
     - text: "Reference"
       href: reference/index.html
@@ -67,7 +67,7 @@ navbar:
 
 reference:
   - title: "Master Benchmarking Workflows"
-    desc: "Unified end-to-end evaluation pipelines executing the 48 curated evaluation metrics across unimodal and multiomics simulations."
+    desc: "Unified end-to-end evaluation pipelines executing the 56 curated evaluation metrics across unimodal and multiomics simulations."
     contents:
       - evaluate_simulation_accuracy
       - evaluate_multiomics_accuracy
@@ -132,10 +132,13 @@ reference:
       - example_batch_info
 
   - title: "Computational Utilities & Fast Kernels"
-    desc: "High-performance matrix calculation helpers and internal dimension-reduction utilities."
+    desc: "High-performance matrix calculation helpers, input validation, and internal dimension-reduction utilities."
     contents:
       - standardize_benchmark_categories
       - filter_gold_standard_metrics
+      - validate_sc_object
+      - validate_multiomics_input
+      - calc_outlier_proportion
       - fast_row_vars
       - fast_col_vars
       - fast_sparse_zero_fraction_cell
@@ -143,6 +146,7 @@ reference:
       - fast_cross_distance_sq
       - fast_pca
       - normalize_counts
+      - tfidf_transform
       - subsample_dist_vector
 
   - title: "Category 1: Global & Marginal Distributions"
@@ -159,6 +163,11 @@ reference:
       - calc_nn_mismatch
       - calc_between_dataset_silhouette
       - calc_kde_ise
+      - calc_fasano_franceschini
+      - calc_kde_test
+      - calc_emd_2d
+      - calc_all_univariate_metrics
+      - calc_all_bivariate_metrics
 
   - title: "Category 2: Sparsity & Zero-Inflation Dynamics"
     desc: "Assessment of zero-inflation dynamics, dropout probability curves, and chromatin accessibility sparsity."
@@ -210,19 +219,23 @@ reference:
       - evaluate_multiomics_integration
 
   - title: "Category 7: Trajectory & Lineage Topology"
-    desc: "Inference and benchmarking of differentiation pseudotime trajectories and lineage branching topologies."
+    desc: "HVG-filtered dynverse trajectory inference benchmarking (Saelens et al., Nature Biotechnology 2019) across milestone networks, geodesic distances, branch assignments, and Random Forest feature importances."
     contents:
-      - infer_scrna_pseudotime
-      - infer_scrna_lineage_tree
-      - calc_pseudotime_correlation
-      - calc_tree_height_discrepancy
-      - calc_trajectory_graph_alignment
-      - calc_lineage_expression_fidelity
+      - preprocess_trajectory_hvgs
+      - infer_dynverse_trajectory
+      - calc_dynverse_him
+      - calc_dynverse_edge_flip
+      - calc_dynverse_geodesic_correlation
+      - calc_dynverse_f1_branches
+      - calc_wcor_features
+      - evaluate_trajectory_metrics
 
   - title: "Category 8: Computational Scalability & Efficiency"
-    desc: "Empirical benchmarking of CPU runtime, peak RAM consumption, and execution efficiency."
+    desc: "Core-normalized benchmarking of CPU execution work (Core-Seconds) and per-core peak RAM footprint (MiB/core and GiB/core)."
     contents:
       - benchmark_resource_usage
+      - compute_core_seconds
+      - compute_memory_per_core
 
 articles:
   - title: "Workflow Guides"

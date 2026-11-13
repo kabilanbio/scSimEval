@@ -38,24 +38,15 @@ ref <- matrix(stats::rnorm(100), 50, 2)
 sim <- matrix(stats::rnorm(100), 50, 2)
 calc_all_bivariate_metrics(ref, sim)
 #> $Fasano_Franceschini_2D_KS
-#> [1] NA
-#> 
-#> $Peacock_2D_KS
-#> [1] NA
-#> 
-#> $KDE_Bivariate_zstat
-#> [1] NA
+#> [1] 850
 #> 
 #> $EMD_2D
-#> [1] NA
+#> [1] 0.03219795
 #> 
 #> $NN_Mismatch_2D
-#> [1] 0.1
+#> [1] 0.04
 #> 
 #> $Between_Dataset_Silh_2D_Global
-#> [1] -0.005137758
-#> 
-#> $Between_Dataset_Silh_2D_Local
-#> [1] 0.05642477
+#> [1] -0.01104689
 #> 
 ```

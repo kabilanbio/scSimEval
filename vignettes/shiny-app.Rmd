@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-The **scSimEval Shiny Studio** is a self-contained, browser-based graphical interface providing point-and-click access to all 48 curated evaluation measures and publication visualizations in the package—without requiring R scripting.
+The **scSimEval Shiny Studio** is a self-contained, browser-based graphical interface providing point-and-click access to all 56 curated evaluation measures and publication visualizations in the package—without requiring R scripting.
 
 Launch the studio locally in R:
 
@@ -38,7 +38,7 @@ launch_scSimEval_app()
 ## Tab 1 — Home
 
 The landing page provides a high-level orientation to **scSimEval Studio**:
-* **KPI Ribbon:** Summarizes the 48 curated evaluation measures, 8 biological dimensions, 3 supported modalities (scRNA-seq, scATAC-seq, and paired Multiome), and the standardized $[0, 1]$ fidelity scale.
+* **KPI Ribbon:** Summarizes the 56 curated evaluation measures, 8 biological dimensions, 3 supported modalities (scRNA-seq, scATAC-seq, and paired Multiome), and the standardized $[0, 1]$ fidelity scale.
 * **Workflow Cards:** Direct access to load pre-computed demo benchmarks, configure single-cell evaluations, launch multiomics co-assay analyses, or upload previously saved benchmark sessions.
 
 ---
@@ -49,9 +49,9 @@ The data ingestion and benchmark orchestration centre, featuring three functiona
 
 ### 1. Data Ingestion & Benchmark Studio
 Choose between four operational modes:
-* **Mode 1 — Pre-Computed Benchmark (Demo Data):** Instantly loads a complete multi-dataset evaluation across 6 simulation methods (Simulator 1 to Simulator 6) over all 48 evaluation measures with zero computational waiting time.
+* **Mode 1 — Pre-Computed Benchmark (Demo Data):** Instantly loads a complete multi-dataset evaluation across 6 simulation methods (Simulator 1 to Simulator 6) over all 56 evaluation measures with zero computational waiting time.
 * **Mode 2 — Single-Cell Evaluation (scRNA-seq / scATAC-seq):** Upload empirical reference count matrices and 1–6 simulated datasets (`.rds`, `.csv`, `.tsv`, `.txt`, `.xlsx`). Optionally provide cell type annotations (unlocking clustering and biological signal fidelity) and batch labels (unlocking technical confounder mixing metrics). Set CPU worker threads for parallel evaluation.
-* **Mode 3 — Multiomics Evaluation (RNA + ATAC):** Benchmark paired co-assays (e.g., 10x Multiome, SHARE-seq) to evaluate cross-modality coupling (FOSCTTM, Match@1, peak-to-gene correlations) alongside unimodal properties, or evaluate unpaired multiomics datasets.
+* **Mode 3 — Multiomics Evaluation (RNA + ATAC):** Benchmark paired co-assays (e.g., 10x Multiome, SHARE-seq) or unpaired multiomics datasets to evaluate joint-embedding multiomics integration (`batch_asw`, `cell_type_asw`, `graph_connectivity`, `ari`, `nmi`) alongside per-modality unimodal properties.
 * **Mode 4 — Upload Saved Benchmark Table (.rds / .csv):** Ingest previously computed benchmark outputs from `evaluate_simulation_accuracy()` or `evaluate_multiomics_accuracy()`. Check **"Add to current benchmark results"** to merge multiple datasets and automatically calculate cross-dataset simulator average rankings.
 
 ### 2. View Uploaded Data & Matrices
@@ -66,7 +66,7 @@ Interactive count matrix browser with column filtering, sparsity statistics, and
 ## Tab 3 — Comparative Bubble Matrix & Leaderboard
 
 ### 1. Comparative Bubble Matrix
-The flagship visualization displaying candidate simulators against all 48 curated evaluation measures organized by canonical category:
+The flagship visualization displaying candidate simulators against all 56 curated evaluation measures organized by canonical category:
 * **Fidelity Sizing:** Bubble diameter reflects direction-aware normalized performance ($0.00$ to $1.00$, where larger indicates higher fidelity).
 * **Top Performers:** Bold circular outlines highlight the best-performing simulator for each individual metric.
 * **Multi-Dataset Navigation:** Switch between individual experimental datasets or view the cross-dataset simulator average.
@@ -86,7 +86,7 @@ Eight specialized diagnostic panels accessed via the sub-navigation pills, each 
 
 1. **Evaluation Summary:** Rank-ordered horizontal bar charts comparing composite and category-level fidelity across simulators.
 2. **Distribution QC:** Grid comparing reference and simulated distributions across expression moments, ECDF curves, and zero-inflation patterns.
-3. **Scalability Benchmark:** Wall-clock runtime (seconds), peak memory consumption (MiB RAM), Pareto efficiency frontiers, and throughput (cells/second).
+3. **Scalability Benchmark:** Core-normalized CPU execution time (`core_seconds` / `core_hours`), peak memory footprint per allocated core (`MiB/core` / `GiB/core`), Pareto efficiency frontiers, and normalized resource cost.
 4. **Metric Boxplots & Barplots:** Score distributions and category-level comparisons with Raw vs Normalized score toggles.
 5. **Metric Heatmap:** Comprehensive simulator $\times$ metric grid with exact numerical scores and hierarchical clustering.
 6. **PCA Ordination:** Simulators projected into 2D performance ordination space with discriminating metric vector loadings.

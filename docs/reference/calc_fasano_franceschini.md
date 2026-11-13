@@ -32,5 +32,5 @@ Estimated 2D KS statistic.
 ref <- matrix(stats::rnorm(100), 50, 2)
 sim <- matrix(stats::rnorm(100), 50, 2)
 calc_fasano_franceschini(ref, sim)
-#> [1] NA
+#> [1] 1100
 ```

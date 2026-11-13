@@ -32,5 +32,5 @@ Quadratic error penalizing large discrepancies.
 ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_rmse(ref, sim)
-#> [1] 0.4305341
+#> [1] 0.5146827
 ```

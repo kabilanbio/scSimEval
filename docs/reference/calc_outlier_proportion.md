@@ -25,5 +25,5 @@ Outlier proportion (between 0 and 1).
 ref <- stats::rnorm(50)
 sim <- stats::rnorm(50)
 calc_outlier_proportion(ref)
-#> [1] 0.02
+#> [1] 0
 ```
