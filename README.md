@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://kabilanbio.github.io/scSimEval/)
-[![Bioconductor submission](https://img.shields.io/badge/Bioconductor-submission%20v0.99.10-brightgreen.svg)](https://github.com/BiocStaging/scSimEval)
+[![Bioconductor submission](https://img.shields.io/badge/Bioconductor-submission%20v0.99.9-brightgreen.svg)](https://github.com/BiocStaging/scSimEval)
 
 **`scSimEval`** is a unified evaluation and benchmarking toolkit designed to systematically quantify how faithfully single-cell simulation methods reproduce empirical biological experiments.
 
@@ -78,7 +78,7 @@ head(res_uni$metrics_summary_table)
 ### 2. Multiomics Accuracy Evaluation (Paired / Unpaired)
 
 ```R
-# Load packaged Option B Seurat v5 paired multiomics dataset (Rice Bud)
+# Load packaged Seurat v5 paired multiomics dataset (Rice Bud)
 data(example_rice_bud)
 
 # Benchmark scMultiSim against empirical reference (cell_type, batch, and reductions are auto-extracted)
@@ -116,7 +116,7 @@ launch_scSimEval_app()
 
 ---
 
-## Built-in Real Biological Datasets (Option B Standardized `Seurat` v5)
+## Built-in Real Biological Datasets (Standardized `Seurat` v5)
 
 `scSimEval` includes standardized empirical benchmarks extracted from published studies, complete with raw integer `counts`, harmonized `cell_type` and `batch` metadata, and dimensional reductions (`integrated`, `pca`):
 

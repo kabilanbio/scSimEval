@@ -245,7 +245,6 @@ calc_integration_ari <- function(embed, cell_type, n_clusters = NULL) {
   k_clust <- if (!is.null(n_clusters)) n_clusters else n_types
   k_clust <- max(2, min(k_clust, nrow(embed) - 1))
   
-  set.seed(42)
   km <- tryCatch(
     suppressWarnings(stats::kmeans(embed, centers = k_clust, nstart = 10, iter.max = 50)),
     error = function(e) NULL
@@ -304,7 +303,6 @@ calc_integration_nmi <- function(embed, cell_type, n_clusters = NULL) {
   k_clust <- if (!is.null(n_clusters)) n_clusters else n_types
   k_clust <- max(2, min(k_clust, nrow(embed) - 1))
   
-  set.seed(42)
   km <- tryCatch(
     suppressWarnings(stats::kmeans(embed, centers = k_clust, nstart = 10, iter.max = 50)),
     error = function(e) NULL
@@ -378,7 +376,7 @@ evaluate_multiomics_integration <- function(
   threads = 1,
   verbose = TRUE
 ) {
-  # Strict standardization check (Option B: Seurat / SingleCellExperiment)
+  # Strict standardization check (Seurat / SingleCellExperiment)
   val_sim <- validate_multiomics_input(sim_multi, "sim_multi", reduction_name = reduction_name)
   sim_multi <- list(val_sim$m1, val_sim$m2)
   if (!is.null(ref_multi)) {

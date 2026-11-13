@@ -143,8 +143,8 @@ library(scSimEval)
 `scSimEval` provides built-in reference datasets for instant testing:
 * **`example_scrna`**: Empirical reference and simulated scRNA-seq count matrices ($60\text{ genes} \times 80\text{ cells}$) with cell types and batch annotations.
 * **`example_scatac`**: Empirical reference and simulated scATAC-seq peak matrices ($60\text{ peaks} \times 80\text{ cells}$).
-* **`example_rice_bud`**: Option B standardized `Seurat` v5 paired single-cell multiomics benchmark dataset of rice bud tissue (100 cells, 200 genes, 200 peaks, 4 cell types, 2 batches across 6 simulators).
-* **`example_soybean_root`**: Option B standardized `Seurat` v5 unpaired single-cell multiomics benchmark dataset of soybean root tissue (100 RNA cells, 100 ATAC cells, 200 genes, 200 peaks, 4 cell types, 2 batches across 3 simulators).
+* **`example_rice_bud`**: Standardized `Seurat` v5 paired single-cell multiomics benchmark dataset of rice bud tissue (100 cells, 200 genes, 200 peaks, 4 cell types, 2 batches across 6 simulators).
+* **`example_soybean_root`**: Standardized `Seurat` v5 unpaired single-cell multiomics benchmark dataset of soybean root tissue (100 RNA cells, 100 ATAC cells, 200 genes, 200 peaks, 4 cell types, 2 batches across 3 simulators).
 
 ```{r load-data}
 data(example_scrna, package = "scSimEval")
@@ -298,7 +298,7 @@ The flagship pipeline function `evaluate_multiomics_accuracy()` executes the com
 ```r
 data(example_rice_bud, package = "scSimEval")
 
-# Option B Seurat v5 objects embed counts, cell_type, batch, and integrated reductions
+# Seurat v5 objects embed counts, cell_type, batch, and integrated reductions
 master_eval <- evaluate_multiomics_accuracy(
   ref_multi    = example_rice_bud$reference$combined,
   sim_multi    = example_rice_bud$simulated$scMultiSim$combined,

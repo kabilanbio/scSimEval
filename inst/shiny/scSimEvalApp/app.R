@@ -4230,7 +4230,7 @@ ui <- page_navbar(
   ),
   
   # ============================================================================
-  # TAB 6: HELP & GETTING STARTED (SIMPLE BEGINNER-FRIENDLY GUIDE - v0.99.10)
+  # TAB 6: HELP & GETTING STARTED (SIMPLE BEGINNER-FRIENDLY GUIDE - v0.99.9)
   # ============================================================================
   nav_panel(
     "Help & Getting Started",
@@ -4245,7 +4245,7 @@ ui <- page_navbar(
               div(
                 class = "d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2",
                 h4("Welcome to scSimEval — Quick & Easy Beginner's Guide", style = "font-weight: 800; color: #1B4F72; margin: 0; font-size: 1.2rem;"),
-                span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "scSimEval v0.99.10 • 56 Metrics • 8 Categories")
+                span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "scSimEval v0.99.9 • 56 Metrics • 8 Categories")
               ),
               p(
                 style = "color: #334155; font-size: 0.94rem; margin-bottom: 14px; line-height: 1.65;",
@@ -5450,14 +5450,29 @@ server <- function(input, output, session) {
     return(NULL)
   }
 
+  load_pkg_example_obj <- function(obj_name = c("example_rice_bud", "example_soybean_root")) {
+    obj_name <- match.arg(obj_name)
+    rds_file <- get_pkg_data_file(paste0(obj_name, ".rds"))
+    if (!is.null(rds_file) && file.exists(rds_file)) return(readRDS(rds_file))
+    rda_file <- get_pkg_data_file(paste0(obj_name, ".rda"))
+    if (!is.null(rda_file) && file.exists(rda_file)) {
+      e <- new.env(parent = emptyenv())
+      load(rda_file, envir = e)
+      if (exists(obj_name, envir = e)) return(get(obj_name, envir = e))
+    }
+    e <- new.env(parent = emptyenv())
+    tryCatch({
+      utils::data(list = obj_name, package = "scSimEval", envir = e)
+      if (exists(obj_name, envir = e)) get(obj_name, envir = e) else NULL
+    }, error = function(err) NULL)
+  }
+
   # Unified Example Dataset & Benchmark Loader (Real Rice Bud & Soybean Root Datasets)
   load_example_benchmark <- function(type = c("all", "scrna_rice", "scrna_soy", "scatac_rice", "scatac_soy", "multi_paired", "multi_unpaired")) {
     type <- match.arg(type)
     sc_log("INFO", paste0("Requesting demo benchmark data for configuration: '", type, "'..."), "DataHub")
     
     bm_file <- get_pkg_data_file("demo_benchmark_data.rds")
-    rb_file <- get_pkg_data_file("example_rice_bud.rds")
-    sb_file <- get_pkg_data_file("example_soybean_root.rds")
     
     if (is.null(bm_file) || !file.exists(bm_file)) {
       sc_log("ERROR", "Benchmark database cache file demo_benchmark_data.rds not found on disk.", "DataHub")
@@ -5466,8 +5481,8 @@ server <- function(input, output, session) {
     }
     
     bm <- readRDS(bm_file)
-    rb <- if (!is.null(rb_file) && file.exists(rb_file)) readRDS(rb_file) else NULL
-    sb <- if (!is.null(sb_file) && file.exists(sb_file)) readRDS(sb_file) else NULL
+    rb <- load_pkg_example_obj("example_rice_bud")
+    sb <- load_pkg_example_obj("example_soybean_root")
     
     get_rb_ct <- function() {
       if (is.null(rb)) return(NULL)
@@ -5533,7 +5548,11 @@ server <- function(input, output, session) {
       sim_mats <- lapply(rb$simulated, function(x) x$rna)
       all_mats <- c(list("[Reference] Rice Bud (scRNA-seq)" = rb$reference$rna),
                     stats::setNames(sim_mats, paste0("[Simulated] ", names(sim_mats), " (Rice Bud scRNA-seq)")))
-      bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Rice Bud (Paired)" & bm$benchmark_df$Modality %in% c("RNA", "Computation"), ]
+      idx_rna <- !grepl("^atac_da_|^DA ", bm$benchmark_df$Metric, ignore.case = TRUE) &
+                 !bm$benchmark_df$Metric %in% c("curve_rmse", "Accessibility Sparsity RMSE") &
+                 !grepl("^\\(VI\\)|Multiomics Integration", bm$benchmark_df$Category, ignore.case = TRUE)
+      bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Rice Bud (Paired)" & idx_rna, ]
+      bench_df$Modality <- "scRNA-seq"
       bench_df$Dataset <- "Rice Bud (scRNA-seq)"
       summary_df <- bm$dataset_summary_df[bm$dataset_summary_df$Dataset == "Rice Bud (Paired)" & bm$dataset_summary_df$Modality == "scRNA-seq", ]
       summary_df$Dataset <- "Rice Bud (scRNA-seq)"
@@ -5548,7 +5567,12 @@ server <- function(input, output, session) {
       sim_mats <- lapply(sb$simulated, function(x) x$rna)
       all_mats <- c(list("[Reference] Soybean Root (scRNA-seq)" = sb$reference$rna),
                     stats::setNames(sim_mats, paste0("[Simulated] ", names(sim_mats), " (Soybean Root scRNA-seq)")))
-      bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Soybean Root (Unpaired)" & bm$benchmark_df$Modality %in% c("RNA", "Computation"), ]
+      idx_rna_soy <- !grepl("^atac_da_|^DA ", bm$benchmark_df$Metric, ignore.case = TRUE) &
+                     !bm$benchmark_df$Metric %in% c("curve_rmse", "Accessibility Sparsity RMSE") &
+                     !grepl("^\\(VI\\)|Multiomics Integration", bm$benchmark_df$Category, ignore.case = TRUE)
+      bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Soybean Root (Unpaired)" & idx_rna_soy, ]
+      bench_df <- bench_df[bench_df$Method %in% names(sim_mats), , drop = FALSE]
+      bench_df$Modality <- "scRNA-seq"
       bench_df$Dataset <- "Soybean Root (scRNA-seq)"
       if (!is.null(sb$scalability_benchmarks) && "RNA_Runtime_Seconds" %in% colnames(sb$scalability_benchmarks)) {
         for (ri in seq_len(nrow(sb$scalability_benchmarks))) {
@@ -5599,8 +5623,11 @@ server <- function(input, output, session) {
       sim_mats <- lapply(rb$simulated, function(x) x$atac)
       all_mats <- c(list("[Reference] Rice Bud (scATAC-seq)" = rb$reference$atac),
                     stats::setNames(sim_mats, paste0("[Simulated] ", names(sim_mats), " (Rice Bud scATAC-seq)")))
-      bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Rice Bud (Paired)" & bm$benchmark_df$Modality %in% c("ATAC", "Computation"), ]
-      bench_df <- bench_df[!grepl("Trajectory", bench_df$Category, ignore.case = TRUE), , drop = FALSE]
+      idx_atac <- !grepl("^rna_de_|^DE ", bm$benchmark_df$Metric, ignore.case = TRUE) &
+                  !grepl("^\\(VII\\)|Trajectory", bm$benchmark_df$Category, ignore.case = TRUE) &
+                  !grepl("^\\(VI\\)|Multiomics Integration", bm$benchmark_df$Category, ignore.case = TRUE)
+      bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Rice Bud (Paired)" & idx_atac, ]
+      bench_df$Modality <- "scATAC-seq"
       bench_df$Dataset <- "Rice Bud (scATAC-seq)"
       summary_df <- bm$dataset_summary_df[bm$dataset_summary_df$Dataset == "Rice Bud (Paired)" & bm$dataset_summary_df$Modality == "scATAC-seq", ]
       summary_df$Dataset <- "Rice Bud (scATAC-seq)"
@@ -5615,8 +5642,12 @@ server <- function(input, output, session) {
       sim_mats <- lapply(sb$simulated, function(x) x$atac)
       all_mats <- c(list("[Reference] Soybean Root (scATAC-seq)" = sb$reference$atac),
                     stats::setNames(sim_mats, paste0("[Simulated] ", names(sim_mats), " (Soybean Root scATAC-seq)")))
-      bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Soybean Root (Unpaired)" & bm$benchmark_df$Modality %in% c("ATAC", "Computation"), ]
-      bench_df <- bench_df[!grepl("Trajectory", bench_df$Category, ignore.case = TRUE), , drop = FALSE]
+      idx_atac_soy <- !grepl("^rna_de_|^DE ", bm$benchmark_df$Metric, ignore.case = TRUE) &
+                      !grepl("^\\(VII\\)|Trajectory", bm$benchmark_df$Category, ignore.case = TRUE) &
+                      !grepl("^\\(VI\\)|Multiomics Integration", bm$benchmark_df$Category, ignore.case = TRUE)
+      bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Soybean Root (Unpaired)" & idx_atac_soy, ]
+      bench_df <- bench_df[bench_df$Method %in% names(sim_mats), , drop = FALSE]
+      bench_df$Modality <- "scATAC-seq"
       bench_df$Dataset <- "Soybean Root (scATAC-seq)"
       if (!is.null(sb$scalability_benchmarks) && "ATAC_Runtime_Seconds" %in% colnames(sb$scalability_benchmarks)) {
         for (ri in seq_len(nrow(sb$scalability_benchmarks))) {
@@ -5695,6 +5726,7 @@ server <- function(input, output, session) {
         all_mats[[paste0("[Simulated] ", m, " ATAC (Soybean Root)")]] <- sb$simulated[[m]]$atac
       }
       bench_df <- bm$benchmark_df[bm$benchmark_df$Dataset == "Soybean Root (Unpaired)", ]
+      bench_df <- bench_df[bench_df$Method %in% names(sb$simulated), , drop = FALSE]
       summary_df <- bm$dataset_summary_df[bm$dataset_summary_df$Dataset == "Soybean Root (Unpaired)", ]
       ct <- get_sb_ct("rna")
       bt <- get_sb_bt("rna")
@@ -6468,8 +6500,7 @@ server <- function(input, output, session) {
 
           ref_names <- names(rv$ref_matrices %||% list())
           matching_ref <- grep(if (is_atac_mode) "ATAC" else "RNA", ref_names, ignore.case = TRUE, value = TRUE)[1]
-          ex_file <- get_pkg_data_file(if (!is.na(matching_ref) && grepl("Soybean", matching_ref, ignore.case = TRUE)) "example_soybean_root.rds" else "example_rice_bud.rds")
-          ex_obj <- if (!is.null(ex_file) && file.exists(ex_file)) readRDS(ex_file) else NULL
+          ex_obj <- load_pkg_example_obj(if (!is.na(matching_ref) && grepl("Soybean", matching_ref, ignore.case = TRUE)) "example_soybean_root" else "example_rice_bud")
           if (!is.null(ex_obj) && is.data.frame(ex_obj$scalability_benchmarks)) {
             scal_tbl <- ex_obj$scalability_benchmarks
           }
@@ -7162,8 +7193,7 @@ server <- function(input, output, session) {
           loaded_matches_pairing <- !is.na(rna_r_key) && !is.na(atac_r_key) &&
             (if (is_paired) !grepl("Soybean|Unpaired", rna_r_key, ignore.case = TRUE) else grepl("Soybean|Unpaired", rna_r_key, ignore.case = TRUE))
 
-          ex_file <- get_pkg_data_file(if (is_paired) "example_rice_bud.rds" else "example_soybean_root.rds")
-          ex_obj <- if (!is.null(ex_file) && file.exists(ex_file)) readRDS(ex_file) else NULL
+          ex_obj <- load_pkg_example_obj(if (is_paired) "example_rice_bud" else "example_soybean_root")
           if (!is.null(ex_obj) && is.data.frame(ex_obj$scalability_benchmarks)) {
             scal_tbl <- ex_obj$scalability_benchmarks
           }
@@ -9304,6 +9334,15 @@ server <- function(input, output, session) {
 
   output$ui_bubble_method_picker <- renderUI({
     req(rv$methods)
+    df <- rv$benchmark_df
+    d_view <- input$sel_bubble_dataset_view %||% "all_avg"
+    avail_methods <- if (!is.null(df) && "Dataset" %in% colnames(df) && !identical(d_view, "all_avg") && d_view %in% df$Dataset) {
+      intersect(rv$methods, unique(df$Method[df$Dataset == d_view]))
+    } else {
+      rv$methods
+    }
+    avail_methods <- avail_methods[!is.na(avail_methods) & avail_methods != ""]
+
     div(
       div(
         class = "d-flex justify-content-between align-items-center mb-1",
@@ -9315,15 +9354,23 @@ server <- function(input, output, session) {
       ),
       checkboxGroupInput(
         "sel_bubble_methods", NULL,
-        choices = rv$methods,
-        selected = rv$methods
+        choices = avail_methods,
+        selected = avail_methods
       )
     )
   })
 
   observeEvent(input$btn_bubble_methods_all, {
     req(rv$methods)
-    updateCheckboxGroupInput(session, "sel_bubble_methods", selected = rv$methods)
+    df <- rv$benchmark_df
+    d_view <- input$sel_bubble_dataset_view %||% "all_avg"
+    avail_methods <- if (!is.null(df) && "Dataset" %in% colnames(df) && !identical(d_view, "all_avg") && d_view %in% df$Dataset) {
+      intersect(rv$methods, unique(df$Method[df$Dataset == d_view]))
+    } else {
+      rv$methods
+    }
+    avail_methods <- avail_methods[!is.na(avail_methods) & avail_methods != ""]
+    updateCheckboxGroupInput(session, "sel_bubble_methods", selected = avail_methods)
   })
 
   observeEvent(input$btn_bubble_methods_none, {
@@ -9444,12 +9491,26 @@ server <- function(input, output, session) {
     
     # 2. Modality Filter
     mod_choice <- input$sel_bubble_modality %||% (input$sel_viz_modality %||% "all")
-    if ("Modality" %in% colnames(df) && !identical(mod_choice, "all")) {
+    if (!identical(mod_choice, "all")) {
       if (identical(mod_choice, "RNA")) {
-        df <- df[grepl("RNA", df$Modality, ignore.case = TRUE) | grepl("Comp|Scalability", df$Modality, ignore.case = TRUE) | grepl("^\\(VIII\\)", df$Category), , drop = FALSE]
+        has_atac_da <- grepl("^atac_da_|^DA ", df$Metric, ignore.case = TRUE)
+        is_atac_curve <- df$Metric %in% c("curve_rmse", "Accessibility Sparsity RMSE")
+        is_cat6 <- grepl("^\\(VI\\)|Multiomics Integration", df$Category, ignore.case = TRUE)
+        df <- df[!has_atac_da & !is_atac_curve & !is_cat6, , drop = FALSE]
+        if ("Modality" %in% colnames(df)) {
+          df <- df[!grepl("ATAC", df$Modality, ignore.case = TRUE), , drop = FALSE]
+        }
       } else if (identical(mod_choice, "ATAC")) {
-        df <- df[grepl("ATAC", df$Modality, ignore.case = TRUE) | grepl("Comp|Scalability", df$Modality, ignore.case = TRUE) | grepl("^\\(VIII\\)", df$Category), , drop = FALSE]
-        df <- df[!grepl("^\\(VII\\)|Trajectory", df$Category, ignore.case = TRUE), , drop = FALSE]
+        has_rna_de <- grepl("^rna_de_|^DE ", df$Metric, ignore.case = TRUE)
+        is_cat7 <- grepl("^\\(VII\\)|Trajectory", df$Category, ignore.case = TRUE)
+        is_cat6 <- grepl("^\\(VI\\)|Multiomics Integration", df$Category, ignore.case = TRUE)
+        df <- df[!has_rna_de & !is_cat7 & !is_cat6, , drop = FALSE]
+        if ("Modality" %in% colnames(df)) {
+          has_both_mods <- any(grepl("ATAC", df$Modality, ignore.case = TRUE) & grepl("^\\(I\\)", df$Category))
+          if (has_both_mods) {
+            df <- df[!grepl("RNA", df$Modality, ignore.case = TRUE), , drop = FALSE]
+          }
+        }
       } else if (identical(mod_choice, "Joint")) {
         df <- df[grepl("Joint|Cross|Multiomics", df$Modality, ignore.case = TRUE) | grepl("Comp|Scalability", df$Modality, ignore.case = TRUE) | grepl("^\\(VIII\\)", df$Category), , drop = FALSE]
       }

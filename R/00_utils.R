@@ -572,7 +572,7 @@ extract_dataset_summary <- function(mat, role = "Reference", method_name = "Data
 
 #' Validate and Standardize Single-Cell Input Objects
 #'
-#' Strictly enforces standard input object compliance in \code{scSimEval} (Option B).
+#' Strictly enforces standard input object compliance in \code{scSimEval} (Seurat / SingleCellExperiment).
 #' Validates that input datasets are either \code{SingleCellExperiment} or
 #' \code{Seurat} objects, extracting underlying count matrices, cell annotations,
 #' batch labels, and dimensional reductions.

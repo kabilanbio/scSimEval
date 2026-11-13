@@ -1,12 +1,7 @@
-# scSimEval 0.99.10
-
-* **Category VII Trajectory Standardization**: Upgraded Category VII to the `dynverse` trajectory inference benchmarking protocol, introducing 5 standardized metrics (`him`, `edge_flip`, `geodesic_correlation`, `F1_branches`, and `wcor_features`).
-* **Category VIII Scalability Normalization**: Standardized computational efficiency to core-normalized metrics (`core_seconds` and `memory_per_core_mib`).
-* **Unified Metric Suite**: Harmonized documentation and benchmark specifications across 56 canonical evaluation measures in 8 categories.
-* **Package Size Optimization**: Streamlined demo data and vignettes to keep source tarball under 5 MB for Bioconductor compliance.
-
 # scSimEval 0.99.9
 
+* **Category VII Trajectory Standardization**: Upgraded Category VII to the `dynverse` trajectory inference protocol (`him`, `edge_flip`, `geodesic_correlation`, `F1_branches`, and `wcor_features`).
+* **Category VIII Scalability Normalization**: Standardized computational efficiency to core-normalized metrics (`core_seconds` and `memory_per_core_mib`).
 * **S4 Object Standardization**: Standardized input handling to require `Seurat` or `SingleCellExperiment` objects with precomputed dimensional reductions.
 * **Category VI Integration Metrics**: Standardized multiomics integration to 5 core metrics (`batch_asw`, `cell_type_asw`, `graph_connectivity`, `ari`, and `nmi`).
 * **Category V Pseudobulk DE/DA**: Structured Category V into scRNA-seq DE and scATAC-seq DA sub-categories using biological replicate pseudobulk testing via `edgeR-QLF`.

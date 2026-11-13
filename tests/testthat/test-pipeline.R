@@ -105,7 +105,7 @@ test_that("evaluate_multiomics_accuracy executes end-to-end on example_multiomic
 })
 
 
-test_that("evaluate_simulation_accuracy enforces Option B (strictly requires Seurat or SingleCellExperiment)", {
+test_that("evaluate_simulation_accuracy strictly requires Seurat or SingleCellExperiment", {
   raw_mat1 <- matrix(rpois(100, 2), 10, 10)
   raw_mat2 <- matrix(rpois(100, 2), 10, 10)
   

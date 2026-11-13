@@ -22,7 +22,7 @@ A list with standardized components:
   \item{embedding}{Extracted dimensional reduction matrix (cells x dims), or NULL if absent.}
 }
 \description{
-Strictly enforces standard input object compliance in \code{scSimEval} (Option B).
+Strictly enforces standard input object compliance in \code{scSimEval} (Seurat / SingleCellExperiment).
 Validates that input datasets are either \code{SingleCellExperiment} or
 \code{Seurat} objects, extracting underlying count matrices, cell annotations,
 batch labels, and dimensional reductions.

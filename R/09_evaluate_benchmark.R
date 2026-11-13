@@ -105,7 +105,7 @@ evaluate_simulation_accuracy <- function(
   trajectory_num_trees = 10000L,
   include_trajectory = TRUE
 ) {
-  # Strict standardization check (Option B: Seurat / SingleCellExperiment)
+  # Strict standardization check (Seurat / SingleCellExperiment)
   val_ref <- validate_sc_object(ref_data, "ref_data")
   val_sim <- validate_sc_object(sim_data, "sim_data")
   
@@ -485,7 +485,7 @@ evaluate_simulation_accuracy <- function(
             batch_sim = batch_sim
           )
         }, error = function(e) {
-          if (verbose) message("scATAC-seq DA evaluation error: ", conditionMessage(e))
+          if (verbose) message("scATAC-seq DA evaluation note: ", conditionMessage(e))
           NULL
         })
         
@@ -512,7 +512,7 @@ evaluate_simulation_accuracy <- function(
             batch_sim = batch_sim
           )
         }, error = function(e) {
-          if (verbose) message("scRNA-seq pseudobulk DE evaluation error: ", conditionMessage(e))
+          if (verbose) message("scRNA-seq pseudobulk DE evaluation note: ", conditionMessage(e))
           NULL
         })
         
@@ -733,7 +733,7 @@ evaluate_multiomics_accuracy <- function(
   sim_cores_atac = NULL,
   trajectory_num_trees = 10000L
 ) {
-  # Strict standardization check (Option B: Seurat / SingleCellExperiment)
+  # Strict standardization check (Seurat / SingleCellExperiment)
   val_ref <- validate_multiomics_input(ref_multi, "ref_multi")
   val_sim <- validate_multiomics_input(sim_multi, "sim_multi")
   
@@ -972,7 +972,7 @@ evaluate_multiomics_accuracy <- function(
           batch_sim = sim_bt_m1
         )
       }, error = function(e) {
-        if (verbose) message("scRNA-seq pseudobulk DE evaluation error: ", conditionMessage(e))
+        if (verbose) message("scRNA-seq pseudobulk DE evaluation note: ", conditionMessage(e))
         NULL
       })
       
@@ -1016,7 +1016,7 @@ evaluate_multiomics_accuracy <- function(
           batch_sim = sim_bt_m2
         )
       }, error = function(e) {
-        if (verbose) message("scATAC-seq DA evaluation error in multiomics: ", conditionMessage(e))
+        if (verbose) message("scATAC-seq DA evaluation note in multiomics: ", conditionMessage(e))
         NULL
       })
       
@@ -1086,7 +1086,7 @@ evaluate_multiomics_accuracy <- function(
       verbose = verbose
     )
   }, error = function(e) {
-    if (verbose) message("Cross-modal integration evaluation error: ", conditionMessage(e))
+    if (verbose) message("Cross-modal integration evaluation note: ", conditionMessage(e))
     NULL
   })
   
@@ -2019,5 +2019,4 @@ print.scSimEval_multidataset_benchmark <- function(x, ...) {
   cat("=====================================================================\n")
   invisible(x)
 }
-
 

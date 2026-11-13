@@ -192,16 +192,22 @@ test_that("plot_benchmark_bubble_matrix returns a valid ggplot object with data.
 
   bm_mod <- data.frame(
     Method = rep(c("SimA", "SimB"), each = 5),
-    Category = rep(c("(I) Distributional Properties", "(I) Distributional Properties", "(III) Cellular Structure & Concordance", "(III) Cellular Structure & Concordance", "(VI) Multiomics Integration & Alignment"), 2),
-    Metric = rep(c("KS", "KS", "ari", "davies_bouldin_sim", "FOSCTTM"), 2),
-    Modality = rep(c("RNA", "ATAC", "RNA", "ATAC", "Joint (Cross-Modal)"), 2),
+    Category = rep(c(
+      "(I) Distributional Properties",
+      "(II) Sparsity & Zero-Inflation",
+      "(III) Cellular Structure & Concordance",
+      "(VII) Trajectory & Lineage Topology",
+      "(VI) Multiomics Integration & Alignment"
+    ), 2),
+    Metric = rep(c("KS", "curve_rmse", "ari", "geodesic_correlation", "FOSCTTM"), 2),
+    Modality = rep(c("RNA", "ATAC", "RNA", "RNA", "Joint (Cross-Modal)"), 2),
     Score = c(0.1, 0.2, 0.8, 0.5, 0.15, 0.3, 0.1, 0.6, 0.4, 0.25)
   )
   p_mod <- plot_benchmark_bubble_matrix(bm_mod)
   expect_s3_class(p_mod, "ggplot")
   expect_false(any(grepl("\\[(scRNA|scATAC|Joint)\\]", levels(p_mod$data$Display_Metric))))
   expect_false("Modality Scope" %in% levels(p_mod$data$Method))
-  expect_true(all(c("scRNA-seq", "scATAC-seq", "Shared (RNA + ATAC)", "Multiomics") %in% as.character(p_mod$data$Modality_Scope)))
+  expect_true(all(c("scRNA-seq only", "scATAC-seq only", "Multiomics (both scRNA-seq + scATAC-seq)") %in% as.character(p_mod$data$Modality_Scope)))
   expect_s3_class(ggplot2::ggplotGrob(p_mod), "gtable")
 
   bm_filt_in <- data.frame(

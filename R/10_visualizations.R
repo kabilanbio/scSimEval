@@ -165,7 +165,7 @@ utils::globalVariables(c(
   "lineage_expression_fidelity"      = "Lineage Expression Fidelity",
 
   # (VIII) Computational Scalability & Efficiency (2 Gold-Standard)
-  "core_seconds"                     = "Core-Seconds (core·s)",
+  "core_seconds"                     = "Core-Seconds (core\u00b7s)",
   "memory_per_core_mib"              = "Peak RAM / Core (MiB/core)",
   "memory_per_core_gib"              = "Peak RAM / Core (GiB/core)",
   "elapsed_time_seconds"             = "Elapsed Time (s)",
@@ -463,7 +463,7 @@ filter_gold_standard_metrics <- function(df) {
   "(III) Cellular Manifold & Clustering Concordance"= "#C0392B",
   "(IV) Technical Variation & Batch Mixing Dynamics"= "#D4AC0D",
   "(V) Biological Signal & Differential Fidelity"   = "#CA6F1E",
-  "(VI) Multiomics Integration & Alignment"         = "#7DD3FC",
+  "(VI) Multiomics Integration & Alignment"         = "#4F46E5",
   "(VII) Trajectory & Lineage Topology"             = "#7D3C98",
   "(VIII) Computational Scalability & Efficiency"   = "#1E8449"
 )
@@ -611,7 +611,7 @@ filter_gold_standard_metrics <- function(df) {
   "lineage_expression_fidelity" = "lineage expression patterns",
   "FOSCTTM"                     = "FOSCTTM cross-modality",
   "rv_coefficient"              = "RV coefficient",
-  "core_seconds"                = "core-seconds (core·s)",
+  "core_seconds"                = "core-seconds (core\u00b7s)",
   "memory_per_core_mib"         = "peak RAM / core (MiB/core)",
   "memory_per_core_gib"         = "peak RAM / core (GiB/core)",
   "elapsed_time_seconds"        = "elapsed time (s)",
@@ -1948,18 +1948,19 @@ plot_category_metric_bars <- function(
     return(df)
   }
   val_cols <- intersect(c("Value", "Score", "Score_Raw"), colnames(df))
-  scale_rows <- function(idx, factor) {
-    if (length(idx) == 0 || !any(idx)) return()
+  scale_rows <- function(d, idx, factor) {
+    if (length(idx) == 0 || !any(idx)) return(d)
     for (vc in val_cols) {
-      df[[vc]][idx] <<- as.numeric(df[[vc]][idx]) * factor
+      d[[vc]][idx] <- as.numeric(d[[vc]][idx]) * factor
     }
+    d
   }
   m_lower <- tolower(trimws(as.character(df$Metric)))
 
   # 1. Runtime / Elapsed Time / Core-Seconds aliases
   idx_core_hr <- m_lower %in% c("core_hours", "core_hour", "corehours", "core_hr", "core_hrs")
   if (any(idx_core_hr)) {
-    scale_rows(idx_core_hr, 3600)
+    df <- scale_rows(df, idx_core_hr, 3600)
     df$Metric[idx_core_hr] <- "core_seconds"
   }
   idx_core_s <- m_lower %in% c("core_seconds", "core_second", "coreseconds", "core_s", "cores_seconds", "core_secs")
@@ -1969,7 +1970,7 @@ plot_category_metric_bars <- function(
 
   idx_min <- m_lower %in% c("elapsed_time_minutes", "elapsed_minutes", "runtime_minutes", "elapsed_time_min")
   if (any(idx_min)) {
-    scale_rows(idx_min, 60)
+    df <- scale_rows(df, idx_min, 60)
     df$Metric[idx_min] <- "elapsed_time_seconds"
   }
   idx_sec_alias <- m_lower %in% c("elapsed_time", "runtime_seconds", "elapsed_seconds", "elapsed_time_s", "runtime_s")
@@ -1981,7 +1982,7 @@ plot_category_metric_bars <- function(
   m_raw <- trimws(as.character(df$Metric))
   idx_mb_si <- m_raw %in% c("peak_memory_mb_si", "PeakRAM_MB", "peak_memory_MB", "memory_mb_si", "RAM_MB")
   if (any(idx_mb_si)) {
-    scale_rows(idx_mb_si, 1000^2 / 1024^2)
+    df <- scale_rows(df, idx_mb_si, 1000^2 / 1024^2)
     df$Metric[idx_mb_si] <- "peak_memory_mb"
   }
   idx_mib_alias <- m_lower %in% c("memory_mb", "peak_memory_mib", "peakram_mib", "memory_mib", "ram_mib", "peak_memory")
@@ -1991,7 +1992,7 @@ plot_category_metric_bars <- function(
 
   idx_mpc_gib <- m_lower %in% c("memory_per_core_gib", "mem_per_core_gib", "peak_ram_per_core_gib", "gib_per_core", "gb_per_core")
   if (any(idx_mpc_gib)) {
-    scale_rows(idx_mpc_gib, 1024)
+    df <- scale_rows(df, idx_mpc_gib, 1024)
     df$Metric[idx_mpc_gib] <- "memory_per_core_mib"
   }
   idx_mpc_mib <- m_lower %in% c("memory_per_core_mib", "memory_per_core", "mem_per_core", "peak_ram_per_core",
@@ -2052,7 +2053,7 @@ plot_category_metric_bars <- function(
 #' @references
 #' Lannelongue, L., et al. (2021). Green Algorithms: Quantifying the carbon footprint of computation. \emph{Advanced Science}, 8(12), 2100707.
 #'
-#' Holtgrewe, M., et al. (2015). Methods for the detection and assembly of novel sequence. \emph{Bioinformatics}, 31(12), 1904–1912.
+#' Holtgrewe, M., et al. (2015). Methods for the detection and assembly of novel sequence. \emph{Bioinformatics}, 31(12), 1904-1912.
 #'
 #' Boisvert, S., et al. (2012). Ray Meta: scalable de novo metagenome assembly. \emph{Genome Biology}, 13(12), R122.
 #'
@@ -2196,7 +2197,7 @@ plot_scalability_benchmark <- function(
   } else {
     wide_sc$display_time <- as.numeric(wide_sc$core_seconds)
     t_label <- "Core-Seconds"
-    t_abbr  <- "core·s"
+    t_abbr  <- "core\u00b7s"
   }
 
   m_u_raw <- tolower(trimws(as.character(memory_unit[1])))
@@ -3694,37 +3695,46 @@ plot_benchmark_bubble_matrix <- function(
     }
   }
 
-  # --- 2b. Modality scope detection (distinguish scRNA vs scATAC metrics) -
-  has_multi_modality <- FALSE
-  df$Modality_Scope <- "Shared (RNA + ATAC)"
-  if ("Modality" %in% colnames(df)) {
-    mod_chr <- as.character(df$Modality)
-    mod_norm <- rep(NA_character_, length(mod_chr))
-    mod_norm[grepl("RNA", mod_chr, ignore.case = TRUE)] <- "RNA"
-    mod_norm[grepl("ATAC", mod_chr, ignore.case = TRUE)] <- "ATAC"
-    mod_norm[grepl("Joint|Cross", mod_chr, ignore.case = TRUE)] <- "Joint"
-    mod_norm[grepl("Comp|Total|Comb", mod_chr, ignore.case = TRUE)] <- "Computation"
+  # --- 2b. Modality scope assignment (scRNA-seq only vs scATAC-seq only vs Multiomics) ---
+  mod_str_view <- tolower(as.character(assay_modality %||% "all")[1L])
+  is_rna_view  <- grepl("rna", mod_str_view) && !grepl("atac|all|multi|joint", mod_str_view)
+  is_atac_view <- grepl("atac", mod_str_view) && !grepl("rna|all|multi|joint", mod_str_view)
 
-    omics_present <- setdiff(unique(mod_norm), c("Computation", NA_character_))
-    has_multi_modality <- length(omics_present) >= 2L
+  is_cat1 <- grepl("^\\(I\\)|Distributional", df$Display_Category, ignore.case = TRUE)
+  is_cat2 <- grepl("^\\(II\\)|Sparsity", df$Display_Category, ignore.case = TRUE)
+  is_cat3 <- grepl("^\\(III\\)|Cellular Manifold|Clustering", df$Display_Category, ignore.case = TRUE)
+  is_cat4 <- grepl("^\\(IV\\)|Technical Variation|Batch Mixing", df$Display_Category, ignore.case = TRUE)
+  is_cat5 <- grepl("^\\(V\\)|Biological Signal|Bio-Signal", df$Display_Category, ignore.case = TRUE)
+  is_cat6 <- grepl("^\\(VI\\)|Multiomics Integration", df$Display_Category, ignore.case = TRUE)
+  is_cat7 <- grepl("^\\(VII\\)|Trajectory", df$Display_Category, ignore.case = TRUE)
+  is_cat8 <- grepl("^\\(VIII\\)|Scalability|Efficiency", df$Display_Category, ignore.case = TRUE)
 
-    if (has_multi_modality) {
-      pair_key <- paste0(df$Display_Category, "___", df$Metric)
-      for (pk in unique(pair_key)) {
-        idx_p <- pair_key == pk
-        m_vals <- setdiff(unique(mod_norm[idx_p]), c("Computation", NA_character_))
-        scope_val <- if (identical(m_vals, "RNA")) {
-          "scRNA-seq"
-        } else if (identical(m_vals, "ATAC")) {
-          "scATAC-seq"
-        } else if (identical(m_vals, "Joint")) {
-          "Multiomics"
-        } else {
-          "Shared (RNA + ATAC)"
-        }
-        df$Modality_Scope[idx_p] <- scope_val
-      }
-    }
+  # Check for specific ATAC-only and RNA-only metrics
+  is_atac_curve <- is_cat2 & (df$Metric %in% c("curve_rmse", "Accessibility Sparsity RMSE"))
+  is_atac_da    <- is_cat5 & grepl("^atac_da_|^DA ", df$Metric, ignore.case = TRUE)
+  is_rna_de     <- is_cat5 & grepl("^rna_de_|^DE ", df$Metric, ignore.case = TRUE)
+
+  if (is_rna_view) {
+    # In unimodal scRNA-seq view: all evaluated metrics belong to the scRNA-seq layer
+    df$Modality_Scope <- "scRNA-seq only"
+    df$Modality_Scope[is_cat8] <- "Multiomics (both scRNA-seq + scATAC-seq)"
+  } else if (is_atac_view) {
+    # In unimodal scATAC-seq view: all evaluated metrics belong to the scATAC-seq layer
+    df$Modality_Scope <- "scATAC-seq only"
+    df$Modality_Scope[is_cat8] <- "Multiomics (both scRNA-seq + scATAC-seq)"
+  } else {
+    # In All Modalities / Combined Multiomics:
+    # Categories I, II (except Accessibility Sparsity RMSE), III, and IV were developed for BOTH scRNA-seq and scATAC-seq!
+    # Categories V (combined DE/DA), VI (Multiomics Integration), and VIII (Scalability) evaluate both modalities.
+    df$Modality_Scope <- "Multiomics (both scRNA-seq + scATAC-seq)"
+
+    # scRNA-seq only metrics in multiomics:
+    # Category VII Trajectory & Lineage Topology (dynverse trajectory inference strictly requires RNA expression)
+    df$Modality_Scope[is_cat7 | is_rna_de] <- "scRNA-seq only"
+
+    # scATAC-seq only metrics in multiomics:
+    # Category II Accessibility Sparsity RMSE (curve_rmse is strictly for chromatin accessibility peak models)
+    df$Modality_Scope[is_atac_curve | is_atac_da] <- "scATAC-seq only"
   }
 
   # --- Multi-Dataset & Modality Aggregation ------------------------------
@@ -3991,52 +4001,51 @@ plot_benchmark_bubble_matrix <- function(
     )
   }
 
-  # Color-code X-axis metric names by modality scope (with legend) when multi-modality
-  if (has_multi_modality) {
-    modality_scope_pal <- c(
-      "scRNA-seq"           = "#1D4ED8",
-      "scATAC-seq"          = "#C2410C",
-      "Shared (RNA + ATAC)" = "#475569",
-      "Multiomics"          = "#7E22CE"
-    )
-    scope_lvls <- names(modality_scope_pal)
-    key_scope_df <- unique(df[, c("Metric_Key", "Modality_Scope"), drop = FALSE])
-    key_label_colors <- stats::setNames(
-      unname(modality_scope_pal[as.character(key_scope_df$Modality_Scope)]),
-      as.character(key_scope_df$Metric_Key)
-    )
-    if (isTRUE(show_category_bars) && length(cat_bar_meta) > 0) {
-      for (meta_ct in cat_bar_meta) {
-        key_label_colors[c(meta_ct$bar1_k, meta_ct$bar2_k)] <- "#0F172A"
-      }
+  # Color-code X-axis metric names by modality scope (with legend)
+  modality_scope_pal <- c(
+    "scRNA-seq only"                          = "#1D4ED8",
+    "scATAC-seq only"                         = "#DC2626",
+    "Multiomics (both scRNA-seq + scATAC-seq)" = "#64748B"
+  )
+  scope_lvls <- names(modality_scope_pal)
+  key_scope_df <- unique(df[, c("Metric_Key", "Modality_Scope"), drop = FALSE])
+  key_label_colors <- stats::setNames(
+    unname(modality_scope_pal[as.character(key_scope_df$Modality_Scope)]),
+    as.character(key_scope_df$Metric_Key)
+  )
+  if (isTRUE(show_category_bars) && length(cat_bar_meta) > 0) {
+    for (meta_ct in cat_bar_meta) {
+      key_label_colors[c(meta_ct$bar1_k, meta_ct$bar2_k)] <- "#0F172A"
     }
-    present_scopes <- scope_lvls[scope_lvls %in% unique(as.character(df$Modality_Scope))]
-    mod_leg_df <- data.frame(
-      Metric_Key       = df$Metric_Key[1L],
-      Method           = df$Method[1L],
-      Display_Category = df$Display_Category[1L],
-      Modality_Scope   = factor(present_scopes, levels = scope_lvls)
-    )
-    if ("Method_Class" %in% colnames(df)) {
-      mod_leg_df$Method_Class <- df$Method_Class[1L]
-    }
-    p <- p +
-      ggplot2::geom_point(
-        data = mod_leg_df,
-        ggplot2::aes(x = .data$Metric_Key, y = .data$Method, color = .data$Modality_Scope),
-        shape = 15, size = 0, alpha = 0, inherit.aes = FALSE
-      ) +
-      ggplot2::scale_color_manual(
-        values = modality_scope_pal,
-        name   = "Metric Name Color (Modality Scope)",
-        drop   = TRUE,
-        guide  = ggplot2::guide_legend(
-          nrow = 1, title.position = "top", order = 1,
-          override.aes = list(shape = 15, size = 4.2, alpha = 1)
-        )
-      ) +
-      ggplot2::guides(x = .guide_axis_colored(label_colors = key_label_colors))
   }
+  present_scopes <- scope_lvls[scope_lvls %in% unique(as.character(df$Modality_Scope))]
+  leg_scopes <- if (length(present_scopes) >= 2L) present_scopes else scope_lvls
+
+  mod_leg_df <- data.frame(
+    Metric_Key       = df$Metric_Key[1L],
+    Method           = df$Method[1L],
+    Display_Category = df$Display_Category[1L],
+    Modality_Scope   = factor(leg_scopes, levels = scope_lvls)
+  )
+  if ("Method_Class" %in% colnames(df)) {
+    mod_leg_df$Method_Class <- df$Method_Class[1L]
+  }
+  p <- p +
+    ggplot2::geom_point(
+      data = mod_leg_df,
+      ggplot2::aes(x = .data$Metric_Key, y = .data$Method, color = .data$Modality_Scope),
+      shape = 15, size = 0, alpha = 0, inherit.aes = FALSE
+    ) +
+    ggplot2::scale_color_manual(
+      values = modality_scope_pal,
+      name   = "Evaluation Metric Modality Scope (Metric Name Color)",
+      drop   = FALSE,
+      guide  = ggplot2::guide_legend(
+        nrow = 1, title.position = "top", order = 1,
+        override.aes = list(shape = 15, size = 4.2, alpha = 1)
+      )
+    ) +
+    ggplot2::guides(x = .guide_axis_colored(label_colors = key_label_colors))
 
   x_label_map <- stats::setNames(as.character(df$Display_Metric), as.character(df$Metric_Key))
   if (isTRUE(show_category_bars) && length(cat_bar_meta) > 0) {
@@ -4700,7 +4709,7 @@ plot_evaluation_summary <- function(
     "(III)\nCell Structure"= "#A78BFA",  # Purple / Lavender (legacy)
     "(IV)\nBatch Mixing"   = "#FBBF24",  # Amber / Warm Yellow
     "(V)\nBio-Signal & DE" = "#FB923C",  # Coral / Orange
-    "(VI)\nMultiomics"     = "#7DD3FC",  # Light Sky Blue
+    "(VI)\nMultiomics"     = "#4F46E5",  # Royal Indigo
     "(VII)\nTrajectory"    = "#2DD4BF",  # Teal / Mint
     "(VI)\nTraj."          = "#2DD4BF",  # Teal / Mint (legacy)
     "(VIII)\nScalability"  = "#4ADE80",  # Light Green
@@ -5848,4 +5857,3 @@ zoom_plot <- function(p, zoom = 1.0, step = 0, xlim = NULL, ylim = NULL, center 
     p
   })
 }
-

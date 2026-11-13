@@ -5,6 +5,7 @@ output:
     toc: true
     toc_depth: 3
     number_sections: false
+    self_contained: false
 vignette: >
   %\VignetteIndexEntry{Interactive Shiny Studio — Complete User Guide}
   %\VignetteEngine{knitr::rmarkdown}
@@ -40,7 +41,7 @@ launch_scSimEval_app()
 ## 1. How scSimEval Works (4 Simple Steps)
 
 <p align="center">
-  <img src="../man/figures/workflow_diagram.png" width="96%" alt="scSimEval 4-Step Benchmarking Workflow"/>
+  <img src="figures/workflow_diagram.png" width="96%" alt="scSimEval 4-Step Benchmarking Workflow"/>
 </p>
 
 1. **Step 1 — Input Your Data:** Provide one real reference dataset and one or more simulated datasets (`scRNA-seq`, `scATAC-seq`, or `Single-Cell Multiomics`) saved as `Seurat` or `SingleCellExperiment` `.rds` files.

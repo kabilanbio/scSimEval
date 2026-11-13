@@ -3,12 +3,12 @@
 \docType{data}
 \name{example_rice_bud}
 \alias{example_rice_bud}
-\title{Real Paired Single-Cell Multiomics Benchmark Dataset (Rice Bud, Seurat v5 Option B)}
+\title{Real Paired Single-Cell Multiomics Benchmark Dataset (Rice Bud, Seurat v5)}
 \format{
 A list with 4 elements:
 \describe{
   \item{metadata}{List containing organism, tissue, GEO accession (GSE232863), data type (Paired), and description.}
-  \item{reference}{List containing Option B standardized \code{Seurat} v5 objects:
+  \item{reference}{List containing standardized \code{Seurat} v5 objects:
     \code{combined} (multi-modal \code{Seurat} with \code{RNA} 200 x 100, \code{ATAC} 200 x 100, \code{cell_type}, \code{batch}, and \code{integrated}/\code{pca} reductions),
     \code{rna} (unimodal \code{Seurat} object for scRNA-seq / Shiny upload), and
     \code{atac} (unimodal \code{Seurat} object for scATAC-seq / Shiny upload).}
@@ -24,8 +24,8 @@ data(example_rice_bud)
 }
 \description{
 A real, pre-processed paired single-cell RNA-seq and ATAC-seq benchmark dataset of
-rice bud tissue (\emph{Oryza sativa}, GEO accession GSE232863), packaged in
-\strong{Option B (Strict S4 Standardization)} using \code{Seurat} v5 objects.
+rice bud tissue (\emph{Oryza sativa}, GEO accession GSE232863), standardized
+using \code{Seurat} v5 objects.
 Contains paired empirical reference profiles (200 shared top-expressed genes x 100 cells for RNA,
 200 shared top-accessible peaks x 100 cells for ATAC) across 4 major biological cell types
 (\code{Bud_primordium}, \code{Epidermis}, \code{Parenchyma_cell}, \code{Root_meristem}, 25 cells each)

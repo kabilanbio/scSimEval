@@ -115,11 +115,11 @@
 #' @export
 "example_batch_info"
 
-#' Real Paired Single-Cell Multiomics Benchmark Dataset (Rice Bud, Seurat v5 Option B)
+#' Real Paired Single-Cell Multiomics Benchmark Dataset (Rice Bud, Seurat v5)
 #'
 #' A real, pre-processed paired single-cell RNA-seq and ATAC-seq benchmark dataset of
-#' rice bud tissue (\emph{Oryza sativa}, GEO accession GSE232863), packaged in
-#' \strong{Option B (Strict S4 Standardization)} using \code{Seurat} v5 objects.
+#' rice bud tissue (\emph{Oryza sativa}, GEO accession GSE232863), standardized
+#' using \code{Seurat} v5 objects.
 #' Contains paired empirical reference profiles (200 shared top-expressed genes x 100 cells for RNA,
 #' 200 shared top-accessible peaks x 100 cells for ATAC) across 4 major biological cell types
 #' (\code{Bud_primordium}, \code{Epidermis}, \code{Parenchyma_cell}, \code{Root_meristem}, 25 cells each)
@@ -134,7 +134,7 @@
 #' @format A list with 4 elements:
 #' \describe{
 #'   \item{metadata}{List containing organism, tissue, GEO accession (GSE232863), data type (Paired), and description.}
-#'   \item{reference}{List containing Option B standardized \code{Seurat} v5 objects:
+#'   \item{reference}{List containing standardized \code{Seurat} v5 objects:
 #'     \code{combined} (multi-modal \code{Seurat} with \code{RNA} 200 x 100, \code{ATAC} 200 x 100, \code{cell_type}, \code{batch}, and \code{integrated}/\code{pca} reductions),
 #'     \code{rna} (unimodal \code{Seurat} object for scRNA-seq / Shiny upload), and
 #'     \code{atac} (unimodal \code{Seurat} object for scATAC-seq / Shiny upload).}
@@ -157,10 +157,10 @@
 #' }
 "example_rice_bud"
 
-#' Real Unpaired Single-Cell Multiomics Benchmark Dataset (Soybean Root, Seurat v5 Option B)
+#' Real Unpaired Single-Cell Multiomics Benchmark Dataset (Soybean Root, Seurat v5)
 #'
 #' A real, pre-processed unpaired single-cell RNA-seq and ATAC-seq benchmark dataset of
-#' soybean root tissue (\emph{Glycine max}), packaged in \strong{Option B (Strict S4 Standardization)}
+#' soybean root tissue (\emph{Glycine max}), standardized
 #' using \code{Seurat} v5 objects. Contains independent empirical reference profiles
 #' (200 shared top-expressed genes x 100 RNA cells, 200 shared top-accessible peaks x 100 ATAC cells)
 #' across 4 major biological cell types (\code{Cortex}, \code{Endodermis}, \code{Epidermis}, \code{Procambium},
@@ -174,7 +174,7 @@
 #' @format A list with 4 elements:
 #' \describe{
 #'   \item{metadata}{List containing organism, tissue, data type (Unpaired), and description.}
-#'   \item{reference}{List containing Option B standardized \code{Seurat} v5 objects:
+#'   \item{reference}{List containing standardized \code{Seurat} v5 objects:
 #'     \code{combined} (multi-modal \code{Seurat} spanning 200 cells with \code{RNA} 200 x 100, \code{ATAC} 200 x 100, \code{cell_type}, \code{batch}, \code{modality}, and \code{integrated}/\code{joint.cca.umap} reductions),
 #'     \code{rna} (unimodal \code{Seurat} object for scRNA-seq / Shiny upload), and
 #'     \code{atac} (unimodal \code{Seurat} object for scATAC-seq / Shiny upload).}

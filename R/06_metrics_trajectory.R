@@ -528,7 +528,7 @@ infer_dynverse_trajectory <- function(
   if (is.null(pca_coords)) {
     k <- min(as.integer(n_pcs), nrow(expr_mat) - 1L, ncol(expr_mat) - 1L)
     k <- max(2L, k)
-    pca_coords <- suppressWarnings(fast_pca(expr_mat, n_pcs = k))
+    pca_coords <- suppressWarnings(fast_pca(Matrix::t(expr_mat), n_pcs = k))
     rownames(pca_coords) <- cell_ids
   } else {
     pca_coords <- as.matrix(pca_coords)
@@ -541,8 +541,11 @@ infer_dynverse_trajectory <- function(
     ct
   } else {
     k_cl <- min(max(3L, floor(sqrt(nrow(pca_coords) / 6))), 8L, nrow(pca_coords) - 1L)
-    set.seed(42)
-    km <- stats::kmeans(pca_coords, centers = k_cl, nstart = 10, iter.max = 50)
+    ord_pc1 <- order(pca_coords[, 1])
+    init_idx <- ord_pc1[unique(round(seq(1, nrow(pca_coords), length.out = k_cl)))]
+    init_centers <- pca_coords[init_idx, , drop = FALSE]
+    if (nrow(init_centers) < 2L || any(duplicated(init_centers))) init_centers <- k_cl
+    km <- stats::kmeans(pca_coords, centers = init_centers, iter.max = 50)
     paste0(milestone_prefix, km$cluster)
   }
 
@@ -722,7 +725,7 @@ calc_dynverse_him <- function(ref_traj, sim_traj) {
   net2 <- sim_traj$milestone_network
   if (nrow(net1) == 0L || nrow(net2) == 0L) return(0)
 
-  if (requireNamespace("dyneval", quietly = TRUE) && requireNamespace("netdist", quietly = TRUE)) {
+  if (requireNamespace("dyneval", quietly = TRUE)) {
     val <- tryCatch(
       suppressWarnings(as.numeric(dyneval::calculate_him(net2, net1, simplify = TRUE))),
       error = function(e) NA_real_

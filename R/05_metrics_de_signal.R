@@ -574,8 +574,8 @@ evaluate_predictive_de_model <- function(
   sub_data <- as.data.frame(t(data_mat[de_features, , drop = FALSE]))
   n_cells <- nrow(sub_data)
   
-  set.seed(42)
-  train_idx <- sample(seq_len(n_cells), max(2, round(0.8 * n_cells)))
+  train_idx <- which(seq_len(n_cells) %% 5L != 0L)
+  if (length(train_idx) < 2L) train_idx <- seq_len(min(n_cells, 2L))
   
   train_x <- sub_data[train_idx, , drop = FALSE]
   test_x <- sub_data[-train_idx, , drop = FALSE]
@@ -593,7 +593,7 @@ evaluate_predictive_de_model <- function(
       e1071::svm(x = train_x, y = train_y, kernel = "radial")
     }, error = function(e) NULL)
     if (!is.null(svm_fit)) {
-      pred_y <- tryCatch(predict(svm_fit, test_x), error = function(e) NULL)
+      pred_y <- tryCatch(stats::predict(svm_fit, test_x), error = function(e) NULL)
     }
   }
   

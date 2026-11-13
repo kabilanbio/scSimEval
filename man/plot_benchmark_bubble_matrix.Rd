@@ -7,6 +7,7 @@
 \usage{
 plot_benchmark_bubble_matrix(
   data,
+  assay_modality = NULL,
   method_classes = NULL,
   category_colors = NULL,
   metrics_order = NULL,
@@ -25,6 +26,7 @@ plot_benchmark_bubble_matrix(
 
 plot_bubble_matrix(
   data,
+  assay_modality = NULL,
   method_classes = NULL,
   category_colors = NULL,
   metrics_order = NULL,
@@ -49,6 +51,10 @@ plot_bubble_matrix(
   \item A tidy \code{data.frame} with columns: \code{Method}, \code{Metric}, \code{Category},
         and \code{Score} (or \code{Value}).
 }}
+
+\item{assay_modality}{Optional character scalar ("all", "RNA", or "ATAC") specifying
+the assay modality scope to dynamically format Category V metrics with the appropriate
+differential prefix ("DE/DA ", "DE ", or "DA "). If \code{NULL}, auto-detected from data.}
 
 \item{method_classes}{Optional named list mapping method names to row group labels.
 E.g. \code{list("scRNA-seq" = c("Splatter", "SymSim"), "Multiomics" = c("scDesign3", "dyngen"))}.}

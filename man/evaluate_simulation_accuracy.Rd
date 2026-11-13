@@ -31,6 +31,20 @@ evaluate_simulation_accuracy(
 
 \item{sim_data}{Simulated count matrix (features x cells).}
 
+\item{cell_types}{Optional vector of shared cell-type annotations across cells.}
+
+\item{cell_types_ref}{Optional vector of cell-type annotations for \code{ref_data}.}
+
+\item{cell_types_sim}{Optional vector of cell-type annotations for \code{sim_data}.}
+
+\item{batch_info}{Optional vector of shared batch or replicate labels across cells.}
+
+\item{batch_ref}{Optional vector of batch or replicate labels for \code{ref_data}.}
+
+\item{batch_sim}{Optional vector of batch or replicate labels for \code{sim_data}.}
+
+\item{modality}{Optional character scalar specifying the omics modality (e.g., \code{"RNA"} or \code{"ATAC"}).}
+
 \item{compute_bivariate}{Logical, whether to compute 2D bivariate tests. Default is TRUE.}
 
 \item{threads}{Number of threads for parallel computation. Default is 1.}

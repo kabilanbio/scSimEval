@@ -55,13 +55,13 @@ test_that("example_multiomics dataset has paired modalities and resource stats",
   expect_true(is.numeric(example_multiomics$resource_stats$memory_mb))
 })
 
-test_that("example_rice_bud dataset has Option B Seurat paired multiomics structure and 6 simulators", {
+test_that("example_rice_bud dataset has standardized Seurat paired multiomics structure and 6 simulators", {
   data("example_rice_bud", package = "scSimEval", envir = environment())
   expect_true(exists("example_rice_bud"))
   expect_type(example_rice_bud, "list")
   expect_named(example_rice_bud, c("metadata", "reference", "simulated", "scalability_benchmarks"), ignore.order = TRUE)
   
-  # Reference dimensions: Option B Seurat objects (200 genes x 100 cells, 200 peaks x 100 cells)
+  # Reference dimensions: standardized Seurat objects (200 genes x 100 cells, 200 peaks x 100 cells)
   expect_s4_class(example_rice_bud$reference$combined, "Seurat")
   expect_s4_class(example_rice_bud$reference$rna, "Seurat")
   expect_s4_class(example_rice_bud$reference$atac, "Seurat")
@@ -86,13 +86,13 @@ test_that("example_rice_bud dataset has Option B Seurat paired multiomics struct
   }
 })
 
-test_that("example_soybean_root dataset has Option B Seurat unpaired multiomics structure and 3 simulators", {
+test_that("example_soybean_root dataset has standardized Seurat unpaired multiomics structure and 3 simulators", {
   data("example_soybean_root", package = "scSimEval", envir = environment())
   expect_true(exists("example_soybean_root"))
   expect_type(example_soybean_root, "list")
   expect_named(example_soybean_root, c("metadata", "reference", "simulated", "scalability_benchmarks"), ignore.order = TRUE)
   
-  # Reference dimensions: Option B Seurat objects (200 genes x 100 RNA cells, 200 peaks x 100 ATAC cells)
+  # Reference dimensions: standardized Seurat objects (200 genes x 100 RNA cells, 200 peaks x 100 ATAC cells)
   expect_s4_class(example_soybean_root$reference$combined, "Seurat")
   expect_s4_class(example_soybean_root$reference$rna, "Seurat")
   expect_s4_class(example_soybean_root$reference$atac, "Seurat")

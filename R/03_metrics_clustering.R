@@ -366,22 +366,11 @@ calc_cdi <- function(
   # 2. Proportional stratified cell subsampling in sparse space: O(N)
   N_cur <- ncol(counts)
   if (!is.null(max_cells) && is.finite(max_cells) && N_cur > max_cells && max_cells >= 6L) {
-    has_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-    if (has_seed) old_seed <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
-    on.exit({
-      if (has_seed) {
-        assign(".Random.seed", old_seed, envir = .GlobalEnv)
-      } else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-        rm(".Random.seed", envir = .GlobalEnv)
-      }
-    }, add = TRUE)
-    set.seed(as.integer(seed))
-
     idx_by_cl <- split(seq_len(N_cur), cl_chr)
     sub_idx <- unlist(lapply(idx_by_cl, function(ix) {
       n_take <- max(3L, as.integer(round(length(ix) * (max_cells / N_cur))))
       n_take <- min(length(ix), n_take)
-      if (n_take == length(ix)) ix else sample(ix, size = n_take, replace = FALSE)
+      if (n_take == length(ix)) ix else ix[unique(round(seq(1, length(ix), length.out = n_take)))]
     }), use.names = FALSE)
     sub_idx <- sort(sub_idx)
 
