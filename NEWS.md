@@ -1,3 +1,8 @@
+# scSimEval 0.99.10
+
+* Updated the data input option which align with Seurat and Single cell experiment objects. 
+
+
 # scSimEval 0.99.9
 
 * **Category VII Trajectory Standardization**: Upgraded Category VII to the `dynverse` trajectory inference protocol (`him`, `edge_flip`, `geodesic_correlation`, `F1_branches`, and `wcor_features`).

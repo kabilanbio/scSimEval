@@ -463,7 +463,7 @@ filter_gold_standard_metrics <- function(df) {
   "(III) Cellular Manifold & Clustering Concordance"= "#C0392B",
   "(IV) Technical Variation & Batch Mixing Dynamics"= "#D4AC0D",
   "(V) Biological Signal & Differential Fidelity"   = "#CA6F1E",
-  "(VI) Multiomics Integration & Alignment"         = "#4F46E5",
+  "(VI) Multiomics Integration & Alignment"         = "#6D28D9",
   "(VII) Trajectory & Lineage Topology"             = "#7D3C98",
   "(VIII) Computational Scalability & Efficiency"   = "#1E8449"
 )
@@ -3710,30 +3710,32 @@ plot_benchmark_bubble_matrix <- function(
   is_cat8 <- grepl("^\\(VIII\\)|Scalability|Efficiency", df$Display_Category, ignore.case = TRUE)
 
   # Check for specific ATAC-only and RNA-only metrics
-  is_atac_curve <- is_cat2 & (df$Metric %in% c("curve_rmse", "Accessibility Sparsity RMSE"))
+  is_atac_curve <- is_cat2 & (df$Metric %in% c("curve_rmse", "Accessibility Sparsity RMSE") | grepl("curve_rmse|accessibility_sparsity", df$Metric, ignore.case = TRUE))
   is_atac_da    <- is_cat5 & grepl("^atac_da_|^DA ", df$Metric, ignore.case = TRUE)
   is_rna_de     <- is_cat5 & grepl("^rna_de_|^DE ", df$Metric, ignore.case = TRUE)
 
   if (is_rna_view) {
-    # In unimodal scRNA-seq view: all evaluated metrics belong to the scRNA-seq layer
+    # In unimodal scRNA-seq view:
+    # Category VIII (Scalability) was developed for both scRNA-seq + scATAC-seq (Gray)
+    # All other unimodal RNA metrics are scRNA-seq only (Blue)
     df$Modality_Scope <- "scRNA-seq only"
     df$Modality_Scope[is_cat8] <- "Multiomics (both scRNA-seq + scATAC-seq)"
   } else if (is_atac_view) {
-    # In unimodal scATAC-seq view: all evaluated metrics belong to the scATAC-seq layer
+    # In unimodal scATAC-seq view:
+    # Category VIII (Scalability) was developed for both scRNA-seq + scATAC-seq (Gray)
+    # All other unimodal ATAC metrics are scATAC-seq only (Red)
     df$Modality_Scope <- "scATAC-seq only"
     df$Modality_Scope[is_cat8] <- "Multiomics (both scRNA-seq + scATAC-seq)"
   } else {
     # In All Modalities / Combined Multiomics:
-    # Categories I, II (except Accessibility Sparsity RMSE), III, and IV were developed for BOTH scRNA-seq and scATAC-seq!
-    # Categories V (combined DE/DA), VI (Multiomics Integration), and VIII (Scalability) evaluate both modalities.
+    # Categories I, II (except Accessibility Sparsity RMSE), III, IV, VI, VIII, and combined DE/DA
+    # evaluate both scRNA-seq and scATAC-seq -> Multiomics (Gray)
     df$Modality_Scope <- "Multiomics (both scRNA-seq + scATAC-seq)"
 
-    # scRNA-seq only metrics in multiomics:
-    # Category VII Trajectory & Lineage Topology (dynverse trajectory inference strictly requires RNA expression)
+    # scRNA-seq only metrics (Blue): Category VII Trajectory & Category V DE metrics
     df$Modality_Scope[is_cat7 | is_rna_de] <- "scRNA-seq only"
 
-    # scATAC-seq only metrics in multiomics:
-    # Category II Accessibility Sparsity RMSE (curve_rmse is strictly for chromatin accessibility peak models)
+    # scATAC-seq only metrics (Red): Category II Accessibility Sparsity RMSE & Category V DA metrics
     df$Modality_Scope[is_atac_curve | is_atac_da] <- "scATAC-seq only"
   }
 
@@ -4013,6 +4015,25 @@ plot_benchmark_bubble_matrix <- function(
     unname(modality_scope_pal[as.character(key_scope_df$Modality_Scope)]),
     as.character(key_scope_df$Metric_Key)
   )
+  # Also map Display_Metric and raw Metric names so label-based lookups in guide_axis match accurately
+  disp_scope_df <- unique(df[!is.na(df$Display_Metric) & !is.na(df$Modality_Scope), c("Display_Metric", "Modality_Scope"), drop = FALSE])
+  for (i in seq_len(nrow(disp_scope_df))) {
+    dm <- as.character(disp_scope_df$Display_Metric[i])
+    sc <- as.character(disp_scope_df$Modality_Scope[i])
+    if (!dm %in% names(key_label_colors) && sc %in% names(modality_scope_pal)) {
+      key_label_colors[dm] <- modality_scope_pal[[sc]]
+    }
+  }
+  if ("Metric" %in% colnames(df)) {
+    raw_scope_df <- unique(df[!is.na(df$Metric) & !is.na(df$Modality_Scope), c("Metric", "Modality_Scope"), drop = FALSE])
+    for (i in seq_len(nrow(raw_scope_df))) {
+      rm_nm <- as.character(raw_scope_df$Metric[i])
+      sc <- as.character(raw_scope_df$Modality_Scope[i])
+      if (!rm_nm %in% names(key_label_colors) && sc %in% names(modality_scope_pal)) {
+        key_label_colors[rm_nm] <- modality_scope_pal[[sc]]
+      }
+    }
+  }
   if (isTRUE(show_category_bars) && length(cat_bar_meta) > 0) {
     for (meta_ct in cat_bar_meta) {
       key_label_colors[c(meta_ct$bar1_k, meta_ct$bar2_k)] <- "#0F172A"
@@ -4243,8 +4264,7 @@ plot_benchmark_bubble_matrix <- function(
     ggplot2::theme_bw(base_size = base_size) +
     ggplot2::theme(
       axis.text.x        = ggplot2::element_text(angle = 55, hjust = 1, vjust = 1,
-                                                 face = "bold", size = base_size * 0.77,
-                                                 color = "#1E293B"),
+                                                 face = "bold", size = base_size * 0.77),
       axis.text.y        = ggplot2::element_text(face = "bold", size = base_size * 1.0,
                                                  color = "#0F172A"),
       axis.title.y       = ggplot2::element_text(face = "bold", size = base_size * 1.10,
@@ -4709,7 +4729,7 @@ plot_evaluation_summary <- function(
     "(III)\nCell Structure"= "#A78BFA",  # Purple / Lavender (legacy)
     "(IV)\nBatch Mixing"   = "#FBBF24",  # Amber / Warm Yellow
     "(V)\nBio-Signal & DE" = "#FB923C",  # Coral / Orange
-    "(VI)\nMultiomics"     = "#4F46E5",  # Royal Indigo
+    "(VI)\nMultiomics"     = "#6D28D9",  # Royal Violet
     "(VII)\nTrajectory"    = "#2DD4BF",  # Teal / Mint
     "(VI)\nTraj."          = "#2DD4BF",  # Teal / Mint (legacy)
     "(VIII)\nScalability"  = "#4ADE80",  # Light Green

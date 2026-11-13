@@ -12,6 +12,8 @@ export(normalize_counts)
 export(tfidf_transform)
 export(subsample_dist_vector)
 export(extract_dataset_summary)
+export(validate_sc_object)
+export(validate_multiomics_input)
 
 # 01_metrics_distribution
 export(extract_cell_properties)

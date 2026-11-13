@@ -5838,9 +5838,19 @@ server <- function(input, output, session) {
   })
   observeEvent(input$btn_load_example_paired_multi, {
     load_example_benchmark("multi_paired")
+    updateRadioButtons(session, "opt_data_mode", selected = "multiomics")
+    updateRadioButtons(session, "opt_multi_pairing", selected = "paired")
+    updateNumericInput(session, "num_multi_datasets", value = 1)
+    updateNumericInput(session, "num_multi_sims", value = 6)
+    updateSelectInput(session, "sel_bubble_dataset_view", selected = "Rice Bud (Paired)")
   })
   observeEvent(input$btn_load_example_unpaired_multi, {
     load_example_benchmark("multi_unpaired")
+    updateRadioButtons(session, "opt_data_mode", selected = "multiomics")
+    updateRadioButtons(session, "opt_multi_pairing", selected = "unpaired")
+    updateNumericInput(session, "num_multi_datasets", value = 1)
+    updateNumericInput(session, "num_multi_sims", value = 3)
+    updateSelectInput(session, "sel_bubble_dataset_view", selected = "Soybean Root (Unpaired)")
   })
   observeEvent(input$btn_run_uni_eval_atac, {
     run_single_cell_evaluation()
@@ -5994,25 +6004,23 @@ server <- function(input, output, session) {
           sprintf("cat('[scSimEval] Processing %s [%d/%d]...\n')", dname, d, n_dsets),
           sprintf("dset_name_%d <- '%s'", d, dname),
           sprintf("ref_file_%d  <- '%s'", d, ref_f),
-          sprintf("ref_mat_%d   <- load_matrix_safe(ref_file_%d, placeholder = paste0('Reference ', dset_name_%d))", d, d, d)
+          sprintf("ref_val_%d   <- validate_sc_object(load_matrix_safe(ref_file_%d, placeholder = paste0('Reference ', dset_name_%d)))", d, d, d),
+          sprintf("ref_mat_%d   <- ref_val_%d$counts", d, d),
+          sprintf("ref_obj_%d   <- ref_val_%d$object", d, d),
+          sprintf("ct_vec_%d    <- ref_val_%d$cell_types", d, d),
+          sprintf("bt_vec_%d    <- ref_val_%d$batch_info", d, d)
         )
         
         if (!is.null(ct_f) && ct_f != "") {
           out <- c(out,
-            sprintf("ct_file_%d   <- '%s'", d, ct_f),
-            sprintf("ct_vec_%d    <- load_vector_safe(ct_file_%d)", d, d)
+            sprintf("if (is.null(ct_vec_%d)) { ct_vec_%d <- load_vector_safe('%s') }", d, d, ct_f)
           )
-        } else {
-          out <- c(out, sprintf("ct_vec_%d    <- NULL # (No cell types configured)", d))
         }
         
         if (!is.null(bt_f) && bt_f != "") {
           out <- c(out,
-            sprintf("bt_file_%d   <- '%s'", d, bt_f),
-            sprintf("bt_vec_%d    <- load_vector_safe(bt_file_%d)", d, d)
+            sprintf("if (is.null(bt_vec_%d)) { bt_vec_%d <- load_vector_safe('%s') }", d, d, bt_f)
           )
-        } else {
-          out <- c(out, sprintf("bt_vec_%d    <- NULL # (No batches configured)", d))
         }
         
         out <- c(out,
@@ -6045,19 +6053,24 @@ server <- function(input, output, session) {
             sprintf("  sim_munit_%d_%d <- '%s'", s, d, sim_mu),
             sprintf("  sim_cores_%d_%d <- %dL # Simulation CPU cores used", s, d, sim_c),
             sprintf("  cat('[scSimEval]   Evaluating ', sim_name_%d_%d, ' on ', dset_name_%d, '...\n')", s, d, d),
-            sprintf("  sim_mat_%d_%d  <- load_matrix_safe(sim_file_%d_%d, placeholder = paste0(sim_name_%d_%d, ' matrix'))", s, d, s, d, s, d),
+            sprintf("  sim_val_%d_%d   <- validate_sc_object(load_matrix_safe(sim_file_%d_%d, placeholder = paste0(sim_name_%d_%d, ' matrix')))", s, d, s, d, s, d),
+            sprintf("  sim_mat_%d_%d   <- sim_val_%d_%d$counts", s, d, s, d),
+            sprintf("  sim_obj_%d_%d   <- sim_val_%d_%d$object", s, d, s, d),
+            sprintf("  sim_ct_%d_%d    <- sim_val_%d_%d$cell_types %%||%% ct_vec_%d", s, d, s, d, d),
+            sprintf("  sim_bt_%d_%d    <- sim_val_%d_%d$batch_info %%||%% bt_vec_%d", s, d, s, d, d),
             "",
             sprintf("  all_dataset_summaries[[length(all_dataset_summaries) + 1]] <- extract_dataset_summary("),
             sprintf("    sim_mat_%d_%d, role = 'Simulated', method_name = paste0(sim_name_%d_%d, ' (', dset_name_%d, ')'),", s, d, s, d, d),
-            sprintf("    modality = '%s', cell_types = ct_vec_%d, batch_info = bt_vec_%d", uni_mod_str, d, d),
+            sprintf("    modality = '%s', cell_types = sim_ct_%d_%d, batch_info = sim_bt_%d_%d", uni_mod_str, s, d, s, d),
             "  )",
             "",
             sprintf("  res_%d_%d <- evaluate_simulation_accuracy(" , s, d),
-            sprintf("    ref_data = ref_mat_%d,", d),
-            sprintf("    sim_data = sim_mat_%d_%d,", s, d),
+            sprintf("    ref_data = ref_obj_%d,", d),
+            sprintf("    sim_data = sim_obj_%d_%d,", s, d),
             sprintf("    cell_types_ref = ct_vec_%d,", d),
-            sprintf("    cell_types_sim = ct_vec_%d,", d),
+            sprintf("    cell_types_sim = sim_ct_%d_%d,", s, d),
             sprintf("    batch_ref = bt_vec_%d,", d),
+            sprintf("    batch_sim = sim_bt_%d_%d,", s, d),
             sprintf("    batch_sim = bt_vec_%d,", d),
             sprintf("    modality = '%s',", uni_mod_str),
             sprintf("    memory_mb = sim_mem_%d_%d,", s, d),
@@ -6083,12 +6096,8 @@ server <- function(input, output, session) {
       for (d in seq_len(n_dsets)) {
         dname_custom <- input[[paste0("multi_dset_name_", d)]]
         dname <- if (!is.null(dname_custom) && trimws(dname_custom) != "") trimws(dname_custom) else sprintf("Dataset %d", d)
-        ref_rna_f  <- input[[paste0("file_multi_ref_rna_", d)]]$name
-        ref_atac_f <- input[[paste0("file_multi_ref_atac_", d)]]$name
-        if (is.null(ref_rna_f) || ref_rna_f == "") ref_rna_f <- sprintf("ref_rna_%s.rds", make.names(dname))
-        if (is.null(ref_atac_f) || ref_atac_f == "") ref_atac_f <- sprintf("ref_atac_%s.rds", make.names(dname))
-        ct_f <- input[[paste0("file_multi_celltypes_", d)]]$name
-        bt_f <- input[[paste0("file_multi_batch_", d)]]$name
+        ref_f  <- input[[paste0("file_multi_ref_", d)]]$name %||% input[[paste0("file_multi_ref_rna_", d)]]$name
+        if (is.null(ref_f) || ref_f == "") ref_f <- sprintf("ref_multi_%s.rds", make.names(dname))
         
         out <- c(out,
           sprintf("# ------------------------------------------------------------------------------"),
@@ -6096,31 +6105,15 @@ server <- function(input, output, session) {
           sprintf("# ------------------------------------------------------------------------------"),
           sprintf("cat('[scSimEval] Processing %s [%d/%d]...\n')", dname, d, n_dsets),
           sprintf("dset_name_%d     <- '%s'", d, dname),
-          sprintf("ref_rna_file_%d  <- '%s'", d, ref_rna_f),
-          sprintf("ref_atac_file_%d <- '%s'", d, ref_atac_f),
-          sprintf("ref_rna_%d       <- load_matrix_safe(ref_rna_file_%d, placeholder = paste0('Reference RNA ', dset_name_%d))", d, d, d),
-          sprintf("ref_atac_%d      <- load_matrix_safe(ref_atac_file_%d, placeholder = paste0('Reference ATAC ', dset_name_%d))", d, d, d)
-        )
-        
-        if (!is.null(ct_f) && ct_f != "") {
-          out <- c(out,
-            sprintf("ct_file_%d        <- '%s'", d, ct_f),
-            sprintf("ct_vec_%d         <- load_vector_safe(ct_file_%d)", d, d)
-          )
-        } else {
-          out <- c(out, sprintf("ct_vec_%d         <- NULL # (No cell types configured)", d))
-        }
-        
-        if (!is.null(bt_f) && bt_f != "") {
-          out <- c(out,
-            sprintf("bt_file_%d        <- '%s'", d, bt_f),
-            sprintf("bt_vec_%d         <- load_vector_safe(bt_file_%d)", d, d)
-          )
-        } else {
-          out <- c(out, sprintf("bt_vec_%d         <- NULL # (No batches configured)", d))
-        }
-        
-        out <- c(out,
+          sprintf("ref_file_%d      <- '%s'", d, ref_f),
+          sprintf("ref_val_%d       <- validate_multiomics_input(load_matrix_safe(ref_file_%d, placeholder = paste0('Reference Multiomics ', dset_name_%d)))", d, d, d),
+          sprintf("ref_rna_%d       <- ref_val_%d$m1", d, d),
+          sprintf("ref_atac_%d      <- ref_val_%d$m2", d, d),
+          sprintf("ref_rna_obj_%d   <- ref_val_%d$m1_obj", d, d),
+          sprintf("ref_atac_obj_%d  <- ref_val_%d$m2_obj", d, d),
+          sprintf("ct_vec_%d        <- ref_val_%d$cell_types", d, d),
+          sprintf("bt_vec_%d        <- ref_val_%d$batch_info", d, d),
+          "",
           sprintf("all_dataset_summaries[[length(all_dataset_summaries) + 1]] <- extract_dataset_summary("),
           sprintf("  ref_rna_%d, role = 'Biological Reference (RNA)', method_name = paste0('Empirical Reference (', dset_name_%d, ')'),", d, d),
           sprintf("  modality = 'RNA-seq', cell_types = ct_vec_%d, batch_info = bt_vec_%d", d, d),
@@ -6135,10 +6128,8 @@ server <- function(input, output, session) {
         for (s in seq_len(n_sims)) {
           sname_custom <- input[[paste0("multi_sim_name_", s)]]
           sname <- if (!is.null(sname_custom) && trimws(sname_custom) != "") trimws(sname_custom) else sprintf("Simulator %d", s)
-          sim_rna_f  <- input[[paste0("file_multi_sim_rna_", s, "_", d)]]$name
-          sim_atac_f <- input[[paste0("file_multi_sim_atac_", s, "_", d)]]$name
-          if (is.null(sim_rna_f) || sim_rna_f == "") sim_rna_f <- sprintf("sim_rna_%s_%s.rds", make.names(sname), make.names(dname))
-          if (is.null(sim_atac_f) || sim_atac_f == "") sim_atac_f <- sprintf("sim_atac_%s_%s.rds", make.names(sname), make.names(dname))
+          sim_f  <- input[[paste0("file_multi_sim_", s, "_", d)]]$name %||% input[[paste0("file_multi_sim_rna_", s, "_", d)]]$name
+          if (is.null(sim_f) || sim_f == "") sim_f <- sprintf("sim_multi_%s_%s.rds", make.names(sname), make.names(dname))
           scal_mode <- input[[paste0("multi_sim_scal_mode_", s, "_", d)]] %||% (if (is_paired) "combined" else "separate")
           if (identical(scal_mode, "combined")) {
             sim_t <- as.numeric(input[[paste0("multi_sim_time_", s, "_", d)]]) %||% round(45 + s * 15 + d * 10, 1)
@@ -6203,25 +6194,29 @@ server <- function(input, output, session) {
           out <- c(out,
             sprintf("  # %s on %s", sname, dname),
             sprintf("  sim_name_%d_%d      <- '%s'", s, d, sname),
-            sprintf("  sim_rna_file_%d_%d  <- '%s'", s, d, sim_rna_f),
-            sprintf("  sim_atac_file_%d_%d <- '%s'", s, d, sim_atac_f),
+            sprintf("  sim_file_%d_%d      <- '%s'", s, d, sim_f),
             scal_var_lines,
             sprintf("  cat('[scSimEval]   Evaluating ', sim_name_%d_%d, ' on ', dset_name_%d, '...\n')", s, d, d),
-            sprintf("  sim_rna_%d_%d   <- load_matrix_safe(sim_rna_file_%d_%d, placeholder = paste0(sim_name_%d_%d, ' RNA'))", s, d, s, d, s, d),
-            sprintf("  sim_atac_%d_%d  <- load_matrix_safe(sim_atac_file_%d_%d, placeholder = paste0(sim_name_%d_%d, ' ATAC'))", s, d, s, d, s, d),
+            sprintf("  sim_val_%d_%d   <- validate_multiomics_input(load_matrix_safe(sim_file_%d_%d, placeholder = paste0(sim_name_%d_%d, ' multiomics')))", s, d, s, d, s, d),
+            sprintf("  sim_rna_%d_%d   <- sim_val_%d_%d$m1", s, d, s, d),
+            sprintf("  sim_atac_%d_%d  <- sim_val_%d_%d$m2", s, d, s, d),
+            sprintf("  sim_rna_obj_%d_%d  <- sim_val_%d_%d$m1_obj", s, d, s, d),
+            sprintf("  sim_atac_obj_%d_%d <- sim_val_%d_%d$m2_obj", s, d, s, d),
+            sprintf("  sim_ct_%d_%d    <- sim_val_%d_%d$cell_types %%||%% ct_vec_%d", s, d, s, d, d),
+            sprintf("  sim_bt_%d_%d    <- sim_val_%d_%d$batch_info %%||%% bt_vec_%d", s, d, s, d, d),
             "",
             sprintf("  all_dataset_summaries[[length(all_dataset_summaries) + 1]] <- extract_dataset_summary("),
             sprintf("    sim_rna_%d_%d, role = 'Simulated (RNA)', method_name = paste0(sim_name_%d_%d, ' (', dset_name_%d, ')'),", s, d, s, d, d),
-            sprintf("    modality = 'RNA-seq', cell_types = ct_vec_%d, batch_info = bt_vec_%d", d, d),
+            sprintf("    modality = 'RNA-seq', cell_types = sim_ct_%d_%d, batch_info = sim_bt_%d_%d", s, d, s, d),
             "  )",
             sprintf("  all_dataset_summaries[[length(all_dataset_summaries) + 1]] <- extract_dataset_summary("),
             sprintf("    sim_atac_%d_%d, role = 'Simulated (ATAC)', method_name = paste0(sim_name_%d_%d, ' (', dset_name_%d, ')'),", s, d, s, d, d),
-            sprintf("    modality = 'ATAC-seq', cell_types = ct_vec_%d, batch_info = bt_vec_%d", d, d),
+            sprintf("    modality = 'ATAC-seq', cell_types = sim_ct_%d_%d, batch_info = sim_bt_%d_%d", s, d, s, d),
             "  )",
             "",
             sprintf("  res_%d_%d <- evaluate_multiomics_accuracy(", s, d),
-            sprintf("    ref_multi    = list(RNA = ref_rna_%d, ATAC = ref_atac_%d),", d, d),
-            sprintf("    sim_multi    = list(RNA = sim_rna_%d_%d, ATAC = sim_atac_%d_%d),", s, d, s, d),
+            sprintf("    ref_multi    = list(RNA = ref_rna_obj_%d, ATAC = ref_atac_obj_%d),", d, d),
+            sprintf("    sim_multi    = list(RNA = sim_rna_obj_%d_%d, ATAC = sim_atac_obj_%d_%d),", s, d, s, d),
             sprintf("    is_paired    = %s,", if (is_paired) "TRUE" else "FALSE"),
             sprintf("    cell_types   = ct_vec_%d,", d),
             sprintf("    batch_info   = bt_vec_%d,", d),
@@ -6375,10 +6370,8 @@ server <- function(input, output, session) {
           uiOutput(paste0("ui_uni_ref_badge_", d))
         ),
         fluidRow(
-          column(3, textInput(paste0("uni_dset_name_", d), "Dataset Name:", value = sprintf("Dataset %d", d))),
-          column(5, fileInput(paste0("file_uni_ref_", d), "Reference Dataset (Seurat / SingleCellExperiment .rds):", accept = c(".rds"))),
-          column(2, fileInput(paste0("file_uni_celltypes_", d), "Cell Types (Optional):", accept = c(".rds", ".csv", ".tsv", ".txt", ".xlsx", ".xls"))),
-          column(2, fileInput(paste0("file_uni_batch_", d), "Batches (Optional):", accept = c(".rds", ".csv", ".tsv", ".txt", ".xlsx", ".xls")))
+          column(4, textInput(paste0("uni_dset_name_", d), "Dataset Name:", value = sprintf("Dataset %d", d))),
+          column(8, fileInput(paste0("file_uni_ref_", d), "Reference Dataset (Seurat / SingleCellExperiment .rds):", accept = c(".rds"), placeholder = "Upload Seurat or SingleCellExperiment .rds..."))
         )
       )
     })
@@ -6625,10 +6618,15 @@ server <- function(input, output, session) {
           
           if (has_upload_ref) {
             incProgress(0.1 / n_dsets, detail = sprintf("Loading reference for %s...", d_label))
-            ref_mat_d <- read_uploaded_matrix(ref_file$datapath, ref_file$name)
-            if (inherits(ref_mat_d, "matrix") && !inherits(ref_mat_d, "dgCMatrix")) ref_mat_d <- Matrix::Matrix(ref_mat_d, sparse = TRUE)
+            ref_raw <- readRDS(ref_file$datapath)
+            ref_val <- validate_sc_object(ref_raw, d_label)
+            ref_mat_d <- ref_val$counts
+            ref_obj_d <- ref_val$object
+            ct_vec <- ref_val$cell_types
+            bt_vec <- ref_val$batch_info
           } else if (!is.null(initial_demo$toy_data$ref)) {
             ref_mat_d <- initial_demo$toy_data$ref
+            ref_obj_d <- ref_mat_d
             d_label <- if (!is.null(dname_custom) && trimws(dname_custom) != "") trimws(dname_custom) else sprintf("Demo Dataset %d", d)
           } else {
             next
@@ -6637,8 +6635,10 @@ server <- function(input, output, session) {
           
           ct_file <- input[[paste0("file_uni_celltypes_", d)]]
           bt_file <- input[[paste0("file_uni_batch_", d)]]
-          ct_vec <- if (!is.null(ct_file) && nrow(ct_file) > 0) read_uploaded_labels(ct_file$datapath, ct_file$name) else (if (!has_upload_ref) initial_demo$toy_data$cell_types else NULL)
-          bt_vec <- if (!is.null(bt_file) && nrow(bt_file) > 0) read_uploaded_labels(bt_file$datapath, bt_file$name) else (if (!has_upload_ref) initial_demo$toy_data$batch else NULL)
+          if (is.null(ct_vec) && !is.null(ct_file) && nrow(ct_file) > 0) ct_vec <- read_uploaded_labels(ct_file$datapath, ct_file$name)
+          if (is.null(bt_vec) && !is.null(bt_file) && nrow(bt_file) > 0) bt_vec <- read_uploaded_labels(bt_file$datapath, bt_file$name)
+          if (is.null(ct_vec) && !has_upload_ref) ct_vec <- initial_demo$toy_data$cell_types
+          if (is.null(bt_vec) && !has_upload_ref) bt_vec <- initial_demo$toy_data$batch
           
           if (!is.null(ct_vec)) {
             rv$cell_types_map[[d_label]] <- ct_vec
@@ -6674,11 +6674,16 @@ server <- function(input, output, session) {
             
             if (has_upload_sim) {
               incProgress(0.7 / (n_sims * n_dsets), detail = sprintf("Evaluating %s on %s...", sim_name, d_label))
-              sim_mat_d <- read_uploaded_matrix(sim_file$datapath, sim_file$name)
-              if (inherits(sim_mat_d, "matrix") && !inherits(sim_mat_d, "dgCMatrix")) sim_mat_d <- Matrix::Matrix(sim_mat_d, sparse = TRUE)
+              sim_raw <- readRDS(sim_file$datapath)
+              sim_val <- validate_sc_object(sim_raw, sim_name)
+              sim_mat_d <- sim_val$counts
+              sim_obj_d <- sim_val$object
+              if (is.null(ct_vec) && !is.null(sim_val$cell_types)) ct_vec <- sim_val$cell_types
+              if (is.null(bt_vec) && !is.null(sim_val$batch_info)) bt_vec <- sim_val$batch_info
             } else if (!is.null(initial_demo$toy_data$sim)) {
               incProgress(0.7 / (n_sims * n_dsets), detail = sprintf("Evaluating %s on %s...", sim_name, d_label))
               sim_mat_d <- initial_demo$toy_data$sim
+              sim_obj_d <- sim_mat_d
             } else {
               next
             }
@@ -6694,8 +6699,8 @@ server <- function(input, output, session) {
             if (is.na(n_cores_uni) || n_cores_uni < 1) n_cores_uni <- 1L
             
             res_sd <- evaluate_simulation_accuracy(
-              ref_data = ref_mat_d,
-              sim_data = sim_mat_d,
+              ref_data = ref_obj_d %||% ref_mat_d,
+              sim_data = sim_obj_d %||% sim_mat_d,
               modality = mod_label,
               memory_mb = sim_mem,
               elapsed_time = sim_time,
@@ -6980,38 +6985,18 @@ server <- function(input, output, session) {
           div(
             span(class = "badge text-white me-2", style = "background: #4F46E5;", sprintf("Reference %d", d)),
             tags$b(sprintf("Biological Reference Multiomics Dataset %d", d), style = "color: #312E81; font-size: 0.94rem;"),
-            tags$small(class = "text-muted ms-2", if (is_unpaired) "(Unpaired: independent cells for RNA and ATAC)" else "(Paired single-cell co-assay across all multiomics simulators)")
+            tags$small(class = "text-muted ms-2", if (is_unpaired) "(Unpaired: Seurat/SCE object containing RNA & ATAC assays)" else "(Paired single-cell co-assay Seurat/SCE object with RNA & ATAC)")
           ),
-          div(uiOutput(paste0("ui_multi_ref_rna_badge_", d)), uiOutput(paste0("ui_multi_ref_atac_badge_", d)))
+          div(
+            uiOutput(paste0("ui_multi_ref_badge_", d)),
+            uiOutput(paste0("ui_multi_ref_rna_badge_", d)),
+            uiOutput(paste0("ui_multi_ref_atac_badge_", d))
+          )
         ),
-        if (is_unpaired) {
-          tagList(
-            fluidRow(
-              column(2, textInput(paste0("multi_dset_name_", d), "Dataset Name:", value = sprintf("Dataset %d", d))),
-              column(5, fileInput(paste0("file_multi_ref_rna_", d), "Reference RNA Dataset (Seurat / SCE .rds):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
-              column(5, fileInput(paste0("file_multi_ref_atac_", d), "Reference ATAC Dataset (Seurat / SCE .rds):", accept = c(".rds", ".csv", ".tsv", ".txt")))
-            ),
-            div(
-              style = "background: #EEF2FF; border: 1px dashed #A5B4FC; border-radius: 6px; padding: 10px; margin-top: 6px;",
-              div(style = "font-size: 0.78rem; font-weight: 700; color: #3730A3; margin-bottom: 6px;",
-                  icon("layer-group", class = "me-1"), "Unpaired Annotations (Independent RNA & ATAC Cells):"),
-              fluidRow(
-                column(3, fileInput(paste0("file_multi_celltypes_rna_", d), "RNA Cell Types (.rds / .csv):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
-                column(3, fileInput(paste0("file_multi_celltypes_atac_", d), "ATAC Cell Types (.rds / .csv):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
-                column(3, fileInput(paste0("file_multi_batch_rna_", d), "RNA Batches (.rds / .csv):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
-                column(3, fileInput(paste0("file_multi_batch_atac_", d), "ATAC Batches (.rds / .csv):", accept = c(".rds", ".csv", ".tsv", ".txt")))
-              )
-            )
-          )
-        } else {
-          fluidRow(
-            column(2, textInput(paste0("multi_dset_name_", d), "Dataset Name:", value = sprintf("Dataset %d", d))),
-            column(3, fileInput(paste0("file_multi_ref_rna_", d), "Reference RNA Dataset (Seurat / SCE .rds):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
-            column(3, fileInput(paste0("file_multi_ref_atac_", d), "Reference ATAC Dataset (Seurat / SCE .rds):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
-            column(2, fileInput(paste0("file_multi_celltypes_", d), "Cell Types (Opt):", accept = c(".rds", ".csv", ".tsv", ".txt"))),
-            column(2, fileInput(paste0("file_multi_batch_", d), "Batches (Opt):", accept = c(".rds", ".csv", ".tsv", ".txt")))
-          )
-        }
+        fluidRow(
+          column(4, textInput(paste0("multi_dset_name_", d), "Dataset Name:", value = sprintf("Dataset %d", d))),
+          column(8, fileInput(paste0("file_multi_ref_", d), "Reference Multiomics Dataset (Seurat / SingleCellExperiment .rds):", accept = c(".rds"), placeholder = "Upload Seurat or SingleCellExperiment .rds..."))
+        )
       )
     })
     tagList(dset_cards)
@@ -7019,6 +7004,12 @@ server <- function(input, output, session) {
   
   # Badges for Multiomics Reference Datasets
   lapply(1:20, function(d) {
+    output[[paste0("ui_multi_ref_badge_", d)]] <- renderUI({
+      f <- input[[paste0("file_multi_ref_", d)]]
+      if (is.null(f) || nrow(f) == 0) return(NULL)
+      span(class = "badge text-white", style = "background: #4F46E5;",
+           icon("circle-check", class = "me-1"), tools::file_path_sans_ext(f$name))
+    })
     output[[paste0("ui_multi_ref_rna_badge_", d)]] <- renderUI({
       f <- input[[paste0("file_multi_ref_rna_", d)]]
       if (is.null(f) || nrow(f) == 0) return(NULL)
@@ -7069,11 +7060,10 @@ server <- function(input, output, session) {
             class = "d-flex align-items-center mb-2",
             span(class = "badge text-white me-2", style = "background: #4F46E5;", sprintf("Dataset %d", d)),
             tags$b(sprintf("Simulated Multiomics Data for: %s", dname_disp), style = "color: #312E81; font-size: 0.90rem;"),
-            tags$small(class = "text-muted ms-2", "(specify simulated RNA & ATAC files, runtime, Peak RAM, and simulation cores used)")
+            tags$small(class = "text-muted ms-2", "(upload simulated Seurat/SCE multiomics file and specify runtime, Peak RAM, and simulation cores used)")
           ),
           fluidRow(
-            column(6, fileInput(paste0("file_multi_sim_rna_", s, "_", d), sprintf("Simulated RNA for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt"))),
-            column(6, fileInput(paste0("file_multi_sim_atac_", s, "_", d), sprintf("Simulated ATAC for %s (Seurat / SCE .rds):", dname_disp), accept = c(".rds", ".csv", ".tsv", ".txt")))
+            column(12, fileInput(paste0("file_multi_sim_", s, "_", d), sprintf("Simulated Multiomics Dataset for %s (Seurat / SingleCellExperiment .rds):", dname_disp), accept = c(".rds"), placeholder = sprintf("Upload simulated %s multiomics Seurat/SCE .rds...", dname_disp)))
           ),
           div(
             style = "background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;",
@@ -7173,8 +7163,9 @@ server <- function(input, output, session) {
         first_sim_mat <- NULL
 
         has_any_multi_upload <- any(vapply(seq_len(n_dsets), function(d) {
-          !is.null(input[[paste0("file_multi_ref_rna_", d)]]) &&
-            !is.null(input[[paste0("file_multi_ref_atac_", d)]])
+          (!is.null(input[[paste0("file_multi_ref_", d)]]) && nrow(input[[paste0("file_multi_ref_", d)]]) > 0) ||
+            ((!is.null(input[[paste0("file_multi_ref_rna_", d)]]) && nrow(input[[paste0("file_multi_ref_rna_", d)]]) > 0) &&
+             (!is.null(input[[paste0("file_multi_ref_atac_", d)]]) && nrow(input[[paste0("file_multi_ref_atac_", d)]]) > 0))
         }, logical(1)))
 
         if (!has_any_multi_upload) {
@@ -7205,7 +7196,17 @@ server <- function(input, output, session) {
             ref_atac_d <- rv$ref_matrices[[atac_r_key]]
 
             sim_names_all <- names(rv$sim_matrices)
-            rna_sim_keys <- grep("_RNA_", sim_names_all, value = TRUE)
+            # Filter strictly for the current dataset (base_ds) so Soybean Root doesn't pick Rice Bud simulators
+            escaped_ds <- gsub("([.|()\\^\\$+*?\\[\\]])", "\\\\\\1", base_ds)
+            rna_sim_keys <- grep(paste0("_RNA_", escaped_ds, "$"), sim_names_all, value = TRUE)
+            if (length(rna_sim_keys) == 0) {
+              base_ds_clean <- gsub("[^A-Za-z0-9]", "", base_ds)
+              rna_sim_keys <- sim_names_all[grepl("_RNA_", sim_names_all) & 
+                                            grepl(base_ds_clean, gsub("[^A-Za-z0-9]", "", sim_names_all))]
+            }
+            if (length(rna_sim_keys) == 0) {
+              rna_sim_keys <- grep("_RNA_", sim_names_all, value = TRUE)
+            }
             for (rk in rna_sim_keys) {
               s_nm <- sub("_RNA_.*$", "", rk)
               ak <- sub("_RNA_", "_ATAC_", rk)
@@ -7348,44 +7349,48 @@ server <- function(input, output, session) {
         }
 
         if (has_any_multi_upload) for (d in seq_len(n_dsets)) {
+          ref_file <- input[[paste0("file_multi_ref_", d)]]
           ref_rna_file  <- input[[paste0("file_multi_ref_rna_", d)]]
           ref_atac_file <- input[[paste0("file_multi_ref_atac_", d)]]
-          if (is.null(ref_rna_file) || is.null(ref_atac_file)) next
+          has_ref_upload <- (!is.null(ref_file) && nrow(ref_file) > 0) ||
+                            (!is.null(ref_rna_file) && nrow(ref_rna_file) > 0 && !is.null(ref_atac_file) && nrow(ref_atac_file) > 0)
+          if (!has_ref_upload) next
           
           dname_custom <- input[[paste0("multi_dset_name_", d)]]
-          d_label <- if (!is.null(dname_custom) && trimws(dname_custom) != "") dname_custom else sprintf("Dataset %d", d)
+          d_label <- if (!is.null(dname_custom) && trimws(dname_custom) != "") trimws(dname_custom) else sprintf("Dataset %d", d)
           
-          incProgress(0.1 / n_dsets, detail = sprintf("Loading reference RNA & ATAC for %s...", d_label))
-          ref_rna_d <- read_uploaded_matrix(ref_rna_file$datapath, ref_rna_file$name)
-          ref_atac_d <- read_uploaded_matrix(ref_atac_file$datapath, ref_atac_file$name)
-          if (inherits(ref_rna_d, "matrix") && !inherits(ref_rna_d, "dgCMatrix")) ref_rna_d <- Matrix::Matrix(ref_rna_d, sparse = TRUE)
-          if (inherits(ref_atac_d, "matrix") && !inherits(ref_atac_d, "dgCMatrix")) ref_atac_d <- Matrix::Matrix(ref_atac_d, sparse = TRUE)
+          incProgress(0.1 / n_dsets, detail = sprintf("Loading reference multiomics for %s...", d_label))
+          if (!is.null(ref_file) && nrow(ref_file) > 0) {
+            ref_raw <- readRDS(ref_file$datapath)
+            ref_val <- validate_multiomics_input(ref_raw, d_label)
+            ref_rna_d <- ref_val$m1
+            ref_atac_d <- ref_val$m2
+            ref_rna_obj <- ref_val$m1_obj
+            ref_atac_obj <- ref_val$m2_obj
+            ct_r_disp <- if (is.list(ref_val$cell_types)) ref_val$cell_types$RNA else ref_val$cell_types
+            ct_a_disp <- if (is.list(ref_val$cell_types)) ref_val$cell_types$ATAC else ref_val$cell_types
+            bt_r_disp <- if (is.list(ref_val$batch_info)) ref_val$batch_info$RNA else ref_val$batch_info
+            bt_a_disp <- if (is.list(ref_val$batch_info)) ref_val$batch_info$ATAC else ref_val$batch_info
+            eval_ct <- if (is_paired) (ct_r_disp %||% ct_a_disp) else list(RNA = ct_r_disp, ATAC = ct_a_disp)
+            eval_bt <- if (is_paired) (bt_r_disp %||% bt_a_disp) else list(RNA = bt_r_disp, ATAC = bt_a_disp)
+          } else {
+            ref_rna_d <- read_uploaded_matrix(ref_rna_file$datapath, ref_rna_file$name)
+            ref_atac_d <- read_uploaded_matrix(ref_atac_file$datapath, ref_atac_file$name)
+            if (inherits(ref_rna_d, "matrix") && !inherits(ref_rna_d, "dgCMatrix")) ref_rna_d <- Matrix::Matrix(ref_rna_d, sparse = TRUE)
+            if (inherits(ref_atac_d, "matrix") && !inherits(ref_atac_d, "dgCMatrix")) ref_atac_d <- Matrix::Matrix(ref_atac_d, sparse = TRUE)
+            ref_rna_obj <- ref_rna_d
+            ref_atac_obj <- ref_atac_d
+            ct_file <- input[[paste0("file_multi_celltypes_", d)]] %||% input[[paste0("file_multi_celltypes_rna_", d)]]
+            bt_file <- input[[paste0("file_multi_batch_", d)]] %||% input[[paste0("file_multi_batch_rna_", d)]]
+            ct_r_disp <- if (!is.null(ct_file) && nrow(ct_file) > 0) read_uploaded_labels(ct_file$datapath, ct_file$name) else NULL
+            ct_a_disp <- ct_r_disp
+            bt_r_disp <- if (!is.null(bt_file) && nrow(bt_file) > 0) read_uploaded_labels(bt_file$datapath, bt_file$name) else NULL
+            bt_a_disp <- bt_r_disp
+            eval_ct <- if (is_paired) (ct_r_disp %||% ct_a_disp) else list(RNA = ct_r_disp, ATAC = ct_a_disp)
+            eval_bt <- if (is_paired) (bt_r_disp %||% bt_a_disp) else list(RNA = bt_r_disp, ATAC = bt_a_disp)
+          }
           refs_list[[paste0(d_label, "_RNA")]] <- ref_rna_d
           refs_list[[paste0(d_label, "_ATAC")]] <- ref_atac_d
-          
-          if (is_paired) {
-            ct_file <- input[[paste0("file_multi_celltypes_", d)]]
-            bt_file <- input[[paste0("file_multi_batch_", d)]]
-            ct_vec <- if (!is.null(ct_file) && nrow(ct_file) > 0) read_uploaded_labels(ct_file$datapath, ct_file$name) else NULL
-            bt_vec <- if (!is.null(bt_file) && nrow(bt_file) > 0) read_uploaded_labels(bt_file$datapath, bt_file$name) else NULL
-            eval_ct <- ct_vec
-            eval_bt <- bt_vec
-            ct_r_disp <- ct_vec; ct_a_disp <- ct_vec
-            bt_r_disp <- bt_vec; bt_a_disp <- bt_vec
-          } else {
-            ct_r_f <- input[[paste0("file_multi_celltypes_rna_", d)]] %||% input[[paste0("file_multi_celltypes_", d)]]
-            ct_a_f <- input[[paste0("file_multi_celltypes_atac_", d)]]
-            bt_r_f <- input[[paste0("file_multi_batch_rna_", d)]] %||% input[[paste0("file_multi_batch_", d)]]
-            bt_a_f <- input[[paste0("file_multi_batch_atac_", d)]]
-            
-            ct_r_disp <- if (!is.null(ct_r_f) && nrow(ct_r_f) > 0) read_uploaded_labels(ct_r_f$datapath, ct_r_f$name) else NULL
-            ct_a_disp <- if (!is.null(ct_a_f) && nrow(ct_a_f) > 0) read_uploaded_labels(ct_a_f$datapath, ct_a_f$name) else NULL
-            bt_r_disp <- if (!is.null(bt_r_f) && nrow(bt_r_f) > 0) read_uploaded_labels(bt_r_f$datapath, bt_r_f$name) else NULL
-            bt_a_disp <- if (!is.null(bt_a_f) && nrow(bt_a_f) > 0) read_uploaded_labels(bt_a_f$datapath, bt_a_f$name) else NULL
-            
-            eval_ct <- if (!is.null(ct_r_disp) || !is.null(ct_a_disp)) list(RNA = ct_r_disp, ATAC = ct_a_disp) else NULL
-            eval_bt <- if (!is.null(bt_r_disp) || !is.null(bt_a_disp)) list(RNA = bt_r_disp, ATAC = bt_a_disp) else NULL
-          }
           
           if (!is.null(ct_r_disp)) {
             rv$cell_types_map[[paste0(d_label, "_RNA")]] <- ct_r_disp
@@ -7419,9 +7424,12 @@ server <- function(input, output, session) {
             sim_name <- input[[paste0("multi_sim_name_", s)]]
             if (is.null(sim_name) || trimws(sim_name) == "") sim_name <- sprintf("Simulator %d", s)
             
+            sim_file <- input[[paste0("file_multi_sim_", s, "_", d)]]
             sim_rna_file  <- input[[paste0("file_multi_sim_rna_", s, "_", d)]]
             sim_atac_file <- input[[paste0("file_multi_sim_atac_", s, "_", d)]]
-            if (is.null(sim_rna_file) || is.null(sim_atac_file)) next
+            has_sim_upload <- (!is.null(sim_file) && nrow(sim_file) > 0) ||
+                              (!is.null(sim_rna_file) && nrow(sim_rna_file) > 0 && !is.null(sim_atac_file) && nrow(sim_atac_file) > 0)
+            if (!has_sim_upload) next
             
             scal_mode <- input[[paste0("multi_sim_scal_mode_", s, "_", d)]] %||% (if (is_paired) "combined" else "separate")
             t_r <- input[[paste0("multi_sim_time_rna_", s, "_", d)]]
@@ -7478,29 +7486,48 @@ server <- function(input, output, session) {
             }
             
             incProgress(0.7 / (n_sims * n_dsets), detail = sprintf("Evaluating %s on %s...", sim_name, d_label))
-            sim_rna_d  <- read_uploaded_matrix(sim_rna_file$datapath, sim_rna_file$name)
-            sim_atac_d <- read_uploaded_matrix(sim_atac_file$datapath, sim_atac_file$name)
-            if (inherits(sim_rna_d, "matrix") && !inherits(sim_rna_d, "dgCMatrix")) sim_rna_d <- Matrix::Matrix(sim_rna_d, sparse = TRUE)
-            if (inherits(sim_atac_d, "matrix") && !inherits(sim_atac_d, "dgCMatrix")) sim_atac_d <- Matrix::Matrix(sim_atac_d, sparse = TRUE)
+            if (!is.null(sim_file) && nrow(sim_file) > 0) {
+              sim_raw <- readRDS(sim_file$datapath)
+              sim_val <- validate_multiomics_input(sim_raw, sim_name)
+              sim_rna_d <- sim_val$m1
+              sim_atac_d <- sim_val$m2
+              sim_rna_obj <- sim_val$m1_obj
+              sim_atac_obj <- sim_val$m2_obj
+              sim_ct_r <- if (is.list(sim_val$cell_types)) sim_val$cell_types$RNA else (sim_val$cell_types %||% ct_r_disp)
+              sim_ct_a <- if (is.list(sim_val$cell_types)) sim_val$cell_types$ATAC else (sim_val$cell_types %||% ct_a_disp)
+              sim_bt_r <- if (is.list(sim_val$batch_info)) sim_val$batch_info$RNA else (sim_val$batch_info %||% bt_r_disp)
+              sim_bt_a <- if (is.list(sim_val$batch_info)) sim_val$batch_info$ATAC else (sim_val$batch_info %||% bt_a_disp)
+            } else {
+              sim_rna_d  <- read_uploaded_matrix(sim_rna_file$datapath, sim_rna_file$name)
+              sim_atac_d <- read_uploaded_matrix(sim_atac_file$datapath, sim_atac_file$name)
+              if (inherits(sim_rna_d, "matrix") && !inherits(sim_rna_d, "dgCMatrix")) sim_rna_d <- Matrix::Matrix(sim_rna_d, sparse = TRUE)
+              if (inherits(sim_atac_d, "matrix") && !inherits(sim_atac_d, "dgCMatrix")) sim_atac_d <- Matrix::Matrix(sim_atac_d, sparse = TRUE)
+              sim_rna_obj <- sim_rna_d
+              sim_atac_obj <- sim_atac_d
+              sim_ct_r <- ct_r_disp
+              sim_ct_a <- ct_a_disp
+              sim_bt_r <- bt_r_disp
+              sim_bt_a <- bt_a_disp
+            }
             if (is.null(first_sim_mat)) first_sim_mat <- sim_rna_d
             all_sim_mats[[paste0(sim_name, "_RNA_", d_label)]] <- sim_rna_d
             all_sim_mats[[paste0(sim_name, "_ATAC_", d_label)]] <- sim_atac_d
             
             summary_rows[[length(summary_rows) + 1]] <- extract_dataset_summary(
               sim_rna_d, role = "Simulated (RNA)", method_name = paste0(sim_name, " (", d_label, ")"),
-              modality = "RNA-seq", cell_types = ct_r_disp, batch_info = bt_r_disp
+              modality = "RNA-seq", cell_types = sim_ct_r, batch_info = sim_bt_r
             )
             summary_rows[[length(summary_rows) + 1]] <- extract_dataset_summary(
               sim_atac_d, role = "Simulated (ATAC)", method_name = paste0(sim_name, " (", d_label, ")"),
-              modality = "ATAC-seq", cell_types = ct_a_disp, batch_info = bt_a_disp
+              modality = "ATAC-seq", cell_types = sim_ct_a, batch_info = sim_bt_a
             )
             
             n_cores_multi <- as.integer(input$num_multi_cores %||% default_n_cores)
             if (is.na(n_cores_multi) || n_cores_multi < 1) n_cores_multi <- 1L
             
             res_multi_sd <- evaluate_multiomics_accuracy(
-              ref_multi = list(RNA = ref_rna_d, ATAC = ref_atac_d),
-              sim_multi = list(RNA = sim_rna_d, ATAC = sim_atac_d),
+              ref_multi = list(RNA = ref_rna_obj %||% ref_rna_d, ATAC = ref_atac_obj %||% ref_atac_d),
+              sim_multi = list(RNA = sim_rna_obj %||% sim_rna_d, ATAC = sim_atac_obj %||% sim_atac_d),
               is_paired = is_paired,
               cell_types = eval_ct,
               batch_info = eval_bt,
@@ -8074,8 +8101,11 @@ server <- function(input, output, session) {
           
           if (!is.null(ref_file) && nrow(ref_file) > 0) {
             incProgress(0.5 / n_dsets, detail = sprintf("Reading %s reference...", d_label))
-            ref_mat_d <- read_uploaded_matrix(ref_file$datapath, ref_file$name)
-            if (inherits(ref_mat_d, "matrix") && !inherits(ref_mat_d, "dgCMatrix")) ref_mat_d <- Matrix::Matrix(ref_mat_d, sparse = TRUE)
+            ref_raw <- readRDS(ref_file$datapath)
+            ref_val <- validate_sc_object(ref_raw, d_label)
+            ref_mat_d <- ref_val$counts
+            if (is.null(ct_vec) && !is.null(ref_val$cell_types)) ct_vec <- ref_val$cell_types
+            if (is.null(bt_vec) && !is.null(ref_val$batch_info)) bt_vec <- ref_val$batch_info
             
             s_row <- extract_dataset_summary(
               ref_mat_d, role = "Biological Reference", method_name = paste0("Empirical Reference (", d_label, ")"),
@@ -8101,12 +8131,15 @@ server <- function(input, output, session) {
             
             if (!is.null(sim_file) && nrow(sim_file) > 0) {
               incProgress(0.5 / (n_dsets * n_sims), detail = sprintf("Reading %s on %s...", sim_name, d_label))
-              sim_mat_d <- read_uploaded_matrix(sim_file$datapath, sim_file$name)
-              if (inherits(sim_mat_d, "matrix") && !inherits(sim_mat_d, "dgCMatrix")) sim_mat_d <- Matrix::Matrix(sim_mat_d, sparse = TRUE)
+              sim_raw <- readRDS(sim_file$datapath)
+              sim_val <- validate_sc_object(sim_raw, sim_name)
+              sim_mat_d <- sim_val$counts
+              sim_ct <- sim_val$cell_types %||% ct_vec
+              sim_bt <- sim_val$batch_info %||% bt_vec
               
               s_row <- extract_dataset_summary(
                 sim_mat_d, role = "Simulated", method_name = paste0(sim_name, " (", d_label, ")"),
-                modality = "Single-Cell (Counts)", cell_types = ct_vec, batch_info = bt_vec
+                modality = "Single-Cell (Counts)", cell_types = sim_ct, batch_info = sim_bt
               )
               s_row$Dataset <- d_label
               summary_rows[[length(summary_rows) + 1]] <- s_row
@@ -8150,27 +8183,94 @@ server <- function(input, output, session) {
         first_sim_mat <- NULL
         
         for (d in seq_len(n_dsets)) {
+          ref_file <- input[[paste0("file_multi_ref_", d)]]
           ref_rna_file <- input[[paste0("file_multi_ref_rna_", d)]]
           ref_atac_file <- input[[paste0("file_multi_ref_atac_", d)]]
           dname_custom <- input[[paste0("multi_dset_name_", d)]]
           d_label <- if (!is.null(dname_custom) && trimws(dname_custom) != "") trimws(dname_custom) else sprintf("Dataset %d", d)
           
-          if (identical(input$opt_multi_pairing, "unpaired")) {
-            ct_r_f <- input[[paste0("file_multi_celltypes_rna_", d)]] %||% input[[paste0("file_multi_celltypes_", d)]]
-            ct_a_f <- input[[paste0("file_multi_celltypes_atac_", d)]]
-            bt_r_f <- input[[paste0("file_multi_batch_rna_", d)]] %||% input[[paste0("file_multi_batch_", d)]]
-            bt_a_f <- input[[paste0("file_multi_batch_atac_", d)]]
-            ct_r_vec <- if (!is.null(ct_r_f) && nrow(ct_r_f) > 0) read_uploaded_labels(ct_r_f$datapath, ct_r_f$name) else NULL
-            ct_a_vec <- if (!is.null(ct_a_f) && nrow(ct_a_f) > 0) read_uploaded_labels(ct_a_f$datapath, ct_a_f$name) else NULL
-            bt_r_vec <- if (!is.null(bt_r_f) && nrow(bt_r_f) > 0) read_uploaded_labels(bt_r_f$datapath, bt_r_f$name) else NULL
-            bt_a_vec <- if (!is.null(bt_a_f) && nrow(bt_a_f) > 0) read_uploaded_labels(bt_a_f$datapath, bt_a_f$name) else NULL
+          ct_r_vec <- NULL; ct_a_vec <- NULL
+          bt_r_vec <- NULL; bt_a_vec <- NULL
+
+          if (!is.null(ref_file) && nrow(ref_file) > 0) {
+            incProgress(0.4 / n_dsets, detail = sprintf("Reading %s multiomics reference...", d_label))
+            ref_raw <- readRDS(ref_file$datapath)
+            ref_val <- validate_multiomics_input(ref_raw, d_label)
+            ref_rna_d <- ref_val$m1
+            ref_atac_d <- ref_val$m2
+            ct_r_vec <- if (is.list(ref_val$cell_types)) ref_val$cell_types$RNA else ref_val$cell_types
+            ct_a_vec <- if (is.list(ref_val$cell_types)) ref_val$cell_types$ATAC else ref_val$cell_types
+            bt_r_vec <- if (is.list(ref_val$batch_info)) ref_val$batch_info$RNA else ref_val$batch_info
+            bt_a_vec <- if (is.list(ref_val$batch_info)) ref_val$batch_info$ATAC else ref_val$batch_info
+
+            s_r <- extract_dataset_summary(
+              ref_rna_d, role = "Biological Reference (RNA)", method_name = paste0("Empirical RNA (", d_label, ")"),
+              modality = "RNA-seq", cell_types = ct_r_vec, batch_info = bt_r_vec
+            )
+            s_r$Dataset <- d_label
+            summary_rows[[length(summary_rows) + 1]] <- s_r
+
+            s_a <- extract_dataset_summary(
+              ref_atac_d, role = "Biological Reference (ATAC)", method_name = paste0("Empirical ATAC (", d_label, ")"),
+              modality = "ATAC-seq", cell_types = ct_a_vec, batch_info = bt_a_vec
+            )
+            s_a$Dataset <- d_label
+            summary_rows[[length(summary_rows) + 1]] <- s_a
+
+            refs_list[[paste0(d_label, "_RNA")]] <- ref_rna_d
+            refs_list[[paste0(d_label, "_ATAC")]] <- ref_atac_d
+            all_mats[[paste0("[", d_label, "] Empirical RNA Reference")]] <- ref_rna_d
+            all_mats[[paste0("[", d_label, "] Empirical ATAC Reference")]] <- ref_atac_d
+            if (d == 1) rv$toy_ref <- ref_rna_d
           } else {
-            ct_file <- input[[paste0("file_multi_celltypes_", d)]]
-            bt_file <- input[[paste0("file_multi_batch_", d)]]
-            ct_r_vec <- if (!is.null(ct_file) && nrow(ct_file) > 0) read_uploaded_labels(ct_file$datapath, ct_file$name) else NULL
-            ct_a_vec <- ct_r_vec
-            bt_r_vec <- if (!is.null(bt_file) && nrow(bt_file) > 0) read_uploaded_labels(bt_file$datapath, bt_file$name) else NULL
-            bt_a_vec <- bt_r_vec
+            if (identical(input$opt_multi_pairing, "unpaired")) {
+              ct_r_f <- input[[paste0("file_multi_celltypes_rna_", d)]] %||% input[[paste0("file_multi_celltypes_", d)]]
+              ct_a_f <- input[[paste0("file_multi_celltypes_atac_", d)]]
+              bt_r_f <- input[[paste0("file_multi_batch_rna_", d)]] %||% input[[paste0("file_multi_batch_", d)]]
+              bt_a_f <- input[[paste0("file_multi_batch_atac_", d)]]
+              ct_r_vec <- if (!is.null(ct_r_f) && nrow(ct_r_f) > 0) read_uploaded_labels(ct_r_f$datapath, ct_r_f$name) else NULL
+              ct_a_vec <- if (!is.null(ct_a_f) && nrow(ct_a_f) > 0) read_uploaded_labels(ct_a_f$datapath, ct_a_f$name) else NULL
+              bt_r_vec <- if (!is.null(bt_r_f) && nrow(bt_r_f) > 0) read_uploaded_labels(bt_r_f$datapath, bt_r_f$name) else NULL
+              bt_a_vec <- if (!is.null(bt_a_f) && nrow(bt_a_f) > 0) read_uploaded_labels(bt_a_f$datapath, bt_a_f$name) else NULL
+            } else {
+              ct_file <- input[[paste0("file_multi_celltypes_", d)]]
+              bt_file <- input[[paste0("file_multi_batch_", d)]]
+              ct_r_vec <- if (!is.null(ct_file) && nrow(ct_file) > 0) read_uploaded_labels(ct_file$datapath, ct_file$name) else NULL
+              ct_a_vec <- ct_r_vec
+              bt_r_vec <- if (!is.null(bt_file) && nrow(bt_file) > 0) read_uploaded_labels(bt_file$datapath, bt_file$name) else NULL
+              bt_a_vec <- bt_r_vec
+            }
+            
+            if (!is.null(ref_rna_file) && nrow(ref_rna_file) > 0) {
+              incProgress(0.2 / n_dsets, detail = sprintf("Reading %s RNA reference...", d_label))
+              ref_rna_d <- read_uploaded_matrix(ref_rna_file$datapath, ref_rna_file$name)
+              if (inherits(ref_rna_d, "matrix") && !inherits(ref_rna_d, "dgCMatrix")) ref_rna_d <- Matrix::Matrix(ref_rna_d, sparse = TRUE)
+              
+              s_row <- extract_dataset_summary(
+                ref_rna_d, role = "Biological Reference (RNA)", method_name = paste0("Empirical RNA (", d_label, ")"),
+                modality = "RNA-seq", cell_types = ct_r_vec, batch_info = bt_r_vec
+              )
+              s_row$Dataset <- d_label
+              summary_rows[[length(summary_rows) + 1]] <- s_row
+              refs_list[[paste0(d_label, "_RNA")]] <- ref_rna_d
+              all_mats[[paste0("[", d_label, "] Empirical RNA Reference")]] <- ref_rna_d
+              if (d == 1) rv$toy_ref <- ref_rna_d
+            }
+            
+            if (!is.null(ref_atac_file) && nrow(ref_atac_file) > 0) {
+              incProgress(0.2 / n_dsets, detail = sprintf("Reading %s ATAC reference...", d_label))
+              ref_atac_d <- read_uploaded_matrix(ref_atac_file$datapath, ref_atac_file$name)
+              if (inherits(ref_atac_d, "matrix") && !inherits(ref_atac_d, "dgCMatrix")) ref_atac_d <- Matrix::Matrix(ref_atac_d, sparse = TRUE)
+              
+              s_row <- extract_dataset_summary(
+                ref_atac_d, role = "Biological Reference (ATAC)", method_name = paste0("Empirical ATAC (", d_label, ")"),
+                modality = "ATAC-seq", cell_types = ct_a_vec, batch_info = bt_a_vec
+              )
+              s_row$Dataset <- d_label
+              summary_rows[[length(summary_rows) + 1]] <- s_row
+              refs_list[[paste0(d_label, "_ATAC")]] <- ref_atac_d
+              all_mats[[paste0("[", d_label, "] Empirical ATAC Reference")]] <- ref_atac_d
+            }
           }
           
           if (!is.null(ct_r_vec)) {
@@ -8192,74 +8292,74 @@ server <- function(input, output, session) {
             rv$batch <- if (!is.null(bt_r_vec)) bt_r_vec else bt_a_vec
           }
           
-          if (!is.null(ref_rna_file) && nrow(ref_rna_file) > 0) {
-            incProgress(0.2 / n_dsets, detail = sprintf("Reading %s RNA reference...", d_label))
-            ref_rna_d <- read_uploaded_matrix(ref_rna_file$datapath, ref_rna_file$name)
-            if (inherits(ref_rna_d, "matrix") && !inherits(ref_rna_d, "dgCMatrix")) ref_rna_d <- Matrix::Matrix(ref_rna_d, sparse = TRUE)
-            
-            s_row <- extract_dataset_summary(
-              ref_rna_d, role = "Biological Reference (RNA)", method_name = paste0("Empirical RNA (", d_label, ")"),
-              modality = "RNA-seq", cell_types = ct_r_vec, batch_info = bt_r_vec
-            )
-            s_row$Dataset <- d_label
-            summary_rows[[length(summary_rows) + 1]] <- s_row
-            refs_list[[paste0(d_label, "_RNA")]] <- ref_rna_d
-            all_mats[[paste0("[", d_label, "] Empirical RNA Reference")]] <- ref_rna_d
-            if (d == 1) {
-              rv$toy_ref <- ref_rna_d
-            }
-          }
-          
-          if (!is.null(ref_atac_file) && nrow(ref_atac_file) > 0) {
-            incProgress(0.2 / n_dsets, detail = sprintf("Reading %s ATAC reference...", d_label))
-            ref_atac_d <- read_uploaded_matrix(ref_atac_file$datapath, ref_atac_file$name)
-            if (inherits(ref_atac_d, "matrix") && !inherits(ref_atac_d, "dgCMatrix")) ref_atac_d <- Matrix::Matrix(ref_atac_d, sparse = TRUE)
-            
-            s_row <- extract_dataset_summary(
-              ref_atac_d, role = "Biological Reference (ATAC)", method_name = paste0("Empirical ATAC (", d_label, ")"),
-              modality = "ATAC-seq", cell_types = ct_a_vec, batch_info = bt_a_vec
-            )
-            s_row$Dataset <- d_label
-            summary_rows[[length(summary_rows) + 1]] <- s_row
-            refs_list[[paste0(d_label, "_ATAC")]] <- ref_atac_d
-            all_mats[[paste0("[", d_label, "] Empirical ATAC Reference")]] <- ref_atac_d
-          }
-          
           for (s in seq_len(n_sims)) {
             sim_name <- input[[paste0("multi_sim_name_", s)]]
             if (is.null(sim_name) || trimws(sim_name) == "") sim_name <- sprintf("Simulator %d", s)
+            sim_file <- input[[paste0("file_multi_sim_", s, "_", d)]]
             sim_rna_file  <- input[[paste0("file_multi_sim_rna_", s, "_", d)]]
             sim_atac_file <- input[[paste0("file_multi_sim_atac_", s, "_", d)]]
             
-            if (!is.null(sim_rna_file) && nrow(sim_rna_file) > 0) {
-              incProgress(0.3 / (n_dsets * n_sims), detail = sprintf("Reading %s RNA on %s...", sim_name, d_label))
-              sim_rna_d <- read_uploaded_matrix(sim_rna_file$datapath, sim_rna_file$name)
-              if (inherits(sim_rna_d, "matrix") && !inherits(sim_rna_d, "dgCMatrix")) sim_rna_d <- Matrix::Matrix(sim_rna_d, sparse = TRUE)
-              
-              s_row <- extract_dataset_summary(
+            if (!is.null(sim_file) && nrow(sim_file) > 0) {
+              incProgress(0.3 / (n_dsets * n_sims), detail = sprintf("Reading %s multiomics on %s...", sim_name, d_label))
+              sim_raw <- readRDS(sim_file$datapath)
+              sim_val <- validate_multiomics_input(sim_raw, sim_name)
+              sim_rna_d <- sim_val$m1
+              sim_atac_d <- sim_val$m2
+              sim_ct_r <- if (is.list(sim_val$cell_types)) sim_val$cell_types$RNA else (sim_val$cell_types %||% ct_r_vec)
+              sim_ct_a <- if (is.list(sim_val$cell_types)) sim_val$cell_types$ATAC else (sim_val$cell_types %||% ct_a_vec)
+              sim_bt_r <- if (is.list(sim_val$batch_info)) sim_val$batch_info$RNA else (sim_val$batch_info %||% bt_r_vec)
+              sim_bt_a <- if (is.list(sim_val$batch_info)) sim_val$batch_info$ATAC else (sim_val$batch_info %||% bt_a_vec)
+
+              s_r <- extract_dataset_summary(
                 sim_rna_d, role = "Simulated (RNA)", method_name = paste0(sim_name, " RNA (", d_label, ")"),
-                modality = "RNA-seq", cell_types = ct_r_vec, batch_info = bt_r_vec
+                modality = "RNA-seq", cell_types = sim_ct_r, batch_info = sim_bt_r
               )
-              s_row$Dataset <- d_label
-              summary_rows[[length(summary_rows) + 1]] <- s_row
-              all_mats[[paste0("[", d_label, "] Simulated RNA: ", sim_name)]] <- sim_rna_d
-              sim_mats_list[[paste0(sim_name, "_RNA_", d_label)]] <- sim_rna_d
-              if (is.null(first_sim_mat)) first_sim_mat <- sim_rna_d
-            }
-            
-            if (!is.null(sim_atac_file) && nrow(sim_atac_file) > 0) {
-              incProgress(0.3 / (n_dsets * n_sims), detail = sprintf("Reading %s ATAC on %s...", sim_name, d_label))
-              sim_atac_d <- read_uploaded_matrix(sim_atac_file$datapath, sim_atac_file$name)
-              if (inherits(sim_atac_d, "matrix") && !inherits(sim_atac_d, "dgCMatrix")) sim_atac_d <- Matrix::Matrix(sim_atac_d, sparse = TRUE)
-              
-              s_row <- extract_dataset_summary(
+              s_r$Dataset <- d_label
+              summary_rows[[length(summary_rows) + 1]] <- s_r
+
+              s_a <- extract_dataset_summary(
                 sim_atac_d, role = "Simulated (ATAC)", method_name = paste0(sim_name, " ATAC (", d_label, ")"),
-                modality = "ATAC-seq", cell_types = ct_a_vec, batch_info = bt_a_vec
+                modality = "ATAC-seq", cell_types = sim_ct_a, batch_info = sim_bt_a
               )
-              s_row$Dataset <- d_label
-              summary_rows[[length(summary_rows) + 1]] <- s_row
+              s_a$Dataset <- d_label
+              summary_rows[[length(summary_rows) + 1]] <- s_a
+
+              all_mats[[paste0("[", d_label, "] Simulated RNA: ", sim_name)]] <- sim_rna_d
               all_mats[[paste0("[", d_label, "] Simulated ATAC: ", sim_name)]] <- sim_atac_d
+              sim_mats_list[[paste0(sim_name, "_RNA_", d_label)]] <- sim_rna_d
               sim_mats_list[[paste0(sim_name, "_ATAC_", d_label)]] <- sim_atac_d
+              if (is.null(first_sim_mat)) first_sim_mat <- sim_rna_d
+            } else {
+              if (!is.null(sim_rna_file) && nrow(sim_rna_file) > 0) {
+                incProgress(0.3 / (n_dsets * n_sims), detail = sprintf("Reading %s RNA on %s...", sim_name, d_label))
+                sim_rna_d <- read_uploaded_matrix(sim_rna_file$datapath, sim_rna_file$name)
+                if (inherits(sim_rna_d, "matrix") && !inherits(sim_rna_d, "dgCMatrix")) sim_rna_d <- Matrix::Matrix(sim_rna_d, sparse = TRUE)
+                
+                s_row <- extract_dataset_summary(
+                  sim_rna_d, role = "Simulated (RNA)", method_name = paste0(sim_name, " RNA (", d_label, ")"),
+                  modality = "RNA-seq", cell_types = ct_r_vec, batch_info = bt_r_vec
+                )
+                s_row$Dataset <- d_label
+                summary_rows[[length(summary_rows) + 1]] <- s_row
+                all_mats[[paste0("[", d_label, "] Simulated RNA: ", sim_name)]] <- sim_rna_d
+                sim_mats_list[[paste0(sim_name, "_RNA_", d_label)]] <- sim_rna_d
+                if (is.null(first_sim_mat)) first_sim_mat <- sim_rna_d
+              }
+              
+              if (!is.null(sim_atac_file) && nrow(sim_atac_file) > 0) {
+                incProgress(0.3 / (n_dsets * n_sims), detail = sprintf("Reading %s ATAC on %s...", sim_name, d_label))
+                sim_atac_d <- read_uploaded_matrix(sim_atac_file$datapath, sim_atac_file$name)
+                if (inherits(sim_atac_d, "matrix") && !inherits(sim_atac_d, "dgCMatrix")) sim_atac_d <- Matrix::Matrix(sim_atac_d, sparse = TRUE)
+                
+                s_row <- extract_dataset_summary(
+                  sim_atac_d, role = "Simulated (ATAC)", method_name = paste0(sim_name, " ATAC (", d_label, ")"),
+                  modality = "ATAC-seq", cell_types = ct_a_vec, batch_info = bt_a_vec
+                )
+                s_row$Dataset <- d_label
+                summary_rows[[length(summary_rows) + 1]] <- s_row
+                all_mats[[paste0("[", d_label, "] Simulated ATAC: ", sim_name)]] <- sim_atac_d
+                sim_mats_list[[paste0(sim_name, "_ATAC_", d_label)]] <- sim_atac_d
+              }
             }
           }
         }
@@ -9338,6 +9438,8 @@ server <- function(input, output, session) {
     d_view <- input$sel_bubble_dataset_view %||% "all_avg"
     avail_methods <- if (!is.null(df) && "Dataset" %in% colnames(df) && !identical(d_view, "all_avg") && d_view %in% df$Dataset) {
       intersect(rv$methods, unique(df$Method[df$Dataset == d_view]))
+    } else if (!is.null(df) && "Method" %in% colnames(df)) {
+      intersect(rv$methods, unique(df$Method))
     } else {
       rv$methods
     }
@@ -9366,6 +9468,8 @@ server <- function(input, output, session) {
     d_view <- input$sel_bubble_dataset_view %||% "all_avg"
     avail_methods <- if (!is.null(df) && "Dataset" %in% colnames(df) && !identical(d_view, "all_avg") && d_view %in% df$Dataset) {
       intersect(rv$methods, unique(df$Method[df$Dataset == d_view]))
+    } else if (!is.null(df) && "Method" %in% colnames(df)) {
+      intersect(rv$methods, unique(df$Method))
     } else {
       rv$methods
     }
@@ -9487,6 +9591,8 @@ server <- function(input, output, session) {
       df <- agg_score
     } else if (!identical(dataset_choice, "all_avg") && dataset_choice %in% all_dsets) {
       df <- df[df$Dataset == dataset_choice, , drop = FALSE]
+      valid_methods <- unique(df$Method)
+      df <- df[df$Method %in% valid_methods, , drop = FALSE]
     }
     
     # 2. Modality Filter
@@ -9519,7 +9625,9 @@ server <- function(input, output, session) {
     # 3. Simulator Methods Filter
     if (!is.null(input$sel_bubble_methods)) {
       if (length(input$sel_bubble_methods) == 0) return(NULL)
-      df <- df[df$Method %in% input$sel_bubble_methods, , drop = FALSE]
+      active_m <- intersect(input$sel_bubble_methods, unique(df$Method))
+      if (length(active_m) == 0) return(NULL)
+      df <- df[df$Method %in% active_m, , drop = FALSE]
     }
     
     # 3. Mode Filter: 'all' vs 'custom'

@@ -566,9 +566,57 @@ extract_dataset_summary <- function(mat, role = "Reference", method_name = "Data
   )
 }
 
+.SC_CELLTYPE_COLS <- c(
+  "cell_type", "celltype", "cell_types", "celltypes", "cluster", "clusters",
+  "group", "groups", "label", "labels", "cell_identity", "cell_line",
+  "cellstate", "state", "annotation", "subclass", "cell_ontology_class"
+)
 
+.SC_BATCH_COLS <- c(
+  "batch", "batch_info", "batches", "replicate", "rep", "donor", "sample",
+  "dataset", "protocol", "run", "experiment", "plate", "library", "gem_group"
+)
 
+.seurat_default_assay <- function(obj) {
+  if (requireNamespace("SeuratObject", quietly = TRUE)) {
+    tryCatch(as.character(SeuratObject::DefaultAssay(obj)), error = function(e) names(obj@assays)[1])
+  } else {
+    names(obj@assays)[1]
+  }
+}
 
+.seurat_assay_counts <- function(obj, assay_name = NULL) {
+  if (is.null(assay_name) || !nzchar(assay_name)) assay_name <- .seurat_default_assay(obj)
+  res <- tryCatch({
+    assay_obj <- obj[[assay_name]]
+    if (!is.null(assay_obj)) {
+      if (inherits(assay_obj, "Assay5")) {
+        try(SeuratObject::JoinLayers(assay_obj, layers = "counts"), silent = TRUE)
+        assay_obj$counts
+      } else if (inherits(assay_obj, "Assay")) {
+        assay_obj@counts
+      } else {
+        Seurat::GetAssayData(obj, assay = assay_name, layer = "counts")
+      }
+    } else {
+      NULL
+    }
+  }, error = function(e) {
+    tryCatch(
+      Seurat::GetAssayData(obj, assay = assay_name, layer = "counts"),
+      error = function(e2) {
+        tryCatch(
+          Seurat::GetAssayData(obj, assay = assay_name, slot = "counts"),
+          error = function(e3) NULL
+        )
+      }
+    )
+  })
+  if (is.null(res) || nrow(res) == 0) {
+    res <- tryCatch(Seurat::GetAssayData(obj, slot = "counts"), error = function(e) obj@assays[[1]]@counts)
+  }
+  res
+}
 
 #' Validate and Standardize Single-Cell Input Objects
 #'
@@ -620,10 +668,10 @@ validate_sc_object <- function(obj, arg_name = "data", reduction_name = NULL) {
     # 2. Metadata (cell_type and batch)
     cd <- SummarizedExperiment::colData(obj)
     cd_cols <- tolower(colnames(cd))
-    ct_col <- which(cd_cols %in% c("cell_type", "celltype", "cell_types", "cluster", "group", "label", "cell_identity"))[1]
+    ct_col <- which(cd_cols %in% tolower(.SC_CELLTYPE_COLS))[1]
     if (!is.na(ct_col)) ct_vec <- as.character(cd[[ct_col]])
     
-    bt_col <- which(cd_cols %in% c("batch", "batch_info", "batches", "replicate", "rep", "donor", "sample"))[1]
+    bt_col <- which(cd_cols %in% tolower(.SC_BATCH_COLS))[1]
     if (!is.na(bt_col)) bt_vec <- as.character(cd[[bt_col]])
     
     # 3. Dimensional Reductions
@@ -639,8 +687,11 @@ validate_sc_object <- function(obj, arg_name = "data", reduction_name = NULL) {
       embed_mat <- as.matrix(SingleCellExperiment::reducedDim(obj, target_rd))
     }
   } else if (is_seurat) {
-    # 1. Counts (respect DefaultAssay first so ATAC/secondary assays work cleanly)
+    # 1. Counts (respect DefaultAssay first so ATAC/secondary assays work cleanly;
+    #    Seurat v5 split 'counts.*' layers are joined automatically)
     counts_mat <- tryCatch(
+      .seurat_assay_counts(obj, .seurat_default_assay(obj)),
+      error = function(e0) tryCatch(
       Seurat::GetAssayData(obj, slot = "counts"),
       error = function(e) {
         tryCatch(
@@ -653,11 +704,11 @@ validate_sc_object <- function(obj, arg_name = "data", reduction_name = NULL) {
           }
         )
       }
-    )
+    ))
     # 2. Metadata
     md <- obj@meta.data
     md_cols <- tolower(colnames(md))
-    ct_col <- which(md_cols %in% c("cell_type", "celltype", "cell_types", "cluster", "group", "label", "cell_identity"))[1]
+    ct_col <- which(md_cols %in% tolower(.SC_CELLTYPE_COLS))[1]
     if (!is.na(ct_col)) {
       ct_vec <- as.character(md[[ct_col]])
     } else {
@@ -665,7 +716,7 @@ validate_sc_object <- function(obj, arg_name = "data", reduction_name = NULL) {
       if (!is.null(ident_vec) && length(ident_vec) == ncol(counts_mat)) ct_vec <- ident_vec
     }
     
-    bt_col <- which(md_cols %in% c("batch", "batch_info", "batches", "replicate", "rep", "donor", "sample"))[1]
+    bt_col <- which(md_cols %in% tolower(.SC_BATCH_COLS))[1]
     if (!is.na(bt_col)) bt_vec <- as.character(md[[bt_col]])
     
     # 3. Dimensional Reductions
@@ -691,55 +742,80 @@ validate_sc_object <- function(obj, arg_name = "data", reduction_name = NULL) {
   )
 }
 
+
+
 #' Validate and Standardize Multiomics Input Objects
 #'
 #' Strictly enforces standard multiomics input compliance in \code{scSimEval}.
 #' Validates that multiomics inputs conform to \code{Seurat} or \code{SingleCellExperiment} structures.
-#' Accepts either:
+#' Accepts a single multi-modal object or a list of two modality objects:
 #' \itemize{
+#'   \item A single multi-modal \code{Seurat} object containing both RNA and ATAC assays (with metadata and reductions).
+#'   \item A single multi-modal \code{SingleCellExperiment} object with an \code{altExp} for the secondary modality.
 #'   \item A named list of 2 \code{Seurat} or \code{SingleCellExperiment} objects (e.g. \code{list(rna = ..., atac = ...)}).
-#'   \item A multi-modal \code{Seurat} object containing both RNA and ATAC assays.
-#'   \item A multi-modal \code{SingleCellExperiment} object with an \code{altExp} (e.g. ATAC).
+#'   \item A file path to an \code{.rds} file containing any of the above.
 #' }
 #'
-#' @param obj Multiomics dataset object to validate.
-#' @param arg_name Name of argument.
+#' @param obj Multiomics dataset object or file path to validate.
+#' @param arg_name Name of argument for diagnostic error messages.
 #' @param reduction_name Optional reduction name to extract.
-#' @return A list with standardized components: \code{m1}, \code{m2}, \code{cell_types}, \code{batch_info}, \code{embedding}.
+#' @return A list with standardized components: \code{m1}, \code{m2}, \code{m1_obj}, \code{m2_obj}, \code{m1_name}, \code{m2_name}, \code{cell_types}, \code{batch_info}, \code{embedding}.
 #' @export
 validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_name = NULL) {
   if (is.null(obj)) return(NULL)
-  
-  # Case A: Named list of 2 objects
-  if (is.list(obj) && !inherits(obj, "Seurat") && !inherits(obj, "SingleCellExperiment") && length(obj) >= 2) {
-    o1 <- obj[[1]]
-    o2 <- obj[[2]]
-    v1 <- validate_sc_object(o1, paste0(arg_name, "[[1]]"), reduction_name = reduction_name)
-    v2 <- validate_sc_object(o2, paste0(arg_name, "[[2]]"), reduction_name = reduction_name)
-    
-    ct <- if (!is.null(v1$cell_types)) v1$cell_types else v2$cell_types
-    bt <- if (!is.null(v1$batch_info)) v1$batch_info else v2$batch_info
-    emb <- if (!is.null(v1$embedding)) v1$embedding else v2$embedding
-    
-    return(list(
-      m1 = v1$counts,
-      m2 = v2$counts,
-      m1_obj = v1$object,
-      m2_obj = v2$object,
-      cell_types = ct,
-      batch_info = bt,
-      embedding = emb
-    ))
+
+  # Auto-load if file path is provided
+  if (is.character(obj) && length(obj) == 1 && file.exists(obj)) {
+    obj <- readRDS(obj)
   }
-  
+
+  # Case A: Named list of 2 objects
+  if (is.list(obj) && !inherits(obj, "Seurat") && !inherits(obj, "SingleCellExperiment")) {
+    if (length(obj) == 1) {
+      obj <- obj[[1]]
+    } else if (length(obj) >= 2) {
+      o1 <- obj[[1]]
+      o2 <- obj[[2]]
+      nm1 <- names(obj)[1] %||% "RNA"
+      nm2 <- names(obj)[2] %||% "ATAC"
+      v1 <- validate_sc_object(o1, paste0(arg_name, "[[1]]"), reduction_name = reduction_name)
+      v2 <- validate_sc_object(o2, paste0(arg_name, "[[2]]"), reduction_name = reduction_name)
+
+      ct <- if (!is.null(v1$cell_types)) v1$cell_types else v2$cell_types
+      bt <- if (!is.null(v1$batch_info)) v1$batch_info else v2$batch_info
+      emb <- if (!is.null(v1$embedding)) v1$embedding else v2$embedding
+
+      return(list(
+        m1 = v1$counts,
+        m2 = v2$counts,
+        m1_obj = v1$object,
+        m2_obj = v2$object,
+        m1_name = nm1,
+        m2_name = nm2,
+        cell_types = ct,
+        batch_info = bt,
+        embedding = emb
+      ))
+    }
+  }
+
   # Case B: Multi-modal Seurat object
   if (inherits(obj, "Seurat")) {
     assay_names <- names(obj@assays)
     if (length(assay_names) >= 2) {
-      a1_name <- assay_names[1]
-      a2_name <- assay_names[2]
-      m1 <- tryCatch(obj[[a1_name]]$counts, error = function(e) Seurat::GetAssayData(obj, assay = a1_name, slot = "counts"))
-      m2 <- tryCatch(obj[[a2_name]]$counts, error = function(e) Seurat::GetAssayData(obj, assay = a2_name, slot = "counts"))
+      is_atac <- grepl("atac|peak|chromatin", tolower(assay_names))
+      is_rna  <- grepl("rna|gene|transcr", tolower(assay_names))
+
+      if (any(is_rna) && any(is_atac)) {
+        a1_name <- assay_names[is_rna][1]
+        a2_name <- assay_names[is_atac][1]
+      } else {
+        a1_name <- assay_names[1]
+        a2_name <- assay_names[2]
+      }
+
+      m1 <- .seurat_assay_counts(obj, a1_name)
+      m2 <- .seurat_assay_counts(obj, a2_name)
       m1_obj <- obj
       m2_obj <- obj
       if (requireNamespace("SeuratObject", quietly = TRUE)) {
@@ -759,10 +835,10 @@ validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_na
         embedding = v$embedding
       ))
     } else {
-      stop(sprintf("Multiomics Seurat object '%s' must contain at least 2 assays (found only '%s').", arg_name, assay_names[1]), call. = FALSE)
+      stop(sprintf("Multiomics Seurat object '%s' must contain at least 2 assays (found only '%s': expected e.g. RNA and ATAC).", arg_name, assay_names[1]), call. = FALSE)
     }
   }
-  
+
   # Case C: Multi-modal SingleCellExperiment with altExp
   if (inherits(obj, "SingleCellExperiment")) {
     alt_names <- SingleCellExperiment::altExpNames(obj)
@@ -785,12 +861,12 @@ validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_na
         embedding = v$embedding
       ))
     } else {
-      stop(sprintf("Multiomics SingleCellExperiment object '%s' must contain at least one altExp for the secondary modality.", arg_name), call. = FALSE)
+      stop(sprintf("Multiomics SingleCellExperiment object '%s' must contain at least one altExp for the secondary modality (e.g. ATAC).", arg_name), call. = FALSE)
     }
   }
-  
+
   stop(sprintf(
-    "scSimEval strictly requires multiomics inputs for '%s' to be standardized 'Seurat' or 'SingleCellExperiment' objects (or a named list of two such objects, e.g. list(rna = sce_rna, atac = sce_atac)). Received '%s'.",
+    "scSimEval strictly requires multiomics inputs for '%s' to be standardized 'Seurat' or 'SingleCellExperiment' objects containing multiomics assays, cell metadata, and reductions. Received '%s'.",
     arg_name, paste(class(obj), collapse = "/")
   ), call. = FALSE)
 }
