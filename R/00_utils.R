@@ -344,9 +344,9 @@ subsample_dist_vector <- function(x, max_n = 10000) {
     if (grepl("atac|peak|chromatin", m_low)) return(TRUE)
     if (grepl("rna|gene|transcript", m_low)) return(FALSE)
   }
-
+  
   if (is.null(data)) return(FALSE)
-
+  
   if (inherits(data, "Seurat") && requireNamespace("SeuratObject", quietly = TRUE)) {
     def_assay <- tryCatch(SeuratObject::DefaultAssay(data), error = function(e) NULL)
     if (!is.null(def_assay) && grepl("atac|peak|chromatin", tolower(def_assay))) {
@@ -358,13 +358,13 @@ subsample_dist_vector <- function(x, max_n = 10000) {
       return(TRUE)
     }
   }
-
+  
   rn <- tryCatch(rownames(data), error = function(e) NULL)
   if (!is.null(rn) && length(rn) > 0) {
     is_peak_name <- grepl("^(peak|chr[0-9xyXYM]+[:-]|[A-Za-z0-9_.-]+[:-][0-9]+-[0-9]+)", rn, ignore.case = TRUE)
     if (mean(is_peak_name) > 0.5) return(TRUE)
   }
-
+  
   FALSE
 }
 
@@ -388,18 +388,15 @@ tfidf_transform <- function(mat, scale_factor = 1e4) {
   if (inherits(mat, "SingleCellExperiment")) {
     mat <- SummarizedExperiment::assay(mat, "counts")
   } else if (inherits(mat, "Seurat")) {
-    mat <- tryCatch(
-      Seurat::GetAssayData(mat, slot = "counts"),
-      error = function(e) Seurat::GetAssayData(mat, layer = "counts")
-    )
+    mat <- .get_seurat_counts(mat)
   }
-
+  
   libs <- as.numeric(Matrix::colSums(mat))
   libs[libs == 0] <- 1
-
+  
   rs <- as.numeric(Matrix::rowSums(mat))
   idf <- ifelse(rs > 0, ncol(mat) / rs, 0)
-
+  
   if (inherits(mat, "dgCMatrix")) {
     norm_mat <- mat
     col_idx <- rep(seq_len(ncol(mat)), diff(mat@p))
@@ -417,7 +414,23 @@ tfidf_transform <- function(mat, scale_factor = 1e4) {
 .get_seurat_counts <- function(obj) {
   tryCatch(
     Seurat::GetAssayData(obj, layer = "counts"),
-    error = function(e) Seurat::GetAssayData(obj, slot = "counts")
+    error = function(e) {
+      tryCatch(
+        Seurat::GetAssayData(obj, slot = "counts"),
+        error = function(e2) {
+          if (!inherits(obj, "Seurat") || length(obj@assays) == 0L) return(NULL)
+          assay_name <- names(obj@assays)[1]
+          assay_obj <- obj[[assay_name]]
+          if (inherits(assay_obj, "Assay5")) {
+            return(assay_obj$counts)
+          }
+          if (inherits(assay_obj, "Assay")) {
+            return(assay_obj@counts)
+          }
+          NULL
+        }
+      )
+    }
   )
 }
 
@@ -496,7 +509,7 @@ normalize_counts <- function(mat, scale_factor = 1e6, log_base = 2, pseudo_count
 #' extract_dataset_summary(example_scrna$ref, role = "Reference", method_name = "Empirical")
 #' @export
 extract_dataset_summary <- function(mat, role = "Reference", method_name = "Dataset",
-                                    modality = "scRNA-seq", cell_types = NULL, batch_info = NULL) {
+                                     modality = "scRNA-seq", cell_types = NULL, batch_info = NULL) {
   if (is.null(mat)) return(NULL)
   
   if (inherits(mat, "SingleCellExperiment")) {
@@ -512,7 +525,7 @@ extract_dataset_summary <- function(mat, role = "Reference", method_name = "Data
     if (is.null(batch_info) && "batch" %in% colnames(mat@meta.data)) {
       batch_info <- mat@meta.data$batch
     }
-    mat <- mat[["RNA"]]$counts
+    mat <- .get_seurat_counts(mat)
   }
   
   n_cells <- ncol(mat)
@@ -613,7 +626,7 @@ extract_dataset_summary <- function(mat, role = "Reference", method_name = "Data
     )
   })
   if (is.null(res) || nrow(res) == 0) {
-    res <- tryCatch(Seurat::GetAssayData(obj, slot = "counts"), error = function(e) obj@assays[[1]]@counts)
+    res <- .get_seurat_counts(obj)
   }
   res
 }
@@ -645,7 +658,7 @@ validate_sc_object <- function(obj, arg_name = "data", reduction_name = NULL) {
   
   if (!is_sce && !is_seurat) {
     stop(sprintf(
-      "scSimEval strictly requires a 'Seurat' or 'SingleCellExperiment' object for '%s' (received '%s').\nTo benchmark your simulation and evaluate all categories (including Category VI Multiomics Integration & Alignment reductions), please package your counts and metadata:\n  - Seurat: Seurat::CreateSeuratObject(counts = <matrix>, meta.data = <data.frame>)\n  - SingleCellExperiment: SingleCellExperiment::SingleCellExperiment(assays = list(counts = <matrix>), colData = <data.frame>)",
+      "scSimEval strictly requires a 'Seurat' or 'SingleCellExperiment' object for '%s' (received '%s').\nTo benchmark your simulation and evaluate all categories (including Category VI Multiomics integration), please provide either object type.",
       arg_name, paste(class(obj), collapse = "/")
     ), call. = FALSE)
   }
@@ -699,7 +712,7 @@ validate_sc_object <- function(obj, arg_name = "data", reduction_name = NULL) {
           error = function(e2) {
             tryCatch(
               obj[["RNA"]]$counts,
-              error = function(e3) obj@assays[[1]]@counts
+              error = function(e3) NULL
             )
           }
         )
@@ -763,12 +776,12 @@ validate_sc_object <- function(obj, arg_name = "data", reduction_name = NULL) {
 #' @export
 validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_name = NULL) {
   if (is.null(obj)) return(NULL)
-
+ 
   # Auto-load if file path is provided
   if (is.character(obj) && length(obj) == 1 && file.exists(obj)) {
     obj <- readRDS(obj)
   }
-
+ 
   # Case A: Named list of 2 objects
   if (is.list(obj) && !inherits(obj, "Seurat") && !inherits(obj, "SingleCellExperiment")) {
     if (length(obj) == 1) {
@@ -780,11 +793,11 @@ validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_na
       nm2 <- names(obj)[2] %||% "ATAC"
       v1 <- validate_sc_object(o1, paste0(arg_name, "[[1]]"), reduction_name = reduction_name)
       v2 <- validate_sc_object(o2, paste0(arg_name, "[[2]]"), reduction_name = reduction_name)
-
+      
       ct <- if (!is.null(v1$cell_types)) v1$cell_types else v2$cell_types
       bt <- if (!is.null(v1$batch_info)) v1$batch_info else v2$batch_info
       emb <- if (!is.null(v1$embedding)) v1$embedding else v2$embedding
-
+      
       return(list(
         m1 = v1$counts,
         m2 = v2$counts,
@@ -798,14 +811,14 @@ validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_na
       ))
     }
   }
-
+ 
   # Case B: Multi-modal Seurat object
   if (inherits(obj, "Seurat")) {
     assay_names <- names(obj@assays)
     if (length(assay_names) >= 2) {
       is_atac <- grepl("atac|peak|chromatin", tolower(assay_names))
       is_rna  <- grepl("rna|gene|transcr", tolower(assay_names))
-
+      
       if (any(is_rna) && any(is_atac)) {
         a1_name <- assay_names[is_rna][1]
         a2_name <- assay_names[is_atac][1]
@@ -813,7 +826,7 @@ validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_na
         a1_name <- assay_names[1]
         a2_name <- assay_names[2]
       }
-
+      
       m1 <- .seurat_assay_counts(obj, a1_name)
       m2 <- .seurat_assay_counts(obj, a2_name)
       m1_obj <- obj
@@ -838,7 +851,7 @@ validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_na
       stop(sprintf("Multiomics Seurat object '%s' must contain at least 2 assays (found only '%s': expected e.g. RNA and ATAC).", arg_name, assay_names[1]), call. = FALSE)
     }
   }
-
+ 
   # Case C: Multi-modal SingleCellExperiment with altExp
   if (inherits(obj, "SingleCellExperiment")) {
     alt_names <- SingleCellExperiment::altExpNames(obj)
@@ -864,7 +877,7 @@ validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_na
       stop(sprintf("Multiomics SingleCellExperiment object '%s' must contain at least one altExp for the secondary modality (e.g. ATAC).", arg_name), call. = FALSE)
     }
   }
-
+ 
   stop(sprintf(
     "scSimEval strictly requires multiomics inputs for '%s' to be standardized 'Seurat' or 'SingleCellExperiment' objects containing multiomics assays, cell metadata, and reductions. Received '%s'.",
     arg_name, paste(class(obj), collapse = "/")
