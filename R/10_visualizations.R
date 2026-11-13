@@ -4462,8 +4462,8 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
     rng     <- max_v - min_v
     if (is.na(rng) || !is.finite(rng)) rng <- 0
 
-    is_naturally_01 <- isTRUE(grepl("^(KS|OV|ari|nmi|ami|v_measure|ECDF_DiffArea|Fasano|Peacock|accuracy|precision|recall|f1_score|auc|pval_dist_score|F1|Top_DEG_Jaccard)", met, ignore.case = TRUE)) ||
-                       isTRUE(min_v >= 0 && max_v <= 1 && rng <= 1)
+  is_naturally_01 <- isTRUE(grepl("^(KS|OV|ari|nmi|ami|v_measure|ECDF_DiffArea|accuracy|precision|recall|f1_score|auc|pval_dist_score|F1|Top_DEG_Jaccard)", met, ignore.case = TRUE)) ||
+                   isTRUE(min_v >= 0 && max_v <= 1 && rng <= 1)
     if (is_naturally_01) {
       if (is_hib) {
         normed <- pmax(0, pmin(1, raw_val))
