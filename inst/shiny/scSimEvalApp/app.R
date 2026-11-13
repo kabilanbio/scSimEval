@@ -4250,13 +4250,13 @@ ui <- page_navbar(
               p(
                 style = "color: #334155; font-size: 0.94rem; margin-bottom: 14px; line-height: 1.65;",
                 tags$b("What does scSimEval do? "),
-                "It compares ", tags$b("simulated single-cell data"), " against ", tags$b("real reference data"),
-                " and scores each simulator from ", tags$b("0.00 (poor)"), " to ", tags$b("1.00 (excellent)"),
-                " so you can immediately see which simulator works best for your study."
+                "It compares ", tags$b("simulated single-cell or multiomics data"), " against ", tags$b("real reference data"),
+                " and scores each simulator from ", tags$b("0.00 (lowest)"), " to ", tags$b("1.00 (best)"),
+                " across 56 quality measures so you can easily choose the best simulator for your study."
               ),
               # 3-Step Quick Start Box
               div(
-                style = "background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 14px 18px;",
+                style = "background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 14px 18px; margin-bottom: 12px;",
                 div(
                   style = "font-weight: 800; color: #0F172A; font-size: 0.92rem; margin-bottom: 10px;",
                   icon("bolt", style = "color: #F59E0B; margin-right: 6px;"),
@@ -4268,7 +4268,7 @@ ui <- page_navbar(
                     div(
                       style = "background: #EFF6FF; border-radius: 6px; padding: 10px 12px; height: 100%; font-size: 0.85rem; color: #1E3A8A;",
                       tags$b("Step 1 — Load Data:"), br(),
-                      "Open ", tags$b("Data Hub"), " and click ", tags$b("Load Demo Dataset"), " (to try the app right away) or upload your own ", tags$code(".rds"), " files."
+                      "Open ", tags$b("Data Hub"), " and load an example dataset — ", tags$b("Rice Bud"), " (paired, 8 tissues, 6 simulators) or ", tags$b("Soybean Root"), " (unpaired, 7 tissues, 3 simulators) — or upload your own ", tags$code(".rds"), " files."
                     )
                   ),
                   column(
@@ -4276,17 +4276,40 @@ ui <- page_navbar(
                     div(
                       style = "background: #F0FDF4; border-radius: 6px; padding: 10px 12px; height: 100%; font-size: 0.85rem; color: #14532D;",
                       tags$b("Step 2 — Compare Simulators:"), br(),
-                      "Open ", tags$b("Comparative Bubble Matrix"), " to see all simulators ranked from best (top) to worst (bottom)."
+                      "Open ", tags$b("Comparative Bubble Matrix"), " to view the ranked bubble matrix and the ", tags$b("Fidelity Leaderboard"), " from best to worst."
                     )
                   ),
                   column(
                     4,
                     div(
                       style = "background: #FEFCE8; border-radius: 6px; padding: 10px 12px; height: 100%; font-size: 0.85rem; color: #713F12;",
-                      tags$b("Step 3 — View Charts & Download:"), br(),
-                      "Explore plots in ", tags$b("Visualizations"), " or download tables in ", tags$b("Benchmark Results & Export"), "."
+                      tags$b("Step 3 — View Charts & Export:"), br(),
+                      "Explore the 8 plot panels in ", tags$b("Visualizations"), " or download your full results table in ", tags$b("Benchmark Results & Export"), "."
                     )
                   )
+                )
+              ),
+              div(
+                style = "padding-top: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;",
+                span(
+                  tags$i(class = "fa fa-book", style = "margin-right: 6px; color: #1B4F72;"),
+                  tags$b("Full Online Documentation & Tutorials: "),
+                  tags$a(
+                    href = "https://kabilanbio.github.io/scSimEval",
+                    target = "_blank",
+                    rel = "noopener noreferrer",
+                    "https://kabilanbio.github.io/scSimEval",
+                    style = "color: #0284C7; text-decoration: underline; font-weight: 700; font-size: 0.88rem; margin-left: 4px;"
+                  )
+                ),
+                tags$a(
+                  href = "https://kabilanbio.github.io/scSimEval",
+                  target = "_blank",
+                  rel = "noopener noreferrer",
+                  class = "btn btn-sm btn-primary",
+                  style = "font-weight: 600; border-radius: 6px;",
+                  tags$i(class = "fa fa-external-link-alt", style = "margin-right: 5px;"),
+                  "Open Online Documentation"
                 )
               )
             ),
@@ -4294,19 +4317,21 @@ ui <- page_navbar(
             # ==================================================================
             # SECTION 1: HOW SCSIMEVAL WORKS (4 SIMPLE STEPS)
             # ==================================================================
-            h5(icon("sitemap", style = "color: #2E86C1; margin-right: 8px;"), "1. How scSimEval Works (4 Simple Steps)", style = "font-weight: 700; color: #1B4F72; margin-bottom: 12px;"),
+            h5(icon("sitemap", style = "color: #2E86C1; margin-right: 8px;"), "1. How scSimEval Works (4 Simple Steps)", style = "font-weight: 700; color: #1B4F72; margin-bottom: 10px;"),
             div(
-              class = "zoomable-fig-card",
-              style = "background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; text-align: center; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);",
-              tags$img(
-                src = "workflow_diagram.png",
-                alt = "scSimEval 4-Stage Evaluation Workflow",
-                style = "max-width: 100%; max-height: 440px; height: auto; border-radius: 6px;"
+              style = "text-align: center; margin: 14px auto 16px auto; max-width: 980px;",
+              with_step_zoom(
+                "workflow_diagram",
+                tags$img(
+                  src = "scfigures/workflow_diagram.png",
+                  alt = "scSimEval Benchmarking Workflow Architecture",
+                  style = "width: 100%; max-width: 960px; height: auto; display: block; margin: 0 auto; border-radius: 8px; border: 1px solid #E2E8F0;"
+                )
               ),
-              div(
-                class = "fig-zoom-hint",
-                icon("magnifying-glass-plus", style = "color: #2E86C1;"),
-                tags$b("Figure 1: "), "The 4-step scSimEval workflow — ", tags$span(style = "color: #2E86C1; font-weight: 600;", "click image to zoom")
+              p(
+                tags$b("Figure 1 | The 4-Step scSimEval Workflow. "),
+                "Use the zoom bar above the figure (or Ctrl+Wheel / Fullscreen button) to zoom and pan.",
+                style = "font-size: 0.83rem; color: #64748B; margin-top: 8px; margin-bottom: 0;"
               )
             ),
             fluidRow(
@@ -4315,36 +4340,36 @@ ui <- page_navbar(
                 3,
                 div(
                   style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-top: 3px solid #2E86C1; border-radius: 6px; padding: 12px 14px; height: 100%;",
-                  div(style = "font-weight: 700; color: #1B4F72; font-size: 0.88rem; margin-bottom: 4px;", "1. Input Your Data"),
+                  div(style = "font-weight: 700; color: #1B4F72; font-size: 0.88rem; margin-bottom: 4px;", "Step 1: Input Your Data"),
                   p(style = "font-size: 0.82rem; color: #475569; margin: 0; line-height: 1.5;",
-                    "Provide one real reference dataset and one or more simulated datasets (scRNA-seq, scATAC-seq, or Multiomics) saved as ", tags$code(".rds"), " files.")
+                    "Provide one real reference dataset and one or more simulated datasets (scRNA-seq, scATAC-seq, or Multiomics) saved as ", tags$code("Seurat"), " or ", tags$code("SingleCellExperiment"), " ", tags$code(".rds"), " files.")
                 )
               ),
               column(
                 3,
                 div(
                   style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-top: 3px solid #148F77; border-radius: 6px; padding: 12px 14px; height: 100%;",
-                  div(style = "font-weight: 700; color: #0E6655; font-size: 0.88rem; margin-bottom: 4px;", "2. Measure Similarity"),
+                  div(style = "font-weight: 700; color: #0E6655; font-size: 0.88rem; margin-bottom: 4px;", "Step 2: Measure Similarity"),
                   p(style = "font-size: 0.82rem; color: #475569; margin: 0; line-height: 1.5;",
-                    "scSimEval automatically checks up to ", tags$b("56 quality measures"), " across ", tags$b("8 categories"), " (counts, sparsity, clusters, batches, DEGs/DARs, trajectories, and speed/RAM).")
+                    "scSimEval automatically computes up to ", tags$b("56 quality measures"), " across ", tags$b("8 categories"), " covering count distributions, sparsity, clusters, batch mixing, DEGs/DARs, multiomics alignment, trajectories, and speed/RAM.")
                 )
               ),
               column(
                 3,
                 div(
                   style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-top: 3px solid #D97706; border-radius: 6px; padding: 12px 14px; height: 100%;",
-                  div(style = "font-weight: 700; color: #92400E; font-size: 0.88rem; margin-bottom: 4px;", "3. Convert to 0–1 Scores"),
+                  div(style = "font-weight: 700; color: #92400E; font-size: 0.88rem; margin-bottom: 4px;", "Step 3: Convert to 0–1 Scores"),
                   p(style = "font-size: 0.82rem; color: #475569; margin: 0; line-height: 1.5;",
-                    "Every metric is converted to a simple ", tags$b("[0, 1] score"), " where ", tags$b("1.00 = Best"), " and ", tags$b("0.00 = Worst"), " so all metrics can be compared fairly.")
+                    "Every metric is standardized onto a simple ", tags$b("[0.00, 1.00] scale"), " where ", tags$b("1.00 = Best"), " and ", tags$b("0.00 = Lowest"), ", while also keeping the raw values (", tags$code("Score_Raw"), ").")
                 )
               ),
               column(
                 3,
                 div(
                   style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-top: 3px solid #7C3AED; border-radius: 6px; padding: 12px 14px; height: 100%;",
-                  div(style = "font-weight: 700; color: #5B21B6; font-size: 0.88rem; margin-bottom: 4px;", "4. Rank & Export"),
+                  div(style = "font-weight: 700; color: #5B21B6; font-size: 0.88rem; margin-bottom: 4px;", "Step 4: Rank, Plot & Export"),
                   p(style = "font-size: 0.82rem; color: #475569; margin: 0; line-height: 1.5;",
-                    "Simulators are ranked by their ", tags$b("Overall Score"), " and displayed in ready-to-publish bubble matrices, bar charts, boxplots, and CSV/RDS tables.")
+                    "Simulators are ranked by their composite ", tags$b("Overall Score"), " and shown in interactive bubble matrices, leaderboards, diagnostic plots, and downloadable R scripts.")
                 )
               )
             ),
@@ -4356,7 +4381,7 @@ ui <- page_navbar(
             h5(icon("layer-group", style = "color: #2E86C1; margin-right: 8px;"), "2. What Do the 8 Evaluation Categories Measure? (56 Metrics)", style = "font-weight: 700; color: #1B4F72; margin-top: 16px; margin-bottom: 8px;"),
             p(
               style = "color: #475569; font-size: 0.88rem; margin-bottom: 12px; line-height: 1.55;",
-              "You do not need to run all 56 metrics at once — scSimEval automatically picks the right metrics based on the data you upload:"
+              "Each category answers one simple question about how realistic a simulated dataset is:"
             ),
             div(
               class = "table-responsive",
@@ -4367,76 +4392,76 @@ ui <- page_navbar(
                 tags$thead(
                   style = "background: #F1F5F9; color: #1E293B;",
                   tags$tr(
-                    tags$th(style = "width: 24%; padding: 9px 12px;", "Category"),
+                    tags$th(style = "width: 25%; padding: 9px 12px;", "Category"),
                     tags$th(style = "width: 10%; text-align: center; padding: 9px 12px;", "# Metrics"),
-                    tags$th(style = "width: 18%; padding: 9px 12px;", "Data Needed"),
-                    tags$th(style = "width: 48%; padding: 9px 12px;", "What Question Does It Answer? (and Metrics Included)")
+                    tags$th(style = "width: 17%; padding: 9px 12px;", "Data Needed"),
+                    tags$th(style = "width: 48%; padding: 9px 12px;", "What Question Does It Answer? (and What It Measures)")
                   )
                 ),
                 tags$tbody(
                   tags$tr(
-                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "I. Gene / Peak-Level & Count Distribution"),
-                    tags$td(style = "text-align: center; font-weight: 700;", "16"),
+                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "I. Distributional Properties"),
+                    tags$td(style = "text-align: center; font-weight: 700;", "14"),
                     tags$td(style = "padding: 8px 12px;", "Count matrix only"),
                     tags$td(style = "padding: 8px 12px;",
-                      tags$b("Do basic gene/peak expression levels and library sizes look like real data?"), br(),
-                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "RNA (11): mean_ks, sd_ks, cv_ks, fano_ks, skew_ks, kurt_ks, cor_spearman, mean_var_r2, lib_size_ks, expr_features_ks, gini_ks • ATAC (5): atac_mean_ks, atac_sd_ks, atac_fano_ks, atac_lib_size_ks, atac_open_peaks_ks"))
+                      tags$b("Do the simulated cell and gene/peak count distributions match real data?"), br(),
+                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "10 univariate & 4 bivariate distributional similarity measures (Wasserstein, KS, MAD, Bhattacharyya, Runs test, NN mismatch, Silhouette, 2D KS, 2D EMD, 2D NN mismatch, 2D Silhouette) across 7 cell-level, 7 feature-level, and 4 bivariate properties."))
                   ),
                   tags$tr(
-                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "II. Sparsity & Zero-Inflation"),
+                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "II. Sparsity & Zero-Inflation Dynamics"),
+                    tags$td(style = "text-align: center; font-weight: 700;", "5"),
+                    tags$td(style = "padding: 8px 12px;", "Count matrix only"),
+                    tags$td(style = "padding: 8px 12px;",
+                      tags$b("Are zero counts and dropout rates realistic across genes/peaks and cells?"), br(),
+                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "Logistic dropout curve fidelity (midpoint error x0, transition slope error k, goodness-of-fit R²), quadratic accessibility-sparsity RMSE & R² (scATAC-seq), and excess zero proportion difference."))
+                  ),
+                  tags$tr(
+                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "III. Cellular Manifold & Clustering Concordance"),
                     tags$td(style = "text-align: center; font-weight: 700;", "8"),
-                    tags$td(style = "padding: 8px 12px;", "Count matrix only"),
-                    tags$td(style = "padding: 8px 12px;",
-                      tags$b("Are zero counts and dropout rates realistic across cells and genes/peaks?"), br(),
-                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "RNA (5): zero_gene_ks, zero_cell_ks, mean_zero_r2, zero_diff, disp_ks • ATAC (3): atac_zero_peak_ks, atac_zero_cell_ks, atac_sparsity_diff"))
-                  ),
-                  tags$tr(
-                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "III. Cellular Manifold & Clustering"),
-                    tags$td(style = "text-align: center; font-weight: 700;", "10"),
                     tags$td(style = "padding: 8px 12px;", "Counts + optional ", tags$code("cell_type")),
                     tags$td(style = "padding: 8px 12px;",
                       tags$b("Do simulated cells form the right cell-type clusters and neighborhood structures?"), br(),
-                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "No labels needed (6): rna_pca_mmd, rna_knn_overlap, rna_pca_var_dist, atac_lsi_mmd, atac_knn_overlap, atac_lsi_var_dist • Needs cell_type (4): rna_ari, rna_nmi, atac_ari, atac_nmi"))
+                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "Maximum Mean Discrepancy (MMD), Generative Precision & Recall, Average Silhouette Width (ASW), Clustering Deviation Index (CDI), Neighborhood Purity, Adjusted Rand Index (ARI), and Normalized Mutual Information (NMI)."))
                   ),
                   tags$tr(
-                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "IV. Batch Effect"),
-                    tags$td(style = "text-align: center; font-weight: 700;", "4"),
+                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "IV. Technical Variation & Batch Mixing Dynamics"),
+                    tags$td(style = "text-align: center; font-weight: 700;", "5"),
                     tags$td(style = "padding: 8px 12px;", "Needs ", tags$code("batch"), " column"),
                     tags$td(style = "padding: 8px 12px;",
                       tags$b("Are technical batch differences reproduced properly across batches?"), br(),
-                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "RNA (2): rna_batch_cms, rna_batch_lisi • ATAC (2): atac_batch_cms, atac_batch_lisi"))
+                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "Batch Silhouette Width, Principal Component Regression (PCR R²), Cell-Specific Mixing Score (CMS), Inverse Simpson's Index (ISI), and Cross-Batch F1 Score."))
                   ),
                   tags$tr(
-                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "V. DEGs & DARs"),
-                    tags$td(style = "text-align: center; font-weight: 700;", "6"),
+                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "V. Biological Signal & Differential Fidelity"),
+                    tags$td(style = "text-align: center; font-weight: 700;", "12"),
                     tags$td(style = "padding: 8px 12px;", "Needs ", tags$code("cell_type"), " column"),
                     tags$td(style = "padding: 8px 12px;",
-                      tags$b("Can we still detect true cell-type marker genes (DEGs) and accessible peaks (DARs)?"), br(),
-                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "RNA DEGs (3): rna_de_f1, rna_de_auroc, rna_de_lfc_cor • ATAC DARs (3): atac_da_f1, atac_da_auroc, atac_da_lfc_cor"))
+                      tags$b("Can we still detect true marker genes (DEGs) and accessible chromatin peaks (DARs)?"), br(),
+                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "Pseudobulk edgeR-QLF differential testing for scRNA-seq DE (6 metrics) and scATAC-seq DA (6 metrics): p-value uniformity, accuracy, precision, recall, F1-score, and ROC-AUC."))
                   ),
                   tags$tr(
-                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "VI. Multiomics Integration"),
+                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "VI. Multiomics Integration & Alignment"),
                     tags$td(style = "text-align: center; font-weight: 700;", "5"),
-                    tags$td(style = "padding: 8px 12px;", "Both RNA + ATAC"),
+                    tags$td(style = "padding: 8px 12px;", "Paired RNA + ATAC"),
                     tags$td(style = "padding: 8px 12px;",
-                      tags$b("Do simulated RNA and ATAC modalities align well with each other?"), br(),
-                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "Paired same-cell barcodes (3): multi_foscttm, multi_cca_rv, multi_wnn_preserve • Paired or Unpaired + cell_type (2): multi_joint_ari, multi_mod_sil"))
+                      tags$b("Do simulated RNA and ATAC modalities align and integrate well together?"), br(),
+                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "Joint-embedding integration quality: Batch ASW, Cell-Type ASW, k-NN Graph Connectivity, Integration ARI, and Integration NMI."))
                   ),
                   tags$tr(
-                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "VII. Trajectory & Pseudotime"),
+                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "VII. Trajectory & Lineage Topology"),
                     tags$td(style = "text-align: center; font-weight: 700;", "5"),
-                    tags$td(style = "padding: 8px 12px;", "RNA + ", tags$code("cell_type"), " (≥3 types)"),
+                    tags$td(style = "padding: 8px 12px;", "scRNA-seq counts"),
                     tags$td(style = "padding: 8px 12px;",
                       tags$b("Are cell developmental paths, branches, and trajectory genes preserved?"), br(),
-                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "RNA Trajectory (5): him, F1_branches, F1_milestones, geodesic_correlation, wcor_features"))
+                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "HVG-filtered dynverse workflow on scRNA-seq: HIM topology similarity, edge-flip similarity, geodesic distance correlation, branch assignment F1 (F1_branches), and RF feature importance correlation (wcor_features)."))
                   ),
                   tags$tr(
-                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "VIII. Scalability & Efficiency"),
+                    tags$td(style = "padding: 8px 12px; font-weight: 700; color: #1B4F72;", "VIII. Computational Scalability & Efficiency"),
                     tags$td(style = "text-align: center; font-weight: 700;", "2"),
-                    tags$td(style = "padding: 8px 12px;", "Runtime & RAM logs"),
+                    tags$td(style = "padding: 8px 12px;", "Runtime & RAM inputs"),
                     tags$td(style = "padding: 8px 12px;",
                       tags$b("How fast and memory-light is each simulator?"), br(),
-                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "Hardware-normalized efficiency (2): runtime_sec (displayed as s or Core-Seconds), peak_ram_mb (displayed as MiB, GiB, MiB/core, or GiB/core)"))
+                      tags$span(style = "color: #64748B; font-size: 0.79rem;", "Core-normalized runtime (core_seconds) and memory per allocated core (memory_per_core_mib), alongside wall-clock elapsed time (s / min) and total peak RAM (MiB / GiB)."))
                   )
                 )
               )
@@ -4455,17 +4480,19 @@ ui <- page_navbar(
             # ==================================================================
             h5(icon("scale-balanced", style = "color: #2E86C1; margin-right: 8px;"), "3. How to Read the Scores (0.00 to 1.00)", style = "font-weight: 700; color: #1B4F72; margin-top: 16px; margin-bottom: 10px;"),
             div(
-              class = "zoomable-fig-card",
-              style = "background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px; text-align: center; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);",
-              tags$img(
-                src = "score_normalization_workflow.png",
-                alt = "scSimEval Score Normalization Workflow",
-                style = "max-width: 100%; max-height: 400px; height: auto; border-radius: 6px;"
+              style = "text-align: center; margin: 14px auto 16px auto; max-width: 950px;",
+              with_step_zoom(
+                "score_normalization_diagram",
+                tags$img(
+                  src = "scfigures/score_normalization_workflow.png",
+                  alt = "Two-Step Score Normalization & Visual Mapping Pipeline",
+                  style = "width: 100%; max-width: 920px; height: auto; display: block; margin: 0 auto; border-radius: 8px; border: 1px solid #E2E8F0;"
+                )
               ),
-              div(
-                class = "fig-zoom-hint",
-                icon("magnifying-glass-plus", style = "color: #2E86C1;"),
-                tags$b("Figure 2: "), "How raw measurements become simple [0, 1] scores — ", tags$span(style = "color: #2E86C1; font-weight: 600;", "click image to zoom")
+              p(
+                tags$b("Figure 2 | How Raw Measurements Become Simple [0.00, 1.00] Scores. "),
+                "Use the zoom bar above the figure (or Ctrl+Wheel / Fullscreen button) to zoom and pan.",
+                style = "font-size: 0.83rem; color: #64748B; margin-top: 8px; margin-bottom: 0;"
               )
             ),
             fluidRow(
@@ -4476,25 +4503,25 @@ ui <- page_navbar(
                   style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px 14px; height: 100%;",
                   div(style = "font-weight: 700; color: #1E293B; font-size: 0.86rem; margin-bottom: 4px;", icon("arrow-up-right-dots", style = "color: #16A34A; margin-right: 5px;"), "1. Higher is Always Better"),
                   p(style = "font-size: 0.81rem; color: #475569; margin: 0; line-height: 1.5;",
-                    "Some raw metrics are error distances (where 0 is best) and others are correlations (where 1 is best). scSimEval flips error metrics automatically so ", tags$b("higher is always better"), ".")
+                    "For error, distance, runtime, or memory metrics where smaller raw numbers are better, scSimEval automatically flips them so ", tags$b("a higher score always means better performance"), ".")
                 )
               ),
               column(
                 3,
                 div(
                   style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px 14px; height: 100%;",
-                  div(style = "font-weight: 700; color: #1E293B; font-size: 0.86rem; margin-bottom: 4px;", icon("sliders", style = "color: #2563EB; margin-right: 5px;"), "2. Scaled From 0.0 to 1.0"),
+                  div(style = "font-weight: 700; color: #1E293B; font-size: 0.86rem; margin-bottom: 4px;", icon("sliders", style = "color: #2563EB; margin-right: 5px;"), "2. Scaled From 0.00 to 1.00"),
                   p(style = "font-size: 0.81rem; color: #475569; margin: 0; line-height: 1.5;",
-                    "For each metric, the best-performing simulator gets ", tags$b("1.00"), " and the worst gets ", tags$b("0.00"), " (using min-max scaling across the compared simulators).")
+                    "All metrics are scaled between ", tags$b("0.00"), " (lowest-performing simulator) and ", tags$b("1.00"), " (top-performing simulator) so metrics with different units can be compared side by side.")
                 )
               ),
               column(
                 3,
                 div(
                   style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px 14px; height: 100%;",
-                  div(style = "font-weight: 700; color: #1E293B; font-size: 0.86rem; margin-bottom: 4px;", icon("trophy", style = "color: #D97706; margin-right: 5px;"), "3. Fair Overall Score"),
+                  div(style = "font-weight: 700; color: #1E293B; font-size: 0.86rem; margin-bottom: 4px;", icon("trophy", style = "color: #D97706; margin-right: 5px;"), "3. Category & Overall Score"),
                   p(style = "font-size: 0.81rem; color: #475569; margin: 0; line-height: 1.5;",
-                    "Metrics are averaged inside each Category first, and the ", tags$b("Overall Score"), " is the average of those Category scores — so every category has equal weight.")
+                    "Metrics are averaged into Category Scores, and the ", tags$b("Overall Score"), " is the average (or custom weighted sum in the Leaderboard) across categories.")
                 )
               ),
               column(
@@ -4503,7 +4530,7 @@ ui <- page_navbar(
                   style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px 14px; height: 100%;",
                   div(style = "font-weight: 700; color: #1E293B; font-size: 0.86rem; margin-bottom: 4px;", icon("table", style = "color: #7C3AED; margin-right: 5px;"), "4. Raw + Scaled Saved"),
                   p(style = "font-size: 0.81rem; color: #475569; margin: 0; line-height: 1.5;",
-                    "Both the original ", tags$code("Raw_Value"), " and the normalized ", tags$code("Scaled_Score"), " are kept so you can inspect or export either one at any time.")
+                    "Both the original unnormalized measurement (", tags$code("Score_Raw"), ") and the normalized [0, 1] score (", tags$code("Score"), ") are stored in the results table.")
                 )
               )
             ),
@@ -4517,58 +4544,64 @@ ui <- page_navbar(
               id = "help_tabs_accordion",
               open = c("tab_guide_2", "tab_guide_3"),
               accordion_panel(
-                title = "Tab 1: Home — Package Overview & Authors",
+                title = "Tab 1: Home — Package Overview & Quick-Start Modes",
                 value = "tab_guide_1",
                 icon = bsicons::bs_icon("house-door-fill"),
-                p("Gives a quick overview of scSimEval, quick-jump buttons to start exploring, and contact details for the development team.", style = "margin-bottom: 0; font-size: 0.86rem; color: #334155;")
+                p("Gives a quick overview of scSimEval, summary counts for all 8 evaluation categories, and quick-jump buttons to start exploring.", style = "margin-bottom: 0; font-size: 0.86rem; color: #334155;")
               ),
               accordion_panel(
-                title = "Tab 2: Data Hub — Load Demo Data or Upload Your Own (.rds)",
+                title = "Tab 2: Data Hub — Load Example Datasets or Upload Your Own (.rds)",
                 value = "tab_guide_2",
                 icon = bsicons::bs_icon("cloud-arrow-up-fill"),
                 tags$ul(
                   style = "margin-bottom: 0; font-size: 0.86rem; color: #334155; line-height: 1.6;",
-                  tags$li(tags$b("Option A — Pre-computed Results (.rds): "), "Click ", tags$b("Load Demo Dataset"), " to instantly load the built-in 12-simulator benchmark across 3 datasets, or upload a saved ", tags$code("scSimEval"), " results ", tags$code(".rds"), " file."),
-                  tags$li(tags$b("Option B — Evaluate New Simulation Data (.rds): "), "Upload 1 real reference ", tags$code(".rds"), " object and 1 or more simulated ", tags$code(".rds"), " objects (", tags$code("Seurat"), " or ", tags$code("SingleCellExperiment"), "), choose which categories to run, and click ", tags$b("Run Evaluation Pipeline"), ".")
+                  tags$li(tags$b("Built-in Example Datasets: "), "Try the app immediately using either the ", tags$b("Rice Bud"), " paired dataset (8 tissues, 6 simulators: scMultiSim, scDesign3, MOSim, scCross, scMoMtF, Matilda) or the ", tags$b("Soybean Root"), " unpaired dataset (7 tissues, 3 simulators: scMultiSim, scDesign3, scCross) under scRNA-seq, scATAC-seq, or Single-Cell Multiomics mode."),
+                  tags$li(tags$b("Evaluate Your Own Simulation Data (.rds): "), "Upload 1 real reference ", tags$code(".rds"), " object and 1 or more simulated ", tags$code(".rds"), " objects (", tags$code("Seurat"), " or ", tags$code("SingleCellExperiment"), ") along with runtime, peak RAM, and CPU cores, or download a ready-to-run R script."),
+                  tags$li(tags$b("Upload Saved Results (.rds / .csv): "), "Choose Mode 4 to load a previously saved ", tags$code("scSimEval"), " benchmark file without re-running calculations.")
                 )
               ),
               accordion_panel(
-                title = "Tab 3: Comparative Bubble Matrix — Main Leaderboard View",
+                title = "Tab 3: Comparative Bubble Matrix — Bubble Matrix Figure & Fidelity Leaderboard",
                 value = "tab_guide_3",
                 icon = bsicons::bs_icon("grid-3x3-gap-fill"),
-                p("Shows the main Saelens/Luecken-style ranking figure: ", tags$b("bars on the left"), " show Overall & Category scores, and ", tags$b("circles on the right"), " show individual metrics (bigger circle = better score). Use the sidebar to filter by dataset, modality, or category, and download PNG/PDF/SVG figures.", style = "margin-bottom: 0; font-size: 0.86rem; color: #334155;")
-              ),
-              accordion_panel(
-                title = "Tab 4: Visualizations — 6 Diagnostic Plot Sub-Tabs",
-                value = "tab_guide_4",
-                icon = bsicons::bs_icon("bar-chart-line-fill"),
                 tags$ul(
                   style = "margin-bottom: 0; font-size: 0.86rem; color: #334155; line-height: 1.6;",
-                  tags$li(tags$b("PCA & MDS Projections: "), "2D/3D cell embeddings comparing Reference vs. Simulated datasets."),
-                  tags$li(tags$b("Evaluation Summary Bars: "), "Ranked bar charts of Overall Score and all 8 Category scores."),
-                  tags$li(tags$b("Metric Boxplots: "), "Score distributions across metrics for each simulator."),
-                  tags$li(tags$b("Simulator × Metric Heatmap: "), "Color-coded matrix of all [0, 1] scaled or raw metric values."),
-                  tags$li(tags$b("1D Metric Distributions: "), "Cumulative distribution curves comparing real vs. simulated features."),
-                  tags$li(tags$b("Scalability Benchmark: "), "Execution time (", tags$code("s"), " or ", tags$code("Core-Seconds"), ") and memory (", tags$code("MiB"), ", ", tags$code("GiB"), ", ", tags$code("MiB/core"), ", or ", tags$code("GiB/core"), ") charts.")
+                  tags$li(tags$b("Sub-Tab 1 — Comparative Bubble Matrix Figure: "), "Visual ranking figure where ", tags$b("bars on the left"), " show Overall & Category scores, and ", tags$b("circles on the right"), " show individual metrics (bigger circle = better score, bold outline = top performer). Includes dataset/modality filters, high-res PDF/JPEG download, and a standalone R script download."),
+                  tags$li(tags$b("Sub-Tab 2 — Fidelity Leaderboard: "), "Displays simulator ranking podium cards, category score breakdowns, multi-axis radar/star charts, and custom category weight sliders.")
                 )
               ),
               accordion_panel(
-                title = "Tab 5: Statistical Comparison — Significance Testing (ANOVA / Post-Hoc / Non-Parametric)",
+                title = "Tab 4: Visualizations — 8 Diagnostic Plot Sub-Tabs",
+                value = "tab_guide_4",
+                icon = bsicons::bs_icon("bar-chart-line-fill"),
+                tags$ol(
+                  style = "margin-bottom: 0; font-size: 0.86rem; color: #334155; line-height: 1.6;",
+                  tags$li(tags$b("Evaluation Summary: "), "Horizontal bar charts ranking simulators across Overall Score and all 8 Categories."),
+                  tags$li(tags$b("Distribution QC: "), "Q-Q plots and 1D/2D density curves comparing real vs. simulated cell and gene/peak properties."),
+                  tags$li(tags$b("Metric Heatmap: "), "Color-coded matrix of simulators × metrics (scaled or raw values)."),
+                  tags$li(tags$b("Metric Plots: "), "Individual metric bar charts and category score boxplots."),
+                  tags$li(tags$b("PCA Ordination: "), "2D PCA biplot showing how similar simulators are across metrics."),
+                  tags$li(tags$b("MDS Metric Space: "), "Multidimensional scaling map of simulator similarity."),
+                  tags$li(tags$b("Cell Embeddings (UMAP, t-SNE & PCA): "), "2D cell projections comparing real reference cells and simulated cells."),
+                  tags$li(tags$b("Scalability Benchmark: "), "Runtime (", tags$code("s"), ", ", tags$code("min"), ", or ", tags$code("Core-Seconds"), ") and memory (", tags$code("MiB"), ", ", tags$code("GiB"), ", ", tags$code("MiB/core"), ", or ", tags$code("GiB/core"), ") trade-off charts.")
+                )
+              ),
+              accordion_panel(
+                title = "Tab 5: Benchmark Results & Export — Browse & Download Master Table",
                 value = "tab_guide_5",
-                icon = bsicons::bs_icon("calculator-fill"),
-                p("Tests whether differences between simulators are statistically significant using ANOVA, Tukey HSD, Duncan MRT, Kruskal-Wallis, Dunn's test, or Wilcoxon tests, and assigns significance letter groups (", tags$code("a, b, c"), ").", style = "margin-bottom: 0; font-size: 0.86rem; color: #334155;")
-              ),
-              accordion_panel(
-                title = "Tab 6: Benchmark Results & Export — Browse & Download Tables",
-                value = "tab_guide_6",
                 icon = bsicons::bs_icon("file-earmark-spreadsheet-fill"),
-                p("Search, sort, and filter all computed raw and [0, 1] scaled scores in an interactive table, and download as ", tags$b("CSV"), ", ", tags$b("TSV"), ", or ", tags$b("RDS"), ".", style = "margin-bottom: 0; font-size: 0.86rem; color: #334155;")
+                p("Search, filter, and sort all computed raw (", tags$code("Score_Raw"), ") and normalized [0, 1] (", tags$code("Score"), ") values in an interactive table, and export the benchmark session as an ", tags$b(".rds"), " file for reproducible sharing.", style = "margin-bottom: 0; font-size: 0.86rem; color: #334155;")
               ),
               accordion_panel(
-                title = "Tab 7 & Tab 8: Help & Getting Started + Logs",
-                value = "tab_guide_7",
+                title = "Tab 6, Tab 7 & Tab 8: Help & Getting Started, Logs, and Contact",
+                value = "tab_guide_6",
                 icon = bsicons::bs_icon("terminal-fill"),
-                p(tags$b("Help & Getting Started"), " is this guide. ", tags$b("Logs"), " shows live progress messages, system CPU/RAM info, and downloadable log files while evaluations run.", style = "margin-bottom: 0; font-size: 0.86rem; color: #334155;")
+                tags$ul(
+                  style = "margin-bottom: 0; font-size: 0.86rem; color: #334155; line-height: 1.6;",
+                  tags$li(tags$b("Tab 6 — Help & Getting Started: "), "This user guide."),
+                  tags$li(tags$b("Tab 7 — Logs: "), "Live execution console showing step-by-step progress, warnings/errors, system CPU/RAM diagnostics, and a downloadable ", tags$code(".txt"), " log file."),
+                  tags$li(tags$b("Tab 8 — Contact: "), "Author profiles, institutional details (ICAR-IASRI, New Delhi), contact emails, and package citation details.")
+                )
               )
             ),
             hr(),
@@ -4579,7 +4612,7 @@ ui <- page_navbar(
             h5(icon("file-code", style = "color: #2E86C1; margin-right: 8px;"), "5. How to Prepare Your Own Data (.rds Files)", style = "font-weight: 700; color: #1B4F72; margin-top: 16px; margin-bottom: 10px;"),
             p(
               style = "color: #475569; font-size: 0.88rem; margin-bottom: 12px; line-height: 1.55;",
-              "When using ", tags$b("Data Hub → Evaluate New Simulation Data"), ", upload standard R ", tags$code(".rds"),
+              "When uploading your own datasets in ", tags$b("Data Hub"), ", provide standard R ", tags$code(".rds"),
               " files containing a ", tags$code("Seurat"), " or ", tags$code("SingleCellExperiment"), " object:"
             ),
             fluidRow(
@@ -4603,7 +4636,7 @@ ui <- page_navbar(
                   style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px; height: 100%;",
                   div(style = "font-weight: 700; color: #0E6655; font-size: 0.88rem; margin-bottom: 6px;", "2. Add Cell Types (Optional)"),
                   p(style = "font-size: 0.81rem; color: #475569; margin-bottom: 8px; line-height: 1.5;",
-                    "To unlock clustering (ARI/NMI), DEG/DAR, and trajectory metrics, store cell labels in a metadata column named ", tags$code("cell_type"), ":"),
+                    "To unlock clustering (ARI/NMI) and DEG/DAR metrics, store cell labels in a metadata column named ", tags$code("cell_type"), ":"),
                   tags$pre(
                     style = "background: #0F172A; color: #F8FAFC; padding: 10px; border-radius: 6px; font-size: 0.76rem; margin: 0;",
                     "# For Seurat:\nobj$cell_type <- obj$seurat_clusters\n# For SingleCellExperiment:\ncolData(sce)$cell_type <- sce$label"
@@ -4616,7 +4649,7 @@ ui <- page_navbar(
                   style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px; height: 100%;",
                   div(style = "font-weight: 700; color: #92400E; font-size: 0.88rem; margin-bottom: 6px;", "3. Add Batches (Optional)"),
                   p(style = "font-size: 0.81rem; color: #475569; margin-bottom: 8px; line-height: 1.5;",
-                    "To unlock Category IV Batch Effect metrics (CMS & LISI), store batch IDs in a metadata column named ", tags$code("batch"), ":"),
+                    "To unlock Category IV Batch Effect metrics (Batch Silhouette, PCR R², CMS, ISI, Cross-Batch F1), store batch IDs in ", tags$code("batch"), ":"),
                   tags$pre(
                     style = "background: #0F172A; color: #F8FAFC; padding: 10px; border-radius: 6px; font-size: 0.76rem; margin: 0;",
                     "# For Seurat:\nobj$batch <- obj$orig.ident\n# For SingleCellExperiment:\ncolData(sce)$batch <- sce$Batch"
@@ -4636,10 +4669,10 @@ ui <- page_navbar(
                 7,
                 div(
                   style = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px; height: 100%;",
-                  div(style = "font-weight: 700; color: #1E293B; font-size: 0.88rem; margin-bottom: 8px;", "Run scSimEval Directly From R (Optional CLI Workflow)"),
+                  div(style = "font-weight: 700; color: #1E293B; font-size: 0.88rem; margin-bottom: 8px;", "Launch the App or Run Offline in R"),
                   tags$pre(
                     style = "background: #0F172A; color: #F8FAFC; padding: 12px; border-radius: 6px; font-size: 0.78rem; margin: 0;",
-                    "library(scSimEval)\n\n# 1. Launch this interactive Shiny app anytime:\nlaunch_scSimEval_app()\n\n# 2. Or run the evaluation pipeline in R and save an .rds for the app:\nres <- run_scSimEval(\n  reference     = 'reference.rds',\n  simulated     = list(Splatter = 'splatter.rds', scDesign3 = 'scdesign3.rds'),\n  modality      = 'RNA',\n  cell_type_col = 'cell_type',\n  batch_col     = 'batch'\n)\nsaveRDS(res, 'my_benchmark_results.rds')"
+                    "# Install & launch the interactive Shiny app:\nremotes::install_github('kabilanbio/scSimEval')\nscSimEval::launch_scSimEval_app()\n\n# Tip: In Data Hub, click 'Download R Script' after configuring your\n# datasets to get a ready-to-run R script for workstations or HPC clusters."
                   )
                 )
               ),
@@ -4656,7 +4689,7 @@ ui <- page_navbar(
                   ),
                   div(
                     style = "padding: 8px 12px; background: #EFF6FF; border-left: 3px solid #2563EB; border-radius: 4px; font-size: 0.8rem; color: #1E3A8A;",
-                    tags$b("Tip: "), "For large studies with many simulators, run ", tags$code("run_scSimEval()"), " in R first, save the ", tags$code(".rds"), " output, and load that ", tags$code(".rds"), " in ", tags$b("Data Hub"), " for instant plotting!"
+                    tags$b("Tip: "), "For large multi-simulator benchmarks, use the ", tags$b("Download R Script"), " button in ", tags$b("Data Hub"), " to run the evaluation in R, then upload the saved ", tags$code(".rds"), " file in ", tags$b("Data Hub (Mode 4)"), " for instant plotting!"
                   )
                 )
               )
@@ -4702,7 +4735,7 @@ ui <- page_navbar(
             span(
               class = "badge",
               style = "background: rgba(56, 189, 248, 0.15); color: #7DD3FC; border: 1px solid rgba(56, 189, 248, 0.3); padding: 7px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 20px;",
-              "scSimEval v0.99.10"
+              "scSimEval v0.99.9"
             )
           )
         )
@@ -5008,7 +5041,7 @@ server <- function(input, output, session) {
   }
   
   # ============================================================================
-  # LIVE RUNNING LOGS & DIAGNOSTIC ENGINE (v0.99.10)
+  # LIVE RUNNING LOGS & DIAGNOSTIC ENGINE (v0.99.9)
   # ============================================================================
   # Session-level log storage container (plain environment for safe context-free reading/writing)
   log_storage <- new.env(parent = emptyenv())
@@ -5043,7 +5076,7 @@ server <- function(input, output, session) {
   }
 
   # Startup Diagnostic Log Sequence
-  sc_log("INFO", "scSimEval Interactive Benchmarking Studio v0.99.10 initialized.", "Startup")
+  sc_log("INFO", "scSimEval Interactive Benchmarking Studio v0.99.9 initialized.", "Startup")
   sc_log("NOTE", paste0("Runtime Environment: R ", getRversion(), " | Platform: ", R.version$platform, " | OS: ", Sys.info()[["sysname"]], " ", Sys.info()[["release"]]), "Environment")
   sc_log("INFO", paste0("System Concurrency: ", parallel::detectCores(), " logical CPU cores detected. Sparse matrix arithmetic (dgCMatrix) enabled."), "Hardware")
   sc_log("NOTE", "Evaluation Suite: 56 evaluation measures registered across Categories 1 to 8.", "Metrics")
@@ -11784,7 +11817,7 @@ server <- function(input, output, session) {
       datasets                = rv$datasets,
       source_name             = rv$source_name,
       timestamp               = Sys.time(),
-      version                 = "0.99.10"
+      version                 = "0.99.9"
     )
   }
 
@@ -12092,7 +12125,7 @@ server <- function(input, output, session) {
         " scSimEval: Single-Cell Multiomics Simulation Benchmarking Studio",
         " Interactive Execution & Diagnostic Runtime Log Export",
         paste0(" Generated At:    ", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
-        paste0(" Package Version: scSimEval v0.99.10"),
+        paste0(" Package Version: scSimEval v0.99.9"),
         paste0(" R Version:       ", R.version.string),
         paste0(" Platform:        ", R.version$platform),
         paste0(" Total Entries:   ", length(entries)),
