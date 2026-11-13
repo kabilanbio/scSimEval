@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">scSimEval</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,236 +80,536 @@
     
     
 <div class="section level2">
-<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+<h2 id="welcome-to-scsimeval-shiny-studio">Welcome to scSimEval Shiny Studio<a class="anchor" aria-label="anchor" href="#welcome-to-scsimeval-shiny-studio"></a>
 </h2>
-<p>The <strong>scSimEval Shiny Studio</strong> is a self-contained,
-browser-based graphical interface providing point-and-click access to
-all 56 curated evaluation measures and publication visualizations in the
-package—without requiring R scripting.</p>
-<p>Launch the studio locally in R:</p>
+<p>The <strong>scSimEval Shiny Studio</strong> is an easy-to-use,
+point-and-click web application included inside the
+<code>scSimEval</code> R package. It compares <strong>simulated
+single-cell or multiomics data</strong> against <strong>real reference
+data</strong> and scores each simulator from <strong>0.00
+(lowest)</strong> to <strong>1.00 (best)</strong> across <strong>56
+quality measures</strong> in <strong>8 categories</strong>—without
+requiring you to write complex R scripts.</p>
+<div class="section level3">
+<h3 id="launch-the-app-in-r">Launch the App in R<a class="anchor" aria-label="anchor" href="#launch-the-app-in-r"></a>
+</h3>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kabilanbio.github.io/scSimEval/">scSimEval</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/launch_scSimEval_app.html">launch_scSimEval_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<ul>
-<li>
-<strong>Capacity:</strong> Handles file uploads up to <strong>10
-GB</strong> per matrix for large single-cell datasets.</li>
-<li>
-<strong>Theme:</strong> Built with a modern responsive UI featuring
-an instant <strong>Light/Dark Mode toggle</strong> switch.</li>
-<li>
-<strong>Navigation:</strong> Organized into 8 intuitive top-level
-navigation tabs.</li>
-</ul>
-<hr>
-</div>
-<div class="section level2">
-<h2 id="tab-1-home">Tab 1 — Home<a class="anchor" aria-label="anchor" href="#tab-1-home"></a>
-</h2>
-<p>The landing page provides a high-level orientation to
-<strong>scSimEval Studio</strong>: * <strong>KPI Ribbon:</strong>
-Summarizes the 56 curated evaluation measures, 8 biological dimensions,
-3 supported modalities (scRNA-seq, scATAC-seq, and paired Multiome), and
-the standardized
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>
-fidelity scale. * <strong>Workflow Cards:</strong> Direct access to load
-pre-computed demo benchmarks, configure single-cell evaluations, launch
-multiomics co-assay analyses, or upload previously saved benchmark
-sessions.</p>
-<hr>
-</div>
-<div class="section level2">
-<h2 id="tab-2-data-hub">Tab 2 — Data Hub<a class="anchor" aria-label="anchor" href="#tab-2-data-hub"></a>
-</h2>
-<p>The data ingestion and benchmark orchestration centre, featuring
-three functional modules:</p>
-<div class="section level3">
-<h3 id="data-ingestion-benchmark-studio">1. Data Ingestion &amp; Benchmark Studio<a class="anchor" aria-label="anchor" href="#data-ingestion-benchmark-studio"></a>
-</h3>
-<p>Choose between four operational modes: * <strong>Mode 1 —
-Pre-Computed Benchmark (Demo Data):</strong> Instantly loads a complete
-multi-dataset evaluation across 6 simulation methods (Simulator 1 to
-Simulator 6) over all 56 evaluation measures with zero computational
-waiting time. * <strong>Mode 2 — Single-Cell Evaluation (scRNA-seq /
-scATAC-seq):</strong> Upload empirical reference count matrices and 1–6
-simulated datasets (<code>.rds</code>, <code>.csv</code>,
-<code>.tsv</code>, <code>.txt</code>, <code>.xlsx</code>). Optionally
-provide cell type annotations (unlocking clustering and biological
-signal fidelity) and batch labels (unlocking technical confounder mixing
-metrics). Set CPU worker threads for parallel evaluation. * <strong>Mode
-3 — Multiomics Evaluation (RNA + ATAC):</strong> Benchmark paired
-co-assays (e.g., 10x Multiome, SHARE-seq) or unpaired multiomics
-datasets to evaluate joint-embedding multiomics integration
-(<code>batch_asw</code>, <code>cell_type_asw</code>,
-<code>graph_connectivity</code>, <code>ari</code>, <code>nmi</code>)
-alongside per-modality unimodal properties. * <strong>Mode 4 — Upload
-Saved Benchmark Table (.rds / .csv):</strong> Ingest previously computed
-benchmark outputs from <code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code> or
-<code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code>. Check <strong>“Add to
-current benchmark results”</strong> to merge multiple datasets and
-automatically calculate cross-dataset simulator average rankings.</p>
 </div>
 <div class="section level3">
-<h3 id="view-uploaded-data-matrices">2. View Uploaded Data &amp; Matrices<a class="anchor" aria-label="anchor" href="#view-uploaded-data-matrices"></a>
+<h3 id="get-started-in-3-easy-steps-takes-30-seconds">Get Started in 3 Easy Steps (Takes 30 Seconds)<a class="anchor" aria-label="anchor" href="#get-started-in-3-easy-steps-takes-30-seconds"></a>
 </h3>
-<p>Interactive count matrix browser with column filtering, sparsity
-statistics, and cell/gene summary previews.</p>
-</div>
-<div class="section level3">
-<h3 id="dataset-properties-batch-script-generator">3. Dataset Properties &amp; Batch Script Generator<a class="anchor" aria-label="anchor" href="#dataset-properties-batch-script-generator"></a>
-</h3>
-<ul>
-<li>
-<strong>QC Summary Table:</strong> Displays cell counts, feature
-dimensions, sparsity percentages, library sizes, and detected feature
-medians across all uploaded matrices.</li>
-<li>
-<strong>HPC Script Generator:</strong> Generates automated SLURM,
-PBS, or Bash cluster execution scripts for offline benchmarking on
-high-performance compute nodes.</li>
-</ul>
-<hr>
-</div>
-</div>
-<div class="section level2">
-<h2 id="tab-3-comparative-bubble-matrix-leaderboard">Tab 3 — Comparative Bubble Matrix &amp; Leaderboard<a class="anchor" aria-label="anchor" href="#tab-3-comparative-bubble-matrix-leaderboard"></a>
-</h2>
-<div class="section level3">
-<h3 id="comparative-bubble-matrix">1. Comparative Bubble Matrix<a class="anchor" aria-label="anchor" href="#comparative-bubble-matrix"></a>
-</h3>
-<p>The flagship visualization displaying candidate simulators against
-all 56 curated evaluation measures organized by canonical category: *
-<strong>Fidelity Sizing:</strong> Bubble diameter reflects
-direction-aware normalized performance
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.00</mn><annotation encoding="application/x-tex">0.00</annotation></semantics></math>
-to
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1.00</mn><annotation encoding="application/x-tex">1.00</annotation></semantics></math>,
-where larger indicates higher fidelity). * <strong>Top
-Performers:</strong> Bold circular outlines highlight the
-best-performing simulator for each individual metric. *
-<strong>Multi-Dataset Navigation:</strong> Switch between individual
-experimental datasets or view the cross-dataset simulator average. *
-<strong>Interactive Step Zoom:</strong> Client-side zoom controls
-(<code>+</code>, <code>-</code>, <code>Reset</code>) allow smooth
-panning and inspection of dense matrices. * <strong>Export
-Options:</strong> Download publication-ready 600 DPI JPEG, vector PDF,
-or a complete reproducible R ggplot2 script.</p>
-</div>
-<div class="section level3">
-<h3 id="method-leaderboard-weight-modeling">2. Method Leaderboard &amp; Weight Modeling<a class="anchor" aria-label="anchor" href="#method-leaderboard-weight-modeling"></a>
-</h3>
-<ul>
-<li>
-<strong>Composite Ranking:</strong> Overall performance podium
-ranking simulators by weighted average score.</li>
-<li>
-<strong>Custom Weight Sliders:</strong> Interactively adjust the
-weight of any category to align rankings with specific research
-priorities.</li>
-<li>
-<strong>Export:</strong> Download the tidy leaderboard as CSV.</li>
-</ul>
-<hr>
-</div>
-</div>
-<div class="section level2">
-<h2 id="tab-4-diagnostic-visualizations">Tab 4 — Diagnostic Visualizations<a class="anchor" aria-label="anchor" href="#tab-4-diagnostic-visualizations"></a>
-</h2>
-<p>Eight specialized diagnostic panels accessed via the sub-navigation
-pills, each equipped with interactive zoom controls, dataset selectors,
-600 DPI image downloads, and reproducible R code exports:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Evaluation Summary:</strong> Rank-ordered horizontal bar
-charts comparing composite and category-level fidelity across
-simulators.</li>
+<strong>Step 1 — Load Data (<code>Data Hub</code>):</strong> Open
+the <strong>Data Hub</strong> tab and click to load one of the built-in
+example datasets—<strong>Rice Bud</strong> (paired dataset, 8 tissues, 6
+simulators) or <strong>Soybean Root</strong> (unpaired dataset, 7
+tissues, 3 simulators)—or upload your own <code>Seurat</code> /
+<code>SingleCellExperiment</code> <code>.rds</code> files.</li>
 <li>
-<strong>Distribution QC:</strong> Grid comparing reference and
-simulated distributions across expression moments, ECDF curves, and
-zero-inflation patterns.</li>
+<strong>Step 2 — Compare Simulators
+(<code>Comparative Bubble Matrix</code>):</strong> Open
+<strong>Comparative Bubble Matrix</strong> to see all simulators ranked
+from best to worst in the <strong>Comparative Bubble Matrix
+Figure</strong> and <strong>Fidelity Leaderboard</strong>.</li>
 <li>
-<strong>Scalability Benchmark:</strong> Core-normalized CPU
-execution time (<code>core_seconds</code> / <code>core_hours</code>),
-peak memory footprint per allocated core (<code>MiB/core</code> /
-<code>GiB/core</code>), Pareto efficiency frontiers, and normalized
-resource cost.</li>
+<strong>Step 3 — View Charts &amp; Export
+(<code>Visualizations</code> /
+<code>Benchmark Results &amp; Export</code>):</strong> Explore the 8
+diagnostic plot tabs in <strong>Visualizations</strong> or download your
+full results table in <strong>Benchmark Results &amp;
+Export</strong>.</li>
+</ol>
+<hr>
+</div>
+</div>
+<div class="section level2">
+<h2 id="how-scsimeval-works-4-simple-steps">1. How scSimEval Works (4 Simple Steps)<a class="anchor" aria-label="anchor" href="#how-scsimeval-works-4-simple-steps"></a>
+</h2>
+<p align="center">
+<img src="../reference/figures/workflow_diagram.png" width="96%" alt="scSimEval 4-Step Benchmarking Workflow"></p>
+<ol style="list-style-type: decimal">
 <li>
-<strong>Metric Boxplots &amp; Barplots:</strong> Score distributions
-and category-level comparisons with Raw vs Normalized score
-toggles.</li>
+<strong>Step 1 — Input Your Data:</strong> Provide one real
+reference dataset and one or more simulated datasets
+(<code>scRNA-seq</code>, <code>scATAC-seq</code>, or
+<code>Single-Cell Multiomics</code>) saved as <code>Seurat</code> or
+<code>SingleCellExperiment</code> <code>.rds</code> files.</li>
 <li>
-<strong>Metric Heatmap:</strong> Comprehensive simulator
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
-metric grid with exact numerical scores and hierarchical
-clustering.</li>
+<strong>Step 2 — Measure Similarity:</strong> <code>scSimEval</code>
+automatically calculates up to <strong>56 quality measures</strong>
+across <strong>8 evaluation categories</strong> (count distributions,
+sparsity, cell clusters, batch mixing, DEGs/DARs, multiomics
+integration, developmental trajectories, and speed/RAM).</li>
 <li>
-<strong>PCA Ordination:</strong> Simulators projected into 2D
-performance ordination space with discriminating metric vector
-loadings.</li>
+<strong>Step 3 — Convert to 0.00–1.00 Scores:</strong> Every metric
+is converted onto a simple
+<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0.00</mn><mo>,</mo><mn>1.00</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0.00, 1.00]</annotation></semantics></math>
+scale</strong> where
+<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1.00</mn><annotation encoding="application/x-tex">1.00</annotation></semantics></math>
+= Best</strong> and
+<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.00</mn><annotation encoding="application/x-tex">0.00</annotation></semantics></math>
+= Lowest</strong>, while also keeping the original raw values
+(<code>Score_Raw</code>).</li>
 <li>
-<strong>MDS Metric Space:</strong> Multi-Dimensional Scaling
-ordination mapping algorithmic distances among simulators.</li>
-<li>
-<strong>Cell Embeddings (UMAP / t-SNE):</strong> Side-by-side
-dimension reduction comparing reference and simulated biological
-manifolds, supplemented by quantitative low-dimensional embedding
-quality metrics.</li>
+<strong>Step 4 — Rank, Plot &amp; Export:</strong> Simulators are
+ranked by their composite <strong>Overall Score</strong> and displayed
+in publication-ready bubble matrices, leaderboards, 8 diagnostic plot
+panels, and downloadable standalone R scripts.</li>
 </ol>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="tab-5-benchmark-results-export">Tab 5 — Benchmark Results &amp; Export<a class="anchor" aria-label="anchor" href="#tab-5-benchmark-results-export"></a>
+<h2 id="what-do-the-8-evaluation-categories-measure-56-metrics">2. What Do the 8 Evaluation Categories Measure? (56 Metrics)<a class="anchor" aria-label="anchor" href="#what-do-the-8-evaluation-categories-measure-56-metrics"></a>
 </h2>
+<p>You do not need to configure metrics manually—<code>scSimEval</code>
+automatically selects the right metrics based on the data and metadata
+you provide:</p>
+<table class="table">
+<colgroup>
+<col width="23%">
+<col width="29%">
+<col width="23%">
+<col width="23%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Category</th>
+<th align="center"># Metrics</th>
+<th align="left">Data Needed</th>
+<th align="left">What Question Does It Answer? (and What It
+Measures)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left"><strong>I. Distributional Properties</strong></td>
+<td align="center"><strong>14</strong></td>
+<td align="left">Count matrix only</td>
+<td align="left">
+<strong>Do the simulated cell and gene/peak count
+distributions match real data?</strong><br>10 univariate &amp; 4
+bivariate distributional similarity measures (Wasserstein, KS, MAD,
+Bhattacharyya, Runs test, NN mismatch, Silhouette, 2D KS, 2D EMD, 2D NN
+mismatch, 2D Silhouette) across 7 cell-level, 7 feature-level, and 4
+bivariate properties.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>II. Sparsity &amp; Zero-Inflation
+Dynamics</strong></td>
+<td align="center"><strong>5</strong></td>
+<td align="left">Count matrix only</td>
+<td align="left">
+<strong>Are zero counts and dropout rates realistic
+across genes/peaks and cells?</strong><br>Logistic dropout curve
+fidelity (midpoint error
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mn>0</mn></msub><annotation encoding="application/x-tex">x_0</annotation></semantics></math>,
+transition slope error
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>,
+goodness-of-fit
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>),
+quadratic accessibility-sparsity RMSE &amp;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>
+(scATAC-seq), and excess zero proportion difference.</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>III. Cellular Manifold &amp; Clustering
+Concordance</strong></td>
+<td align="center"><strong>8</strong></td>
+<td align="left">Counts + optional <code>cell_type</code>
+</td>
+<td align="left">
+<strong>Do simulated cells form the right cell-type
+clusters and neighborhood structures?</strong><br>Maximum Mean
+Discrepancy (MMD), Generative Precision &amp; Recall, Average Silhouette
+Width (ASW), Clustering Deviation Index (CDI), Neighborhood Purity,
+Adjusted Rand Index (ARI), and Normalized Mutual Information (NMI).</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>IV. Technical Variation &amp; Batch Mixing
+Dynamics</strong></td>
+<td align="center"><strong>5</strong></td>
+<td align="left">Needs <code>batch</code> column</td>
+<td align="left">
+<strong>Are technical batch differences reproduced
+properly across batches?</strong><br>Batch Silhouette Width, Principal
+Component Regression (PCR
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math>),
+Cell-Specific Mixing Score (CMS), Inverse Simpson’s Index (ISI), and
+Cross-Batch F1 Score.</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>V. Biological Signal &amp; Differential
+Fidelity</strong></td>
+<td align="center"><strong>12</strong></td>
+<td align="left">Needs <code>cell_type</code> column</td>
+<td align="left">
+<strong>Can we still detect true marker genes (DEGs)
+and accessible chromatin peaks (DARs)?</strong><br>Pseudobulk
+<code>edgeR-QLF</code> differential testing for scRNA-seq DE (6 metrics)
+and scATAC-seq DA (6 metrics): p-value uniformity, accuracy, precision,
+recall, F1-score, and ROC-AUC.</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>VI. Multiomics Integration &amp;
+Alignment</strong></td>
+<td align="center"><strong>5</strong></td>
+<td align="left">Paired RNA + ATAC</td>
+<td align="left">
+<strong>Do simulated RNA and ATAC modalities align and
+integrate well together?</strong><br>Joint-embedding integration
+quality: Batch ASW, Cell-Type ASW, k-NN Graph Connectivity, Integration
+ARI, and Integration NMI.</td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>VII. Trajectory &amp; Lineage
+Topology</strong></td>
+<td align="center"><strong>5</strong></td>
+<td align="left">scRNA-seq counts</td>
+<td align="left">
+<strong>Are cell developmental paths, branches, and
+trajectory genes preserved?</strong><br>HVG-filtered
+<code>dynverse</code> workflow on scRNA-seq: HIM topology similarity,
+edge-flip similarity, geodesic distance correlation, branch assignment
+F1 (<code>F1_branches</code>), and Random Forest feature importance
+correlation (<code>wcor_features</code>).</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>VIII. Computational Scalability &amp;
+Efficiency</strong></td>
+<td align="center"><strong>2</strong></td>
+<td align="left">Runtime &amp; RAM inputs</td>
+<td align="left">
+<strong>How fast and memory-light is each
+simulator?</strong><br>Core-normalized runtime
+(<code>core_seconds</code>) and memory per allocated core
+(<code>memory_per_core_mib</code>), alongside wall-clock elapsed time
+(<code>s</code> / <code>min</code>) and total peak RAM (<code>MiB</code>
+/ <code>GiB</code>).</td>
+</tr>
+</tbody>
+</table>
+<div class="section level3">
+<h3 id="how-many-metrics-will-run-on-my-data">How Many Metrics Will Run on My Data?<a class="anchor" aria-label="anchor" href="#how-many-metrics-will-run-on-my-data"></a>
+</h3>
 <ul>
 <li>
-<strong>Interactive Scores Table:</strong> Full searchable
-<code>DT</code> table displaying both raw unnormalized scores (in
-physical units such as KS distances, seconds, and MiB RAM) and
-normalized
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>
-fidelity scores.</li>
+<strong>scRNA-seq only (up to 45 metrics):</strong>
+<code>29 / 45</code> with counts only • <code>40 / 45</code> with
+<code>cell_type</code> • <strong>all <code>45 / 45</code></strong> with
+<code>cell_type + batch</code>.</li>
 <li>
-<strong>Multi-Format Exports:</strong> Export benchmark results as
-<code>.rds</code> (for full R reproducibility), <code>.xlsx</code>
-(Excel workbook with multiple sheets), <code>.csv</code>,
-<code>.tsv</code>, or a packaged <code>.zip</code> archive.</li>
+<strong>scATAC-seq only (up to 32 metrics):</strong>
+<code>16 / 32</code> with counts only • <code>27 / 32</code> with
+<code>cell_type</code> • <strong>all <code>32 / 32</code></strong> with
+<code>cell_type + batch</code>.</li>
+<li>
+<strong>Paired Multiomics (up to 56 metrics):</strong>
+<code>35 / 56</code> with counts only • <code>49 / 56</code> with
+<code>cell_type</code> • <strong>all <code>56 / 56</code></strong> with
+<code>cell_type + batch</code> (or <code>30 / 56</code> to
+<code>51 / 56</code> in <strong>Unpaired Multiomics</strong>).</li>
 </ul>
 <hr>
 </div>
+</div>
 <div class="section level2">
-<h2 id="tab-6-help-getting-started">Tab 6 — Help &amp; Getting Started<a class="anchor" aria-label="anchor" href="#tab-6-help-getting-started"></a>
+<h2 id="how-to-read-the-scores-0-00-to-1-00">3. How to Read the Scores (0.00 to 1.00)<a class="anchor" aria-label="anchor" href="#how-to-read-the-scores-0-00-to-1-00"></a>
 </h2>
-<p>An in-app reference guide providing: 1. Four-step workflow pipeline
-architecture. 2. Summary table of the 8 canonical evaluation categories
-and their active metric scopes. 3. Metric measurement capacity breakdown
-by input metadata availability. 4. Two-step score normalization
-methodology (direction inversion and min-max scaling). 5. Comprehensive
-input file formatting guidelines and metadata templates. 6.
-Computational sizing and RAM guidelines for workstation and cluster
-environments.</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Higher is Always Better:</strong> For error, distance,
+runtime, or memory metrics where smaller raw numbers are better,
+<code>scSimEval</code> automatically flips them so <strong>a higher
+score always means better performance</strong>.</li>
+<li>
+<strong>Scaled From 0.00 to 1.00:</strong> All metrics are scaled
+between
+<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.00</mn><annotation encoding="application/x-tex">0.00</annotation></semantics></math></strong>
+(lowest-performing simulator) and
+<strong><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1.00</mn><annotation encoding="application/x-tex">1.00</annotation></semantics></math></strong>
+(top-performing simulator) so metrics with different physical units can
+be compared side by side.</li>
+<li>
+<strong>Category &amp; Overall Score:</strong> Metrics are averaged
+into Category Scores, and the <strong>Overall Score</strong> is the
+average (or custom weighted sum in the Leaderboard) across
+categories.</li>
+<li>
+<strong>Raw + Scaled Saved:</strong> Both the original unnormalized
+measurement (<code>Score_Raw</code>) and the normalized
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>
+score (<code>Score</code>) are stored in the results table.</li>
+</ol>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="tab-7-execution-logs">Tab 7 — Execution Logs<a class="anchor" aria-label="anchor" href="#tab-7-execution-logs"></a>
+<h2 id="quick-guide-to-the-8-tabs-in-the-top-menu">4. Quick Guide to the 8 Tabs in the Top Menu<a class="anchor" aria-label="anchor" href="#quick-guide-to-the-8-tabs-in-the-top-menu"></a>
 </h2>
-<p>A live diagnostic console tracking real-time data loading, hardware
-concurrency allocation, metric calculation progress, memory consumption,
-and system notifications.</p>
+<div class="section level3">
+<h3 id="tab-1-home">Tab 1 — Home<a class="anchor" aria-label="anchor" href="#tab-1-home"></a>
+</h3>
+<p>Provides a quick overview of <code>scSimEval</code>, summary counts
+for all 8 evaluation categories and 56 metrics, and quick-jump buttons
+to start exploring the application.</p>
+</div>
+<div class="section level3">
+<h3 id="tab-2-data-hub">Tab 2 — Data Hub<a class="anchor" aria-label="anchor" href="#tab-2-data-hub"></a>
+</h3>
+<p>The central workspace for loading example data, uploading your own
+<code>.rds</code> datasets, or loading saved benchmark results. In the
+left sidebar, choose one of four <strong>Data Modes</strong>:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Mode 1 — <code>1. scRNA-seq datasets</code>:</strong>
+<ul>
+<li>
+<strong>Load Example scRNA-seq Data:</strong> Choose between
+<strong>Rice Bud (Paired, 8 tissues, 6 Simulators)</strong> or
+<strong>Soybean Root (Unpaired, 7 tissues, 3 Simulators)</strong> and
+click <strong>Load Example scRNA-seq Data</strong>.</li>
+<li>
+<strong>Custom scRNA-seq Evaluation:</strong> Upload 1 or more
+reference <code>Seurat</code> / <code>SingleCellExperiment</code>
+<code>.rds</code> objects and simulated <code>.rds</code> objects, enter
+runtime (<code>s</code> or <code>min</code>), peak RAM (<code>MiB</code>
+or <code>MB</code>), and CPU cores used, and click <strong>Calculate
+Single-Cell Metrics</strong> (or <strong>Download R Script</strong> to
+run offline).</li>
+</ul>
+</li>
+<li>
+<strong>Mode 2 — <code>2. scATAC-seq datasets</code>:</strong>
+<ul>
+<li>
+<strong>Load Example scATAC-seq Data:</strong> Load the <strong>Rice
+Bud</strong> (8 tissues, 6 simulators) or <strong>Soybean Root</strong>
+(7 tissues, 3 simulators) scATAC-seq example datasets with one
+click.</li>
+<li>
+<strong>Custom scATAC-seq Evaluation:</strong> Upload reference and
+simulated chromatin accessibility <code>.rds</code> objects and click
+<strong>Calculate scATAC-seq Metrics</strong>.</li>
+</ul>
+</li>
+<li>
+<strong>Mode 3 —
+<code>3. Single-Cell Multiomics datasets</code>:</strong>
+<ul>
+<li>
+<strong>Assay Type:</strong> Switch between <strong>Paired (Same
+Cells, 10x / SHARE-seq)</strong> and <strong>Unpaired (Independent
+Cells)</strong>.</li>
+<li>
+<strong>Load Example Multiomics Data:</strong>
+<ul>
+<li>In <strong>Paired</strong> mode: Click <strong>Load Rice Bud Example
+(Paired, 6 Simulators)</strong> to load the <em>Oryza sativa</em> Rice
+Bud benchmark (8 tissues, 6 simulators: <code>scMultiSim</code>,
+<code>scDesign3</code>, <code>MOSim</code>, <code>scCross</code>,
+<code>scMoMtF</code>, <code>Matilda</code>).</li>
+<li>In <strong>Unpaired</strong> mode: Click <strong>Load Soybean Root
+Example (Unpaired, 3 Simulators)</strong> to load the <em>Glycine
+max</em> Soybean Root benchmark (7 tissues, 3 simulators:
+<code>scMultiSim</code>, <code>scDesign3</code>,
+<code>scCross</code>).</li>
+</ul>
+</li>
+<li>
+<strong>Custom Multiomics Evaluation:</strong> Upload reference RNA
+&amp; ATAC <code>.rds</code> objects and simulated RNA &amp; ATAC
+<code>.rds</code> objects, then click <strong>Calculate Multiomics
+Metrics</strong>.</li>
+</ul>
+</li>
+<li>
+<strong>Mode 4 —
+<code>4. Upload Saved Results (.rds / .csv)</code>:</strong>
+<ul>
+<li>Load a previously saved <code>scSimEval</code> benchmark result file
+(<code>.rds</code> or <code>.csv</code>) to immediately view all
+leaderboards, bubble matrices, and diagnostic plots without re-running
+evaluations. Check <strong>Add to current benchmark results</strong> to
+combine multiple datasets.</li>
+</ul>
+</li>
+</ol>
+<p>Inside the <strong>Data Hub</strong> main panel, three sub-tabs let
+you: * <strong>Upload &amp; Configure Data:</strong> Upload
+<code>.rds</code> files and enter simulator runtime, RAM, and core
+counts. * <strong>View Uploaded Data:</strong> Preview the uploaded
+count matrices and cell/feature dimensions. * <strong>Dataset
+properties:</strong> Inspect a QC summary table (cells, genes/peaks,
+sparsity %, library size) across all uploaded datasets.</p>
+</div>
+<div class="section level3">
+<h3 id="tab-3-comparative-bubble-matrix">Tab 3 — Comparative Bubble Matrix<a class="anchor" aria-label="anchor" href="#tab-3-comparative-bubble-matrix"></a>
+</h3>
+<p>Contains two sub-tabs for ranking and comparing simulators:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Sub-Tab 1 — Comparative Bubble Matrix Figure:</strong>
+<ul>
+<li>
+<strong>Bars on the left</strong> display the Overall Score and the
+8 Category Scores.</li>
+<li>
+<strong>Circles on the right</strong> display individual metrics
+(larger circle = better
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>
+score; bold black outline = best-performing simulator for that
+metric).</li>
+<li>Filter by <strong>Dataset</strong> (or Cross-Dataset Average),
+<strong>Modality</strong> (All, RNA-Specific, ATAC-Specific, or
+Multiomics), or <strong>Category</strong>, use the interactive zoom bar
+(<code>+</code>, <code>-</code>, slider, <code>Fit</code>,
+<code>100%</code>, <code>Fullscreen</code>), and download 600 DPI JPEG,
+vector PDF, or a standalone reproducible R script.</li>
+</ul>
+</li>
+<li>
+<strong>Sub-Tab 2 — Fidelity Leaderboard:</strong>
+<ul>
+<li>Displays simulator ranking podium cards, category score breakdowns,
+multi-axis radar/star charts, and interactive <strong>Category Weight
+Sliders</strong> so you can customize category weights for your
+biological use case.</li>
+</ul>
+</li>
+</ol>
+</div>
+<div class="section level3">
+<h3 id="tab-4-visualizations-8-diagnostic-sub-tabs">Tab 4 — Visualizations (8 Diagnostic Sub-Tabs)<a class="anchor" aria-label="anchor" href="#tab-4-visualizations-8-diagnostic-sub-tabs"></a>
+</h3>
+<p>Eight dedicated diagnostic panels—each equipped with interactive
+zoom/pan controls, dataset &amp; modality filters, 600 DPI image export,
+and a <strong>Download Standalone R Script</strong> button:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>1. Evaluation Summary:</strong> Horizontal bar charts
+ranking simulators across Overall Score and all 8 Categories (toggle
+between Normalized
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>
+and Raw values).</li>
+<li>
+<strong>2. Distribution QC:</strong> Quantile-Quantile (Q-Q)
+alignment plots and 1D/2D density curves comparing real vs. simulated
+cell-level, feature-level, and bivariate properties.</li>
+<li>
+<strong>3. Metric Heatmap:</strong> Color-coded matrix of Simulators
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+Metrics with customizable dimensions and raw/normalized value
+display.</li>
+<li>
+<strong>4. Metric Plots:</strong> Individual metric bar charts and
+category-level score distribution boxplots.</li>
+<li>
+<strong>5. PCA Ordination:</strong> 2D Principal Component Analysis
+biplot showing how similar simulators are in metric space.</li>
+<li>
+<strong>6. MDS Metric Space:</strong> Multidimensional Scaling map
+of simulator performance similarity.</li>
+<li>
+<strong>7. Cell Embeddings (UMAP, t-SNE &amp; PCA):</strong>
+Side-by-side 2D cell embeddings comparing real reference cells and
+simulated cells, accompanied by quantitative embedding fidelity
+metrics.</li>
+<li>
+<strong>8. Scalability Benchmark:</strong> Hardware-aware execution
+time (<code>s</code>, <code>min</code>, or <code>Core-Seconds</code>)
+and memory (<code>MiB</code>, <code>GiB</code>, <code>MiB/core</code>,
+or <code>GiB/core</code>) trade-off charts.</li>
+</ol>
+</div>
+<div class="section level3">
+<h3 id="tab-5-benchmark-results-export">Tab 5 — Benchmark Results &amp; Export<a class="anchor" aria-label="anchor" href="#tab-5-benchmark-results-export"></a>
+</h3>
+<p>Search, filter, and sort all computed raw (<code>Score_Raw</code>)
+and normalized
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[0, 1]</annotation></semantics></math>
+(<code>Score</code>) values in an interactive table, and download the
+complete benchmark session as an <code>.rds</code> file for reproducible
+sharing.</p>
+</div>
+<div class="section level3">
+<h3 id="tab-6-help-getting-started">Tab 6 — Help &amp; Getting Started<a class="anchor" aria-label="anchor" href="#tab-6-help-getting-started"></a>
+</h3>
+<p>In-app beginner’s guide covering the 3-step quick start, zoomable
+workflow diagrams, plain-English category descriptions, tab guide, and
+<code>.rds</code> data preparation snippets.</p>
+</div>
+<div class="section level3">
+<h3 id="tab-7-logs">Tab 7 — Logs<a class="anchor" aria-label="anchor" href="#tab-7-logs"></a>
+</h3>
+<p>Live diagnostic console displaying real-time progress messages,
+warning/error counters, system CPU/RAM information, and a downloadable
+<code>.txt</code> execution log.</p>
+</div>
+<div class="section level3">
+<h3 id="tab-8-contact">Tab 8 — Contact<a class="anchor" aria-label="anchor" href="#tab-8-contact"></a>
+</h3>
+<p>Profiles and contact details for the development team at the Division
+of Agricultural Bioinformatics, ICAR-IASRI, New Delhi, along with
+package citation information and GitHub issue links.</p>
 <hr>
 </div>
-<div class="section level2">
-<h2 id="tab-8-contact-academic-citations">Tab 8 — Contact &amp; Academic Citations<a class="anchor" aria-label="anchor" href="#tab-8-contact-academic-citations"></a>
-</h2>
-<p>Details regarding the development team at the Division of
-Agricultural Bioinformatics, ICAR-IASRI, New Delhi, citation guidelines,
-and GitHub issue tracker links.</p>
-<hr>
 </div>
 <div class="section level2">
-<h2 id="r-api-cross-reference">R API Cross-Reference<a class="anchor" aria-label="anchor" href="#r-api-cross-reference"></a>
+<h2 id="how-to-prepare-your-own-data--rds-files">5. How to Prepare Your Own Data (<code>.rds</code> Files)<a class="anchor" aria-label="anchor" href="#how-to-prepare-your-own-data--rds-files"></a>
 </h2>
-<p>Every interactive feature in Shiny Studio corresponds directly to a
-documented R function in <code>scSimEval</code>:</p>
+<p>When uploading your own datasets in <strong>Data Hub</strong>,
+provide standard R <code>.rds</code> files containing a
+<code>Seurat</code> or <code>SingleCellExperiment</code> object with raw
+counts stored in the <code>counts</code> layer/assay (genes or peaks
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
+cells):</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 1. Save your Reference and Simulated objects as .rds</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">ref_obj</span>, <span class="st">"reference.rds"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">sim_obj</span>, <span class="st">"splatter_sim.rds"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Add Cell Types (Optional — unlocks ARI, NMI, and DEG/DAR metrics)</span></span>
+<span><span class="co"># For Seurat:</span></span>
+<span><span class="va">obj</span><span class="op">$</span><span class="va">cell_type</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="va">seurat_clusters</span></span>
+<span><span class="co"># For SingleCellExperiment:</span></span>
+<span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">cell_type</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">$</span><span class="va">label</span></span>
+<span></span>
+<span><span class="co"># 3. Add Batches (Optional — unlocks Category IV Batch Effect metrics)</span></span>
+<span><span class="co"># For Seurat:</span></span>
+<span><span class="va">obj</span><span class="op">$</span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">obj</span><span class="op">$</span><span class="va">orig.ident</span></span>
+<span><span class="co"># For SingleCellExperiment:</span></span>
+<span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">$</span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">sce</span><span class="op">$</span><span class="va">Batch</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="recommended-computer-specs">Recommended Computer Specs<a class="anchor" aria-label="anchor" href="#recommended-computer-specs"></a>
+</h3>
+<ul>
+<li>
+<strong>Small datasets
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&lt;</mo><mn>5</mn><mo>,</mo><mn>000</mn></mrow><annotation encoding="application/x-tex">&lt; 5,000</annotation></semantics></math>
+cells):</strong> 8 GB RAM, 4 CPU cores (~1–2 min per simulator).</li>
+<li>
+<strong>Medium datasets
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn><mo>,</mo><mn>000</mn><mrow><mspace width="0.333em"></mspace><mtext mathvariant="normal"> – </mtext><mspace width="0.333em"></mspace></mrow><mn>25</mn><mo>,</mo><mn>000</mn></mrow><annotation encoding="application/x-tex">5,000 \text{ – } 25,000</annotation></semantics></math>
+cells):</strong> 16 GB RAM, 8 CPU cores (~3–6 min per simulator).</li>
+<li>
+<strong>Large / Multiomics
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>&gt;</mo><mn>25</mn><mo>,</mo><mn>000</mn></mrow><annotation encoding="application/x-tex">&gt; 25,000</annotation></semantics></math>
+cells):</strong> 32+ GB RAM, 8–16 CPU cores.</li>
+<li>
+<strong>Tip:</strong> For large multi-simulator benchmarks, click
+<strong>Download R Script</strong> in <strong>Data Hub</strong> to run
+the evaluation offline on a workstation or HPC cluster, then upload the
+saved <code>.rds</code> file in <strong>Data Hub (Mode 4)</strong> for
+instant visualization!</li>
+</ul>
+<hr>
+</div>
+</div>
+<div class="section level2">
+<h2 id="r-function-cross-reference">6. R Function Cross-Reference<a class="anchor" aria-label="anchor" href="#r-function-cross-reference"></a>
+</h2>
+<p>Every view in the <strong>scSimEval Shiny Studio</strong> corresponds
+directly to an exported R function in <code>scSimEval</code>:</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -323,12 +623,13 @@ documented R function in <code>scSimEval</code>:</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">Data Hub → Single-Cell</td>
+<td align="left">Data Hub → Single-Cell (<code>scRNA</code> /
+<code>scATAC</code>)</td>
 <td align="left"><code><a href="../reference/evaluate_simulation_accuracy.html">evaluate_simulation_accuracy()</a></code></td>
 <td align="left">Unimodal benchmark results</td>
 </tr>
 <tr class="even">
-<td align="left">Data Hub → Multiomics</td>
+<td align="left">Data Hub → Multiomics (<code>RNA + ATAC</code>)</td>
 <td align="left"><code><a href="../reference/evaluate_multiomics_accuracy.html">evaluate_multiomics_accuracy()</a></code></td>
 <td align="left">Multiomics benchmark results</td>
 </tr>
@@ -338,61 +639,57 @@ documented R function in <code>scSimEval</code>:</p>
 <td align="left">Combined multi-dataset object</td>
 </tr>
 <tr class="even">
-<td align="left">Bubble Matrix</td>
+<td align="left">Comparative Bubble Matrix → Figure</td>
 <td align="left"><code><a href="../reference/plot_benchmark_bubble_matrix.html">plot_benchmark_bubble_matrix()</a></code></td>
-<td align="left">Multi-metric comparative bubble matrix</td>
+<td align="left">Ranked multi-metric bubble matrix</td>
 </tr>
 <tr class="odd">
-<td align="left">Leaderboard</td>
+<td align="left">Comparative Bubble Matrix → Leaderboard</td>
 <td align="left"><code><a href="../reference/compute_method_leaderboard.html">compute_method_leaderboard()</a></code></td>
 <td align="left">Ranked composite performance table</td>
 </tr>
 <tr class="even">
-<td align="left">Evaluation Summary</td>
+<td align="left">Visualizations → 1. Evaluation Summary</td>
 <td align="left"><code><a href="../reference/plot_evaluation_summary.html">plot_evaluation_summary()</a></code></td>
-<td align="left">Category-level horizontal bar matrix</td>
+<td align="left">Category-level horizontal bar chart</td>
 </tr>
 <tr class="odd">
-<td align="left">Distribution QC</td>
+<td align="left">Visualizations → 2. Distribution QC</td>
 <td align="left"><code><a href="../reference/plot_distribution_qc.html">plot_distribution_qc()</a></code></td>
-<td align="left">Comparative moment and distribution grid</td>
+<td align="left">Q-Q and 1D/2D density comparison grid</td>
 </tr>
 <tr class="even">
-<td align="left">Scalability Dashboard</td>
-<td align="left"><code><a href="../reference/plot_scalability_benchmark.html">plot_scalability_benchmark()</a></code></td>
-<td align="left">Runtime and memory Pareto charts</td>
-</tr>
-<tr class="odd">
-<td align="left">Metric Plots</td>
-<td align="left"><code><a href="../reference/plot_metric_boxplots.html">plot_metric_boxplots()</a></code></td>
-<td align="left">Score distributions across categories</td>
-</tr>
-<tr class="even">
-<td align="left">Metric Heatmap</td>
+<td align="left">Visualizations → 3. Metric Heatmap</td>
 <td align="left"><code><a href="../reference/plot_metric_heatmap.html">plot_metric_heatmap()</a></code></td>
 <td align="left">Simulator
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
 metric score heatmap</td>
 </tr>
 <tr class="odd">
-<td align="left">PCA Ordination</td>
+<td align="left">Visualizations → 4. Metric Plots</td>
+<td align="left"><code><a href="../reference/plot_metric_boxplots.html">plot_metric_boxplots()</a></code></td>
+<td align="left">Metric bar charts &amp; category boxplots</td>
+</tr>
+<tr class="even">
+<td align="left">Visualizations → 5. PCA Ordination</td>
 <td align="left"><code><a href="../reference/plot_metric_pca.html">plot_metric_pca()</a></code></td>
 <td align="left">2D PCA performance ordination</td>
 </tr>
-<tr class="even">
-<td align="left">MDS Metric Space</td>
+<tr class="odd">
+<td align="left">Visualizations → 6. MDS Metric Space</td>
 <td align="left"><code><a href="../reference/plot_metric_mds.html">plot_metric_mds()</a></code></td>
-<td align="left">Multi-dimensional scaling plot</td>
+<td align="left">Multidimensional scaling similarity map</td>
+</tr>
+<tr class="even">
+<td align="left">Visualizations → 7. Cell Embeddings</td>
+<td align="left"><code><a href="../reference/compute_dataset_embeddings.html">compute_dataset_embeddings()</a></code></td>
+<td align="left">UMAP, t-SNE &amp; PCA cell coordinates</td>
 </tr>
 <tr class="odd">
-<td align="left">Cell Embeddings</td>
-<td align="left"><code><a href="../reference/compute_dataset_embeddings.html">compute_dataset_embeddings()</a></code></td>
-<td align="left">Low-dimensional cell coordinates</td>
-</tr>
-<tr class="even">
-<td align="left">Embedding Quality</td>
-<td align="left"><code><a href="../reference/compute_embedding_quality_metrics.html">compute_embedding_quality_metrics()</a></code></td>
-<td align="left">Quantitative manifold fidelity table</td>
+<td align="left">Visualizations → 8. Scalability Benchmark</td>
+<td align="left"><code><a href="../reference/plot_scalability_benchmark.html">plot_scalability_benchmark()</a></code></td>
+<td align="left">Runtime (<code>s</code>/<code>Core-Seconds</code>)
+&amp; RAM (<code>MiB</code>/<code>MiB per core</code>) charts</td>
 </tr>
 </tbody>
 </table>
@@ -431,7 +728,7 @@ metric score heatmap</td>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Kabilan Sakthivel, Dr. Dwijesh Chandra Mishra, Dr. Shashi Bhushan Lal, Dr. Ulavappa Angadi, Dr. Sudhir Srivastava, Dr. Neeraj Budhlakoti, Dr. Krishna Kumar Chaturvedi, Dr. Ranjeet Ranjan Kumar, Dr. Navin Chandra Gupta.</p>
+  <p>Developed by Kabilan Sakthivel, Dr Dwijesh Chandra Mishra, Dr Shashi Bhushan Lal, Dr Ulavappa Angadi, Dr Sudhir Srivastava, Dr Neeraj Budhlakoti, Dr Krishna Kumar Chaturvedi, Dr Ranjeet Ranjan Kumar, Dr Navin Chandra Gupta.</p>
 </div>
 
 <div class="pkgdown-footer-right">
