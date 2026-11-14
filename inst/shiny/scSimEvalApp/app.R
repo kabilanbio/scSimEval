@@ -238,6 +238,93 @@ filter_gold_standard_metrics <- function(df) {
   "pseudotime_correlation", "graph_alignment", "lineage_expression_fidelity",
   "cross_modal_accuracy", "cross_modal_F1", "match_at_1", "rv_coefficient", "module_correlation_r", "mean_coupling_cor"
 )
+if (!exists(".HIGHER_IS_BETTER_METRICS", mode = "character")) {
+  .HIGHER_IS_BETTER_METRICS <- .HIGHER_IS_BETTER_METRICS_LIST
+}
+
+# Direction-aware bubble scores normalization (fallback if local 10_visualizations.R not sourced)
+if (!isTRUE(.local_viz_loaded) || !exists(".normalize_bubble_scores", mode = "function")) {
+.normalize_bubble_scores <- function(df) {
+  if (isNamespaceLoaded("scSimEval")) {
+    ns <- asNamespace("scSimEval")
+    if (exists(".normalize_bubble_scores", envir = ns, mode = "function")) {
+      fn <- get0(".normalize_bubble_scores", envir = ns, mode = "function", inherits = FALSE)
+      if (!is.null(fn)) return(fn(df))
+    } else if (exists("normalize_bubble_scores", envir = ns, mode = "function")) {
+      fn <- get0("normalize_bubble_scores", envir = ns, mode = "function", inherits = FALSE)
+      if (!is.null(fn)) return(fn(df))
+    }
+  }
+  if (is.null(df) || !is.data.frame(df) || nrow(df) == 0) {
+    if (is.data.frame(df)) df$Score_Norm <- numeric(0)
+    return(df)
+  }
+  if (!"Score_Raw" %in% colnames(df)) {
+    if ("Score" %in% colnames(df)) df$Score_Raw <- df$Score
+    else if ("Value" %in% colnames(df)) df$Score_Raw <- df$Value
+  }
+  df$Score_Norm <- NA_real_
+  dset_pfx <- if ("Dataset" %in% colnames(df)) paste0(df$Dataset, "___") else ""
+  mod_pfx  <- if ("Modality" %in% colnames(df)) paste0(df$Modality, "___") else ""
+  prop_pfx <- if ("Property" %in% colnames(df)) {
+    paste0(df$Property, "___")
+  } else if ("Display_Category" %in% colnames(df)) {
+    paste0(df$Display_Category, "___")
+  } else {
+    ""
+  }
+  metric_key <- paste0(dset_pfx, mod_pfx, prop_pfx, df$Metric)
+  hib_vec <- if (exists(".HIGHER_IS_BETTER_METRICS", mode = "character")) get(".HIGHER_IS_BETTER_METRICS") else .HIGHER_IS_BETTER_METRICS_LIST
+
+  for (m_key in unique(metric_key)) {
+    idx     <- metric_key == m_key
+    met     <- df$Metric[idx][1]
+    raw_val <- df$Score_Raw[idx]
+    if (met %in% c("Runs_Statistic", "Between_Dataset_Silh_Global", "Between_Dataset_Silh_2D_Global")) {
+      raw_val <- abs(raw_val)
+    }
+    non_na  <- raw_val[!is.na(raw_val) & is.finite(raw_val)]
+    if (length(non_na) == 0) {
+      df$Score_Norm[idx] <- NA_real_
+      next
+    }
+    is_hib  <- met %in% hib_vec
+    min_v   <- min(non_na)
+    max_v   <- max(non_na)
+    rng     <- max_v - min_v
+    if (is.na(rng) || !is.finite(rng)) rng <- 0
+
+    is_naturally_01 <- isTRUE(grepl("^(KS|OV|ari|nmi|ami|v_measure|ECDF_DiffArea|accuracy|precision|recall|f1_score|auc|pval_dist_score|F1|Top_DEG_Jaccard)", met, ignore.case = TRUE)) ||
+                       isTRUE(min_v >= 0 && max_v <= 1 && rng <= 1)
+
+    if (rng < 1e-10) {
+      if (is_naturally_01) {
+        if (is_hib) {
+          normed <- pmax(0, pmin(1, raw_val))
+        } else {
+          normed <- pmax(0, pmin(1, 1 - raw_val))
+        }
+      } else if (is_hib) {
+        normed <- if (max_v > 0) pmin(1, raw_val / max(1, max_v)) else rep(0.5, sum(idx))
+      } else {
+        normed <- 1 / (1 + pmax(0, raw_val))
+      }
+    } else if (is_hib) {
+      normed <- (raw_val - min_v) / rng
+    } else {
+      normed <- 1 - (raw_val - min_v) / rng
+    }
+    df$Score_Norm[idx] <- pmax(0, pmin(1, normed))
+  }
+  still_na <- is.na(df$Score_Norm)
+  if (any(still_na))
+    df$Score_Norm[still_na] <- pmax(0, pmin(1, df$Score_Raw[still_na]))
+  df
+}
+}
+if (!exists("normalize_bubble_scores", mode = "function")) {
+  normalize_bubble_scores <- .normalize_bubble_scores
+}
 
 # ==============================================================================
 # Helper Functions: Robust Matrix and Label Reading
@@ -2023,6 +2110,34 @@ ui <- page_navbar(
         color: #4ADE80 !important;
       }
 
+      /* Hardcoded purples become radiant soft lavender */
+      [data-bs-theme='dark'] [style*='color: #581C87'],
+      [data-bs-theme='dark'] [style*='color: #581C87'] *,
+      [data-bs-theme='dark'] [style*='color:#581C87'],
+      [data-bs-theme='dark'] [style*='color:#581C87'] *,
+      [data-bs-theme='dark'] [style*='color: #581c87'],
+      [data-bs-theme='dark'] [style*='color: #581c87'] *,
+      [data-bs-theme='dark'] [style*='color:#581c87'],
+      [data-bs-theme='dark'] [style*='color:#581c87'] *,
+      [data-bs-theme='dark'] [style*='color: #5B21B6'],
+      [data-bs-theme='dark'] [style*='color: #5B21B6'] *,
+      [data-bs-theme='dark'] [style*='color:#5B21B6'],
+      [data-bs-theme='dark'] [style*='color:#5B21B6'] *,
+      [data-bs-theme='dark'] [style*='color: #5b21b6'],
+      [data-bs-theme='dark'] [style*='color: #5b21b6'] *,
+      [data-bs-theme='dark'] [style*='color:#5b21b6'],
+      [data-bs-theme='dark'] [style*='color:#5b21b6'] *,
+      [data-bs-theme='dark'] [style*='color: #7C3AED'],
+      [data-bs-theme='dark'] [style*='color: #7C3AED'] *,
+      [data-bs-theme='dark'] [style*='color:#7C3AED'],
+      [data-bs-theme='dark'] [style*='color:#7C3AED'] *,
+      [data-bs-theme='dark'] [style*='color: #7c3aed'],
+      [data-bs-theme='dark'] [style*='color: #7c3aed'] *,
+      [data-bs-theme='dark'] [style*='color:#7c3aed'],
+      [data-bs-theme='dark'] [style*='color:#7c3aed'] * {
+        color: #DDD6FE !important;
+      }
+
       /* Hardcoded amber/browns become soft light gold */
       [data-bs-theme='dark'] [style*='color: #92400E'],
       [data-bs-theme='dark'] [style*='color: #92400E'] *,
@@ -2039,7 +2154,15 @@ ui <- page_navbar(
       [data-bs-theme='dark'] [style*='color: #78350f'],
       [data-bs-theme='dark'] [style*='color: #78350f'] *,
       [data-bs-theme='dark'] [style*='color:#78350f'],
-      [data-bs-theme='dark'] [style*='color:#78350f'] * {
+      [data-bs-theme='dark'] [style*='color:#78350f'] *,
+      [data-bs-theme='dark'] [style*='color: #713F12'],
+      [data-bs-theme='dark'] [style*='color: #713F12'] *,
+      [data-bs-theme='dark'] [style*='color:#713F12'],
+      [data-bs-theme='dark'] [style*='color:#713F12'] *,
+      [data-bs-theme='dark'] [style*='color: #713f12'],
+      [data-bs-theme='dark'] [style*='color: #713f12'] *,
+      [data-bs-theme='dark'] [style*='color:#713f12'],
+      [data-bs-theme='dark'] [style*='color:#713f12'] * {
         color: #FCD34D !important;
       }
 
@@ -2112,10 +2235,39 @@ ui <- page_navbar(
         color: #D1FAE5 !important;
       }
 
+      [data-bs-theme='dark'] [style*='background: #FAF5FF'],
+      [data-bs-theme='dark'] [style*='background:#FAF5FF'],
+      [data-bs-theme='dark'] [style*='background: #F5F3FF'],
+      [data-bs-theme='dark'] [style*='background:#F5F3FF'],
+      [data-bs-theme='dark'] [style*='background-color: #FAF5FF'],
+      [data-bs-theme='dark'] [style*='background-color:#FAF5FF'],
+      [data-bs-theme='dark'] .quickstart-step3 {
+        background: #3B0764 !important;
+        color: #F3E8FF !important;
+      }
+      [data-bs-theme='dark'] [style*='background: #FAF5FF'] b,
+      [data-bs-theme='dark'] [style*='background:#FAF5FF'] b,
+      [data-bs-theme='dark'] [style*='background: #FAF5FF'] strong,
+      [data-bs-theme='dark'] [style*='background:#FAF5FF'] strong,
+      [data-bs-theme='dark'] .quickstart-step3 b,
+      [data-bs-theme='dark'] .quickstart-step3 strong {
+        color: #FFFFFF !important;
+      }
+
       [data-bs-theme='dark'] [style*='background: #FFFBEB'],
-      [data-bs-theme='dark'] [style*='background:#FFFBEB'] {
-        background: #451A03 !important;
+      [data-bs-theme='dark'] [style*='background:#FFFBEB'],
+      [data-bs-theme='dark'] [style*='background: #FEFCE8'],
+      [data-bs-theme='dark'] [style*='background:#FEFCE8'],
+      [data-bs-theme='dark'] [style*='background: #FEF3C7'],
+      [data-bs-theme='dark'] [style*='background:#FEF3C7'] {
+        background: #78350F !important;
         color: #FEF3C7 !important;
+      }
+      [data-bs-theme='dark'] [style*='background: #FEFCE8'] b,
+      [data-bs-theme='dark'] [style*='background:#FEFCE8'] b,
+      [data-bs-theme='dark'] [style*='background: #FFFBEB'] b,
+      [data-bs-theme='dark'] [style*='background:#FFFBEB'] b {
+        color: #FFFFFF !important;
       }
 
       [data-bs-theme='dark'] [style*='background: #FEF2F2'],
@@ -4206,12 +4358,11 @@ ui <- page_navbar(
               class = "d-flex align-items-center gap-2",
               icon("table", class = "text-primary"),
               tags$b("Master Benchmark Scores Table", style = "color: #1E293B;"),
-              span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "Raw Metric Values & Normalized Scores")
+              span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "Raw Metric Values")
             ),
             div(
               class = "text-muted small mt-1", style = "font-size: 0.79rem;",
-              tags$span(tags$b("Score_Raw: "), "Raw statistical/computational values (e.g. KS distance, Wasserstein distance, runtime in seconds, peak RAM in MiB, Chi-Square values, correlation). "),
-              tags$span(tags$b("Score: "), "Direction-aware normalized score [0, 1] where 1.0 represents best performance.")
+              tags$span(tags$b("Score_Raw: "), "Raw statistical/computational values (e.g. KS distance, Wasserstein distance, runtime in seconds, peak RAM in MiB, Chi-Square values, correlation).")
             )
           ),
           div(
@@ -4282,7 +4433,8 @@ ui <- page_navbar(
                   column(
                     4,
                     div(
-                      style = "background: #FEFCE8; border-radius: 6px; padding: 10px 12px; height: 100%; font-size: 0.85rem; color: #713F12;",
+                      class = "quickstart-step3",
+                      style = "background: #FAF5FF; border-radius: 6px; padding: 10px 12px; height: 100%; font-size: 0.85rem; color: #581C87;",
                       tags$b("Step 3 — View Charts & Export:"), br(),
                       "Explore the 8 plot panels in ", tags$b("Visualizations"), " or download your full results table in ", tags$b("Benchmark Results & Export"), "."
                     )
@@ -4590,7 +4742,7 @@ ui <- page_navbar(
                 title = "Tab 5: Benchmark Results & Export — Browse & Download Master Table",
                 value = "tab_guide_5",
                 icon = bsicons::bs_icon("file-earmark-spreadsheet-fill"),
-                p("Search, filter, and sort all computed raw (", tags$code("Score_Raw"), ") and normalized [0, 1] (", tags$code("Score"), ") values in an interactive table, and export the benchmark session as an ", tags$b(".rds"), " file for reproducible sharing.", style = "margin-bottom: 0; font-size: 0.86rem; color: #334155;")
+                p("Search, filter, and sort all computed raw (", tags$code("Score_Raw"), ") values in an interactive table, and export the benchmark session as an ", tags$b(".rds"), " file for reproducible sharing.", style = "margin-bottom: 0; font-size: 0.86rem; color: #334155;")
               ),
               accordion_panel(
                 title = "Tab 6, Tab 7 & Tab 8: Help & Getting Started, Logs, and Contact",
@@ -6904,8 +7056,21 @@ server <- function(input, output, session) {
         combined_df <- do.call(rbind, results_list)
         combined_df <- standardize_benchmark_categories(combined_df)
         if (nrow(combined_df) > 0 && "Score_Raw" %in% colnames(combined_df)) {
-          combined_df <- .normalize_bubble_scores(combined_df)
-          combined_df$Score <- combined_df$Score_Norm
+          norm_fn <- if (exists(".normalize_bubble_scores", mode = "function")) {
+            get(".normalize_bubble_scores")
+          } else if (exists("normalize_bubble_scores", mode = "function")) {
+            get("normalize_bubble_scores")
+          } else if (isNamespaceLoaded("scSimEval") && exists(".normalize_bubble_scores", envir = asNamespace("scSimEval"), mode = "function")) {
+            get(".normalize_bubble_scores", envir = asNamespace("scSimEval"))
+          } else if (isNamespaceLoaded("scSimEval") && exists("normalize_bubble_scores", envir = asNamespace("scSimEval"), mode = "function")) {
+            get("normalize_bubble_scores", envir = asNamespace("scSimEval"))
+          } else {
+            NULL
+          }
+          if (!is.null(norm_fn)) {
+            combined_df <- norm_fn(combined_df)
+            combined_df$Score <- combined_df$Score_Norm
+          }
         }
         
         if (isTRUE(input$chk_append_uni) && !is.null(rv$benchmark_df)) {
@@ -7587,8 +7752,21 @@ server <- function(input, output, session) {
         combined_df <- do.call(rbind, results_list)
         combined_df <- standardize_benchmark_categories(combined_df)
         if (nrow(combined_df) > 0 && "Score_Raw" %in% colnames(combined_df)) {
-          combined_df <- .normalize_bubble_scores(combined_df)
-          combined_df$Score <- combined_df$Score_Norm
+          norm_fn <- if (exists(".normalize_bubble_scores", mode = "function")) {
+            get(".normalize_bubble_scores")
+          } else if (exists("normalize_bubble_scores", mode = "function")) {
+            get("normalize_bubble_scores")
+          } else if (isNamespaceLoaded("scSimEval") && exists(".normalize_bubble_scores", envir = asNamespace("scSimEval"), mode = "function")) {
+            get(".normalize_bubble_scores", envir = asNamespace("scSimEval"))
+          } else if (isNamespaceLoaded("scSimEval") && exists("normalize_bubble_scores", envir = asNamespace("scSimEval"), mode = "function")) {
+            get("normalize_bubble_scores", envir = asNamespace("scSimEval"))
+          } else {
+            NULL
+          }
+          if (!is.null(norm_fn)) {
+            combined_df <- norm_fn(combined_df)
+            combined_df$Score <- combined_df$Score_Norm
+          }
         }
         
         if (isTRUE(input$chk_append_multi) && !is.null(rv$benchmark_df)) {
@@ -12081,6 +12259,25 @@ server <- function(input, output, session) {
           length(input$table_master_export_rows_all) < nrow(df_export)) {
         df_export <- df_export[input$table_master_export_rows_all, , drop = FALSE]
       }
+      if (!"Dataset" %in% colnames(df_export)) df_export$Dataset <- "Dataset 1"
+      if (!"Score_Raw" %in% colnames(df_export)) {
+        if ("Value" %in% colnames(df_export)) df_export$Score_Raw <- df_export$Value
+        else if ("Raw_Value" %in% colnames(df_export)) df_export$Score_Raw <- df_export$Raw_Value
+        else df_export$Score_Raw <- df_export$Score
+      }
+      if (!"Property" %in% colnames(df_export)) {
+        df_export$Property <- df_export$Metric
+      } else {
+        df_export$Property <- ifelse(is.na(df_export$Property) | df_export$Property == "", df_export$Metric, df_export$Property)
+      }
+      df_export$Score <- NULL
+      df_export$Score_Norm <- NULL
+      df_export$Value <- NULL
+      df_export$Raw_Value <- NULL
+      pref_cols <- c("Dataset", "Method", "Category", "Property", "Metric", "Score_Raw", intersect("Modality", colnames(df_export)))
+      col_order <- unique(c(pref_cols, colnames(df_export)))
+      col_order <- intersect(col_order, colnames(df_export))
+      df_export <- df_export[, col_order, drop = FALSE]
       export_excel_workbook(file, df_export, leaderboard_reactive(), rv$dataset_summary_df)
     }
   )
@@ -12097,6 +12294,25 @@ server <- function(input, output, session) {
           length(input$table_master_export_rows_all) < nrow(df_export)) {
         df_export <- df_export[input$table_master_export_rows_all, , drop = FALSE]
       }
+      if (!"Dataset" %in% colnames(df_export)) df_export$Dataset <- "Dataset 1"
+      if (!"Score_Raw" %in% colnames(df_export)) {
+        if ("Value" %in% colnames(df_export)) df_export$Score_Raw <- df_export$Value
+        else if ("Raw_Value" %in% colnames(df_export)) df_export$Score_Raw <- df_export$Raw_Value
+        else df_export$Score_Raw <- df_export$Score
+      }
+      if (!"Property" %in% colnames(df_export)) {
+        df_export$Property <- df_export$Metric
+      } else {
+        df_export$Property <- ifelse(is.na(df_export$Property) | df_export$Property == "", df_export$Metric, df_export$Property)
+      }
+      df_export$Score <- NULL
+      df_export$Score_Norm <- NULL
+      df_export$Value <- NULL
+      df_export$Raw_Value <- NULL
+      pref_cols <- c("Dataset", "Method", "Category", "Property", "Metric", "Score_Raw", intersect("Modality", colnames(df_export)))
+      col_order <- unique(c(pref_cols, colnames(df_export)))
+      col_order <- intersect(col_order, colnames(df_export))
+      df_export <- df_export[, col_order, drop = FALSE]
       utils::write.csv(df_export, file, row.names = FALSE)
     }
   )
@@ -12119,20 +12335,14 @@ server <- function(input, output, session) {
     # Ensure Dataset column exists and is positioned first for instant dropdown filtering
     if (!"Dataset" %in% colnames(df)) df$Dataset <- "Dataset 1"
     
-    # Ensure raw values and normalized scores are both present
+    # Ensure raw values are present
     if (!"Score_Raw" %in% colnames(df)) {
       if ("Value" %in% colnames(df)) df$Score_Raw <- df$Value
       else if ("Raw_Value" %in% colnames(df)) df$Score_Raw <- df$Raw_Value
       else df$Score_Raw <- df$Score
     }
-    if (!"Score" %in% colnames(df) && "Score_Norm" %in% colnames(df)) {
-      df$Score <- df$Score_Norm
-    } else if (!"Score" %in% colnames(df)) {
-      df$Score <- df$Score_Raw
-    }
     
-    # Ensure Score is rounded normalized score in [0, 1]
-    df$Score <- round(as.numeric(df$Score), 4)
+    # Ensure Score_Raw is rounded to 4 decimals
     df$Score_Raw <- round(as.numeric(df$Score_Raw), 4)
     
     # Ensure Property column is present and never empty
@@ -12142,14 +12352,15 @@ server <- function(input, output, session) {
       df$Property <- ifelse(is.na(df$Property) | df$Property == "", df$Metric, df$Property)
     }
     
-    # Remove redundant intermediate columns
+    # Remove redundant intermediate columns (keep only Score_Raw)
+    df$Score <- NULL
     df$Score_Norm <- NULL
     df$Value <- NULL
     df$Raw_Value <- NULL
     
     # Establish clean, logical column ordering:
-    # Dataset -> Method -> Category -> Property -> Metric -> Score_Raw -> Score -> Modality
-    pref_cols <- c("Dataset", "Method", "Category", "Property", "Metric", "Score_Raw", "Score", intersect("Modality", colnames(df)))
+    # Dataset -> Method -> Category -> Property -> Metric -> Score_Raw -> Modality
+    pref_cols <- c("Dataset", "Method", "Category", "Property", "Metric", "Score_Raw", intersect("Modality", colnames(df)))
     col_order <- unique(c(pref_cols, colnames(df)))
     col_order <- intersect(col_order, colnames(df))
     df <- df[, col_order, drop = FALSE]

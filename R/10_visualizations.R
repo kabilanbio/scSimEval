@@ -465,7 +465,7 @@ filter_gold_standard_metrics <- function(df) {
   "(IV) Technical Variation & Batch Mixing Dynamics"= "#D4AC0D",
   "(V) Biological Signal & Differential Fidelity"   = "#CA6F1E",
   "(VI) Multiomics Integration & Alignment"         = "#6D28D9",
-  "(VII) Trajectory & Lineage Topology"             = "#7D3C98",
+  "(VII) Trajectory & Lineage Topology"             = "#696969",
   "(VIII) Computational Scalability & Efficiency"   = "#1E8449"
 )
 
@@ -4430,8 +4430,15 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
 }
 
 
-# Normalize bubble scores (direction-aware, per-metric across methods)
-# @keywords internal
+#' Normalize Bubble Matrix Scores Across Benchmark Datasets and Simulators
+#'
+#' Rescales metric raw scores to a 0-1 range where 1 is always best, taking into account
+#' whether the metric is higher-is-better or lower-is-better, naturally bounded, or unbounded.
+#'
+#' @param df A data frame of benchmark results containing at least \code{Metric} and \code{Score_Raw} (or \code{Score}).
+#' @return The data frame with an added or updated \code{Score_Norm} column.
+#' @export
+#' @rdname normalize_bubble_scores
 .normalize_bubble_scores <- function(df) {
   if (is.null(df) || nrow(df) == 0) {
     if (is.data.frame(df)) df$Score_Norm <- numeric(0)
@@ -4499,6 +4506,10 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
     df$Score_Norm[still_na] <- pmax(0, pmin(1, df$Score_Raw[still_na]))
   df
 }
+
+#' @rdname normalize_bubble_scores
+#' @export
+normalize_bubble_scores <- .normalize_bubble_scores
 
 # Color-coded discrete axis guide (supports per-facet independent label coloring)
 # @keywords internal

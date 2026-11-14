@@ -836,6 +836,36 @@ validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_na
         try({ SeuratObject::DefaultAssay(m2_obj) <- a2_name }, silent = TRUE)
       }
       v <- validate_sc_object(obj, arg_name, reduction_name = reduction_name)
+      
+      ct_val <- v$cell_types
+      bt_val <- v$batch_info
+      m1_cells <- colnames(m1)
+      m2_cells <- colnames(m2)
+      if (!is.null(m1_cells) && !is.null(m2_cells) && !identical(m1_cells, m2_cells)) {
+        if (all(m1_cells %in% colnames(obj)) && length(m1_cells) < ncol(obj)) {
+          o1 <- obj
+          try(SeuratObject::DefaultAssay(o1) <- a1_name, silent = TRUE)
+          m1_obj <- o1[, m1_cells]
+        }
+        if (all(m2_cells %in% colnames(obj)) && length(m2_cells) < ncol(obj)) {
+          o2 <- obj
+          try(SeuratObject::DefaultAssay(o2) <- a2_name, silent = TRUE)
+          m2_obj <- o2[, m2_cells]
+        }
+        ct_col <- intersect(c("cell_type", "celltype", "CellType"), colnames(obj@meta.data))[1]
+        if (!is.na(ct_col)) {
+          ct_val <- stats::setNames(list(as.character(m1_obj@meta.data[[ct_col]]),
+                                         as.character(m2_obj@meta.data[[ct_col]])),
+                                    c(a1_name, a2_name))
+        }
+        bt_col <- intersect(c("batch", "Batch", "sample", "replicate"), colnames(obj@meta.data))[1]
+        if (!is.na(bt_col)) {
+          bt_val <- stats::setNames(list(as.character(m1_obj@meta.data[[bt_col]]),
+                                         as.character(m2_obj@meta.data[[bt_col]])),
+                                    c(a1_name, a2_name))
+        }
+      }
+
       return(list(
         m1 = m1,
         m2 = m2,
@@ -843,8 +873,8 @@ validate_multiomics_input <- function(obj, arg_name = "multi_data", reduction_na
         m2_obj = m2_obj,
         m1_name = a1_name,
         m2_name = a2_name,
-        cell_types = v$cell_types,
-        batch_info = v$batch_info,
+        cell_types = ct_val,
+        batch_info = bt_val,
         embedding = v$embedding
       ))
     } else {
