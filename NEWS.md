@@ -1,6 +1,7 @@
 # scSimEval 0.99.10
 
-* Updated the data input option which align with Seurat and Single cell experiment objects. 
+* Updated the data input option which align with Seurat and Single cell experiment objects.
+* **Fasano-Franceschini 2D KS Min-Max Normalization**: Corrected direction-aware score normalization in `.normalize_bubble_scores()` so that `Fasano_Franceschini_2D_KS` (and other bounded distance/divergence metrics) properly scale to `[0, 1]` across benchmarked simulators rather than bypassing min-max scaling.
 
 
 # scSimEval 0.99.9

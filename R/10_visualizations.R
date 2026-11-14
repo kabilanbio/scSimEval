@@ -188,6 +188,7 @@ utils::globalVariables(c(
   "ECDF_DiffArea"                    = "(I) Distributional Properties",
   "Runs_PValue"                      = "(I) Distributional Properties",
   "Fasano_Franceschini_2D_KS"        = "(I) Distributional Properties",
+  "Fasano-Franceschini 2D"           = "(I) Distributional Properties",
   "EMD_2D"                           = "(I) Distributional Properties",
   "NN_Mismatch_2D"                   = "(I) Distributional Properties",
   "Between_Dataset_Silh_2D_Global"   = "(I) Distributional Properties",
@@ -4436,14 +4437,22 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
     if (is.data.frame(df)) df$Score_Norm <- numeric(0)
     return(df)
   }
-  df$Score_Norm <- NA_real_
-  metric_key <- if ("Property" %in% colnames(df)) {
-    paste0(df$Property, "___", df$Metric)
-  } else if ("Display_Category" %in% colnames(df)) {
-    paste0(df$Display_Category, "___", df$Metric)
-  } else {
-    df$Metric
+  if (!"Score_Raw" %in% colnames(df)) {
+    if ("Score" %in% colnames(df)) df$Score_Raw <- df$Score
+    else if ("Value" %in% colnames(df)) df$Score_Raw <- df$Value
   }
+  df$Score_Norm <- NA_real_
+  dset_pfx <- if ("Dataset" %in% colnames(df)) paste0(df$Dataset, "___") else ""
+  mod_pfx  <- if ("Modality" %in% colnames(df)) paste0(df$Modality, "___") else ""
+  prop_pfx <- if ("Property" %in% colnames(df)) {
+    paste0(df$Property, "___")
+  } else if ("Display_Category" %in% colnames(df)) {
+    paste0(df$Display_Category, "___")
+  } else {
+    ""
+  }
+  metric_key <- paste0(dset_pfx, mod_pfx, prop_pfx, df$Metric)
+
   for (m_key in unique(metric_key)) {
     idx     <- metric_key == m_key
     met     <- df$Metric[idx][1]
@@ -4462,16 +4471,18 @@ plot_bubble_matrix <- plot_benchmark_bubble_matrix
     rng     <- max_v - min_v
     if (is.na(rng) || !is.finite(rng)) rng <- 0
 
-  is_naturally_01 <- isTRUE(grepl("^(KS|OV|ari|nmi|ami|v_measure|ECDF_DiffArea|accuracy|precision|recall|f1_score|auc|pval_dist_score|F1|Top_DEG_Jaccard)", met, ignore.case = TRUE)) ||
-                   isTRUE(min_v >= 0 && max_v <= 1 && rng <= 1)
-    if (is_naturally_01) {
-      if (is_hib) {
-        normed <- pmax(0, pmin(1, raw_val))
-      } else {
-        normed <- pmax(0, pmin(1, 1 - raw_val))
-      }
-    } else if (rng < 1e-10) {
-      if (is_hib) {
+    is_naturally_01 <- isTRUE(grepl("^(KS|OV|ari|nmi|ami|v_measure|ECDF_DiffArea|accuracy|precision|recall|f1_score|auc|pval_dist_score|F1|Top_DEG_Jaccard)", met, ignore.case = TRUE)) ||
+                       isTRUE(min_v >= 0 && max_v <= 1 && rng <= 1)
+
+    if (rng < 1e-10) {
+      # Fallback for single simulator or identical scores across simulators
+      if (is_naturally_01) {
+        if (is_hib) {
+          normed <- pmax(0, pmin(1, raw_val))
+        } else {
+          normed <- pmax(0, pmin(1, 1 - raw_val))
+        }
+      } else if (is_hib) {
         normed <- if (max_v > 0) pmin(1, raw_val / max(1, max_v)) else rep(0.5, sum(idx))
       } else {
         normed <- 1 / (1 + pmax(0, raw_val))

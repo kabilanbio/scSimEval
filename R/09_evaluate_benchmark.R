@@ -1935,6 +1935,12 @@ benchmark_simulation_suite <- function(
     granular_tbl$Category[idx] <- mc_override[idx]
   }
 
+  # Re-normalize direction-aware scores across all evaluated simulators
+  if (nrow(granular_tbl) > 0 && "Score_Raw" %in% colnames(granular_tbl)) {
+    granular_tbl <- .normalize_bubble_scores(granular_tbl)
+    granular_tbl$Score <- granular_tbl$Score_Norm
+  }
+
   # Build Cross-Dataset Summary Table (mean across datasets for each simulator)
   agg_norm <- stats::aggregate(
     Score_Norm ~ Method + Category + Metric,

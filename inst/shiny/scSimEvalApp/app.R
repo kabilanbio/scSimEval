@@ -4230,7 +4230,7 @@ ui <- page_navbar(
   ),
   
   # ============================================================================
-  # TAB 6: HELP & GETTING STARTED (SIMPLE BEGINNER-FRIENDLY GUIDE - v0.99.9)
+  # TAB 6: HELP & GETTING STARTED (SIMPLE BEGINNER-FRIENDLY GUIDE - v0.99.10)
   # ============================================================================
   nav_panel(
     "Help & Getting Started",
@@ -4245,7 +4245,7 @@ ui <- page_navbar(
               div(
                 class = "d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2",
                 h4("Welcome to scSimEval — Quick & Easy Beginner's Guide", style = "font-weight: 800; color: #1B4F72; margin: 0; font-size: 1.2rem;"),
-                span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "scSimEval v0.99.9 • 56 Metrics • 8 Categories")
+                span(class = "badge bg-primary-subtle text-primary border border-primary-subtle", "scSimEval v0.99.10 • 56 Metrics • 8 Categories")
               ),
               p(
                 style = "color: #334155; font-size: 0.94rem; margin-bottom: 14px; line-height: 1.65;",
@@ -4735,7 +4735,7 @@ ui <- page_navbar(
             span(
               class = "badge",
               style = "background: rgba(56, 189, 248, 0.15); color: #7DD3FC; border: 1px solid rgba(56, 189, 248, 0.3); padding: 7px 12px; font-size: 0.82rem; font-weight: 600; border-radius: 20px;",
-              "scSimEval v0.99.9"
+              "scSimEval v0.99.10"
             )
           )
         )
@@ -5041,7 +5041,7 @@ server <- function(input, output, session) {
   }
   
   # ============================================================================
-  # LIVE RUNNING LOGS & DIAGNOSTIC ENGINE (v0.99.9)
+  # LIVE RUNNING LOGS & DIAGNOSTIC ENGINE (v0.99.10)
   # ============================================================================
   # Session-level log storage container (plain environment for safe context-free reading/writing)
   log_storage <- new.env(parent = emptyenv())
@@ -5076,7 +5076,7 @@ server <- function(input, output, session) {
   }
 
   # Startup Diagnostic Log Sequence
-  sc_log("INFO", "scSimEval Interactive Benchmarking Studio v0.99.9 initialized.", "Startup")
+  sc_log("INFO", "scSimEval Interactive Benchmarking Studio v0.99.10 initialized.", "Startup")
   sc_log("NOTE", paste0("Runtime Environment: R ", getRversion(), " | Platform: ", R.version$platform, " | OS: ", Sys.info()[["sysname"]], " ", Sys.info()[["release"]]), "Environment")
   sc_log("INFO", paste0("System Concurrency: ", parallel::detectCores(), " logical CPU cores detected. Sparse matrix arithmetic (dgCMatrix) enabled."), "Hardware")
   sc_log("NOTE", "Evaluation Suite: 56 evaluation measures registered across Categories 1 to 8.", "Metrics")
@@ -5768,6 +5768,9 @@ server <- function(input, output, session) {
     }
     
     bench_df <- filter_gold_standard_metrics(bench_df)
+    if (!"Score_Norm" %in% colnames(bench_df) && "Score" %in% colnames(bench_df)) {
+      bench_df$Score_Norm <- bench_df$Score
+    }
     methods <- unique(bench_df$Method)
     
     ct_map <- list()
@@ -6900,6 +6903,10 @@ server <- function(input, output, session) {
         })
         combined_df <- do.call(rbind, results_list)
         combined_df <- standardize_benchmark_categories(combined_df)
+        if (nrow(combined_df) > 0 && "Score_Raw" %in% colnames(combined_df)) {
+          combined_df <- .normalize_bubble_scores(combined_df)
+          combined_df$Score <- combined_df$Score_Norm
+        }
         
         if (isTRUE(input$chk_append_uni) && !is.null(rv$benchmark_df)) {
           if ("Dataset" %in% colnames(rv$benchmark_df) && "Dataset" %in% colnames(combined_df)) {
@@ -7579,6 +7586,10 @@ server <- function(input, output, session) {
         })
         combined_df <- do.call(rbind, results_list)
         combined_df <- standardize_benchmark_categories(combined_df)
+        if (nrow(combined_df) > 0 && "Score_Raw" %in% colnames(combined_df)) {
+          combined_df <- .normalize_bubble_scores(combined_df)
+          combined_df$Score <- combined_df$Score_Norm
+        }
         
         if (isTRUE(input$chk_append_multi) && !is.null(rv$benchmark_df)) {
           if ("Dataset" %in% colnames(rv$benchmark_df) && "Dataset" %in% colnames(combined_df)) {
@@ -11986,7 +11997,7 @@ server <- function(input, output, session) {
       datasets                = rv$datasets,
       source_name             = rv$source_name,
       timestamp               = Sys.time(),
-      version                 = "0.99.9"
+      version                 = "0.99.10"
     )
   }
 
@@ -12294,7 +12305,7 @@ server <- function(input, output, session) {
         " scSimEval: Single-Cell Multiomics Simulation Benchmarking Studio",
         " Interactive Execution & Diagnostic Runtime Log Export",
         paste0(" Generated At:    ", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
-        paste0(" Package Version: scSimEval v0.99.9"),
+        paste0(" Package Version: scSimEval v0.99.10"),
         paste0(" R Version:       ", R.version.string),
         paste0(" Platform:        ", R.version$platform),
         paste0(" Total Entries:   ", length(entries)),

@@ -324,16 +324,26 @@ test_that("compute_dataset_embeddings, plot_dataset_embeddings and compute_embed
 })
 
 test_that(".normalize_bubble_scores keeps 2D KS distances on a proper min-max scale", {
-  df <- data.frame(
+  # Realistic [0, 1] Fasano-Franceschini 2D KS test statistics
+  df_real <- data.frame(
+    Method = c("Method_A", "Method_B"),
+    Metric = rep("Fasano_Franceschini_2D_KS", 2),
+    Score_Raw = c(0.18, 0.06),
+    stringsAsFactors = FALSE
+  )
+  out_real <- .normalize_bubble_scores(df_real)
+  expect_true(all(out_real$Score_Norm >= 0 & out_real$Score_Norm <= 1))
+  expect_equal(out_real$Score_Norm, c(0, 1), tolerance = 1e-8)
+
+  # Arbitrary / large raw test statistics
+  df_large <- data.frame(
     Method = c("Method_A", "Method_B"),
     Metric = rep("Fasano_Franceschini_2D_KS", 2),
     Score_Raw = c(850, 100),
     stringsAsFactors = FALSE
   )
-
-  out <- .normalize_bubble_scores(df)
-
-  expect_true(all(out$Score_Norm >= 0 & out$Score_Norm <= 1))
-  expect_equal(out$Score_Norm, c(0, 1), tolerance = 1e-8)
-  expect_false(all(out$Score_Norm == 0))
+  out_large <- .normalize_bubble_scores(df_large)
+  expect_true(all(out_large$Score_Norm >= 0 & out_large$Score_Norm <= 1))
+  expect_equal(out_large$Score_Norm, c(0, 1), tolerance = 1e-8)
+  expect_false(all(out_large$Score_Norm == 0))
 })
